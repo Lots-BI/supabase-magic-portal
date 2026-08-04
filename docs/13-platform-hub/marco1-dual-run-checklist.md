@@ -17,7 +17,7 @@ last_review: 2026-08-04
 | Campo | Valor |
 |-------|--------|
 | Cliente piloto | Agência Lots (`cadastro_id` 15) |
-| Connection ID | `bb56230f-6a9d-4a32-a3f1-621b8f6c1d79` |
+| Connection ID | `37ebe453-f60f-4375-a6b7-97229f87050f` (reconectada 2026-08-04) |
 | Label | Meta - Agência Lots |
 | Ad Account primário | `act_775882631991215` (Leandro MAJR) |
 | Dono ops | _nome_ |
@@ -26,20 +26,21 @@ last_review: 2026-08-04
 | Aceite write Hub no Supabase atual | [x] sim (Make intacto; `active_source=make`) |
 | Data início dual-run | 2026-08-04 |
 | Data fim prevista | 2026-08-18 (aprox. 2 semanas) |
-| Estágio migração | `dual_run` (atualizado 2026-08-04) |
+| Estágio migração | `dual_run` (reconfirmado 2026-08-04 após reconnect OAuth) |
 
-### Snapshot verificação (2026-08-04)
+### Snapshot verificação (2026-08-04 — pós-reconnect)
 
 | Check | Resultado |
 |-------|-----------|
 | Status / health | `active` / `healthy` (score 85) |
 | Provider | `official_api` |
-| OAuth token no vault | `meta:oauth:token` presente |
+| OAuth token no vault | presente · expira ~2026-10-03 · 6 scopes |
 | Identidades | 4 (business, **ad_account primary**, page, instagram @agencia.lots) |
-| Sync runs | 2× `success`, 4 rows cada |
-| `base_metricas_hub` | Campanha `[RMKT] Lots BI - WhatsApp` · 2026-08-04 · impressions/reach/clicks/spend |
+| Sync runs | success · 4 rows (CLI `hub:sync-official` ok) |
+| `base_metricas_hub` | rows acumuladas (20+) · Make intocado |
 | Dashboards cliente | Ainda Make (`ph_metricas_source.active_source = make`) |
-| Diagnóstico UI | `ok` (fix ago/2026: health persistido; antes `warning` por HealthEngine in-memory vazio) |
+| Diagnóstico | `ok` (todos os checks) |
+| `hub:doctor` | ALL PASS |
 
 ## KPIs (alvo)
 
