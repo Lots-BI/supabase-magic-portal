@@ -114,6 +114,9 @@ function SyncStatusBody({ queryName }: { queryName: string }) {
                 Ingestão: {formatDate(data.ultima_ingestao)}
               </span>
             </p>
+            <p className="mt-1 text-[10.5px] text-muted-foreground/90">
+              Fonte dos dashboards: Make (vw_metricas) — Hub em dual-run até cutover.
+            </p>
           </div>
         </div>
         <span className="rounded-full bg-muted px-2.5 py-1 text-[10.5px] font-medium tabular-nums text-muted-foreground">

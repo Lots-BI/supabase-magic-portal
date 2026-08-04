@@ -15,6 +15,8 @@ export function KanbanColumn({
   onOpenCard,
   showCliente,
   readOnly = false,
+  disableDrag = false,
+  onMoveCard,
 }: {
   status: ContentCardStatus;
   label: string;
@@ -24,12 +26,14 @@ export function KanbanColumn({
   onOpenCard: (id: string) => void;
   showCliente?: boolean;
   readOnly?: boolean;
+  disableDrag?: boolean;
+  onMoveCard?: (input: { id: string; status: ContentCardStatus; kanban_ordem: number }) => void;
 }) {
   const meta = KANBAN_COLUMN_META[status];
   const { setNodeRef, isOver } = useDroppable({
     id: status,
     data: { status },
-    disabled: readOnly,
+    disabled: readOnly || disableDrag,
   });
 
   return (
@@ -60,11 +64,22 @@ export function KanbanColumn({
             onOpen={() => onOpenCard(card.id)}
             showCliente={showCliente}
             readOnly={readOnly}
+            disableDrag={disableDrag}
+            onMoveStatus={
+              onMoveCard
+                ? (nextStatus) =>
+                    onMoveCard({
+                      id: card.id,
+                      status: nextStatus,
+                      kanban_ordem: cards.length,
+                    })
+                : undefined
+            }
           />
         ))}
         {cards.length === 0 && (
           <p className="py-8 text-center text-xs text-muted-foreground">
-            {readOnly ? "Nenhum conteúdo nesta etapa" : "Arraste cards aqui"}
+            {readOnly || disableDrag ? "Nenhum conteúdo nesta etapa" : "Arraste cards aqui"}
           </p>
         )}
       </div>

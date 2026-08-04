@@ -30,6 +30,7 @@ import {
   SwatchBook,
   Plug,
 } from "lucide-react";
+import { useAdminNavBadges } from "@/hooks/use-admin-nav-badges";
 import { lazy, Suspense } from "react";
 
 const GlobalSearch = lazy(() =>
@@ -113,6 +114,7 @@ function AuthenticatedLayout() {
   const clienteSlug = clienteSlugMatch?.[1];
   const isClientBrandbook = /^\/cliente\/[^/]+\/brandbook\/?$/.test(pathname);
   const signOut = useSignOut(user.email);
+  const navBadges = useAdminNavBadges(isAdmin);
 
   const adminGroups: NavGroup[] = [
     {
@@ -121,7 +123,12 @@ function AuthenticatedLayout() {
         { to: "/admin/central", label: "Central", icon: Building2, prefixMatch: false },
         { to: "/admin", label: "Visão geral", icon: LayoutDashboard },
         { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
-        { to: "/admin/aprovacoes", label: "Aprovações", icon: ClipboardCheck },
+        {
+          to: "/admin/aprovacoes",
+          label: "Aprovações",
+          icon: ClipboardCheck,
+          badge: navBadges.aprovacoes,
+        },
         { to: "/admin/brandbook", label: "Brand book", icon: SwatchBook },
         { to: "/admin/plano-estrategico", label: "Plano Estratégico", icon: Compass },
         { to: "/admin/clientes", label: "Clientes", icon: Users },
@@ -139,7 +146,13 @@ function AuthenticatedLayout() {
     {
       label: "Plataforma",
       items: [
-        { to: "/admin/conexoes", label: "Conexões", icon: Plug, prefixMatch: false },
+        {
+          to: "/admin/conexoes",
+          label: "Conexões",
+          icon: Plug,
+          prefixMatch: false,
+          badge: navBadges.conexoes,
+        },
         { to: "/admin/branding", label: "Branding", icon: Palette },
       ],
     },

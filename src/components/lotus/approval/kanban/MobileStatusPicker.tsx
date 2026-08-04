@@ -13,9 +13,12 @@ import { KANBAN_COLUMN_META } from "./kanban-meta";
 export function MobileStatusPicker({
   currentStatus,
   onSelect,
+  alwaysVisible = false,
 }: {
   currentStatus: ContentCardStatus;
   onSelect: (status: ContentCardStatus) => void;
+  /** No card mobile (fora do drawer): sempre visível. */
+  alwaysVisible?: boolean;
 }) {
   const allowed = KANBAN_COLUMNS.filter(
     (col) => col.status !== currentStatus && canTransitionStatus(currentStatus, col.status),
@@ -25,7 +28,7 @@ export function MobileStatusPicker({
 
   return (
     <Select onValueChange={(v) => onSelect(v as ContentCardStatus)}>
-      <SelectTrigger className="w-full sm:hidden">
+      <SelectTrigger className={alwaysVisible ? "w-full" : "w-full sm:hidden"}>
         <SelectValue placeholder="Mover para…" />
       </SelectTrigger>
       <SelectContent>

@@ -1,8 +1,10 @@
-import type { ContentCard } from "@/modules/approval/types/content-card";
+import type { ContentCard, ContentCardStatus } from "@/modules/approval/types/content-card";
 import { cn } from "@/lib/utils";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import type { PillarSummary } from "../shared/PillarBadge";
 import { formatCardSchedule, responsavelLabel } from "./kanban-meta";
+import { MobileStatusPicker } from "./MobileStatusPicker";
 
 export function KanbanCard({
   card,
@@ -11,6 +13,8 @@ export function KanbanCard({
   onOpen,
   showCliente,
   readOnly = false,
+  disableDrag = false,
+  onMoveStatus,
 }: {
   card: ContentCard;
   pillar?: PillarSummary | null;
@@ -18,11 +22,15 @@ export function KanbanCard({
   onOpen: () => void;
   showCliente?: boolean;
   readOnly?: boolean;
+  /** Em touch/mobile: evita DnD e mostra seletor de status. */
+  disableDrag?: boolean;
+  onMoveStatus?: (status: ContentCardStatus) => void;
 }) {
+  const dragDisabled = readOnly || disableDrag;
   const draggable = useDraggable({
     id: card.id,
     data: { card, status: card.status },
-    disabled: readOnly,
+    disabled: dragDisabled,
   });
 
   const style = draggable.transform
@@ -82,10 +90,19 @@ export function KanbanCard({
           </span>
         )}
       </div>
+      {!readOnly && disableDrag && onMoveStatus && (
+        <div
+          className="mt-2"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <MobileStatusPicker currentStatus={card.status} onSelect={onMoveStatus} alwaysVisible />
+        </div>
+      )}
     </>
   );
 
-  if (readOnly) {
+  if (readOnly || dragDisabled) {
     return (
       <button type="button" onClick={onOpen} className={className}>
         {body}
