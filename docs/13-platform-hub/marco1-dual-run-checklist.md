@@ -39,7 +39,7 @@ last_review: 2026-08-04
 | Sync runs | 2× `success`, 4 rows cada |
 | `base_metricas_hub` | Campanha `[RMKT] Lots BI - WhatsApp` · 2026-08-04 · impressions/reach/clicks/spend |
 | Dashboards cliente | Ainda Make (`ph_metricas_source.active_source = make`) |
-| Diagnóstico UI | `warning` (não bloqueante; acompanhar no dual-run) |
+| Diagnóstico UI | `ok` (fix ago/2026: health persistido; antes `warning` por HealthEngine in-memory vazio) |
 
 ## KPIs (alvo)
 
@@ -60,11 +60,12 @@ last_review: 2026-08-04
 
 ## Go / No-Go
 
-**Go** (agendar Marco 2 — cutover + scheduler):
+**Go** (aplicar cutover do [Marco 2](./marco2-scheduler-and-cutover.md)):
 
 - Todos os KPIs no alvo
 - Identity correta (Ad Account / currency / tz)
 - Ops consegue operar pelo [runbook](./marco1-piloto-runbook.md)
+- Scheduler `hub:sync-official -- --eligible` já validado (manual ou Actions)
 
 **No-Go:**
 

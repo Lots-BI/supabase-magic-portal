@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { asConnectionId } from "../../../../contracts/connection/connection-id.v1";
+import { asScopeRef } from "../../../../contracts/connection/scope-ref.v1";
 import { createLegacyCadastroBridge } from "@/modules/platform-hub-bridges/legacy-cadastro";
 import { registerCadastroRecord } from "@/modules/platform-hub-bridges/legacy-cadastro";
 import { createConnectionResolver } from "@/modules/platform-hub/connections/create-connection-resolver";
@@ -47,10 +49,17 @@ async function hydrateCadastroBridge(
 ): Promise<void> {
   const { data } = await supabase
     .from("ph_connections")
-    .select("scope_ref,cadastro_clientes(nome_cliente)")
-    .not("cadastro_id", "is", null);
+    .select("id,scope_ref,cadastro_clientes(nome_cliente)");
+
   for (const row of data ?? []) {
-    const match = /^cadastro:(\d+)$/.exec(row.scope_ref as string);
+    const id = row.id as string | undefined;
+    const scopeRaw = row.scope_ref as string | undefined;
+    if (!id || !scopeRaw) continue;
+
+    const scopeRef = asScopeRef(scopeRaw);
+    bridge.registerConnection(asConnectionId(id), scopeRef);
+
+    const match = /^cadastro:(\d+)$/.exec(scopeRaw);
     const nome = (row.cadastro_clientes as { nome_cliente?: string } | null)?.nome_cliente;
     if (match && nome) {
       registerCadastroRecord({ cadastroId: Number(match[1]), nomeCanonico: nome });

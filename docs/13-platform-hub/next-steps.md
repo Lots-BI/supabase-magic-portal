@@ -5,12 +5,12 @@ status: living
 owner: Engenharia Lots BI
 tags: [platform-hub, roadmap, backlog]
 difficulty: intermediate
-last_review: 2026-07-09
+last_review: 2026-08-04
 ---
 
 # O que falta — Platform Hub RC1 → Produção
 
-Estado em **jul/2026** após entrega RC1. Prioridade: **P0** bloqueia produção client-facing; **P1** homologação; **P2** melhoria.
+Estado em **ago/2026** após Marco 1 piloto + Marco 2 prep (scheduler CLI). Prioridade: **P0** bloqueia produção client-facing; **P1** homologação; **P2** melhoria.
 
 ---
 
@@ -18,10 +18,10 @@ Estado em **jul/2026** após entrega RC1. Prioridade: **P0** bloqueia produção
 
 | # | Item | Situação | Ação |
 |---|------|----------|------|
-| 1 | **Cutover `ph_metricas_source`** | Default `make` | Dual-run estável → update controlado + monitoramento |
+| 1 | **Cutover `ph_metricas_source`** | Default `make`; CLI dry-run pronto | Dual-run Go → `npm run hub:cutover -- --to=hub --confirm=hub` ([Marco 2](./marco2-scheduler-and-cutover.md)) |
 | 2 | **OAuth secrets no deploy** | `deploy.yml` sem vars Hub/OAuth | Adicionar secrets Meta/Google/TikTok + `APP_URL` + `HUB_CREDENTIAL_ENCRYPTION_KEY` |
-| 3 | **Piloto real com dados live** | Não validado end-to-end em prod | 1 cliente, 1 plataforma, 2 semanas dual-run |
-| 4 | **Scheduler automático** | Apenas `ManualScheduler` | Cron/queue para sync periódico (Edge Function ou worker) |
+| 3 | **Piloto real com dados live** | Piloto Meta em dual_run (ago/2026) | Completar 1–2 semanas + KPIs no checklist |
+| 4 | **Scheduler automático** | CLI `hub:sync-official` + workflow manual | Ativar cron/Actions schedule no ambiente alvo |
 
 ---
 

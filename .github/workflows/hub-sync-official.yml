@@ -1,0 +1,57 @@
+name: Hub Sync Official
+
+# Scheduler de métricas (Marco 2). NÃO altera ph_metricas_source.
+# Requer secrets: OFFICIAL_SUPABASE_URL, OFFICIAL_SERVICE_ROLE_KEY,
+# HUB_CREDENTIAL_ENCRYPTION_KEY, META_APP_ID, META_APP_SECRET (piloto Meta).
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "eligible = todas dual_run+; dry-run = só listar"
+        type: choice
+        options:
+          - eligible
+          - dry-run
+        default: dry-run
+  # Descomente após secrets configurados e dual-run estável:
+  # schedule:
+  #   - cron: "0 11,23 * * *"  # 08:00 e 20:00 BRT (UTC-3)
+
+concurrency:
+  group: hub-sync-official
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync Official → base_metricas_hub
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Run sync
+        env:
+          OFFICIAL_SUPABASE_URL: ${{ secrets.OFFICIAL_SUPABASE_URL }}
+          OFFICIAL_SERVICE_ROLE_KEY: ${{ secrets.OFFICIAL_SERVICE_ROLE_KEY }}
+          HUB_CREDENTIAL_ENCRYPTION_KEY: ${{ secrets.HUB_CREDENTIAL_ENCRYPTION_KEY }}
+          META_APP_ID: ${{ secrets.META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.META_APP_SECRET }}
+          HUB_SYNC_ACTOR: github-actions:hub-sync-official
+        run: |
+          MODE="${{ github.event.inputs.mode || 'eligible' }}"
+          if [ "$MODE" = "dry-run" ]; then
+            npm run hub:sync-official -- --eligible --dry-run
+          else
+            npm run hub:sync-official -- --eligible
+          fi
