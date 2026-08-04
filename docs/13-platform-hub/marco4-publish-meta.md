@@ -21,12 +21,13 @@ last_review: 2026-08-04
 
 1. Conexão Hub Meta (`official_api`) do **mesmo** `cadastro_cliente_id` do card
 2. Identity **Page** anexada na conexão
-3. OAuth reconectado com scopes novos:
-   - `pages_show_list`, `pages_manage_posts` (+ `instagram_content_publish` reservado)
+3. OAuth reconectado (Connect scopes). Para **publish live**, habilite no App Dashboard e peça depois:
+   - `pages_show_list`, `pages_manage_posts`, `instagram_content_publish`
+   - **Não** misture esses scopes no dialog padrão — apps sem Use Case/App Review recebem "Invalid Scopes" e o login quebra
 4. Card com plataforma **Facebook**, status **Aprovado**, e **imagem** (anexo ou `capa_url`)
 5. Meta App com permissões de Page (dev/test users ou App Review)
 
-**Importante:** tokens emitidos **antes** desta mudança **não** têm `pages_manage_posts`. Reconecte OAuth em `/admin/conexoes`.
+**Importante:** o dialog padrão de Conexões usa só scopes de **métricas** (`ads_read`, `business_management`, `pages_read_engagement`, `instagram_basic`). Publish scopes ficam em `META_OAUTH_PUBLISH_SCOPES` até o app Meta estar pronto.
 
 ---
 
@@ -49,7 +50,7 @@ Marcar **Publicado** só no Kanban continua sendo **local** (sem Graph) — úti
 | Orquestração | `src/modules/approval/internal/publish-meta.server.ts` |
 | Server fn | `publishCardToMeta` em `cards.server.ts` |
 | UI | `CardDetailDrawer` — botão Publish |
-| Scopes | `meta-oauth.config.ts` + `meta_ads.manifest.json` |
+| Scopes | `meta-oauth.config.ts` + `meta_ads.manifest.json` (connect default; publish separado) |
 
 Fluxo: vault user token → `me/accounts` (Page token) → multipart `/{page-id}/photos` → metadata + move `publicado`.
 

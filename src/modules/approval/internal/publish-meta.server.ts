@@ -143,7 +143,7 @@ export async function publishContentCardToMetaFacebook(
   const pageAccessToken = pickPageAccessToken(pages, pageIdentity.externalId);
   if (!pageAccessToken) {
     throw new Error(
-      `Page ${pageIdentity.externalId} sem access_token. Reconecte OAuth com scopes pages_manage_posts / pages_show_list.`,
+      `Page ${pageIdentity.externalId} sem access_token utilizável. No App Meta, habilite pages_manage_posts / pages_show_list (Use Cases) e reconecte OAuth pedindo META_OAUTH_PUBLISH_SCOPES.`,
     );
   }
 
