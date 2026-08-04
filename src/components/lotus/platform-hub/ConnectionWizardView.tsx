@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/lotus/PageHeader";
 import { SectionCard } from "@/components/lotus/SectionCard";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { listClientes } from "@/lib/admin.functions";
 import {
   createHubConnection,
   getHubCatalog,
+  getHubConnectionDetail,
   getHubOAuthEnvStatus,
   startHubOAuth,
   storeHubCredential,
@@ -28,7 +29,6 @@ import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
 import { oauthCredentialKeyForPlugin } from "@/modules/platform-hub-admin/services/hub-oauth.factory";
 import { PlatformLogoBadge } from "./hub-badges";
 import { HubIdentityPicker } from "./HubIdentityPicker";
-
 const STEPS = [
   "Cliente",
   "Plataforma",
@@ -72,6 +72,33 @@ export function ConnectionWizardView({
     if (resumeStep !== undefined) setStep(resumeStep);
   }, [resumeConnectionId, resumeStep]);
 
+  const activeConnectionId = connectionId ?? resumeConnectionId ?? null;
+
+  /** Após OAuth o React state zera; reidrata plugin/label a partir da conexão persistida. */
+  const { data: resumeDetail, isLoading: resumeLoading } = useQuery({
+    queryKey: activeConnectionId
+      ? hubAdminKeys.connection(activeConnectionId)
+      : ["hub-admin", "connection", "none"],
+    queryFn: () => getHubConnectionDetail({ data: { connectionId: activeConnectionId! } }),
+    enabled: Boolean(activeConnectionId),
+    staleTime: 30_000,
+  });
+
+  useEffect(() => {
+    if (!resumeDetail?.connection) return;
+    const c = resumeDetail.connection;
+    setPluginKey((prev) => prev || c.pluginKey);
+    setLabel((prev) => prev || c.label);
+    setProvider((c.activeProviderType as "make_passive" | "official_api") || "official_api");
+    if (typeof c.cadastroId === "number") {
+      const id = c.cadastroId;
+      setCadastroId((prev) => prev ?? id);
+    }
+  }, [resumeDetail]);
+
+  const effectivePluginKey = pluginKey || resumeDetail?.connection.pluginKey || "";
+  const effectiveConnectionId = activeConnectionId;
+
   const { data: clientes } = useQuery({
     queryKey: ["admin", "clientes", "picker"],
     queryFn: () => listClientes(),
@@ -88,8 +115,8 @@ export function ConnectionWizardView({
     staleTime: 60_000,
   });
 
-  const selectedPlatform = catalog?.find((p) => p.key === pluginKey);
-  const pluginOAuthReady = oauthReadyForPlugin(pluginKey, oauthEnv);
+  const selectedPlatform = catalog?.find((p) => p.key === effectivePluginKey);
+  const pluginOAuthReady = oauthReadyForPlugin(effectivePluginKey, oauthEnv);
 
   const createMutation = useMutation({
     mutationFn: () =>
@@ -125,7 +152,7 @@ export function ConnectionWizardView({
 
   const credentialMutation = useMutation({
     mutationFn: (id: string) => {
-      const key = oauthCredentialKeyForPlugin(pluginKey);
+      const key = oauthCredentialKeyForPlugin(effectivePluginKey);
       if (!key) throw new Error("Plataforma sem chave de credencial OAuth");
       return storeHubCredential({
         data: {
@@ -148,7 +175,7 @@ export function ConnectionWizardView({
       toast.success("Sincronização OK — confira base_metricas_hub e compare com Make");
       void navigate({
         to: "/admin/conexoes/$connectionId",
-        params: { connectionId: connectionId! },
+        params: { connectionId: effectiveConnectionId! },
       });
     },
     onError: (e) => toast.error(e.message),
@@ -318,11 +345,13 @@ export function ConnectionWizardView({
                 <div>
                   <p className="font-medium">OAuth desta plataforma não está configurado no .env</p>
                   <p className="mt-1 text-destructive/90">
-                    {pluginKey === "meta_ads" &&
+                    {effectivePluginKey === "meta_ads" &&
                       "Defina META_APP_ID e META_APP_SECRET, configure o redirect {APP_URL}/oauth/meta/callback no app Meta e reinicie o npm run dev."}
-                    {pluginKey === "tiktok" &&
+                    {effectivePluginKey === "tiktok" &&
                       "Defina TIKTOK_APP_ID e TIKTOK_APP_SECRET e reinicie o servidor."}
-                    {["google_ads", "ga4", "google_business", "youtube"].includes(pluginKey) &&
+                    {["google_ads", "ga4", "google_business", "youtube"].includes(
+                      effectivePluginKey,
+                    ) &&
                       "Defina GOOGLE_OAUTH_CLIENT_ID e GOOGLE_OAUTH_CLIENT_SECRET e reinicie o servidor."}
                   </p>
                 </div>
@@ -362,22 +391,44 @@ export function ConnectionWizardView({
         </SectionCard>
       )}
 
-      {step === 4 && connectionId && pluginKey && (
+      {step === 4 && effectiveConnectionId && (
         <SectionCard
           title="Selecionar identidades"
           description="Escolha o Ad Account / propriedade correto (moeda e fuso alinhados ao Make)."
         >
           <div className="p-4">
-            <HubIdentityPicker
-              connectionId={connectionId}
-              pluginKey={pluginKey}
-              onComplete={() => setStep(5)}
-            />
+            {resumeLoading && !effectivePluginKey ? (
+              <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Carregando conexão após OAuth…
+              </div>
+            ) : !effectivePluginKey ? (
+              <div className="space-y-3">
+                <p className="text-sm text-destructive">
+                  Não foi possível recuperar a plataforma desta conexão. Abra a conexão no painel
+                  ou reinicie o assistente.
+                </p>
+                <Button asChild variant="outline" size="sm">
+                  <Link
+                    to="/admin/conexoes/$connectionId"
+                    params={{ connectionId: effectiveConnectionId }}
+                  >
+                    Abrir conexão
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <HubIdentityPicker
+                connectionId={effectiveConnectionId}
+                pluginKey={effectivePluginKey}
+                onComplete={() => setStep(5)}
+              />
+            )}
           </div>
         </SectionCard>
       )}
 
-      {step === 5 && connectionId && (
+      {step === 5 && effectiveConnectionId && (
         <SectionCard
           title="Teste e finalizar"
           description="Uma sync de teste valida o caminho Campanha → base_metricas_hub (Make continua nos dashboards)."
@@ -388,13 +439,13 @@ export function ConnectionWizardView({
             </p>
             <Button
               className="w-full"
-              onClick={() => syncMutation.mutate(connectionId)}
+              onClick={() => syncMutation.mutate(effectiveConnectionId)}
               disabled={syncMutation.isPending}
             >
               {syncMutation.isPending ? "Sincronizando…" : "Sincronizar agora"}
             </Button>
             <Button asChild variant="outline" className="w-full">
-              <Link to="/admin/conexoes/$connectionId" params={{ connectionId }}>
+              <Link to="/admin/conexoes/$connectionId" params={{ connectionId: effectiveConnectionId }}>
                 Ir para a conexão
               </Link>
             </Button>
