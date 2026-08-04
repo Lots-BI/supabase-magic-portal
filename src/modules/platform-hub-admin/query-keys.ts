@@ -2,6 +2,7 @@ export const hubAdminKeys = {
   all: ["hub-admin"] as const,
   overview: () => [...hubAdminKeys.all, "overview"] as const,
   catalog: () => [...hubAdminKeys.all, "catalog"] as const,
+  oauthEnv: () => [...hubAdminKeys.all, "oauth-env"] as const,
   connections: (filters?: Record<string, unknown>) =>
     [...hubAdminKeys.all, "connections", filters ?? {}] as const,
   connection: (id: string) => [...hubAdminKeys.all, "connection", id] as const,

@@ -125,6 +125,22 @@ export const getHubCatalog = createServerFn({ method: "GET" })
     return buildPlatformCatalog(stats);
   });
 
+/** Status booleano de secrets OAuth (nunca retorna valores). Para UX do assistente. */
+export const getHubOAuthEnvStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAgencyOsAdmin(context);
+    const filled = (...keys: string[]) => keys.every((k) => Boolean(process.env[k]?.trim()));
+    return {
+      appUrl: resolveServerAppUrl() ?? null,
+      meta: filled("META_APP_ID", "META_APP_SECRET"),
+      google: filled("GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET"),
+      googleAdsDeveloperToken: filled("GOOGLE_ADS_DEVELOPER_TOKEN"),
+      tiktok: filled("TIKTOK_APP_ID", "TIKTOK_APP_SECRET"),
+      vaultKey: filled("HUB_CREDENTIAL_ENCRYPTION_KEY"),
+    };
+  });
+
 export const createHubConnection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => createConnectionWizardSchema.parse(d))

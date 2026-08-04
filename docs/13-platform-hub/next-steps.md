@@ -55,7 +55,8 @@ Estado em **jul/2026** após entrega RC1. Prioridade: **P0** bloqueia produção
 2. `npm run hub:doctor`
 3. Abrir `/admin/conexoes` e `/admin/ai-workspace`
 4. Ler ADRs 0020–0024
-5. Escolher **um** item P0 ou P1 e abrir issue/PR
+5. **Marco 1:** [runbook piloto](./marco1-piloto-runbook.md) + [checklist dual-run](./marco1-dual-run-checklist.md)
+6. Escolher **um** item P0 ou P1 e abrir issue/PR
 
 ---
 

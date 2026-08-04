@@ -62,7 +62,9 @@ function metaOAuthConfig() {
   const clientId = process.env.META_APP_ID?.trim();
   const clientSecret = process.env.META_APP_SECRET?.trim();
   if (!clientId || !clientSecret) {
-    throw new Error("META_APP_ID e META_APP_SECRET são obrigatórios para OAuth Meta");
+    throw new Error(
+      "OAuth Meta não configurado. Defina META_APP_ID e META_APP_SECRET no .env e reinicie o servidor (npm run dev). Redirect: {APP_URL}/oauth/meta/callback",
+    );
   }
   return { clientId, clientSecret };
 }

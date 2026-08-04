@@ -21,11 +21,13 @@ Esta pasta é a **aba dedicada** do Knowledge Center ao Platform Hub. Use-a quan
 | # | Documento | Tempo | Para quê |
 |---|-----------|-------|----------|
 | 1 | [Handoff RC1 — continuar o trabalho](./handoff-rc1.md) | 15 min | Estado atual, arquitetura, comandos, onde mexer |
-| 2 | [Guia de homologação](./homologation-guide.md) | 10 min | Piloto, dual-run, cutover de métricas |
-| 3 | [O que falta e próximos passos](./next-steps.md) | 5 min | Backlog priorizado pós-RC1 |
-| 4 | [Variáveis de ambiente](../ENVIRONMENT_VARIABLES.md) | 10 min | OAuth, writers, secrets |
-| 5 | [Admin UI (operador)](../06-dashboards/platform-hub-admin.md) | 5 min | Rotas e fluxos sem CLI |
-| 6 | [Registry ops (auto)](../06-dashboards/platform-hub-registry-ops.md) | 3 min | Plugins gerados do registry |
+| 2 | [Runbook Marco 1 — Meta piloto](./marco1-piloto-runbook.md) | 5 min | Ops: conectar, sync, troubleshooting |
+| 3 | [Checklist dual-run / Go-No-Go](./marco1-dual-run-checklist.md) | 5 min | KPIs e decisão de cutover |
+| 4 | [Guia de homologação](./homologation-guide.md) | 10 min | Piloto, dual-run, cutover de métricas |
+| 5 | [O que falta e próximos passos](./next-steps.md) | 5 min | Backlog priorizado pós-RC1 |
+| 6 | [Variáveis de ambiente](../ENVIRONMENT_VARIABLES.md) | 10 min | OAuth, writers, secrets |
+| 7 | [Admin UI (operador)](../06-dashboards/platform-hub-admin.md) | 5 min | Rotas e fluxos sem CLI |
+| 8 | [Registry ops (auto)](../06-dashboards/platform-hub-registry-ops.md) | 3 min | Plugins gerados do registry |
 
 ---
 

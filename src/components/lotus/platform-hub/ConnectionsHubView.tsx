@@ -80,7 +80,7 @@ export function ConnectionsHubView({
       <PageHeader
         eyebrow="Platform Hub"
         title="Conexões"
-        description="Painel operacional — conecte plataformas, autentique via OAuth e acompanhe migração Make → Official API."
+        description="Conecte plataformas oficiais, rode sync e compare com Make. Dashboards de cliente só mudam após cutover explícito."
         actions={
           <Button asChild className="lotus-focus">
             <Link to="/admin/conexoes/nova" search={{}}>
@@ -90,6 +90,21 @@ export function ConnectionsHubView({
           </Button>
         }
       />
+
+      {connections.length === 0 && (
+        <EmptyState
+          icon={Plug}
+          title="Nenhuma plataforma conectada"
+          description="No Marco 1: conecte Meta Ads (Official API) para 1 cliente piloto, autentique, escolha o Ad Account e rode o sync de teste."
+          action={
+            <Button asChild>
+              <Link to="/admin/conexoes/nova" search={{ plugin: "meta_ads" }}>
+                Conectar Meta Ads
+              </Link>
+            </Button>
+          }
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-3 min-[375px]:grid-cols-4 lg:grid-cols-8">
         <StatCard label="Total" value={overview.total} variant="compact" />
