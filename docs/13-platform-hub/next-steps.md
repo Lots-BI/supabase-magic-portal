@@ -31,7 +31,7 @@ Estado em **ago/2026** após Marco 1 piloto + Marco 2 prep (scheduler CLI). Prio
 |---|------|----------|------|
 | 5 | Gate A live no CI | Skipped (sem credenciais) | Job manual ou secrets staging |
 | 6 | Paridade Google/TikTok | Plugins existem; menos exercício que Meta | Piloto por plataforma + ajuste identity discovery |
-| 7 | Alertas operacionais | Card na Central básico | Expandir: sync falho, token expirado, divergência dual-run |
+| 7 | Alertas operacionais | Badges nav + Central | Expandir: token expirado, divergência dual-run |
 | 8 | RLS `ph_*` para roles | Admin via service role | Políticas para leitura auditável sem service role no browser |
 | 9 | Tutorial plataforma | `07-clientes-integracoes` sem Hub | Atualizar tutorial admin com `/admin/conexoes` |
 

@@ -1,8 +1,11 @@
 export const META_OAUTH_DEFAULT_SCOPES = [
   "ads_read",
   "business_management",
+  "pages_show_list",
   "pages_read_engagement",
+  "pages_manage_posts",
   "instagram_basic",
+  "instagram_content_publish",
 ] as const;
 
 export interface MetaOAuthConfigV1 {

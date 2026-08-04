@@ -33,6 +33,6 @@ last_review: 2026-08-04
 ## Fora deste marco
 
 - Flip `ph_metricas_source` → hub
-- Publish / agendamento de posts (Marco 4)
+- Publish / agendamento de posts ([Marco 4](./marco4-publish-meta.md))
 - Inbox cross-client de aprovações (backlog)
 - Framework LP + tracking (Marco 7)

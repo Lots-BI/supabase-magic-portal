@@ -29,14 +29,22 @@
   ],
   "oauth": {
     "type": "oauth2_meta",
-    "scopes": ["ads_read", "business_management", "pages_read_engagement", "instagram_basic"]
+    "scopes": [
+      "ads_read",
+      "business_management",
+      "pages_show_list",
+      "pages_read_engagement",
+      "pages_manage_posts",
+      "instagram_basic",
+      "instagram_content_publish"
+    ]
   },
   "providers": {
     "default": "make_passive",
     "supported": ["make_passive", "official_api"]
   },
   "publisher": {
-    "supported": false
+    "supported": true
   },
   "identity": {
     "types": ["business", "ad_account", "page", "instagram"],

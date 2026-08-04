@@ -21,6 +21,7 @@ import {
   deleteCardAttachment,
   listCardAttachmentsWithUrls,
 } from "../internal/attachment-lifecycle.server";
+import { publishContentCardToMetaFacebook } from "../internal/publish-meta.server";
 import { deleteContentCard } from "../internal/library-lifecycle.server";
 import { editorialPillarRepository } from "../repositories/editorial-pillar.repository.server";
 import { CONTENT_CARD_STATUSES } from "../types/content-card";
@@ -206,4 +207,23 @@ export const listAllowedStatuses = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertStaffAccess(context);
     return { statuses: CONTENT_CARD_STATUSES };
+  });
+
+/** Marco 4 — publica foto na Facebook Page via Graph e move para `publicado`. */
+export const publishCardToMeta = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        target: z.enum(["facebook", "instagram"]).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const actor = await actorFromContext(context);
+    return publishContentCardToMetaFacebook(context.supabase, actor, {
+      cardId: data.id,
+      target: data.target ?? "facebook",
+    });
   });
