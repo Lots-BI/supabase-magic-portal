@@ -10,7 +10,10 @@ last_review: 2026-08-04
 
 # O que falta — Platform Hub RC1 → Produção
 
-Estado em **ago/2026** após Marco 1 piloto + Marco 2 prep (scheduler CLI). Prioridade: **P0** bloqueia produção client-facing; **P1** homologação; **P2** melhoria.
+> **CONGELADO (ago/2026).** Não priorizar Hub até nova ordem. Branch no GitHub:
+> `feature/marco1-hub-meta-piloto`. Retomada: [manual-ops-checklist](./manual-ops-checklist.md).
+
+Estado em **ago/2026** após Marcos 1–4 + fix de métricas Hub. Prioridade quando descongelar: **P0** bloqueia produção client-facing; **P1** homologação; **P2** melhoria.
 
 ---
 

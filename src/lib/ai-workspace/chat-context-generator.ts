@@ -255,6 +255,8 @@ function buildCurrentState(snapshot: AiWorkspaceSnapshotCore, contextScoreTotal:
     "",
     "**Em consolidação ativa:** Agency OS (Central operacional), OS Core (command bus, registries), AI Workspace.",
     "",
+    "**Platform Hub:** CONGELADO (ago/2026) — Marcos 1–4 no código, dual-run Make, branch `feature/marco1-hub-meta-piloto` no GitHub. Sem cutover. Retomar: `docs/13-platform-hub/manual-ops-checklist.md`.",
+    "",
     "**Dívidas conhecidas:**",
     ...(snapshot.limitations.length
       ? snapshot.limitations.map((l) => `- ${l}`)

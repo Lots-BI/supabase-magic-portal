@@ -10,6 +10,9 @@ last_review: 2026-08-05
 
 # Checklist manual — fim do plano (Hub Meta)
 
+> **Projeto congelado (ago/2026).** Execute estes itens só quando for **descongelar** o Hub.  
+> Branch no GitHub: `feature/marco1-hub-meta-piloto` (código salvo; sem cutover / sem deploy prod).
+
 Use este arquivo **só no final** (ou quando um passo humano for impossibilitante extremo).  
 Engenharia já deixou código, migrations, workflow e botões prontos. **Make permanece fonte dos dashboards** até o Go/No-Go (item M5).
 
@@ -32,7 +35,7 @@ Engenharia já deixou código, migrations, workflow e botões prontos. **Make pe
 
 ### M0 — Desbloquear Meta Graph (`API access blocked`)
 
-- [ ] Abrir [Meta for Developers](https://developers.facebook.com/) → app cujo App ID = `META_APP_ID` do `.env`
+- [ ok ] Abrir [Meta for Developers](https://developers.facebook.com/) → app cujo App ID = `META_APP_ID` do `.env`
 - [ ] Confirmar app em Development **ou** Live conforme o piloto
 - [ ] Conta usada no OAuth está em **App roles** (Admin / Developer / Tester)
 - [ ] Marketing API / permissões de Ads disponíveis para o app

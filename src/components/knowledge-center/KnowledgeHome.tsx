@@ -18,8 +18,8 @@ import { getFavorites, getRecent } from "@/lib/knowledge-center/storage";
 const HIGHLIGHTS = [
   {
     slug: "13-platform-hub/readme",
-    title: "Platform Hub (RC1)",
-    description: "Hub de conexões — handoff, homologação e próximos passos.",
+    title: "Platform Hub (congelado)",
+    description: "Marcos 1–4 no código · dual-run Make · checklist manual para retomar.",
     icon: Plug,
   },
   {

@@ -10,6 +10,8 @@ last_review: 2026-07-09
 
 # Platform Hub RC1 — Handoff
 
+> **Freeze ago/2026:** trabalho Hub pausado. Estado e backlog na [aba README](./README.md) e no [checklist manual](./manual-ops-checklist.md). Este handoff permanece válido para retomar código.
+
 Use este documento se você está **assumindo o trabalho** no Hub de Conexões sem contexto da conversa anterior.
 
 ---
