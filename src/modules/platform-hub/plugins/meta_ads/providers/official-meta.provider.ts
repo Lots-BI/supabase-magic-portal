@@ -20,6 +20,12 @@ import type { HubObservabilityPort } from "@/modules/platform-hub/observability/
 /** Label gravado em base_metricas.plataforma — paridade com Make. */
 export const META_PLATFORM_LABEL = "Meta Ads";
 
+/** Fuso padrão da agência — evita “hoje” UTC virar dia errado no Brasil. */
+export const META_COLLECT_TIMEZONE = "America/Sao_Paulo";
+
+/** Dias inclusivos na coleta default (hoje + 6 anteriores) para atualizar atribuição Meta. */
+export const META_COLLECT_LOOKBACK_DAYS = 6;
+
 export interface OfficialMetaProviderConfig {
   credentialAccess: CredentialAccessPort;
   httpClient: HttpClientPort;
@@ -29,6 +35,31 @@ export interface OfficialMetaProviderConfig {
 }
 
 const METRICS_CAPABILITY = "meta:metrics:collect" as Capability;
+
+export function calendarDateInTimeZone(date: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+export function shiftIsoDate(isoDate: string, days: number): string {
+  const mid = new Date(`${isoDate}T12:00:00.000Z`);
+  mid.setUTCDate(mid.getUTCDate() + days);
+  return mid.toISOString().slice(0, 10);
+}
+
+export function defaultMetaCollectWindow(
+  now = new Date(),
+  timeZone = META_COLLECT_TIMEZONE,
+  lookbackDays = META_COLLECT_LOOKBACK_DAYS,
+): { from: string; to: string } {
+  const to = calendarDateInTimeZone(now, timeZone);
+  const from = shiftIsoDate(to, -lookbackDays);
+  return { from, to };
+}
 
 function resolveAdAccountIdentity(identities: readonly PlatformIdentityV1[]): PlatformIdentityV1 {
   const primary = identities.find((id) => id.identityType === "ad_account" && id.isPrimary);
@@ -60,8 +91,7 @@ export function createOfficialMetaProvider(config: OfficialMetaProviderConfig): 
       assertCapability(params.capability);
 
       const timer = telemetry.start();
-      const today = new Date().toISOString().slice(0, 10);
-      const window = params.window ?? { from: today, to: today };
+      const window = params.window ?? defaultMetaCollectWindow();
 
       try {
         const adAccount = resolveAdAccountIdentity(params.identities);
