@@ -115,7 +115,7 @@ Doc Meta: [Customize Manage everything on your Page](https://developers.facebook
 |----|------|--------|
 | O1 | Task Scheduler Windows (`scripts/ops/hub-sync-eligible.cmd`) | Se não quiser Actions |
 | O2 | App Review / Advanced Access Meta | Publish para usuários fora do app (clientes) |
-| O3 | Secrets Hub no deploy Cloudflare | Produção client-facing (P0 separado) |
+| O3 | Secrets Hub no deploy Cloudflare | `deploy.yml` já mapeia vars; preencher secrets no GitHub + garantir runtime Cloudflare |
 | O4 | `git push` desta branch / abrir PR | Quando quiser remoto / review |
 
 ---

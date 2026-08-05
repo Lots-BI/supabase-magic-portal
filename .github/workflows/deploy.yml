@@ -1,6 +1,12 @@
 # Deploy proprietário Lotus → Cloudflare Workers
 # Disparo MANUAL apenas — não substitui Lovable até validação em produção.
-# Secrets necessários: CLOUDFLARE_API_TOKEN + variáveis OFFICIAL_* / VITE_OFFICIAL_*
+# Secrets necessários:
+#   CLOUDFLARE_API_TOKEN
+#   OFFICIAL_* / VITE_OFFICIAL_* / APP_URL (build)
+#   Hub OAuth (runtime): HUB_CREDENTIAL_ENCRYPTION_KEY, META_APP_ID, META_APP_SECRET,
+#     GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_ADS_DEVELOPER_TOKEN (opc.),
+#     TIKTOK_APP_ID, TIKTOK_APP_SECRET (opc.)
+# Checklist humano: docs/13-platform-hub/manual-ops-checklist.md (O3)
 
 name: Deploy (Cloudflare)
 
@@ -52,6 +58,14 @@ jobs:
           OFFICIAL_SUPABASE_ANON_KEY: ${{ secrets.OFFICIAL_SUPABASE_ANON_KEY }}
           OFFICIAL_SERVICE_ROLE_KEY: ${{ secrets.OFFICIAL_SERVICE_ROLE_KEY }}
           APP_URL: ${{ secrets.APP_URL }}
+          HUB_CREDENTIAL_ENCRYPTION_KEY: ${{ secrets.HUB_CREDENTIAL_ENCRYPTION_KEY }}
+          META_APP_ID: ${{ secrets.META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.META_APP_SECRET }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
+          TIKTOK_APP_ID: ${{ secrets.TIKTOK_APP_ID }}
+          TIKTOK_APP_SECRET: ${{ secrets.TIKTOK_APP_SECRET }}
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3

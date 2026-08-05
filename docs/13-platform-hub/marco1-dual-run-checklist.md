@@ -36,8 +36,8 @@ last_review: 2026-08-04
 | Provider | `official_api` |
 | OAuth token no vault | presente · expira ~2026-10-03 · 6 scopes |
 | Identidades | 4 (business, **ad_account primary**, page, instagram @agencia.lots) |
-| Sync runs | success · 4 rows (CLI `hub:sync-official` ok) |
-| `base_metricas_hub` | rows acumuladas (20+) · Make intocado |
+| Sync runs | success histórico · refresh Graph bloqueado (`API access blocked`) até M0 no [checklist manual](./manual-ops-checklist.md) |
+| `base_metricas_hub` | Idempotente (índice natural) · Meta Ads 2026-08-04 = 740 impressões (paridade Make) · Make intocado |
 | Dashboards cliente | Ainda Make (`ph_metricas_source.active_source = make`) |
 | Diagnóstico | `ok` (todos os checks) |
 | `hub:doctor` | ALL PASS |
