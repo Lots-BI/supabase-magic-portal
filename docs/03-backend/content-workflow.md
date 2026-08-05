@@ -69,16 +69,17 @@ Toda mutação relevante chama `events/repository.append()`:
 
 ---
 
-## Ports (Fase 0 — stubs only)
+## Ports
 
 ### ContentAiPort
 
 `generateCaption` · `generateCopy` · `generateHashtags` · `evaluateCreative` ·
-`suggestBestTime` · `improveCTA`
+`suggestBestTime` · `improveCTA` — ainda sem implementação.
 
 ### ContentPublisherPort
 
-Meta · TikTok · LinkedIn (futuro)
+- **Marco 4 MVP:** Facebook Page photo via `publishCardToMeta` ([doc](../13-platform-hub/marco4-publish-meta.md))
+- Futuro: Instagram, TikTok, LinkedIn, agendamento Graph
 
 ### WorkflowAutomationPort
 

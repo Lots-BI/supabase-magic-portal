@@ -69,9 +69,11 @@ Painel em `/admin/conexoes/migracao` com timeline por conexão.
 
 A UI **não altera** Runtime, Pipeline, Registry, Health, Contracts ou Provider Framework. Consome `createAdminHubStack()` em `platform-hub-bridges/ph-persistence`.
 
-## Limitações conhecidas (RC1)
+## Limitações conhecidas / freeze (ago/2026)
 
-- Dashboards client-facing ainda usam `ph_metricas_source.active_source = 'make'` por padrão
-- Sync automático: apenas `ManualScheduler` (sem cron em produção)
-- Cutover para `hub` exige homologação dual-run — ver [homologation-guide](../13-platform-hub/homologation-guide.md)
-- Documentação completa: [13-platform-hub/](../13-platform-hub/README.md)
+- **Projeto Hub congelado** temporariamente — retomar via [manual-ops-checklist](../13-platform-hub/manual-ops-checklist.md)
+- Dashboards client-facing: `ph_metricas_source.active_source = make` (não flipar sem Go)
+- Sync automático: schedule no `hub-sync-official.yml` pronto; secrets GitHub ainda manuais
+- Publish Facebook: código + botão **Reconectar + Publish**; Use Cases Meta manuais
+- Meta Graph pode retornar `API access blocked` até desbloqueio no App Dashboard
+- Documentação: aba [13-platform-hub/](../13-platform-hub/README.md)

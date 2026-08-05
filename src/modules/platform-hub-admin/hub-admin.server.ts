@@ -15,9 +15,9 @@ import { createAdminHubStack } from "@/modules/platform-hub-bridges/ph-persisten
 import { registerCadastroRecord } from "@/modules/platform-hub-bridges/legacy-cadastro";
 import { FetchHttpClient } from "@/modules/platform-hub/plugins/_internal/http/fetch-http-client";
 import { createCredentialAccess } from "@/modules/platform-hub/plugins/_internal/oauth/credential-access.port";
-import { isMetricsTimeseriesEnvelope } from "../../../contracts/ingest/ingest-envelope.v1";
 import { buildPlatformCatalog } from "./services/build-catalog";
 import { runConnectionDiagnostics } from "./services/run-diagnostics";
+import { runOfficialSyncPass } from "./services/run-official-sync-pass";
 import {
   attachIdentitySchema,
   batchAttachIdentitiesSchema,
@@ -41,6 +41,7 @@ import {
   oauthCredentialKeyForPlugin,
 } from "./services/hub-oauth.factory";
 import { sanitizeOAuthRedirectAfter } from "./services/sanitize-redirect";
+import { resolveMetaOAuthDialogScopes } from "@/modules/platform-hub/plugins/meta_ads/oauth/meta-oauth.config";
 
 async function adminStack() {
   return createAdminHubStack(getSupabaseAdmin());
@@ -125,6 +126,22 @@ export const getHubCatalog = createServerFn({ method: "GET" })
     return buildPlatformCatalog(stats);
   });
 
+/** Status booleano de secrets OAuth (nunca retorna valores). Para UX do assistente. */
+export const getHubOAuthEnvStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAgencyOsAdmin(context);
+    const filled = (...keys: string[]) => keys.every((k) => Boolean(process.env[k]?.trim()));
+    return {
+      appUrl: resolveServerAppUrl() ?? null,
+      meta: filled("META_APP_ID", "META_APP_SECRET"),
+      google: filled("GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET"),
+      googleAdsDeveloperToken: filled("GOOGLE_ADS_DEVELOPER_TOKEN"),
+      tiktok: filled("TIKTOK_APP_ID", "TIKTOK_APP_SECRET"),
+      vaultKey: filled("HUB_CREDENTIAL_ENCRYPTION_KEY"),
+    };
+  });
+
 export const createHubConnection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => createConnectionWizardSchema.parse(d))
@@ -196,7 +213,13 @@ export const startHubOAuth = createServerFn({ method: "POST" })
       createCredentialAccess(stack.credentialVault),
     );
     const redirectUri = `${resolveServerAppUrl()}${oauth.callbackPath}`;
-    const url = oauth.buildAuthorizationUrl({ redirectUri, state });
+    const scopes =
+      conn.pluginKey === "meta_ads"
+        ? resolveMetaOAuthDialogScopes({
+            includePublish: data.includePublishScopes === true,
+          })
+        : undefined;
+    const url = oauth.buildAuthorizationUrl({ redirectUri, state, scopes });
     return { authorizationUrl: url };
   });
 
@@ -309,54 +332,11 @@ export const syncHubConnection = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAgencyOsAdmin(context);
     const stack = await adminStack();
-    const connectionId = asConnectionId(data.connectionId);
-    await stack.timeline.append({
+    const pass = await runOfficialSyncPass(stack, {
       connectionId: data.connectionId,
-      kind: "sync_started",
-      title: "Sincronização iniciada",
       actorEmail: actorEmailFromClaims(context.claims),
     });
-    const result = await stack.manualScheduler.run(connectionId);
-    if (result.status === "success" && result.envelope) {
-      await stack.metricPipeline.accept(result.envelope);
-      const rows = isMetricsTimeseriesEnvelope(result.envelope)
-        ? result.envelope.payload.rows.length
-        : 0;
-      await stack.adminQueries.updateAdminFields(data.connectionId, {
-        healthStatus: "healthy",
-        healthScore: 90,
-      });
-      await stack.timeline.append({
-        connectionId: data.connectionId,
-        kind: "sync_finished",
-        title: `Sincronização concluída (${rows} métricas)`,
-        metadata: { rows, durationMs: result.durationMs },
-      });
-    } else {
-      await stack.adminQueries.updateAdminFields(data.connectionId, {
-        healthStatus: "unhealthy",
-        healthScore: 20,
-      });
-      await stack.timeline.append({
-        connectionId: data.connectionId,
-        kind: "sync_failed",
-        title: "Sincronização falhou",
-        detail: result.error,
-      });
-    }
-    const health = await stack.healthEngine.get(connectionId);
-    await stack.adminQueries.updateAdminFields(data.connectionId, {
-      healthStatus:
-        health.status === "healthy"
-          ? "healthy"
-          : health.status === "degraded"
-            ? "degraded"
-            : health.status === "unhealthy"
-              ? "unhealthy"
-              : "unknown",
-      healthScore: health.score,
-    });
-    return result;
+    return pass.execution;
   });
 
 export const switchHubProvider = createServerFn({ method: "POST" })

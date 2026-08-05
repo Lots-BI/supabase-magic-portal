@@ -128,19 +128,33 @@ export async function runConnectionDiagnostics(
       }
     }
 
-    const health = await stack.healthEngine.get(id);
+    // HealthEngine é in-memory por request — sem sinais recentes fica `unknown`.
+    // Preferir snapshot persistido em ph_connections quando o engine não tem observação.
+    const liveHealth = await stack.healthEngine.get(id);
+    const persistedStatus = adminRow?.healthStatus ?? null;
+    const persistedScore = adminRow?.healthScore;
+    const usePersisted =
+      liveHealth.status === "unknown" &&
+      !!persistedStatus &&
+      persistedStatus !== "unknown";
+    const healthStatus = usePersisted ? persistedStatus : liveHealth.status;
+    const healthScore = usePersisted
+      ? (persistedScore ?? liveHealth.score)
+      : liveHealth.score;
     checks.push({
       id: "health",
       label: "Health",
       status:
-        health.status === "healthy"
+        healthStatus === "healthy"
           ? "ok"
-          : health.status === "degraded"
+          : healthStatus === "degraded"
             ? "warning"
-            : health.status === "unhealthy"
+            : healthStatus === "unhealthy"
               ? "error"
               : "warning",
-      detail: `${health.status} (score ${health.score})`,
+      detail: usePersisted
+        ? `${healthStatus} (score ${healthScore}, persistido)`
+        : `${healthStatus} (score ${healthScore})`,
     });
 
     checks.push({

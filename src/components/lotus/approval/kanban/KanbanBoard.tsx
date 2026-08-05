@@ -12,6 +12,7 @@ import type { KanbanBoard } from "@/modules/approval/services/build-kanban-board
 import type { ContentCard } from "@/modules/approval/types/content-card";
 import type { ContentCardStatus } from "@/modules/approval/types/content-card";
 import type { PillarSummary } from "../shared/PillarBadge";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanCard } from "./KanbanCard";
 
@@ -32,6 +33,8 @@ export const KanbanBoardView = memo(function KanbanBoardView({
   showCliente?: boolean;
   readOnly?: boolean;
 }) {
+  const isMobile = useIsMobile();
+  const disableDrag = !readOnly && isMobile;
   const [activeCard, setActiveCard] = useState<ContentCard | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
@@ -48,6 +51,8 @@ export const KanbanBoardView = memo(function KanbanBoardView({
           onOpenCard={onOpenCard}
           showCliente={showCliente}
           readOnly={readOnly}
+          disableDrag={disableDrag}
+          onMoveCard={onMoveCard}
         />
       ))}
     </div>
@@ -56,12 +61,14 @@ export const KanbanBoardView = memo(function KanbanBoardView({
   if (readOnly) return columns;
 
   const handleDragStart = (event: DragStartEvent) => {
+    if (disableDrag) return;
     const card = event.active.data.current?.card as ContentCard | undefined;
     if (card) setActiveCard(card);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveCard(null);
+    if (disableDrag) return;
     const { active, over } = event;
     if (!over || !onMoveCard) return;
 
@@ -79,19 +86,21 @@ export const KanbanBoardView = memo(function KanbanBoardView({
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       {columns}
-      <DragOverlay>
-        {activeCard ? (
-          <div className="w-[18rem] rotate-2 opacity-95">
-            <KanbanCard
-              card={activeCard}
-              pillar={activeCard.pilar_id ? pillarMap[activeCard.pilar_id] : null}
-              thumbnailUrl={thumbMap[activeCard.id] ?? activeCard.capa_url}
-              onOpen={() => undefined}
-              showCliente={showCliente}
-            />
-          </div>
-        ) : null}
-      </DragOverlay>
+      {!disableDrag && (
+        <DragOverlay>
+          {activeCard ? (
+            <div className="w-[18rem] rotate-2 opacity-95">
+              <KanbanCard
+                card={activeCard}
+                pillar={activeCard.pilar_id ? pillarMap[activeCard.pilar_id] : null}
+                thumbnailUrl={thumbMap[activeCard.id] ?? activeCard.capa_url}
+                onOpen={() => undefined}
+                showCliente={showCliente}
+              />
+            </div>
+          ) : null}
+        </DragOverlay>
+      )}
     </DndContext>
   );
 });

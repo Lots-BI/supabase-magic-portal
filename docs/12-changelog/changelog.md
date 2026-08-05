@@ -21,6 +21,13 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Adicionado
 
+- **Platform Hub — Marcos 1–4 + freeze (2026-08-05):** piloto Meta dual-run (Agência Lots);
+  sync Official CLI + schedule Actions; UX diária; publish Facebook Page (código); writer Hub
+  idempotente (migration 32); checklist manual e aba KC atualizada. Branch
+  `feature/marco1-hub-meta-piloto` no GitHub — **sem cutover / sem deploy prod**.
+  Docs: [13-platform-hub/README](../13-platform-hub/README.md),
+  [manual-ops-checklist](../13-platform-hub/manual-ops-checklist.md).
+
 - **Tutorial — Knowledge Center e AI Workspace (2026-07-07):** capítulos admin
   `13-knowledge-center` e `14-ai-workspace`; mapa de menus, atalhos e Aprovações atualizados.
   Docs KC: [knowledge-center.md](../06-dashboards/knowledge-center.md),

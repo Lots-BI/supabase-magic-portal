@@ -5,12 +5,15 @@ status: living
 owner: Engenharia Lots BI
 tags: [platform-hub, roadmap, backlog]
 difficulty: intermediate
-last_review: 2026-07-09
+last_review: 2026-08-04
 ---
 
 # O que falta — Platform Hub RC1 → Produção
 
-Estado em **jul/2026** após entrega RC1. Prioridade: **P0** bloqueia produção client-facing; **P1** homologação; **P2** melhoria.
+> **CONGELADO (ago/2026).** Não priorizar Hub até nova ordem. Branch no GitHub:
+> `feature/marco1-hub-meta-piloto`. Retomada: [manual-ops-checklist](./manual-ops-checklist.md).
+
+Estado em **ago/2026** após Marcos 1–4 + fix de métricas Hub. Prioridade quando descongelar: **P0** bloqueia produção client-facing; **P1** homologação; **P2** melhoria.
 
 ---
 
@@ -18,10 +21,10 @@ Estado em **jul/2026** após entrega RC1. Prioridade: **P0** bloqueia produção
 
 | # | Item | Situação | Ação |
 |---|------|----------|------|
-| 1 | **Cutover `ph_metricas_source`** | Default `make` | Dual-run estável → update controlado + monitoramento |
-| 2 | **OAuth secrets no deploy** | `deploy.yml` sem vars Hub/OAuth | Adicionar secrets Meta/Google/TikTok + `APP_URL` + `HUB_CREDENTIAL_ENCRYPTION_KEY` |
-| 3 | **Piloto real com dados live** | Não validado end-to-end em prod | 1 cliente, 1 plataforma, 2 semanas dual-run |
-| 4 | **Scheduler automático** | Apenas `ManualScheduler` | Cron/queue para sync periódico (Edge Function ou worker) |
+| 1 | **Cutover `ph_metricas_source`** | Default `make`; CLI dry-run pronto | Dual-run Go → `npm run hub:cutover -- --to=hub --confirm=hub` ([Marco 2](./marco2-scheduler-and-cutover.md)) |
+| 2 | **OAuth secrets no deploy** | `deploy.yml` mapeia secrets Hub/OAuth no build | Preencher secrets no GitHub + Cloudflare runtime — [manual-ops-checklist](./manual-ops-checklist.md) O3 |
+| 3 | **Piloto real com dados live** | Piloto Meta em dual_run (ago/2026) | Completar 1–2 semanas + KPIs no checklist |
+| 4 | **Scheduler automático** | Schedule no `hub-sync-official.yml` pronto | Secrets GitHub + `gh auth` — [manual-ops-checklist](./manual-ops-checklist.md) |
 
 ---
 
@@ -31,7 +34,7 @@ Estado em **jul/2026** após entrega RC1. Prioridade: **P0** bloqueia produção
 |---|------|----------|------|
 | 5 | Gate A live no CI | Skipped (sem credenciais) | Job manual ou secrets staging |
 | 6 | Paridade Google/TikTok | Plugins existem; menos exercício que Meta | Piloto por plataforma + ajuste identity discovery |
-| 7 | Alertas operacionais | Card na Central básico | Expandir: sync falho, token expirado, divergência dual-run |
+| 7 | Alertas operacionais | Badges nav + Central | Expandir: token expirado, divergência dual-run |
 | 8 | RLS `ph_*` para roles | Admin via service role | Políticas para leitura auditável sem service role no browser |
 | 9 | Tutorial plataforma | `07-clientes-integracoes` sem Hub | Atualizar tutorial admin com `/admin/conexoes` |
 
@@ -55,7 +58,8 @@ Estado em **jul/2026** após entrega RC1. Prioridade: **P0** bloqueia produção
 2. `npm run hub:doctor`
 3. Abrir `/admin/conexoes` e `/admin/ai-workspace`
 4. Ler ADRs 0020–0024
-5. Escolher **um** item P0 ou P1 e abrir issue/PR
+5. **Marco 1:** [runbook piloto](./marco1-piloto-runbook.md) + [checklist dual-run](./marco1-dual-run-checklist.md)
+6. Escolher **um** item P0 ou P1 e abrir issue/PR
 
 ---
 

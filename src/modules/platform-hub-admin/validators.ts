@@ -36,6 +36,8 @@ export const connectionIdSchema = z.object({
 export const startOAuthSchema = z.object({
   connectionId: z.string().uuid(),
   redirectAfter: z.string().min(1),
+  /** Meta only — pede pages_manage_posts etc. Só após Use Cases no App Dashboard. */
+  includePublishScopes: z.boolean().optional(),
 });
 
 export const switchProviderSchema = z.object({

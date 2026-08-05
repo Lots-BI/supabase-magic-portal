@@ -14,6 +14,10 @@ import { HubHealthBadge, HubProviderBadge } from "./hub-badges";
 import { HubCredentialPanel } from "./HubCredentialPanel";
 import { HubIdentityPicker } from "./HubIdentityPicker";
 import {
+  ConnectionNextStepCard,
+  resolveConnectionPhase,
+} from "./ConnectionNextStepCard";
+import {
   deleteHubConnection,
   runHubDiagnostics,
   startHubOAuth,
@@ -64,11 +68,12 @@ export function ConnectionDetailView({ detail }: ConnectionDetailViewProps) {
   });
 
   const oauthMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (includePublishScopes?: boolean) =>
       startHubOAuth({
         data: {
           connectionId: connection.id,
           redirectAfter: `/admin/conexoes/nova?connectionId=${connection.id}&step=4`,
+          includePublishScopes,
         },
       }),
     onSuccess: (r) => {
@@ -114,13 +119,20 @@ export function ConnectionDetailView({ detail }: ConnectionDetailViewProps) {
   });
 
   const stageIndex = MIGRATION_STAGES.findIndex((s) => s.id === connection.migrationStage);
+  const phase = resolveConnectionPhase({
+    identityCount: identities.length,
+    lastSyncAt: connection.lastSyncAt,
+    lastSyncStatus: connection.lastSyncStatus,
+    lastError: connection.lastError,
+    healthStatus: connection.healthStatus,
+  });
 
   return (
     <div className="space-y-7 pb-10">
       <PageHeader
         eyebrow="Conexão"
         title={connection.label}
-        description={`${connection.clienteNome ?? "—"} · ${connection.pluginKey}`}
+        description={`${connection.clienteNome ?? "—"} · ${connection.pluginKey} · dashboards ainda leem Make até o cutover`}
         actions={
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
@@ -155,10 +167,21 @@ export function ConnectionDetailView({ detail }: ConnectionDetailViewProps) {
             {manifest.oauth && (
               <Button
                 size="sm"
-                onClick={() => oauthMutation.mutate()}
+                onClick={() => oauthMutation.mutate(false)}
                 disabled={oauthMutation.isPending}
               >
                 Reconectar OAuth
+              </Button>
+            )}
+            {manifest.oauth && connection.pluginKey === "meta_ads" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => oauthMutation.mutate(true)}
+                disabled={oauthMutation.isPending}
+                title="Requer Use Cases pages_manage_posts / pages_show_list no App Dashboard Meta"
+              >
+                Reconectar + Publish
               </Button>
             )}
           </div>
@@ -179,6 +202,15 @@ export function ConnectionDetailView({ detail }: ConnectionDetailViewProps) {
           {connection.status === "active" ? "Ativa" : "Desativada"}
         </span>
       </div>
+
+      <ConnectionNextStepCard
+        phase={phase}
+        lastError={connection.lastError}
+        onSync={() => syncMutation.mutate()}
+        onDiagnose={() => diagMutation.mutate()}
+        onOAuth={manifest.oauth ? () => oauthMutation.mutate(false) : undefined}
+        syncPending={syncMutation.isPending}
+      />
 
       <SectionCard title="Homologação paralela">
         <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -302,8 +334,10 @@ export function ConnectionDetailView({ detail }: ConnectionDetailViewProps) {
         <HubCredentialPanel connectionId={connection.id} />
       </SectionCard>
 
+      <div id="identidades">
       <SectionCard
         title="Identidades"
+        description="Confira Ad Account, moeda e timezone contra o Make antes do dual-run."
         actions={
           <Button size="sm" variant="outline" onClick={() => setIdentityOpen(true)}>
             Adicionar / atualizar
@@ -311,7 +345,14 @@ export function ConnectionDetailView({ detail }: ConnectionDetailViewProps) {
         }
       >
         {identities.length === 0 ? (
-          <p className="p-4 text-sm text-muted-foreground">Nenhuma identidade vinculada.</p>
+          <div className="space-y-3 p-4">
+            <p className="text-sm text-muted-foreground">
+              Nenhuma identidade vinculada. Sem Ad Account o Hub não sabe de onde coletar.
+            </p>
+            <Button size="sm" onClick={() => setIdentityOpen(true)}>
+              Escolher identidade agora
+            </Button>
+          </div>
         ) : (
           <ul className="divide-y divide-border">
             {identities.map((id) => (
@@ -326,6 +367,7 @@ export function ConnectionDetailView({ detail }: ConnectionDetailViewProps) {
           </ul>
         )}
       </SectionCard>
+      </div>
 
       {diagnostic && (
         <SectionCard title="Centro de diagnóstico">

@@ -64,6 +64,8 @@ UPDATE ph_metricas_source SET active_source = 'hub' WHERE id = 1;
 | Comando | Uso |
 |---------|-----|
 | `npm run hub:doctor` | Saúde DB + writer |
+| `npm run hub:sync-official -- --eligible` | Sync periódico Official → Hub ([Marco 2](./marco2-scheduler-and-cutover.md)) |
+| `npm run hub:cutover` | Dry-run da fonte; flip só com `--confirm` |
 | `npm run gate-a:discover` | Listar pilotos Gate A Meta |
 | `npm run gate-a:parity` | Paridade CLI (staging) |
 | `npm run gate-a:demo` | Teste operacional sem API live |

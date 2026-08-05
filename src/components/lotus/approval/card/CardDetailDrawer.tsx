@@ -27,10 +27,12 @@ import {
   duplicateCard,
   getContentCard,
   moveCard,
+  publishCardToMeta,
   updateCard,
   listEditorialPillars,
 } from "@/modules/approval/cards/cards.server";
 import type { ContentCardStatus } from "@/modules/approval/types/content-card";
+import { isMetaLivePublishPlatform, readMetaPublishFromMetadata } from "@/modules/approval/integrations/meta/meta-publish-helpers";
 import { KANBAN_COLUMNS } from "@/modules/approval/workflow/column-config";
 import { canTransitionStatus } from "@/modules/approval/workflow/status-machine";
 import { CardTimeline } from "./CardTimeline";
@@ -39,7 +41,7 @@ import { MobileStatusPicker } from "../kanban/MobileStatusPicker";
 import { KANBAN_COLUMN_META } from "../kanban/kanban-meta";
 import { MediaPreview } from "@/components/lotus/MediaPreview/MediaPreview";
 import { buildPreviewContext } from "@/lib/media-preview";
-import { Copy, Archive, MessageSquare } from "lucide-react";
+import { Copy, Archive, MessageSquare, Share2, ExternalLink } from "lucide-react";
 import { PillarBadge } from "../shared/PillarBadge";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
 import { ApprovalConfirmDialog } from "../shared/ApprovalConfirmDialog";
@@ -59,6 +61,7 @@ export function CardDetailDrawer({
   const getFn = useServerFn(getContentCard);
   const updateFn = useServerFn(updateCard);
   const moveFn = useServerFn(moveCard);
+  const publishFn = useServerFn(publishCardToMeta);
   const archiveFn = useServerFn(archiveCard);
   const duplicateFn = useServerFn(duplicateCard);
   const commentFn = useServerFn(commentCard);
@@ -184,6 +187,19 @@ export function CardDetailDrawer({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const publishMut = useMutation({
+    mutationFn: () => publishFn({ data: { id: cardId, target: "facebook" } }),
+    onSuccess: (result) => {
+      toast.success(
+        result.publish.url
+          ? "Publicado no Facebook."
+          : `Publicado no Facebook (id ${result.publish.externalId}).`,
+      );
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const commentMut = useMutation({
     mutationFn: () => commentFn({ data: { card_id: cardId, mensagem: comment } }),
     onSuccess: () => {
@@ -203,6 +219,9 @@ export function CardDetailDrawer({
   };
 
   const statusMeta = card ? KANBAN_COLUMN_META[card.status] : null;
+  const metaPublish = card ? readMetaPublishFromMetadata(card.integration_metadata ?? {}) : null;
+  const canLivePublish =
+    !!card && card.status === "aprovado" && isMetaLivePublishPlatform(card.plataforma);
   const previewCtx =
     card &&
     buildPreviewContext(
@@ -264,6 +283,32 @@ export function CardDetailDrawer({
                 </Select>
               </div>
               <MobileStatusPicker currentStatus={card.status} onSelect={(s) => moveMut.mutate(s)} />
+              {canLivePublish && (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="lotus-focus"
+                  onClick={() => publishMut.mutate()}
+                  disabled={publishMut.isPending}
+                >
+                  <Share2 className="mr-1.5 h-4 w-4" />
+                  {publishMut.isPending ? "Publicando…" : "Publicar no Facebook"}
+                </Button>
+              )}
+              {card.plataforma.toLowerCase() === "instagram" && card.status === "aprovado" && (
+                <p className="w-full text-[11px] text-muted-foreground">
+                  Instagram live ainda não está no MVP — use Facebook ou marque Publicado no
+                  Kanban (local).
+                </p>
+              )}
+              {metaPublish?.url && (
+                <Button type="button" variant="outline" size="sm" asChild>
+                  <a href={metaPublish.url} target="_blank" rel="noreferrer">
+                    <ExternalLink className="mr-1.5 h-4 w-4" />
+                    Ver no Facebook
+                  </a>
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="outline"

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Activity, Plug, Plus, Search } from "lucide-react";
+import { Activity, AlertTriangle, Plug, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/lotus/PageHeader";
 import { SectionCard } from "@/components/lotus/SectionCard";
@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import type {
   PhConnectionAdminRowV1,
   PhConnectionsOverviewV1,
@@ -31,6 +32,29 @@ interface ConnectionsHubViewProps {
 
 type GroupBy = "none" | "plugin" | "health" | "provider" | "client";
 
+const STALE_SYNC_MS = 48 * 60 * 60 * 1000;
+
+function connectionNeedsAttention(c: PhConnectionAdminRowV1): boolean {
+  if (c.status === "disabled") return true;
+  if (c.healthStatus === "unhealthy" || c.healthStatus === "degraded") return true;
+  if (c.lastSyncStatus === "failed" || c.lastError) return true;
+  if (c.status === "active" && c.activeProviderType === "official_api") {
+    if (!c.lastSyncAt) return true;
+    return Date.now() - new Date(c.lastSyncAt).getTime() > STALE_SYNC_MS;
+  }
+  return false;
+}
+
+function syncLabel(c: PhConnectionAdminRowV1): string {
+  if (c.lastSyncStatus === "failed") return "Sync falhou";
+  if (!c.lastSyncAt) return "Sem sync";
+  const age = Date.now() - new Date(c.lastSyncAt).getTime();
+  if (age > STALE_SYNC_MS) {
+    return `Sync atrasado · ${new Date(c.lastSyncAt).toLocaleDateString("pt-BR")}`;
+  }
+  return `Sync ${new Date(c.lastSyncAt).toLocaleDateString("pt-BR")}`;
+}
+
 export function ConnectionsHubView({
   overview,
   connections,
@@ -40,11 +64,18 @@ export function ConnectionsHubView({
   const [search, setSearch] = useState("");
   const [healthFilter, setHealthFilter] = useState<string>("all");
   const [providerFilter, setProviderFilter] = useState<string>("all");
+  const [attentionOnly, setAttentionOnly] = useState(false);
   const [groupBy, setGroupBy] = useState<GroupBy>("none");
+
+  const attentionCount = useMemo(
+    () => connections.filter(connectionNeedsAttention).length,
+    [connections],
+  );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return connections.filter((c) => {
+      if (attentionOnly && !connectionNeedsAttention(c)) return false;
       if (healthFilter !== "all" && c.healthStatus !== healthFilter) return false;
       if (providerFilter !== "all" && c.activeProviderType !== providerFilter) return false;
       if (!q) return true;
@@ -54,7 +85,7 @@ export function ConnectionsHubView({
         (c.clienteNome?.toLowerCase().includes(q) ?? false)
       );
     });
-  }, [connections, search, healthFilter, providerFilter]);
+  }, [connections, search, healthFilter, providerFilter, attentionOnly]);
 
   const grouped = useMemo(() => {
     if (groupBy === "none") return { Todas: filtered };
@@ -80,7 +111,7 @@ export function ConnectionsHubView({
       <PageHeader
         eyebrow="Platform Hub"
         title="Conexões"
-        description="Painel operacional — conecte plataformas, autentique via OAuth e acompanhe migração Make → Official API."
+        description="Conecte plataformas oficiais, rode sync e compare com Make. Dashboards de cliente só mudam após cutover explícito."
         actions={
           <Button asChild className="lotus-focus">
             <Link to="/admin/conexoes/nova" search={{}}>
@@ -91,6 +122,21 @@ export function ConnectionsHubView({
         }
       />
 
+      {connections.length === 0 && (
+        <EmptyState
+          icon={Plug}
+          title="Nenhuma plataforma conectada"
+          description="Conecte Meta Ads (Official API) para um cliente, autentique, escolha o Ad Account e rode o sync."
+          action={
+            <Button asChild>
+              <Link to="/admin/conexoes/nova" search={{ plugin: "meta_ads" }}>
+                Conectar Meta Ads
+              </Link>
+            </Button>
+          }
+        />
+      )}
+
       <div className="grid grid-cols-2 gap-3 min-[375px]:grid-cols-4 lg:grid-cols-8">
         <StatCard label="Total" value={overview.total} variant="compact" />
         <StatCard label="Saudáveis" value={overview.healthy} variant="compact" />
@@ -99,7 +145,7 @@ export function ConnectionsHubView({
         <StatCard label="Make" value={overview.makePassive} variant="compact" />
         <StatCard label="Official" value={overview.officialApi} variant="compact" />
         <StatCard label="Desconhecidas" value={overview.unknown} variant="compact" />
-        <StatCard label="Unhealthy" value={overview.unhealthy} variant="compact" />
+        <StatCard label="Atenção" value={attentionCount} variant="compact" />
       </div>
 
       <SectionCard title="Filtros" bodyClassName="p-4">
@@ -114,6 +160,15 @@ export function ConnectionsHubView({
               aria-label="Buscar conexões"
             />
           </div>
+          <Button
+            type="button"
+            variant={attentionOnly ? "default" : "outline"}
+            className="lotus-focus shrink-0"
+            onClick={() => setAttentionOnly((v) => !v)}
+          >
+            <AlertTriangle className="mr-2 h-4 w-4" />
+            Precisa atenção{attentionCount > 0 ? ` (${attentionCount})` : ""}
+          </Button>
           <Select value={healthFilter} onValueChange={setHealthFilter}>
             <SelectTrigger className="w-full lg:w-40">
               <SelectValue placeholder="Health" />
@@ -168,36 +223,45 @@ export function ConnectionsHubView({
             />
           ) : (
             <div className="divide-y divide-border">
-              {items.map((c) => (
-                <Link
-                  key={c.id}
-                  to="/admin/conexoes/$connectionId"
-                  params={{ connectionId: c.id }}
-                  className="flex flex-col gap-2 p-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <PlatformLogoBadge pluginKey={c.pluginKey} />
-                    <div>
-                      <p className="font-medium text-foreground">{c.label}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {c.clienteNome ?? "—"} · {c.pluginKey}
-                        {c.lastSyncAt && (
-                          <> · Sync {new Date(c.lastSyncAt).toLocaleDateString("pt-BR")}</>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <HubHealthBadge status={c.healthStatus} score={c.healthScore} />
-                    <HubProviderBadge provider={c.activeProviderType} />
-                    {c.coverage !== null && (
-                      <span className="text-xs text-muted-foreground">
-                        {(c.coverage * 100).toFixed(0)}%
-                      </span>
+              {items.map((c) => {
+                const attention = connectionNeedsAttention(c);
+                return (
+                  <Link
+                    key={c.id}
+                    to="/admin/conexoes/$connectionId"
+                    params={{ connectionId: c.id }}
+                    className={cn(
+                      "flex flex-col gap-2 p-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between",
+                      attention && "border-l-2 border-l-warning bg-warning/[0.04]",
                     )}
-                  </div>
-                </Link>
-              ))}
+                  >
+                    <div className="flex items-center gap-3">
+                      <PlatformLogoBadge pluginKey={c.pluginKey} />
+                      <div>
+                        <p className="font-medium text-foreground">{c.label}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {c.clienteNome ?? "—"} · {c.pluginKey} · {syncLabel(c)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {attention && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-warning/40 bg-warning/10 px-2 py-0.5 text-[10.5px] font-medium text-warning">
+                          <AlertTriangle className="h-3 w-3" />
+                          Atenção
+                        </span>
+                      )}
+                      <HubHealthBadge status={c.healthStatus} score={c.healthScore} />
+                      <HubProviderBadge provider={c.activeProviderType} />
+                      {c.coverage !== null && (
+                        <span className="text-xs text-muted-foreground">
+                          {(c.coverage * 100).toFixed(0)}%
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </SectionCard>

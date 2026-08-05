@@ -36,7 +36,7 @@
     "supported": ["make_passive", "official_api"]
   },
   "publisher": {
-    "supported": false
+    "supported": true
   },
   "identity": {
     "types": ["business", "ad_account", "page", "instagram"],

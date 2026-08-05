@@ -133,8 +133,10 @@ Um único par OAuth cobre os quatro plugins Google.
 | -------- | ----------- | --------- | ------------ | ------- | -------- | ---------- |
 | `META_APP_ID` | condicional | App ID do Meta for Developers | `hub-oauth.factory.ts`, `create-registration-credential-access.ts` | `1234567890123456` | dev, staging, prod | [Meta for Developers](https://developers.facebook.com/) → App → **Settings → Basic** → App ID |
 | `META_APP_SECRET` | condicional | App Secret | idem | `a1b2c3d4e5f6...` | dev, staging, prod | Mesmo app → **App Secret** (Show) |
+| `META_OAUTH_INCLUDE_PUBLISH_SCOPES` | não | Se `1`, dialog OAuth Meta inclui scopes de publish (`pages_manage_posts` etc.). Preferir o botão **Reconectar + Publish** na UI | `resolveMetaOAuthDialogScopes` | `1` | local-cli / ops pontual | Só após Use Cases no App Dashboard — ver [manual-ops-checklist](../13-platform-hub/manual-ops-checklist.md) |
 
 **Redirect URI no Meta:** `{APP_URL}/oauth/meta/callback` · Produto: Facebook Login + Marketing API
+**Publish:** Use Cases + botão **Reconectar + Publish** — [marco4-publish-meta](../13-platform-hub/marco4-publish-meta.md)
 
 ### TikTok
 
