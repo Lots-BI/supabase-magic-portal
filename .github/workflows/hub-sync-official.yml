@@ -14,9 +14,9 @@ on:
           - eligible
           - dry-run
         default: dry-run
-  # Descomente após secrets configurados e dual-run estável:
-  # schedule:
-  #   - cron: "0 11,23 * * *"  # 08:00 e 20:00 BRT (UTC-3)
+  # Dual-run: 2×/dia BRT (UTC-3). Ajuste se DST. Requer secrets no repo.
+  schedule:
+    - cron: "0 11,23 * * *"  # 08:00 e 20:00 BRT
 
 concurrency:
   group: hub-sync-official

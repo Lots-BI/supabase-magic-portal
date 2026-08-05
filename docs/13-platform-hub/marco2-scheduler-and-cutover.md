@@ -57,8 +57,8 @@ npm run hub:diagnose -- --connection=bb56230f-6a9d-4a32-a3f1-621b8f6c1d79
 
 ### Onde agendar
 
-1. **Local / VM:** Task Scheduler (Windows) ou cron (Linux) chamando `npm run hub:sync-official -- --eligible`
-2. **GitHub Actions:** workflow `hub-sync-official.yml` — `workflow_dispatch` + schedule opcional (requer secrets no repo)
+1. **Local / VM:** Task Scheduler (Windows) → `scripts/ops/hub-sync-eligible.cmd` (ou cron Linux com o mesmo `npm run`)
+2. **GitHub Actions:** workflow `hub-sync-official.yml` — `workflow_dispatch` + **schedule** 08:00/20:00 BRT (`0 11,23 * * *` UTC). Requer secrets — [manual-ops-checklist](./manual-ops-checklist.md)
 3. **Futuro:** Cloudflare Worker / Supabase Cron (decisão CTO — ver [next-steps](./next-steps.md))
 
 O workflow **não** flipa `ph_metricas_source`.
@@ -99,6 +99,6 @@ npm run hub:cutover -- --to=make --confirm=make
 
 - [x] Sync CLI equivalente ao botão Sync da UI
 - [x] Script de cutover com `--confirm` obrigatório
-- [ ] Cadência automática rodando no ambiente alvo (cron ou Actions)
+- [x] Schedule no workflow (código); secrets/Actions auth = checklist manual
 - [ ] Dual-run Go assinado por ops
 - [ ] Flip `hub` aplicado e monitorado (só após Go)

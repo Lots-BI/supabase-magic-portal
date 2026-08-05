@@ -21,7 +21,7 @@ Estado em **ago/2026** após Marco 1 piloto + Marco 2 prep (scheduler CLI). Prio
 | 1 | **Cutover `ph_metricas_source`** | Default `make`; CLI dry-run pronto | Dual-run Go → `npm run hub:cutover -- --to=hub --confirm=hub` ([Marco 2](./marco2-scheduler-and-cutover.md)) |
 | 2 | **OAuth secrets no deploy** | `deploy.yml` sem vars Hub/OAuth | Adicionar secrets Meta/Google/TikTok + `APP_URL` + `HUB_CREDENTIAL_ENCRYPTION_KEY` |
 | 3 | **Piloto real com dados live** | Piloto Meta em dual_run (ago/2026) | Completar 1–2 semanas + KPIs no checklist |
-| 4 | **Scheduler automático** | CLI `hub:sync-official` + workflow manual | Ativar cron/Actions schedule no ambiente alvo |
+| 4 | **Scheduler automático** | Schedule no `hub-sync-official.yml` pronto | Secrets GitHub + `gh auth` — [manual-ops-checklist](./manual-ops-checklist.md) |
 
 ---
 
