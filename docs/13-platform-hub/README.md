@@ -26,11 +26,12 @@ Esta pasta é a **aba dedicada** do Knowledge Center ao Platform Hub. Use-a quan
 | 4 | [Marco 2 — Scheduler + cutover prep](./marco2-scheduler-and-cutover.md) | 5 min | Sync CLI, Actions, flip com confirmação |
 | 5 | [Marco 3 — UX operação diária](./marco3-ux-diaria.md) | 3 min | Badges, atenção Conexões, Kanban mobile |
 | 6 | [Marco 4 — Publish Meta](./marco4-publish-meta.md) | 5 min | Facebook Page photo live |
-| 7 | [Guia de homologação](./homologation-guide.md) | 10 min | Piloto, dual-run, cutover de métricas |
-| 8 | [O que falta e próximos passos](./next-steps.md) | 5 min | Backlog priorizado pós-RC1 |
-| 9 | [Variáveis de ambiente](../ENVIRONMENT_VARIABLES.md) | 10 min | OAuth, writers, secrets |
-| 10 | [Admin UI (operador)](../06-dashboards/platform-hub-admin.md) | 5 min | Rotas e fluxos sem CLI |
-| 11 | [Registry ops (auto)](../06-dashboards/platform-hub-registry-ops.md) | 3 min | Plugins gerados do registry |
+| 7 | [Checklist manual (bloqueadores humanos)](./manual-ops-checklist.md) | 5 min | Meta Use Cases, gh secrets, reconnect Publish |
+| 8 | [Guia de homologação](./homologation-guide.md) | 10 min | Piloto, dual-run, cutover de métricas |
+| 9 | [O que falta e próximos passos](./next-steps.md) | 5 min | Backlog priorizado pós-RC1 |
+| 10 | [Variáveis de ambiente](../ENVIRONMENT_VARIABLES.md) | 10 min | OAuth, writers, secrets |
+| 11 | [Admin UI (operador)](../06-dashboards/platform-hub-admin.md) | 5 min | Rotas e fluxos sem CLI |
+| 12 | [Registry ops (auto)](../06-dashboards/platform-hub-registry-ops.md) | 3 min | Plugins gerados do registry |
 
 ---
 
