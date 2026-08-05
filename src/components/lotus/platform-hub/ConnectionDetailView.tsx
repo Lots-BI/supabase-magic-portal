@@ -68,11 +68,12 @@ export function ConnectionDetailView({ detail }: ConnectionDetailViewProps) {
   });
 
   const oauthMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (includePublishScopes?: boolean) =>
       startHubOAuth({
         data: {
           connectionId: connection.id,
           redirectAfter: `/admin/conexoes/nova?connectionId=${connection.id}&step=4`,
+          includePublishScopes,
         },
       }),
     onSuccess: (r) => {
@@ -166,10 +167,21 @@ export function ConnectionDetailView({ detail }: ConnectionDetailViewProps) {
             {manifest.oauth && (
               <Button
                 size="sm"
-                onClick={() => oauthMutation.mutate()}
+                onClick={() => oauthMutation.mutate(false)}
                 disabled={oauthMutation.isPending}
               >
                 Reconectar OAuth
+              </Button>
+            )}
+            {manifest.oauth && connection.pluginKey === "meta_ads" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => oauthMutation.mutate(true)}
+                disabled={oauthMutation.isPending}
+                title="Requer Use Cases pages_manage_posts / pages_show_list no App Dashboard Meta"
+              >
+                Reconectar + Publish
               </Button>
             )}
           </div>
@@ -196,7 +208,7 @@ export function ConnectionDetailView({ detail }: ConnectionDetailViewProps) {
         lastError={connection.lastError}
         onSync={() => syncMutation.mutate()}
         onDiagnose={() => diagMutation.mutate()}
-        onOAuth={manifest.oauth ? () => oauthMutation.mutate() : undefined}
+        onOAuth={manifest.oauth ? () => oauthMutation.mutate(false) : undefined}
         syncPending={syncMutation.isPending}
       />
 

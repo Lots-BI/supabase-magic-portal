@@ -20,6 +20,25 @@ export const META_OAUTH_PUBLISH_SCOPES = [
 /** Default do dialog OAuth = connect (métricas). Não incluir publish aqui. */
 export const META_OAUTH_DEFAULT_SCOPES = META_OAUTH_CONNECT_SCOPES;
 
+export interface ResolveMetaOAuthDialogScopesOptions {
+  /** Pedido explícito (UI “Reconectar com Publish”). */
+  includePublish?: boolean;
+}
+
+/**
+ * Resolve scopes do dialog Meta.
+ * Publish só entra com `includePublish` ou `META_OAUTH_INCLUDE_PUBLISH_SCOPES=1`.
+ */
+export function resolveMetaOAuthDialogScopes(
+  options: ResolveMetaOAuthDialogScopesOptions = {},
+): readonly string[] {
+  const envOn = process.env.META_OAUTH_INCLUDE_PUBLISH_SCOPES?.trim() === "1";
+  if (!options.includePublish && !envOn) {
+    return META_OAUTH_CONNECT_SCOPES;
+  }
+  return [...new Set([...META_OAUTH_CONNECT_SCOPES, ...META_OAUTH_PUBLISH_SCOPES])];
+}
+
 export interface MetaOAuthConfigV1 {
   clientId: string;
   clientSecret: string;

@@ -27,7 +27,11 @@ export interface HubOAuthHandle {
   pluginKey: HubOAuthPluginKey;
   credentialKey: CredentialKey;
   callbackPath: string;
-  buildAuthorizationUrl(params: { redirectUri: string; state: string }): string;
+  buildAuthorizationUrl(params: {
+    redirectUri: string;
+    state: string;
+    scopes?: readonly string[];
+  }): string;
   exchangeCodeForToken(params: {
     connectionId: ConnectionId;
     code: string;

@@ -21,13 +21,15 @@ last_review: 2026-08-04
 
 1. Conexão Hub Meta (`official_api`) do **mesmo** `cadastro_cliente_id` do card
 2. Identity **Page** anexada na conexão
-3. OAuth reconectado (Connect scopes). Para **publish live**, habilite no App Dashboard e peça depois:
-   - `pages_show_list`, `pages_manage_posts`, `instagram_content_publish`
-   - **Não** misture esses scopes no dialog padrão — apps sem Use Case/App Review recebem "Invalid Scopes" e o login quebra
+3. OAuth reconectado (Connect scopes). Para **publish live**:
+   - Habilite no App Dashboard Use Case **Manage everything on your Page** com `pages_show_list` + `pages_manage_posts`
+   - Na UI da conexão Meta: **Reconectar + Publish** (não use o Connect padrão — ele só pede métricas)
+   - Alternativa ops: `META_OAUTH_INCLUDE_PUBLISH_SCOPES=1` no `.env` e reconnect normal
+   - **Não** deixe publish no dialog padrão permanente — apps sem Use Case quebram com "Invalid Scopes"
 4. Card com plataforma **Facebook**, status **Aprovado**, e **imagem** (anexo ou `capa_url`)
 5. Meta App com permissões de Page (dev/test users ou App Review)
 
-**Importante:** o dialog padrão de Conexões usa só scopes de **métricas** (`ads_read`, `business_management`, `pages_read_engagement`, `instagram_basic`). Publish scopes ficam em `META_OAUTH_PUBLISH_SCOPES` até o app Meta estar pronto.
+**Importante:** o dialog padrão de Conexões usa só scopes de **métricas** (`ads_read`, `business_management`, `pages_read_engagement`, `instagram_basic`). Publish scopes ficam em `META_OAUTH_PUBLISH_SCOPES` até o app Meta estar pronto. Checklist humano: [manual-ops-checklist](./manual-ops-checklist.md).
 
 ---
 

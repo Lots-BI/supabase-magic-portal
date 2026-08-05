@@ -41,6 +41,7 @@ import {
   oauthCredentialKeyForPlugin,
 } from "./services/hub-oauth.factory";
 import { sanitizeOAuthRedirectAfter } from "./services/sanitize-redirect";
+import { resolveMetaOAuthDialogScopes } from "@/modules/platform-hub/plugins/meta_ads/oauth/meta-oauth.config";
 
 async function adminStack() {
   return createAdminHubStack(getSupabaseAdmin());
@@ -212,7 +213,13 @@ export const startHubOAuth = createServerFn({ method: "POST" })
       createCredentialAccess(stack.credentialVault),
     );
     const redirectUri = `${resolveServerAppUrl()}${oauth.callbackPath}`;
-    const url = oauth.buildAuthorizationUrl({ redirectUri, state });
+    const scopes =
+      conn.pluginKey === "meta_ads"
+        ? resolveMetaOAuthDialogScopes({
+            includePublish: data.includePublishScopes === true,
+          })
+        : undefined;
+    const url = oauth.buildAuthorizationUrl({ redirectUri, state, scopes });
     return { authorizationUrl: url };
   });
 

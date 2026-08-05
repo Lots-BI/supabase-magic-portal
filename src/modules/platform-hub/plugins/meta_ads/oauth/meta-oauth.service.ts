@@ -8,9 +8,9 @@ import type { MetaDebugTokenResponseV1, MetaOAuthTokenResponseV1 } from "../api/
 import { META_OAUTH_CREDENTIAL_KEY } from "../meta-credential-keys";
 import {
   type MetaOAuthConfigV1,
-  META_OAUTH_DEFAULT_SCOPES,
   metaGraphOAuthUrl,
   metaOAuthDialogUrl,
+  resolveMetaOAuthDialogScopes,
 } from "./meta-oauth.config";
 
 export interface MetaOAuthAuthorizationParams {
@@ -45,7 +45,7 @@ export class MetaOAuthService {
   }
 
   buildAuthorizationUrl(params: MetaOAuthAuthorizationParams): string {
-    const scopes = params.scopes ?? META_OAUTH_DEFAULT_SCOPES;
+    const scopes = params.scopes ?? resolveMetaOAuthDialogScopes();
     const url = new URL(metaOAuthDialogUrl(this.graphVersion));
     url.searchParams.set("client_id", this.config.clientId);
     url.searchParams.set("redirect_uri", params.redirectUri);
