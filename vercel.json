@@ -1,5 +1,11 @@
 {
-    "buildCommand": "npm run build",
-    "outputDirectory": ".vercel/output",
-    "framework": null
+  "buildCommand": "npm run build",
+  "outputDirectory": ".vercel/output",
+  "framework": null,
+  "crons": [
+    {
+      "path": "/api/cron/instagram-media-sync",
+      "schedule": "58 2 * * *"
+    }
+  ]
 }

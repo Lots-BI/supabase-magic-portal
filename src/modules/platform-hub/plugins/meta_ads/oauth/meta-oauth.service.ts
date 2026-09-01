@@ -4,14 +4,14 @@ import {
   type CredentialAccessPort,
   type OAuthTokenBundleV1,
 } from "../../_internal/oauth/credential-access.port";
-import type { MetaDebugTokenResponseV1, MetaOAuthTokenResponseV1 } from "../api/meta-api.types";
-import { META_OAUTH_CREDENTIAL_KEY } from "../meta-credential-keys";
 import {
   type MetaOAuthConfigV1,
   META_OAUTH_DEFAULT_SCOPES,
   metaGraphOAuthUrl,
   metaOAuthDialogUrl,
 } from "./meta-oauth.config";
+import type { MetaDebugTokenResponseV1, MetaOAuthTokenResponseV1 } from "../api/meta-api.types";
+import { META_OAUTH_CREDENTIAL_KEY } from "../meta-credential-keys";
 
 export interface MetaOAuthAuthorizationParams {
   redirectUri: string;
@@ -35,6 +35,8 @@ export interface MetaTokenValidationV1 {
 /** OAuth Meta desacoplado do Runtime — tokens persistidos no CredentialVault. */
 export class MetaOAuthService {
   private readonly graphVersion: string;
+  private readonly credentialKey: CredentialKey;
+  private readonly defaultScopes: readonly string[];
 
   constructor(
     private readonly config: MetaOAuthConfigV1,
@@ -42,10 +44,12 @@ export class MetaOAuthService {
     private readonly credentialAccess: CredentialAccessPort,
   ) {
     this.graphVersion = config.graphVersion ?? "v22.0";
+    this.credentialKey = config.credentialKey ?? META_OAUTH_CREDENTIAL_KEY;
+    this.defaultScopes = config.defaultScopes ?? META_OAUTH_DEFAULT_SCOPES;
   }
 
   buildAuthorizationUrl(params: MetaOAuthAuthorizationParams): string {
-    const scopes = params.scopes ?? META_OAUTH_DEFAULT_SCOPES;
+    const scopes = params.scopes ?? this.defaultScopes;
     const url = new URL(metaOAuthDialogUrl(this.graphVersion));
     url.searchParams.set("client_id", this.config.clientId);
     url.searchParams.set("redirect_uri", params.redirectUri);
@@ -69,7 +73,7 @@ export class MetaOAuthService {
     const bundle = this.toTokenBundle(body);
     await this.credentialAccess.storeOAuthToken(
       params.connectionId,
-      META_OAUTH_CREDENTIAL_KEY,
+      this.credentialKey,
       bundle,
     );
     return bundle;
@@ -78,7 +82,7 @@ export class MetaOAuthService {
   async refreshAccessToken(connectionId: ConnectionId): Promise<OAuthTokenBundleV1> {
     const current = await this.credentialAccess.retrieveOAuthToken(
       connectionId,
-      META_OAUTH_CREDENTIAL_KEY,
+      this.credentialKey,
     );
     if (!current?.accessToken) {
       throw new Error("Meta refresh requires an existing access token in CredentialVault");
@@ -95,7 +99,7 @@ export class MetaOAuthService {
 
     const body = await response.json<MetaOAuthTokenResponseV1>();
     const bundle = this.toTokenBundle(body, current.scopes);
-    await this.credentialAccess.storeOAuthToken(connectionId, META_OAUTH_CREDENTIAL_KEY, bundle);
+    await this.credentialAccess.storeOAuthToken(connectionId, this.credentialKey, bundle);
     return bundle;
   }
 
@@ -127,7 +131,7 @@ export class MetaOAuthService {
   async revokeConnectionToken(connectionId: ConnectionId): Promise<void> {
     const current = await this.credentialAccess.retrieveOAuthToken(
       connectionId,
-      META_OAUTH_CREDENTIAL_KEY,
+      this.credentialKey,
     );
     if (current?.accessToken) {
       await this.httpClient.request(
@@ -135,7 +139,7 @@ export class MetaOAuthService {
         { method: "DELETE" },
       );
     }
-    await this.credentialAccess.deleteCredential(connectionId, META_OAUTH_CREDENTIAL_KEY);
+    await this.credentialAccess.deleteCredential(connectionId, this.credentialKey);
   }
 
   private toTokenBundle(

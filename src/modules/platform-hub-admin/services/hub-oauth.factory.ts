@@ -8,6 +8,8 @@ import { GoogleAdsOAuthService } from "@/modules/platform-hub/plugins/google_ads
 import { GOOGLE_ADS_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/google_ads/google-ads-credential-keys";
 import { GoogleBusinessOAuthService } from "@/modules/platform-hub/plugins/google_business/oauth/google-business-oauth.service";
 import { GOOGLE_BUSINESS_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/google_business/google-business-credential-keys";
+import { INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/instagram_organic/instagram-credential-keys";
+import { INSTAGRAM_ORGANIC_OAUTH_SCOPES } from "@/modules/platform-hub/plugins/instagram_organic/oauth/instagram-organic-oauth.config";
 import { MetaOAuthService } from "@/modules/platform-hub/plugins/meta_ads/oauth/meta-oauth.service";
 import { META_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/meta_ads/meta-credential-keys";
 import { TikTokOAuthService } from "@/modules/platform-hub/plugins/tiktok/oauth/tiktok-oauth.service";
@@ -17,6 +19,7 @@ import { YOUTUBE_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/you
 
 export type HubOAuthPluginKey =
   | "meta_ads"
+  | "instagram_organic"
   | "google_ads"
   | "ga4"
   | "google_business"
@@ -79,6 +82,7 @@ function tiktokOAuthConfig() {
 export function isHubOAuthPlugin(pluginKey: string): pluginKey is HubOAuthPluginKey {
   return (
     pluginKey === "meta_ads" ||
+    pluginKey === "instagram_organic" ||
     pluginKey === "google_ads" ||
     pluginKey === "ga4" ||
     pluginKey === "google_business" ||
@@ -91,6 +95,8 @@ export function oauthCredentialKeyForPlugin(pluginKey: string): CredentialKey | 
   switch (pluginKey) {
     case "meta_ads":
       return META_OAUTH_CREDENTIAL_KEY;
+    case "instagram_organic":
+      return INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY;
     case "google_ads":
       return GOOGLE_ADS_OAUTH_CREDENTIAL_KEY;
     case "ga4":
@@ -117,6 +123,26 @@ export function createHubOAuthHandle(
       return {
         pluginKey,
         credentialKey: META_OAUTH_CREDENTIAL_KEY,
+        callbackPath: "/oauth/meta/callback",
+        buildAuthorizationUrl: (p) => oauth.buildAuthorizationUrl(p),
+        exchangeCodeForToken: (p) => oauth.exchangeCodeForToken(p),
+        validateAccessToken: (t) => oauth.validateAccessToken(t),
+        revokeConnectionToken: (id) => oauth.revokeConnectionToken(id),
+      };
+    }
+    case "instagram_organic": {
+      const oauth = new MetaOAuthService(
+        {
+          ...metaOAuthConfig(),
+          credentialKey: INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY,
+          defaultScopes: INSTAGRAM_ORGANIC_OAUTH_SCOPES,
+        },
+        httpClient,
+        credentialAccess,
+      );
+      return {
+        pluginKey,
+        credentialKey: INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY,
         callbackPath: "/oauth/meta/callback",
         buildAuthorizationUrl: (p) => oauth.buildAuthorizationUrl(p),
         exchangeCodeForToken: (p) => oauth.exchangeCodeForToken(p),
@@ -192,7 +218,7 @@ export function createHubOAuthHandle(
 }
 
 export function oauthCallbackKind(pluginKey: string): "meta" | "google" | "tiktok" | null {
-  if (pluginKey === "meta_ads") return "meta";
+  if (pluginKey === "meta_ads" || pluginKey === "instagram_organic") return "meta";
   if (GOOGLE_PLUGINS.has(pluginKey as HubOAuthPluginKey)) return "google";
   if (pluginKey === "tiktok") return "tiktok";
   return null;

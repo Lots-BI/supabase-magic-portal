@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { completeHubGoogleOAuth } from "@/modules/platform-hub-admin/hub-admin.server";
-import { navigateOAuthRedirect } from "@/components/lotus/platform-hub/oauth-redirect";
+import { navigateOAuthError, navigateOAuthRedirect } from "@/components/lotus/platform-hub/oauth-redirect";
 
 const searchSchema = z.object({
   code: z.string().optional(),
@@ -22,11 +22,13 @@ function GoogleOAuthCallbackPage() {
 
   useEffect(() => {
     if (search.error) {
-      setMessage(search.error_description ?? search.error);
+      const msg = search.error_description ?? search.error;
+      if (!navigateOAuthError(msg)) setMessage(msg);
       return;
     }
     if (!search.code || !search.state) {
-      setMessage("Parâmetros OAuth ausentes.");
+      const msg = "Parâmetros OAuth ausentes.";
+      if (!navigateOAuthError(msg)) setMessage(msg);
       return;
     }
     void completeHubGoogleOAuth({ data: { code: search.code, state: search.state } })
@@ -34,7 +36,8 @@ function GoogleOAuthCallbackPage() {
         navigateOAuthRedirect(result.redirectAfter);
       })
       .catch((e) => {
-        setMessage(e instanceof Error ? e.message : "Falha no OAuth");
+        const msg = e instanceof Error ? e.message : "Falha no OAuth";
+        if (!navigateOAuthError(msg)) setMessage(msg);
       });
   }, [search]);
 

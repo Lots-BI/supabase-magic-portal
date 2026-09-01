@@ -15,7 +15,7 @@ const PLATFORM_LOGOS: Record<string, { label: string; color: string }> = {
   ga4: { label: "GA4", color: "bg-orange-500/15 text-orange-600 dark:text-orange-400" },
   tiktok_ads: { label: "TikTok", color: "bg-foreground/10 text-foreground" },
   linkedin_ads: { label: "LinkedIn", color: "bg-sky-500/15 text-sky-600 dark:text-sky-400" },
-  instagram_insights: { label: "IG", color: "bg-pink-500/15 text-pink-600 dark:text-pink-400" },
+  instagram_organic: { label: "Instagram", color: "bg-pink-500/15 text-pink-600 dark:text-pink-400" },
   google_business: {
     label: "GMB",
     color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",

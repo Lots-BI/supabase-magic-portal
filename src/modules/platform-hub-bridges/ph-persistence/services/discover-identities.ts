@@ -2,6 +2,7 @@ import type { HttpClientPort } from "@/modules/platform-hub/plugins/_internal/ht
 import { discoverGa4Identities } from "./ga4-identity-discovery";
 import { discoverGoogleAdsIdentities } from "./google-ads-identity-discovery";
 import { discoverGoogleBusinessIdentities } from "./google-business-identity-discovery";
+import { discoverInstagramOrganicIdentities } from "./instagram-organic-identity-discovery";
 import { discoverMetaIdentities } from "./meta-identity-discovery";
 import { discoverTikTokIdentities } from "./tiktok-identity-discovery";
 import { discoverYouTubeIdentities } from "./youtube-identity-discovery";
@@ -9,6 +10,7 @@ import type { DiscoveredIdentityV1 } from "./discovered-identity.v1";
 
 const OAUTH_PLUGINS = new Set([
   "meta_ads",
+  "instagram_organic",
   "google_ads",
   "ga4",
   "google_business",
@@ -30,6 +32,9 @@ export async function discoverIdentitiesForPlugin(
   switch (pluginKey) {
     case "meta_ads":
       results = await discoverMetaIdentities(http, accessToken);
+      break;
+    case "instagram_organic":
+      results = await discoverInstagramOrganicIdentities(http, accessToken);
       break;
     case "google_ads":
       results = await discoverGoogleAdsIdentities(http, accessToken);

@@ -15,6 +15,8 @@ import { TikTokOAuthService } from "../../tiktok/oauth/tiktok-oauth.service";
 import { TIKTOK_OAUTH_CREDENTIAL_KEY } from "../../tiktok/tiktok-credential-keys";
 import { YouTubeOAuthService } from "../../youtube/oauth/youtube-oauth.service";
 import { YOUTUBE_OAUTH_CREDENTIAL_KEY } from "../../youtube/youtube-credential-keys";
+import { INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY } from "../../instagram_organic/instagram-credential-keys";
+import { INSTAGRAM_ORGANIC_OAUTH_SCOPES } from "../../instagram_organic/oauth/instagram-organic-oauth.config";
 
 function googleOAuthEnv() {
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID?.trim();
@@ -98,6 +100,23 @@ export function createRegistrationCredentialAccess(
       const oauth = new TikTokOAuthService(env, http, base);
       return createRefreshingCredentialAccess(vault, {
         credentialKey: TIKTOK_OAUTH_CREDENTIAL_KEY,
+        refreshAccessToken: (id) => oauth.refreshAccessToken(id),
+      });
+    }
+    case "instagram_organic": {
+      const env = metaOAuthEnv();
+      if (!env) return base;
+      const oauth = new MetaOAuthService(
+        {
+          ...env,
+          credentialKey: INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY,
+          defaultScopes: INSTAGRAM_ORGANIC_OAUTH_SCOPES,
+        },
+        http,
+        base,
+      );
+      return createRefreshingCredentialAccess(vault, {
+        credentialKey: INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY,
         refreshAccessToken: (id) => oauth.refreshAccessToken(id),
       });
     }

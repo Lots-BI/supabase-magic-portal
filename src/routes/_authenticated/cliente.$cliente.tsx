@@ -11,6 +11,7 @@ import {
   Music2,
   LayoutDashboard,
   Megaphone,
+  Images,
   type LucideIcon,
   Compass,
   ClipboardCheck,
@@ -226,6 +227,16 @@ function PlatformSideNav({ slug, queryName }: { slug: string; queryName: string 
           icon={ClipboardCheck}
           label="Aprovações"
         />
+        {platforms.includes("instagram") && (
+          <SubNavLink
+            to="/cliente/$cliente/publicacoes"
+            params={{ cliente: slug }}
+            pathname={pathname}
+            href={`/cliente/${slug}/publicacoes`}
+            icon={Images}
+            label="Publicações"
+          />
+        )}
 
         <p className="hidden px-3 pb-1 pt-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground lg:mt-3 lg:block">
           Plataformas

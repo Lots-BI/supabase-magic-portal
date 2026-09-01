@@ -26,6 +26,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 const OAUTH_PLUGINS = new Set([
   "meta_ads",
+  "instagram_organic",
   "google_ads",
   "ga4",
   "google_business",
@@ -35,6 +36,7 @@ const OAUTH_PLUGINS = new Set([
 
 const PRIMARY_TYPES: Record<string, string> = {
   meta_ads: "ad_account",
+  instagram_organic: "instagram",
   google_ads: "customer",
   ga4: "property",
   google_business: "location",

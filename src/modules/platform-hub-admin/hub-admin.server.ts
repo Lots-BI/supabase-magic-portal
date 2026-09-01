@@ -16,6 +16,10 @@ import { registerCadastroRecord } from "@/modules/platform-hub-bridges/legacy-ca
 import { FetchHttpClient } from "@/modules/platform-hub/plugins/_internal/http/fetch-http-client";
 import { createCredentialAccess } from "@/modules/platform-hub/plugins/_internal/oauth/credential-access.port";
 import { isMetricsTimeseriesEnvelope } from "../../../contracts/ingest/ingest-envelope.v1";
+import {
+  acceptIgMediaEnvelope,
+  isIgMediaSyncEnvelope,
+} from "@/modules/platform-hub-bridges/ig-media/accept-ig-media-envelope";
 import { buildPlatformCatalog } from "./services/build-catalog";
 import { runConnectionDiagnostics } from "./services/run-diagnostics";
 import {
@@ -318,10 +322,16 @@ export const syncHubConnection = createServerFn({ method: "POST" })
     });
     const result = await stack.manualScheduler.run(connectionId);
     if (result.status === "success" && result.envelope) {
-      await stack.metricPipeline.accept(result.envelope);
-      const rows = isMetricsTimeseriesEnvelope(result.envelope)
-        ? result.envelope.payload.rows.length
-        : 0;
+      let rows = 0;
+      if (isIgMediaSyncEnvelope(result.envelope)) {
+        const igResult = await acceptIgMediaEnvelope(getSupabaseAdmin(), result.envelope);
+        rows = igResult?.mediaUpserted ?? 0;
+      } else {
+        await stack.metricPipeline.accept(result.envelope);
+        rows = isMetricsTimeseriesEnvelope(result.envelope)
+          ? result.envelope.payload.rows.length
+          : 0;
+      }
       await stack.adminQueries.updateAdminFields(data.connectionId, {
         healthStatus: "healthy",
         healthScore: 90,
@@ -329,7 +339,9 @@ export const syncHubConnection = createServerFn({ method: "POST" })
       await stack.timeline.append({
         connectionId: data.connectionId,
         kind: "sync_finished",
-        title: `Sincronização concluída (${rows} métricas)`,
+        title: isIgMediaSyncEnvelope(result.envelope)
+          ? `Sincronização concluída (${rows} publicações)`
+          : `Sincronização concluída (${rows} métricas)`,
         metadata: { rows, durationMs: result.durationMs },
       });
     } else {

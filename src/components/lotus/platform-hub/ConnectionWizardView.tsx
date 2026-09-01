@@ -18,13 +18,16 @@ import { listClientes } from "@/lib/admin.functions";
 import {
   createHubConnection,
   getHubCatalog,
+  getHubConnectionDetail,
   startHubOAuth,
   storeHubCredential,
   syncHubConnection,
 } from "@/modules/platform-hub-admin/hub-admin.server";
+import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
 import { oauthCredentialKeyForPlugin } from "@/modules/platform-hub-admin/services/hub-oauth.factory";
 import { PlatformCategoryIcon, PlatformLogoBadge } from "./hub-badges";
 import { HubIdentityPicker } from "./HubIdentityPicker";
+import { openHubOAuthPopup } from "./oauth-popup";
 
 const STEPS = [
   "Cliente",
@@ -68,6 +71,28 @@ export function ConnectionWizardView({
     queryFn: () => getHubCatalog(),
   });
 
+  const resumeQuery = useQuery({
+    queryKey: hubAdminKeys.connection(resumeConnectionId ?? ""),
+    queryFn: () =>
+      getHubConnectionDetail({ data: { connectionId: resumeConnectionId! } }),
+    enabled: Boolean(resumeConnectionId),
+  });
+
+  useEffect(() => {
+    const connection = resumeQuery.data?.connection;
+    if (!connection) return;
+    setConnectionId(connection.id);
+    setPluginKey(connection.pluginKey);
+    setLabel(connection.label);
+    setCadastroId(connection.cadastroId);
+    if (
+      connection.activeProviderType === "make_passive" ||
+      connection.activeProviderType === "official_api"
+    ) {
+      setProvider(connection.activeProviderType);
+    }
+  }, [resumeQuery.data]);
+
   const selectedPlatform = catalog?.find((p) => p.key === pluginKey);
 
   const createMutation = useMutation({
@@ -89,15 +114,28 @@ export function ConnectionWizardView({
   });
 
   const oauthMutation = useMutation({
-    mutationFn: (id: string) =>
-      startHubOAuth({
+    mutationFn: async (id: string) => {
+      const r = await startHubOAuth({
         data: {
           connectionId: id,
           redirectAfter: `/admin/conexoes/nova?connectionId=${id}&step=4`,
         },
-      }),
-    onSuccess: (r) => {
-      window.location.href = r.authorizationUrl;
+      });
+      return openHubOAuthPopup(r.authorizationUrl);
+    },
+    onSuccess: async (result) => {
+      const target = new URL(result.redirectAfter, window.location.origin);
+      const sameDestination =
+        window.location.pathname === target.pathname &&
+        window.location.search === target.search;
+      if (sameDestination) {
+        await resumeQuery.refetch();
+        const stepParam = target.searchParams.get("step");
+        if (stepParam) setStep(Number(stepParam));
+        toast.success("Login concluído");
+        return;
+      }
+      window.location.assign(result.redirectAfter);
     },
     onError: (e) => toast.error(e.message),
   });
@@ -249,8 +287,14 @@ export function ConnectionWizardView({
         <SectionCard title="Autenticação">
           <div className="space-y-4 p-4">
             {selectedPlatform?.oauthType ? (
-              <Button className="w-full" onClick={() => oauthMutation.mutate(connectionId)}>
-                Conectar com {selectedPlatform.label}
+              <Button
+                className="w-full"
+                onClick={() => oauthMutation.mutate(connectionId)}
+                disabled={oauthMutation.isPending}
+              >
+                {oauthMutation.isPending
+                  ? "Aguardando login..."
+                  : `Conectar com ${selectedPlatform.label}`}
               </Button>
             ) : (
               <>
@@ -275,6 +319,22 @@ export function ConnectionWizardView({
               Continuar para identidades
             </Button>
           </div>
+        </SectionCard>
+      )}
+
+      {step === 4 && connectionId && resumeQuery.isLoading && !pluginKey && (
+        <SectionCard title="Selecionar identidades">
+          <p className="p-4 text-sm text-muted-foreground">Carregando conexão...</p>
+        </SectionCard>
+      )}
+
+      {step === 4 && connectionId && resumeQuery.isError && !pluginKey && (
+        <SectionCard title="Selecionar identidades">
+          <p className="p-4 text-sm text-destructive">
+            {resumeQuery.error instanceof Error
+              ? resumeQuery.error.message
+              : "Falha ao carregar a conexão."}
+          </p>
         </SectionCard>
       )}
 

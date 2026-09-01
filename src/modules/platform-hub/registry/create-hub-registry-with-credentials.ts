@@ -5,6 +5,7 @@ import { createGa4Registration } from "../plugins/ga4/create-ga4-registration";
 import { createGoogleBusinessRegistration } from "../plugins/google_business/create-google-business-registration";
 import { createTikTokRegistration } from "../plugins/tiktok/create-tiktok-registration";
 import { createYouTubeRegistration } from "../plugins/youtube/create-youtube-registration";
+import { createInstagramOrganicRegistration } from "../plugins/instagram_organic/create-instagram-organic-registration";
 import { GlobPluginLoader } from "./glob-plugin-loader";
 import { HubRegistry } from "./hub-registry";
 
@@ -32,6 +33,8 @@ export function createHubRegistryWithCredentials(
       registry.register(createTikTokRegistration(credentialVault, httpOpts));
     } else if (key === "youtube") {
       registry.register(createYouTubeRegistration(credentialVault, httpOpts));
+    } else if (key === "instagram_organic") {
+      registry.register(createInstagramOrganicRegistration(credentialVault, httpOpts));
     } else {
       registry.register(registration);
     }

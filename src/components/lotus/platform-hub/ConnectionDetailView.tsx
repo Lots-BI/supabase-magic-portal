@@ -24,6 +24,7 @@ import {
 } from "@/modules/platform-hub-admin/hub-admin.server";
 import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
 import { MIGRATION_STAGES, type HubDiagnosticReportV1 } from "@/modules/platform-hub-admin/types";
+import { openHubOAuthPopup } from "./oauth-popup";
 import { cn } from "@/lib/utils";
 
 interface ConnectionDetailViewProps {
@@ -64,15 +65,17 @@ export function ConnectionDetailView({ detail }: ConnectionDetailViewProps) {
   });
 
   const oauthMutation = useMutation({
-    mutationFn: () =>
-      startHubOAuth({
+    mutationFn: async () => {
+      const r = await startHubOAuth({
         data: {
           connectionId: connection.id,
           redirectAfter: `/admin/conexoes/nova?connectionId=${connection.id}&step=4`,
         },
-      }),
-    onSuccess: (r) => {
-      window.location.href = r.authorizationUrl;
+      });
+      return openHubOAuthPopup(r.authorizationUrl);
+    },
+    onSuccess: (result) => {
+      window.location.assign(result.redirectAfter);
     },
     onError: (e) => toast.error(e.message),
   });

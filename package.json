@@ -28,6 +28,7 @@
     "generate:registry-report": "node scripts/engineering/generate-registry-report.mjs",
     "generate:hub-kc-doc": "node scripts/engineering/generate-hub-kc-doc.mjs",
     "hub:doctor": "node scripts/engineering/doctor.mjs",
+    "ig:gate-b": "node scripts/engineering/ig-gate-b.mjs",
     "hub:registry": "node scripts/engineering/generate-registry-report.mjs",
     "gate-a:parity": "node scripts/rollout/gate-a/run-parity.mjs",
     "gate-a:discover": "node scripts/rollout/gate-a/discover-pilots.mjs",

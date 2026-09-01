@@ -35,32 +35,40 @@ export async function discoverMetaIdentities(
 ): Promise<MetaDiscoveredIdentityV1[]> {
   const results: MetaDiscoveredIdentityV1[] = [];
 
-  const businesses = await graphGet<GraphListResponse<{ id: string; name: string }>>(
-    http,
-    "me/businesses",
-    accessToken,
-    { fields: "id,name", limit: "50" },
-  );
-  for (const b of businesses.data ?? []) {
-    results.push({
-      identityType: "business",
-      externalId: b.id,
-      label: b.name || b.id,
-    });
+  try {
+    const businesses = await graphGet<GraphListResponse<{ id: string; name: string }>>(
+      http,
+      "me/businesses",
+      accessToken,
+      { fields: "id,name", limit: "50" },
+    );
+    for (const b of businesses.data ?? []) {
+      results.push({
+        identityType: "business",
+        externalId: b.id,
+        label: b.name || b.id,
+      });
+    }
+  } catch {
+    // token sem business_management ou sem Business portfolios
   }
 
-  const adAccounts = await graphGet<
-    GraphListResponse<{ id: string; name: string; account_id?: string }>
-  >(http, "me/adaccounts", accessToken, {
-    fields: "id,name,account_id",
-    limit: "100",
-  });
-  for (const a of adAccounts.data ?? []) {
-    results.push({
-      identityType: "ad_account",
-      externalId: a.account_id ? `act_${a.account_id.replace(/^act_/, "")}` : a.id,
-      label: a.name || a.id,
+  try {
+    const adAccounts = await graphGet<
+      GraphListResponse<{ id: string; name: string; account_id?: string }>
+    >(http, "me/adaccounts", accessToken, {
+      fields: "id,name,account_id",
+      limit: "100",
     });
+    for (const a of adAccounts.data ?? []) {
+      results.push({
+        identityType: "ad_account",
+        externalId: a.account_id ? `act_${a.account_id.replace(/^act_/, "")}` : a.id,
+        label: a.name || a.id,
+      });
+    }
+  } catch {
+    // token sem permissões de Ads (ex.: instagram_organic)
   }
 
   const pages = await graphGet<GraphListResponse<{ id: string; name: string }>>(
