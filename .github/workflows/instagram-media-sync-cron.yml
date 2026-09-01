@@ -1,0 +1,42 @@
+# Sync diário — publicações Instagram (métricas por post)
+# Depende do merge da branch feature/instagram-post-metrics.
+#
+# Secrets no repositório (Settings → Secrets → Actions):
+#   APP_URL        — URL pública do portal (ex.: https://lotsbi.leandromajr.com)
+#   CRON_SECRET    — mesmo valor configurado no runtime do app
+#
+# Alternativa gratuita ao Vercel Cron (plano Pro). Funciona com Lovable, Vercel ou Cloudflare.
+
+name: Instagram media sync (daily)
+
+on:
+  schedule:
+    # 02:58 UTC = 23:58 America/Sao_Paulo (sem horário de verão)
+    - cron: "58 2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: instagram-media-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Trigger /api/cron/instagram-media-sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Ative após merge de feature/instagram-post-metrics e secrets configurados.
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Call cron endpoint
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "APP_URL e CRON_SECRET devem estar configurados nos secrets do repositório."
+            exit 1
+          fi
+          curl -fsS --retry 2 --retry-delay 10 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${APP_URL%/}/api/cron/instagram-media-sync"

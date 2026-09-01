@@ -20,8 +20,28 @@ last_review: 2026-09-01
 - Plugin Hub: `instagram_organic`
 - OAuth Meta com scopes `instagram_manage_insights`, etc.
 - Sync manual: botão **Puxar métricas** (cooldown 5 min)
-- Sync automático: cron diário **23:58** (America/Sao_Paulo) via Vercel — rota `GET /api/cron/instagram-media-sync` (requer `CRON_SECRET`)
 - Admin: `/admin/conexoes` → sincronizar conexão Instagram
+
+## Sync automático (pendente)
+
+> **Status:** à fazer após merge da branch `feature/instagram-post-metrics`.
+
+A rota já existe: `GET /api/cron/instagram-media-sync` (header `Authorization: Bearer <CRON_SECRET>`).
+
+| Opção | Situação |
+| ----- | -------- |
+| **Vercel Cron** (`vercel.json`) | Adiado — exige plano **Pro** na Vercel |
+| **GitHub Actions** (recomendado, gratuito) | Workflow `.github/workflows/instagram-media-sync-cron.yml` — configurar secrets `APP_URL` + `CRON_SECRET` após merge em `main` |
+| **Cloudflare Cron Triggers** | Futuro — deploy proprietário já usa Workers; avaliar quando cutover Lovable → CF |
+| **Manual** | Sempre disponível (botão na UI + admin) |
+
+Horário alvo: **23:58** America/Sao_Paulo (`58 2 * * *` UTC).
+
+Teste manual:
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/instagram-media-sync"
+```
 
 ## Dados
 
