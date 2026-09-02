@@ -17,6 +17,12 @@ import { getFavorites, getRecent } from "@/lib/knowledge-center/storage";
 
 const HIGHLIGHTS = [
   {
+    slug: "06-dashboards/instagram-posts",
+    title: "Publicações Instagram",
+    description: "Métricas por post, plugin instagram_organic e sync.",
+    icon: Sparkles,
+  },
+  {
     slug: "13-platform-hub/readme",
     title: "Platform Hub (RC1)",
     description: "Hub de conexões — handoff, homologação e próximos passos.",
@@ -25,13 +31,13 @@ const HIGHLIGHTS = [
   {
     slug: "12-changelog/changelog",
     title: "Changelog",
-    description: "Performance, responsividade mobile e correções de jun/2026.",
+    description: "Entregas recentes — produto, dados e infraestrutura.",
     icon: Sparkles,
   },
   {
     slug: "04-database/migrations",
     title: "Migrations",
-    description: "Ordem 01→12, migration 05 com DROP VIEW e validação.",
+    description: "Ordem oficial 01→33, idempotência e validação.",
     icon: Database,
   },
   {
@@ -43,7 +49,7 @@ const HIGHLIGHTS = [
   {
     slug: "06-dashboards/knowledge-center",
     title: "Este módulo",
-    description: "Arquitetura do KC, mobile e manutenção de docs.",
+    description: "Arquitetura do KC, tutorial, novidades e manutenção.",
     icon: Smartphone,
   },
 ] as const;

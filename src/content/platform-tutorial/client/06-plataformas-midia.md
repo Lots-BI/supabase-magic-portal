@@ -13,7 +13,8 @@ Cada plataforma de anúncios ou analytics tem uma **tela dedicada** com KPIs, gr
 | ---------------- | --------------------------------- |
 | `.../google-ads` | Google Ads                        |
 | `.../meta-ads`   | Meta Ads (Facebook/Instagram ads) |
-| `.../instagram`  | Orgânico Instagram                |
+| `.../instagram`  | Orgânico Instagram (visão diária)   |
+| `.../publicacoes`| Publicações — métricas por post     |
 | `.../ga4`        | Google Analytics 4 (site)         |
 
 Se uma aba não aparece, a agência ainda não conectou ou não há dados no período.
@@ -76,6 +77,8 @@ Foco em **alcance, engajamento, interações** — não confunda com Meta Ads.
 
 - Engagement rate alto = conteúdo ressoando
 - Alcance baixo com bom engajamento = audiência fiel mas pequena
+
+Para **cada publicação** (post a post, com miniatura), use **Publicações** no menu da marca — capítulo dedicado neste tutorial.
 
 ## GA4 — site
 

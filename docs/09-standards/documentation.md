@@ -48,7 +48,7 @@ da Definition of Done.
 | Erros / logging                       | [observability-errors](../05-frontend/observability-errors.md), [observability](../08-operations/observability.md)               |
 | Estratégia de testes                  | [testing](../09-standards/testing.md)                                                                                            |
 | Decisão estrutural                    | Novo [ADR](../02-architecture/adr/README.md)                                                                                     |
-| Qualquer coisa visível ao usuário     | [Changelog](../12-changelog/changelog.md)                                                                                        |
+| Qualquer coisa visível ao usuário     | [Changelog](../12-changelog/changelog.md), [Novidades](../06-dashboards/platform-news.md) (`src/content/platform-news/releases.ts`), tutorial |
 | Nova seção ou lacuna resolvida        | [AUDIT](../AUDIT.md), [README](../README.md)                                                                                     |
 
 ---

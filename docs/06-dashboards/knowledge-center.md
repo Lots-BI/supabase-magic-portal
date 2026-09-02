@@ -5,7 +5,7 @@ status: living
 owner: Engenharia Lots BI
 tags: [knowledge-center, admin, documentation]
 difficulty: intermediate
-last_review: 2026-07-07
+last_review: 2026-09-02
 ---
 
 # Knowledge Center
@@ -75,6 +75,20 @@ Tutorial em `/admin/tutorial` cobre uso operacional; KC cobre engenharia.
 Guias passo a passo para admin e clientes vivem em `src/content/platform-tutorial/` e são
 renderizados em `/admin/tutorial` e `/tutorial`. Atualize ambos (KC + tutorial) quando mudar
 fluxos visíveis ao usuário.
+
+| Público | Rota | Conteúdo |
+| ------- | ---- | -------- |
+| Admin | `/admin/tutorial` | Operação, conexões, clientes, KC |
+| Cliente | `/tutorial` | Dashboards, aprovações, publicações IG |
+
+Capítulos recentes (set/2026): admin `15-conexoes-instagram-publicacoes`; client `08-publicacoes-instagram`, `09-novidades-plataforma`.
+
+## Novidades da plataforma (clientes)
+
+Entregas visíveis ao usuário final também entram em `src/content/platform-news/releases.ts`
+e aparecem em `/novidades`. **No mesmo PR do deploy:** changelog + tutorial (se aplicável) + item em `releases.ts`.
+
+Ver [platform-news.md](./platform-news.md).
 
 ## Futuro (arquitetura preparada)
 

@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthIndexRouteImport } from './routes/auth/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedPlanoEstrategicoRouteImport } from './routes/_authenticated/plano-estrategico'
+import { Route as AuthenticatedNovidadesRouteImport } from './routes/_authenticated/novidades'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAprovacoesRouteImport } from './routes/_authenticated/aprovacoes'
 import { Route as AuthenticatedTutorialRouteRouteImport } from './routes/_authenticated/tutorial/route'
@@ -104,6 +105,11 @@ const AuthenticatedPlanoEstrategicoRoute =
     path: '/plano-estrategico',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedNovidadesRoute = AuthenticatedNovidadesRouteImport.update({
+  id: '/novidades',
+  path: '/novidades',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -452,6 +458,7 @@ export interface FileRoutesByFullPath {
   '/tutorial': typeof AuthenticatedTutorialRouteRouteWithChildren
   '/aprovacoes': typeof AuthenticatedAprovacoesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/novidades': typeof AuthenticatedNovidadesRoute
   '/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/': typeof AuthIndexRoute
@@ -514,6 +521,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/aprovacoes': typeof AuthenticatedAprovacoesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/novidades': typeof AuthenticatedNovidadesRoute
   '/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth': typeof AuthIndexRoute
@@ -576,6 +584,7 @@ export interface FileRoutesById {
   '/_authenticated/tutorial': typeof AuthenticatedTutorialRouteRouteWithChildren
   '/_authenticated/aprovacoes': typeof AuthenticatedAprovacoesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/novidades': typeof AuthenticatedNovidadesRoute
   '/_authenticated/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/': typeof AuthIndexRoute
@@ -643,6 +652,7 @@ export interface FileRouteTypes {
     | '/tutorial'
     | '/aprovacoes'
     | '/dashboard'
+    | '/novidades'
     | '/plano-estrategico'
     | '/auth/callback'
     | '/auth/'
@@ -705,6 +715,7 @@ export interface FileRouteTypes {
     | '/'
     | '/aprovacoes'
     | '/dashboard'
+    | '/novidades'
     | '/plano-estrategico'
     | '/auth/callback'
     | '/auth'
@@ -766,6 +777,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tutorial'
     | '/_authenticated/aprovacoes'
     | '/_authenticated/dashboard'
+    | '/_authenticated/novidades'
     | '/_authenticated/plano-estrategico'
     | '/auth/callback'
     | '/auth/'
@@ -876,6 +888,13 @@ declare module '@tanstack/react-router' {
       path: '/plano-estrategico'
       fullPath: '/plano-estrategico'
       preLoaderRoute: typeof AuthenticatedPlanoEstrategicoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/novidades': {
+      id: '/_authenticated/novidades'
+      path: '/novidades'
+      fullPath: '/novidades'
+      preLoaderRoute: typeof AuthenticatedNovidadesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -1524,6 +1543,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTutorialRouteRoute: typeof AuthenticatedTutorialRouteRouteWithChildren
   AuthenticatedAprovacoesRoute: typeof AuthenticatedAprovacoesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedNovidadesRoute: typeof AuthenticatedNovidadesRoute
   AuthenticatedPlanoEstrategicoRoute: typeof AuthenticatedPlanoEstrategicoRoute
   AuthenticatedAccountSecurityRoute: typeof AuthenticatedAccountSecurityRoute
   AuthenticatedClienteClienteRoute: typeof AuthenticatedClienteClienteRouteWithChildren
@@ -1534,6 +1554,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTutorialRouteRoute: AuthenticatedTutorialRouteRouteWithChildren,
   AuthenticatedAprovacoesRoute: AuthenticatedAprovacoesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedNovidadesRoute: AuthenticatedNovidadesRoute,
   AuthenticatedPlanoEstrategicoRoute: AuthenticatedPlanoEstrategicoRoute,
   AuthenticatedAccountSecurityRoute: AuthenticatedAccountSecurityRoute,
   AuthenticatedClienteClienteRoute:
@@ -1568,13 +1589,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

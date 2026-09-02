@@ -150,6 +150,7 @@ function AuthenticatedLayout() {
           ? [{ to: "/admin/ai-workspace", label: "AI Workspace", icon: BrainCircuit }]
           : []),
         { to: "/admin/tutorial", label: "Tutorial", icon: GraduationCap },
+        { to: "/novidades", label: "Novidades", icon: Sparkles },
         { to: "/admin/knowledge", label: "Knowledge Center", icon: BookOpen },
       ],
     },
@@ -176,6 +177,7 @@ function AuthenticatedLayout() {
             ]
           : []),
         { to: "/tutorial", label: "Tutorial", icon: GraduationCap },
+        { to: "/novidades", label: "Novidades", icon: Sparkles },
       ],
     },
     ...(isAdmin

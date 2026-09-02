@@ -17,6 +17,8 @@ Vercel Docs).
 
 **Novo no time?** Comece por **[START HERE](./START_HERE.md)** — onboarding em menos de 1 hora.
 
+**Repositório GitHub:** [`README.md`](../README.md) na raiz — setup, comandos, deploy e links rápidos.
+
 Depois: [Onboarding técnico](./10-onboarding/onboarding.md) para setup local.
 
 ---

@@ -36,6 +36,7 @@ O **Knowledge Center** é a biblioteca técnica da plataforma — ADRs, arquitet
 | -------------------- | --------------------- | ------------------------------- | --------------------------------------- |
 | **Tutorial**         | `/admin/tutorial`     | Passo a passo de uso (operação) | Produto / engenharia                    |
 | **Knowledge Center** | `/admin/knowledge`    | Documentação completa           | Engenharia (docs/)                      |
+| **Novidades**        | `/novidades`          | Entregas recentes (produto)     | Produto — `src/content/platform-news/`  |
 | **AI Workspace**     | `/admin/ai-workspace` | Context Pack para IAs (síntese) | Automático — **somente Platform Owner** |
 
 O KC é a **fonte única de verdade**. O AI Workspace **lê** o KC e sintetiza — nunca substitui.
@@ -59,7 +60,8 @@ Ao alterar o produto:
 
 1. Edite ou crie `.md` em `docs/` com frontmatter (`title`, `description`, `last_review`)
 2. Atualize o [Changelog](../../../docs/12-changelog/changelog.md) se a mudança for visível
-3. Não é preciso registrar no app — novos arquivos são indexados no build
+3. Se for feature **client-facing**, adicione item em `src/content/platform-news/releases.ts` (`/novidades`)
+4. Não é preciso registrar no app — novos arquivos `docs/` são indexados no build
 
 ## Próximo capítulo
 

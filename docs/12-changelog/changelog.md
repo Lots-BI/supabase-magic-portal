@@ -21,6 +21,12 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Adicionado
 
+- **Publicações Instagram (2026-09-01):** plugin Platform Hub `instagram_organic`, migration `33_instagram_media_metrics`, rota cliente `/cliente/:slug/publicacoes`, sync manual e bridge `ig_media`. Docs: [instagram-posts.md](../06-dashboards/instagram-posts.md), [meta-instagram-setup.md](../07-integrations/meta-instagram-setup.md). Tutorial admin `15-conexoes-instagram-publicacoes`; client `08-publicacoes-instagram`.
+
+- **Novidades da plataforma (2026-09-02):** rota `/novidades` para clientes e admins; fonte `src/content/platform-news/releases.ts`. Doc: [platform-news.md](../06-dashboards/platform-news.md). README na raiz do repositório.
+
+- **README GitHub (2026-09-02):** `README.md` na raiz com setup, estrutura, deploy e links para docs.
+
 - **Tutorial — Knowledge Center e AI Workspace (2026-07-07):** capítulos admin
   `13-knowledge-center` e `14-ai-workspace`; mapa de menus, atalhos e Aprovações atualizados.
   Docs KC: [knowledge-center.md](../06-dashboards/knowledge-center.md),
