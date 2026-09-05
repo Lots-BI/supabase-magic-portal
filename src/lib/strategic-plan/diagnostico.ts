@@ -1,4 +1,4 @@
-// Lotus · Motor de narrativa — Diagnóstico Atual (regras v1, interface estável para IA).
+// Lots BI · Motor de narrativa — Diagnóstico Atual (regras v1, interface estável para IA).
 
 import type { PeriodAggregates } from "@/lib/platforms/engine";
 import { pctDelta } from "@/lib/platforms/engine";

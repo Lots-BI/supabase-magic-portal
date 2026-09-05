@@ -3,8 +3,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getStrategicDashboard } from "@/lib/strategic-plan.functions";
-import { StrategicPlanCentro } from "@/components/lotus/strategic-plan/StrategicPlanCentro";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
+import { StrategicPlanCentro } from "@/components/lots/strategic-plan/StrategicPlanCentro";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import { brandTitle } from "@/lib/brand";
 import { getRouteApi } from "@tanstack/react-router";
 import { clienteRefQuery } from "./cliente.$cliente";
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/cliente/$cliente/plano-est
     }),
     component: PlanoCentroPage,
     errorComponent: ({ error }) => (
-      <div className="lotus-surface p-4 text-sm text-danger">
+      <div className="lots-surface p-4 text-sm text-danger">
         Não foi possível carregar o plano: {error.message}
       </div>
     ),

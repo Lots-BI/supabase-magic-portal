@@ -2,7 +2,7 @@
 title: Content Workflow — Guia de Manutenção
 description: Como operar, estender e depurar o módulo de Aprovações após a Fase 5.
 status: active
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 
@@ -26,7 +26,7 @@ Aggregate root: `content_cards`. Eventos em `content_card_events`. Anexos em `co
 | Filtro de biblioteca                     | `library/repositories/library.repository.server.ts`                         |
 | Métricas do dashboard ops                | `dashboard/services/build-ops-dashboard.ts`                                 |
 | Nova aba no workspace                    | `ApprovalWorkspaceTabs.tsx` + rota `aprovacoes.tsx`                         |
-| Componente visual                        | `components/lotus/approval/**`                                              |
+| Componente visual                        | `components/lots/approval/**`                                              |
 
 **Nunca:** importar `@/integrations/supabase` fora de `*.repository.server.ts` no módulo approval.
 

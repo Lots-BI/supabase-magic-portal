@@ -3,6 +3,11 @@ export interface MetaGraphPagingV1 {
   next?: string;
 }
 
+export interface MetaActionValueV1 {
+  action_type?: string;
+  value?: string;
+}
+
 export interface MetaInsightRowV1 {
   campaign_name?: string;
   campaign_id?: string;
@@ -12,10 +17,25 @@ export interface MetaInsightRowV1 {
   reach?: string;
   clicks?: string;
   spend?: string;
+  /** Todas as ações atribuídas (cliques, leads, compras, mensagens…). */
+  actions?: MetaActionValueV1[];
+  /** Subconjunto de conversões da Insights API (pixel / API / CRM). */
+  conversions?: MetaActionValueV1[];
 }
 
 export interface MetaInsightsResponseV1 {
   data: MetaInsightRowV1[];
+  paging?: MetaGraphPagingV1;
+}
+
+export interface MetaCampaignRowV1 {
+  id: string;
+  name?: string;
+  objective?: string;
+}
+
+export interface MetaCampaignsResponseV1 {
+  data: MetaCampaignRowV1[];
   paging?: MetaGraphPagingV1;
 }
 

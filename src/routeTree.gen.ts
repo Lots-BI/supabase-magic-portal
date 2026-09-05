@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthIndexRouteImport } from './routes/auth/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AuthenticatedSobreRouteImport } from './routes/_authenticated/sobre'
 import { Route as AuthenticatedPlanoEstrategicoRouteImport } from './routes/_authenticated/plano-estrategico'
 import { Route as AuthenticatedNovidadesRouteImport } from './routes/_authenticated/novidades'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -99,6 +100,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
   getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthenticatedSobreRoute = AuthenticatedSobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPlanoEstrategicoRoute =
   AuthenticatedPlanoEstrategicoRouteImport.update({
@@ -467,6 +473,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/novidades': typeof AuthenticatedNovidadesRoute
   '/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
+  '/sobre': typeof AuthenticatedSobreRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/': typeof AuthIndexRoute
   '/admin/knowledge': typeof AuthenticatedAdminKnowledgeRouteRouteWithChildren
@@ -531,6 +538,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/novidades': typeof AuthenticatedNovidadesRoute
   '/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
+  '/sobre': typeof AuthenticatedSobreRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth': typeof AuthIndexRoute
   '/account/security': typeof AuthenticatedAccountSecurityRoute
@@ -595,6 +603,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/novidades': typeof AuthenticatedNovidadesRoute
   '/_authenticated/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
+  '/_authenticated/sobre': typeof AuthenticatedSobreRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/': typeof AuthIndexRoute
   '/_authenticated/admin/knowledge': typeof AuthenticatedAdminKnowledgeRouteRouteWithChildren
@@ -664,6 +673,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/novidades'
     | '/plano-estrategico'
+    | '/sobre'
     | '/auth/callback'
     | '/auth/'
     | '/admin/knowledge'
@@ -728,6 +738,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/novidades'
     | '/plano-estrategico'
+    | '/sobre'
     | '/auth/callback'
     | '/auth'
     | '/account/security'
@@ -791,6 +802,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/novidades'
     | '/_authenticated/plano-estrategico'
+    | '/_authenticated/sobre'
     | '/auth/callback'
     | '/auth/'
     | '/_authenticated/admin/knowledge'
@@ -895,6 +907,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/callback'
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRouteRoute
+    }
+    '/_authenticated/sobre': {
+      id: '/_authenticated/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof AuthenticatedSobreRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/plano-estrategico': {
       id: '/_authenticated/plano-estrategico'
@@ -1568,6 +1587,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedNovidadesRoute: typeof AuthenticatedNovidadesRoute
   AuthenticatedPlanoEstrategicoRoute: typeof AuthenticatedPlanoEstrategicoRoute
+  AuthenticatedSobreRoute: typeof AuthenticatedSobreRoute
   AuthenticatedAccountSecurityRoute: typeof AuthenticatedAccountSecurityRoute
   AuthenticatedClienteClienteRoute: typeof AuthenticatedClienteClienteRouteWithChildren
 }
@@ -1579,6 +1599,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedNovidadesRoute: AuthenticatedNovidadesRoute,
   AuthenticatedPlanoEstrategicoRoute: AuthenticatedPlanoEstrategicoRoute,
+  AuthenticatedSobreRoute: AuthenticatedSobreRoute,
   AuthenticatedAccountSecurityRoute: AuthenticatedAccountSecurityRoute,
   AuthenticatedClienteClienteRoute:
     AuthenticatedClienteClienteRouteWithChildren,

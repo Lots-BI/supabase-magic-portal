@@ -3,8 +3,8 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { adminTitle } from "@/lib/brand";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
-import { ClientHealthBadge } from "@/components/lotus/agency-os/ClientHealthBadge";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
+import { ClientHealthBadge } from "@/components/lots/agency-os/ClientHealthBadge";
 import { DashboardGrid } from "@/modules/core/dashboard/dashboard-engine";
 import "@/modules/os-bootstrap";
 import { getAgencyClient } from "@/modules/agency-os/agency-os.server";
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/admin/central/clientes/$id
   },
   component: ClientWorkspacePage,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-danger">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-danger">Erro: {error.message}</div>
   ),
 });
 
@@ -65,13 +65,13 @@ function ClientWorkspaceContent() {
     <div className="space-y-8 pb-10">
       <Link
         to="/admin/central"
-        className="lotus-focus inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground"
+        className="lots-focus inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Voltar à Central
       </Link>
 
-      <header className="lotus-surface space-y-5 p-6 sm:p-8">
+      <header className="lots-surface space-y-5 p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 space-y-1">
             <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
@@ -97,7 +97,7 @@ function ClientWorkspaceContent() {
         </div>
 
         {client.proxima_acao && (
-          <p className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3 text-sm text-foreground">
+          <p className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-foreground">
             <span className="font-medium text-muted-foreground">Próxima ação · </span>
             {client.proxima_acao}
           </p>

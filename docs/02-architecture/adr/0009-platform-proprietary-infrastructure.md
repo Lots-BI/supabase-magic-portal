@@ -2,14 +2,14 @@
 title: "ADR-0009: Infraestrutura proprietária (sem ferramentas transitórias)"
 status: proposed
 date: 2026-06-26
-deciders: Engenharia Lotus / Liderança
+deciders: Engenharia Lots BI / Liderança
 ---
 
 # ADR-0009: Infraestrutura proprietária (sem ferramentas transitórias)
 
 ## Contexto
 
-A Lotus foi prototipada com ferramentas que aceleraram time-to-market:
+O Lots BI foi prototipada com ferramentas que aceleraram time-to-market:
 
 | Ferramenta   | Uso observado                                                      |
 | ------------ | ------------------------------------------------------------------ |
@@ -18,7 +18,7 @@ A Lotus foi prototipada com ferramentas que aceleraram time-to-market:
 | **Horizons** | Citado na visão estratégica — **não encontrado no repositório**    |
 
 A visão de longo prazo é uma plataforma **100% proprietária**, onde toda inteligência
-operacional e analítica reside no ecossistema Lotus.
+operacional e analítica reside no ecossistema Lots BI.
 
 ## Decisão (alvo)
 

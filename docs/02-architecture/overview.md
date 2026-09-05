@@ -1,8 +1,8 @@
 ---
 title: Arquitetura — Visão Geral
-description: Visão de sistema da Lotus, componentes, responsabilidades e limites.
+description: Visão de sistema do Lots BI, componentes, responsabilidades e limites.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
@@ -13,7 +13,7 @@ last_review: 2026-06-26
 
 ## Resumo executivo
 
-A Lotus é uma aplicação **full-stack TypeScript** construída sobre **TanStack Start**
+O Lots BI é uma aplicação **full-stack TypeScript** construída sobre **TanStack Start**
 (SSR + roteamento por arquivos) e **Supabase** (Postgres + Auth + RLS). Não há servidor
 backend próprio: a lógica de servidor vive em **server functions** do TanStack Start, e a
 camada de dados/segurança vive no Postgres (RLS + views + funções `SECURITY DEFINER`).
@@ -54,7 +54,7 @@ flowchart TB
     user_admin["👤 Admin (agência)"]
     user_client["👤 Cliente final"]
 
-    subgraph lotus["Plataforma Lotus"]
+    subgraph lotus["Plataforma Lots BI"]
         direction TB
         fe["Frontend React 19\n(SSR via TanStack Start)"]
         sf["Server Functions\nadmin.functions · editorial.functions"]

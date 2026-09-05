@@ -62,7 +62,7 @@ export const INTEGRATIONS: readonly IntegrationDef[] = [
       {
         col: "instagram_username",
         label: "Username (@)",
-        placeholder: "lotus.marketing",
+        placeholder: "marca.oficial",
         hint: "Handle público da conta (sem o @).",
       },
       {

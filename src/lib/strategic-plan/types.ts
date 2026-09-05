@@ -1,4 +1,4 @@
-// Lotus · Plano Estratégico — tipos canônicos (espelham migrations-official/11).
+// Lots BI · Plano Estratégico — tipos canônicos (espelham migrations-official/11).
 
 export const PLANO_STATUS = ["rascunho", "ativo", "pausado", "concluido", "arquivado"] as const;
 export type PlanoStatus = (typeof PLANO_STATUS)[number];

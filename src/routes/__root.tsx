@@ -11,11 +11,21 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportClientError } from "../lib/error-reporting";
-import { BRAND_ASSETS, BRAND_COLORS, BRAND_DESCRIPTION, BRAND_NAME } from "../lib/brand";
-import { ThemeProvider } from "@/components/lotus/theme-provider";
+import {
+  BRAND_ASSETS,
+  BRAND_COLORS,
+  BRAND_DESCRIPTION,
+  BRAND_NAME,
+  BRAND_OG_DESCRIPTION,
+  BRAND_OG_IMAGE_HEIGHT,
+  BRAND_OG_IMAGE_WIDTH,
+  BRAND_TAGLINE,
+  BRAND_URL,
+} from "../lib/brand";
+import { ThemeProvider } from "@/components/lots/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SupabaseBootstrapGate } from "@/components/lotus/SupabaseConfigGuard";
+import { SupabaseBootstrapGate } from "@/components/lots/SupabaseConfigGuard";
 import { supabase, isSupabaseReady } from "@/integrations/supabase/client";
 import type { QueryClient } from "@tanstack/react-query";
 
@@ -86,50 +96,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: BRAND_NAME },
-      {
-        name: "description",
-        content: BRAND_DESCRIPTION,
-      },
+      { name: "description", content: BRAND_DESCRIPTION },
+      { name: "application-name", content: BRAND_NAME },
+      { name: "apple-mobile-web-app-title", content: BRAND_NAME },
       { name: "theme-color", content: BRAND_COLORS.purple },
       { property: "og:title", content: BRAND_NAME },
-      {
-        property: "og:description",
-        content: BRAND_DESCRIPTION,
-      },
+      { property: "og:description", content: BRAND_OG_DESCRIPTION },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: `${BRAND_URL}/` },
+      { property: "og:site_name", content: BRAND_NAME },
+      { property: "og:locale", content: "pt_BR" },
+      { property: "og:image", content: BRAND_ASSETS.ogImage },
+      { property: "og:image:secure_url", content: BRAND_ASSETS.ogImage },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:image:width", content: String(BRAND_OG_IMAGE_WIDTH) },
+      { property: "og:image:height", content: String(BRAND_OG_IMAGE_HEIGHT) },
+      { property: "og:image:alt", content: `${BRAND_NAME} — ${BRAND_TAGLINE}` },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: BRAND_NAME },
-      {
-        name: "twitter:description",
-        content: BRAND_DESCRIPTION,
-      },
-      {
-        property: "og:image",
-        content: BRAND_ASSETS.ogImage,
-      },
-      {
-        name: "twitter:image",
-        content: BRAND_ASSETS.ogImage,
-      },
+      { name: "twitter:description", content: BRAND_OG_DESCRIPTION },
+      { name: "twitter:image", content: BRAND_ASSETS.ogImage },
+      { name: "twitter:image:alt", content: `${BRAND_NAME} — ${BRAND_TAGLINE}` },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      {
-        rel: "icon",
-        type: "image/png",
-        href: BRAND_ASSETS.favicon,
-      },
-      {
-        rel: "apple-touch-icon",
-        href: BRAND_ASSETS.icon,
-      },
-      {
-        rel: "manifest",
-        href: "/site.webmanifest",
-      },
+      { rel: "stylesheet", href: appCss },
+      { rel: "canonical", href: `${BRAND_URL}/` },
+      { rel: "icon", type: "image/png", href: BRAND_ASSETS.favicon },
+      { rel: "apple-touch-icon", href: BRAND_ASSETS.appleTouchIcon },
+      { rel: "manifest", href: "/site.webmanifest" },
     ],
   }),
   shellComponent: RootShell,

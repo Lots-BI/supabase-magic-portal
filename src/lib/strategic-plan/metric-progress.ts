@@ -1,4 +1,4 @@
-// Lotus · Progresso de KPIs por referência — usa engine, sem duplicar métricas.
+// Lots BI · Progresso de KPIs por referência — usa engine, sem duplicar métricas.
 
 import type { Row } from "@/lib/platforms/types";
 import { aggregatePeriod, pctDelta } from "@/lib/platforms/engine";

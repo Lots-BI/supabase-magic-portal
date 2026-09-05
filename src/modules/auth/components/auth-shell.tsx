@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { LotsBIWordmark } from "@/components/lotus/LotusMark";
+import { LotsBIWordmark } from "@/components/lots/LotsMark";
 
 export function AuthShell({
   title,

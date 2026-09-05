@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Lotus — deploy para Cloudflare Workers (pós-build Nitro).
+ * Lots BI — deploy para Cloudflare Workers (pós-build Nitro).
  * Requer: npm run build concluído, wrangler autenticado (CLOUDFLARE_API_TOKEN).
  *
  * Uso: npm run deploy:cloudflare

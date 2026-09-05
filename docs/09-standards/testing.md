@@ -2,7 +2,7 @@
 title: Estratégia de Testes
 description: Estado atual, prioridades e plano de implementação de testes automatizados.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 

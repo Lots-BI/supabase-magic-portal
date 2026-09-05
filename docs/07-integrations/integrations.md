@@ -2,7 +2,7 @@
 title: Integrações & Pipeline de Ingestão
 description: Catálogo de plataformas, IDs técnicos e o pipeline externo (Make/workers).
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
@@ -11,10 +11,10 @@ last_review: 2026-06-26
 > **Dois estados:** ingestão **atual** via [Make (transitório)](./current-pipeline-make.md) ·
 > ingestão **alvo** via [Coletores proprietários](./target-collectors.md).
 
-A Lotus integra com plataformas de marketing de forma **declarativa**: cada plataforma é uma
+O Lots BI integra com plataformas de marketing de forma **declarativa**: cada plataforma é uma
 entrada em um catálogo (`src/lib/integrations-catalog.ts`) e suas credenciais técnicas são
 colunas em `cadastro_clientes`. Os mesmos campos são lidos pelos workers do Make (hoje) ou
-pelos coletores Lotus (futuro) para coletar dados.
+pelos coletores Lots BI (futuro) para coletar dados.
 
 ---
 
@@ -53,7 +53,7 @@ Adicionar plataforma ao catálogo = **uma migration aditiva (`ADD COLUMN`)** + u
 | Estado                         | Documento                                              |
 | ------------------------------ | ------------------------------------------------------ |
 | **Atual (Make — transitório)** | [current-pipeline-make.md](./current-pipeline-make.md) |
-| **Alvo (Coletores Lotus)**     | [target-collectors.md](./target-collectors.md)         |
+| **Alvo (Coletores Lots BI)**     | [target-collectors.md](./target-collectors.md)         |
 
 Resumo do pipeline **atual** (detalhes no doc dedicado):
 
@@ -110,7 +110,7 @@ que cada view consome (fonte: definições em `08_aliases_e_null_guard.sql`):
 
 | Plataforma      | Métricas esperadas                                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Meta Ads        | reach, impressions, clicks, cpc, cpm, ctr, frequency, spend                                                                    |
+| Meta Ads        | reach, impressions, clicks, cpc, cpm, ctr, frequency, spend, results, conversions                                              |
 | Google Ads      | impressions, clicks, spend                                                                                                     |
 | GA4             | activeusers, sessions, engagedsessions, screenpageviews, eventcount, conversions                                               |
 | Instagram       | reach, total_interactions, accounts_engaged, likes, comments, saves, shares, profile_links_taps                                |

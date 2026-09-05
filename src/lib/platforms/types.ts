@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · Platform Definition contract.
+// Lots BI · Platform Definition contract.
 // Cada plataforma de marketing é descrita DECLARATIVAMENTE — métricas brutas,
 // estratégias de agregação, KPIs derivados, gráficos e perguntas de negócio.
 // Adicionar uma nova plataforma = criar UM PlatformDef + registrar em registry.

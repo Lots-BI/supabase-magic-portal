@@ -1,8 +1,8 @@
 ---
 title: Glossário de Domínio
-description: Vocabulário comum de negócio e técnico usado na Lotus.
+description: Vocabulário comum de negócio e técnico usado no Lots BI.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
@@ -12,7 +12,7 @@ Termos usados de forma consistente em todo o código e na documentação.
 
 | Termo                       | Definição                                                                                                                                               |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Lotus**                   | Nome da plataforma/produto documentada neste handbook.                                                                                                  |
+| **Lots BI**                   | Nome da plataforma/produto documentada neste handbook.                                                                                                  |
 | **Cliente**                 | Empresa atendida pela agência, cadastrada em `cadastro_clientes`. Também é o nome do perfil de usuário final que só vê os próprios dados.               |
 | **Admin**                   | Usuário interno da agência. Enxerga todos os clientes e o painel administrativo. Papel definido em `user_roles`.                                        |
 | **Plataforma**              | Fonte de métricas de marketing: Meta Ads, Google Ads, GA4, Instagram, Google Business, TikTok.                                                          |
@@ -25,7 +25,6 @@ Termos usados de forma consistente em todo o código e na documentação.
 | **current_user_clientes()** | Função Postgres `SECURITY DEFINER` que retorna a lista de clientes visíveis ao usuário logado. Coração da isolação multi-tenant.                        |
 | **RLS**                     | Row Level Security do Postgres — políticas que filtram linhas por usuário.                                                                              |
 | **Server Function**         | Função do TanStack Start executada no servidor, com validação de token e Zod. Ver [API Reference](../03-backend/api-reference.md).                      |
-| **Majrá**                   | Nome exibido na UI de login (`/auth`). Relação com Lotus não formalizada — ver [missão](./mission.md).                                                  |
 | **Cursor**                  | Ambiente oficial de engenharia (ADR-0010). Desenvolvimento no repositório Git.                                                                          |
 | **PlatformDef**             | Descrição declarativa de uma plataforma (métricas, agregações, KPIs, gráficos). Catálogo: [platform-catalog](../06-engine/platform-catalog.md).         |
 | **Engine**                  | Camada de funções puras (`engine.ts`, `formulas.ts`, `metrics.ts`). Visão: [overview](../06-engine/overview.md).                                        |

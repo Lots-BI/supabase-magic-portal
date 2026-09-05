@@ -1,25 +1,25 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_PRODUCTION_APP_URL,
-  detectLotusEnvironment,
+  detectLotsEnvironment,
   hostnamesMatch,
   resolveExpectedAppUrl,
 } from "./environment";
 
 describe("environment", () => {
   it("detecta development em localhost", () => {
-    expect(detectLotusEnvironment("http://localhost:5173")).toBe("development");
-    expect(detectLotusEnvironment("127.0.0.1")).toBe("development");
+    expect(detectLotsEnvironment("http://localhost:5173")).toBe("development");
+    expect(detectLotsEnvironment("127.0.0.1")).toBe("development");
   });
 
   it("detecta staging em preview/pages.dev", () => {
-    expect(detectLotusEnvironment("https://lotsbi-preview.pages.dev")).toBe("staging");
-    expect(detectLotusEnvironment("https://staging.lotsbi.example.com")).toBe("staging");
+    expect(detectLotsEnvironment("https://lotsbi-preview.pages.dev")).toBe("staging");
+    expect(detectLotsEnvironment("https://staging.lotsbi.example.com")).toBe("staging");
   });
 
   it("detecta production no domínio oficial", () => {
     expect(
-      detectLotusEnvironment("https://lotsbi.leandromajr.com", { nodeEnv: "production" }),
+      detectLotsEnvironment("https://lotsbi.leandromajr.com", { nodeEnv: "production" }),
     ).toBe("production");
   });
 

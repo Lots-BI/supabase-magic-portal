@@ -2,7 +2,7 @@
 title: Troubleshooting
 description: Guia de diagnóstico para problemas comuns — dados, auth, build e deploy.
 status: living
-owner: Engenharia / Ops Lotus
+owner: Engenharia / Ops Lots BI
 last_review: 2026-07-01
 ---
 
@@ -216,9 +216,9 @@ Postgres interpreta colunas inseridas **no meio** da lista como rename. **Soluç
 
 ---
 
-## Dashboard admin quebra com `AreaChartLotusLazy is not defined`
+## Dashboard admin quebra com `AreaChartLotsLazy is not defined`
 
-Gráfico de evolução em `/admin` sem import do componente lazy. Corrigido em `admin/index.tsx` — garantir deploy com import de `@/components/lotus/charts/AreaChartLotusLazy`.
+Gráfico de evolução em `/admin` sem import do componente lazy. Corrigido em `admin/index.tsx` — garantir deploy com import de `@/components/lots/charts/AreaChartLotsLazy`.
 
 ---
 

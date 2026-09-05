@@ -6,9 +6,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Plus, BarChart3, ClipboardList } from "lucide-react";
 import { z } from "zod";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { SectionCard } from "@/components/lotus/SectionCard";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { SectionCard } from "@/components/lots/SectionCard";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -24,38 +24,38 @@ import {
   listEditorialPillars,
 } from "@/modules/approval/cards/cards.server";
 import { buildPillarMap } from "@/modules/approval/services/group-cards-by-date";
-import { CardDetailDrawer } from "@/components/lotus/approval/card/CardDetailDrawer";
-import { CardCreateSheet } from "@/components/lotus/approval/card/CardCreateSheet";
+import { CardDetailDrawer } from "@/components/lots/approval/card/CardDetailDrawer";
+import { CardCreateSheet } from "@/components/lots/approval/card/CardCreateSheet";
 import {
   ApprovalWorkspaceTabs,
   type ApprovalTab,
-} from "@/components/lotus/approval/shared/ApprovalWorkspaceTabs";
-import { ApprovalEmptyState } from "@/components/lotus/approval/shared/ApprovalEmptyState";
-import { ApprovalPanelSkeleton } from "@/components/lotus/approval/shared/ApprovalPanelSkeleton";
+} from "@/components/lots/approval/shared/ApprovalWorkspaceTabs";
+import { ApprovalEmptyState } from "@/components/lots/approval/shared/ApprovalEmptyState";
+import { ApprovalPanelSkeleton } from "@/components/lots/approval/shared/ApprovalPanelSkeleton";
 import type { ContentCardStatus } from "@/modules/approval/types/content-card";
 
 const KanbanBoardView = lazy(() =>
-  import("@/components/lotus/approval/kanban/KanbanBoard").then((m) => ({
+  import("@/components/lots/approval/kanban/KanbanBoard").then((m) => ({
     default: m.KanbanBoardView,
   })),
 );
 const ApprovalCalendar = lazy(() =>
-  import("@/components/lotus/approval/calendar/ApprovalCalendar").then((m) => ({
+  import("@/components/lots/approval/calendar/ApprovalCalendar").then((m) => ({
     default: m.ApprovalCalendar,
   })),
 );
 const EditorialPillarsPanel = lazy(() =>
-  import("@/components/lotus/approval/pillars/EditorialPillarsPanel").then((m) => ({
+  import("@/components/lots/approval/pillars/EditorialPillarsPanel").then((m) => ({
     default: m.EditorialPillarsPanel,
   })),
 );
 const StoryPlanSheet = lazy(() =>
-  import("@/components/lotus/approval/stories/StoryPlanSheet").then((m) => ({
+  import("@/components/lots/approval/stories/StoryPlanSheet").then((m) => ({
     default: m.StoryPlanSheet,
   })),
 );
 const LibraryPanel = lazy(() =>
-  import("@/components/lotus/approval/library/LibraryPanel").then((m) => ({
+  import("@/components/lots/approval/library/LibraryPanel").then((m) => ({
     default: m.LibraryPanel,
   })),
 );

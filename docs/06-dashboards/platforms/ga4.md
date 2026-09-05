@@ -1,8 +1,8 @@
 ---
 title: GA4 — Dashboard
-description: Google Analytics 4 — usuários, sessões, eventos e conversões na Lotus.
+description: Google Analytics 4 — usuários, sessões, eventos e conversões no Lots BI.
 status: living
-owner: Engenharia / Dados Lotus
+owner: Engenharia / Dados Lots BI
 tags: [dashboard, ga4, platformdef]
 difficulty: intermediate
 last_review: 2026-06-26

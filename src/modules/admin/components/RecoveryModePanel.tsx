@@ -33,7 +33,7 @@ export function RecoveryModePanel({
   busy: boolean;
 }) {
   return (
-    <div className="lotus-surface space-y-4 p-4">
+    <div className="lots-surface space-y-4 p-4">
       <div>
         <h3 className="text-sm font-semibold">Recovery Mode</h3>
         <p className="text-xs text-muted-foreground">

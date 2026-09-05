@@ -26,7 +26,7 @@ paridade funcional.
 
 Precedentes:
 
-- [ADR-0011](./0011-engineering-system-foundation.md) — Sistema de Engenharia Lotus
+- [ADR-0011](./0011-engineering-system-foundation.md) — Sistema de Engenharia Lots BI
 - [ADR-0014](./0014-auth-module-v3-architecture.md) — boundaries e validação CI
 - Platform Hub v3.3 — Architecture Frozen
 
@@ -44,7 +44,7 @@ Precedentes:
 
 ### 2. Localização dos contratos
 
-Contratos vivem em `contracts/` na raiz de `supabase-magic-portal/`, com export central em
+Contratos vivem em `contracts/` na raiz de `lots-bi/`, com export central em
 `contracts/index.ts`.
 
 ### 3. IngestEnvelope como raiz de ingestão

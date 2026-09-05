@@ -2,7 +2,7 @@
 title: Content Workflow — Fase 5.1 (Portal do Cliente)
 description: Integração do modo slug_context com o Content Workflow via ClientScopeProvider.
 status: completed
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 

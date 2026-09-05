@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · Google Ads — PlatformDef.
+// Lots BI · Google Ads — PlatformDef.
 // View: public.vw_google_ads_diario
 // Colunas: data, cliente, campanha, impressions, clicks, spend, ctr, cpc, cpm.
 // Conversions ainda não chegam nesta view — quando chegarem, basta declarar

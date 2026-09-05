@@ -2,13 +2,13 @@
 title: Dashboards — KPIs, Fórmulas e Telas
 description: Catálogo das telas analíticas, métricas exibidas e fórmulas oficiais.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
 # Dashboards
 
-Os dashboards são a entrega central da Lotus. Todos consomem as [views](../04-database/views.md)
+Os dashboards são a entrega central do Lots BI. Todos consomem as [views](../04-database/views.md)
 e calculam via [engine de métricas](../06-engine/overview.md). **Nenhum número é calculado
 dentro do componente** — apenas exibido.
 
@@ -67,7 +67,7 @@ Componente genérico `PlatformDashboard` (ver
 
 ## Componentes de experiência (Lots BI)
 
-Camada compartilhada em `src/components/lotus/` — reutilizada em dashboards, cliente e admin:
+Camada compartilhada em `src/components/lots/` — reutilizada em dashboards, cliente e admin:
 
 | Componente             | Uso                                                                         |
 | ---------------------- | --------------------------------------------------------------------------- |

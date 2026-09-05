@@ -2,20 +2,20 @@
 title: Estrutura do Repositório
 description: Organização de pastas, convenções de nomes e mapa de módulos do código.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-30
 ---
 
 # Estrutura do Repositório
 
-Raiz do app: `supabase-magic-portal/`
+Raiz do app: `lots-bi/`
 
 ---
 
 ## Árvore principal
 
 ```
-supabase-magic-portal/
+lots-bi/
 ├── .cursor/rules/          # Regras Cursor (engenharia + docs)
 ├── docs/                   # Engineering Handbook (este centro de conhecimento)
 ├── public/                 # Assets estáticos
@@ -27,7 +27,7 @@ supabase-magic-portal/
 │   │   └── admin/          # Gestão de usuários — convites, Recovery Mode UI
 │   ├── features/           # Legado em migração (access, auth stubs deprecated)
 │   ├── components/
-│   │   ├── lotus/          # Componentes de domínio Lotus
+│   │   ├── lots/          # Componentes de domínio Lots BI
 │   │   └── ui/             # Primitivos shadcn/Radix
 │   ├── lib/                # Lógica de negócio pura
 │   │   └── platforms/      # Engine declarativo de plataformas
@@ -39,7 +39,7 @@ supabase-magic-portal/
 ├── supabase/
 │   └── migrations-official/  # DDL versionado (01–08)
 ├── .env.example            # Template de variáveis
-├── AGENTS.md               # Avisos Lovable + fluxo Lotus
+├── AGENTS.md               # Avisos Lovable + fluxo Lots BI
 ├── package.json
 └── vite.config.ts          # Preset Lovable (transitório)
 ```
@@ -97,7 +97,7 @@ Detalhes: [Arquitetura Auth, Access e Admin](../02-architecture/auth-access-admi
 
 ---
 
-## `src/components/lotus/` — UI de domínio
+## `src/components/lots/` — UI de domínio
 
 Componentes reutilizáveis do produto: `PlatformDashboard`, `AppShell`, `StatCard`,
 `PeriodToggle`, charts, etc.

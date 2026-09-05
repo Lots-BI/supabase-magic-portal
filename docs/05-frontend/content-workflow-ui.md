@@ -2,7 +2,7 @@
 title: Content Workflow — UI
 description: Componentes, visualizações e UX do módulo Aprovações (Workflow de Conteúdo).
 status: living
-owner: Engenharia / Produto Lotus
+owner: Engenharia / Produto Lots BI
 last_review: 2026-07-05
 ---
 
@@ -98,7 +98,7 @@ Cliente: Kanban read-only, botões aprovar/reprovar/comentar apenas.
 
 ---
 
-## Componentes (`src/components/lotus/approval/`)
+## Componentes (`src/components/lots/approval/`)
 
 ```
 approval/

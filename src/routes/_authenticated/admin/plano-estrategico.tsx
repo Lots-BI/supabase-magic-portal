@@ -5,12 +5,12 @@ import { useState } from "react";
 import { Plus, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { listPlanos, createPlano, deletePlano, updatePlano } from "@/lib/strategic-plan.functions";
 import { listClientes } from "@/lib/admin.functions";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { SectionCard } from "@/components/lotus/SectionCard";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";
-import { Field, TextInput, Select } from "@/components/lotus/FormField";
-import { ConfirmDialog } from "@/components/lotus/ConfirmDialog";
-import { PublishAlinhamentoPanel } from "@/components/lotus/strategic-plan/PublishAlinhamentoPanel";
+import { Field, TextInput, Select } from "@/components/lots/FormField";
+import { ConfirmDialog } from "@/components/lots/ConfirmDialog";
+import { PublishAlinhamentoPanel } from "@/components/lots/strategic-plan/PublishAlinhamentoPanel";
 import { adminTitle } from "@/lib/brand";
 import { slugify } from "@/lib/slug";
 import { toast } from "sonner";
@@ -193,7 +193,7 @@ function AdminPlanoPage() {
           {(planos ?? []).map((p: PlanoRow) => (
             <div
               key={p.id}
-              className="flex items-center justify-between gap-2 rounded-lg border border-border/70 px-4 py-3"
+              className="flex items-center justify-between gap-2 rounded-lg border border-border px-4 py-3"
             >
               <div className="min-w-0">
                 <p className="font-medium text-foreground">{p.titulo}</p>

@@ -8,7 +8,7 @@ date: 2026-06-26
 
 ## Contexto
 
-A Lotus precisa de uma aplicação web com SSR, autenticação, banco relacional, segurança por
+O Lots BI precisa de uma aplicação web com SSR, autenticação, banco relacional, segurança por
 linha (multi-tenant) e ciclo de desenvolvimento rápido — com um time pequeno e sem desejo de
 manter infraestrutura de backend dedicada. O projeto foi inicialmente prototipado no Lovable;
 desde [ADR-0010](./0010-cursor-official-development-environment.md), o desenvolvimento oficial

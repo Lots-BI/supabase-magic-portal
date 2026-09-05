@@ -2,7 +2,7 @@
 title: Segurança
 description: Modelo de defesa em profundidade, segredos, RLS e políticas de acesso.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
@@ -12,7 +12,7 @@ last_review: 2026-06-26
 
 ## Princípio: defesa em profundidade
 
-A Lotus **não confia apenas na UI**. Cada camada valida independentemente:
+O Lots BI **não confia apenas na UI**. Cada camada valida independentemente:
 
 ```mermaid
 flowchart TB

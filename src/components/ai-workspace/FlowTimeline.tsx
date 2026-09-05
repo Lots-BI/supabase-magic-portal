@@ -13,7 +13,7 @@ export function FlowTimeline({ flows }: { flows: FlowDefinition[] }) {
               <div key={i} className="flex flex-col items-start">
                 <div
                   className={cn(
-                    "rounded-lg border border-border/80 bg-muted/30 px-3 py-2 text-sm text-foreground",
+                    "rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-foreground",
                   )}
                 >
                   {step}

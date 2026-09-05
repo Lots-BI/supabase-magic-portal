@@ -2,7 +2,7 @@
 title: Ambientes
 description: Desenvolvimento, staging e produção — configuração e segredos.
 status: living
-owner: Engenharia / Ops Lotus
+owner: Engenharia / Ops Lots BI
 last_review: 2026-06-26
 ---
 
@@ -15,7 +15,7 @@ last_review: 2026-06-26
 | Ambiente     | Propósito                 | Status documentado           |
 | ------------ | ------------------------- | ---------------------------- |
 | **Local**    | Desenvolvimento no Cursor | ✅                           |
-| **Produção** | Portal Lotus (usuários)   | Parcial                      |
+| **Produção** | Portal Lots BI (usuários)   | Parcial                      |
 | **Staging**  | Pré-produção              | ⚠️ INFORMAÇÃO NÃO ENCONTRADA |
 
 ---
@@ -51,7 +51,7 @@ Em dev, **duplicar** URL e anon key com e sem prefixo `VITE_`:
 
 Deploy proprietário: [CI/CD](./cicd.md) · ADR-0012.
 
-> ⚠️ **INFORMAÇÃO NÃO ENCONTRADA:** domínio de produção, URL pública do Portal Lotus,
+> ⚠️ **INFORMAÇÃO NÃO ENCONTRADA:** domínio de produção, URL pública do Portal Lots BI,
 > mapeamento de secrets no Cloudflare/Lovable dashboard.
 
 **Ação recomendada:** documentar URL e painel de secrets quando confirmado com Ops.
@@ -83,7 +83,7 @@ Migrations aplicadas manualmente hoje — ver [Migrations](../04-database/migrat
 flowchart LR
     DEV["Local\nCursor"] --> GH["GitHub"]
     GH --> STG["Staging\n(preview)"]
-    GH --> PRD["Production\nPortal Lotus"]
+    GH --> PRD["Production\nPortal Lots BI"]
     STG --> SB_STG["Supabase staging"]
     PRD --> SB_PRD["Supabase prod"]
 ```

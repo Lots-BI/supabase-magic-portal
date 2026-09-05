@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { adminTitle } from "@/lib/brand";
 import { getViewsAudit } from "@/lib/admin.functions";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { SectionCard } from "@/components/lotus/SectionCard";
-import { StatCard } from "@/components/lotus/StatCard";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { SectionCard } from "@/components/lots/SectionCard";
+import { StatCard } from "@/components/lots/StatCard";
 import { AlertTriangle, CheckCircle2, Database } from "lucide-react";
 
 const auditQuery = queryOptions({

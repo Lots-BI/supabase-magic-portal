@@ -2,13 +2,13 @@
 title: Backend — Visão Geral
 description: Server functions, autenticação, middlewares e clients Supabase.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
 # Backend — Visão Geral
 
-A Lotus não tem um servidor backend separado. O "backend" é composto por:
+O Lots BI não tem um servidor backend separado. O "backend" é composto por:
 
 1. **Server Functions** do TanStack Start (`src/lib/*.functions.ts`).
 2. **Middlewares de autenticação** (`src/integrations/supabase/*`).

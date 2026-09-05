@@ -1,8 +1,8 @@
 ---
 title: LinkedIn — Dashboard (futuro)
-description: Status planejado do LinkedIn Ads na Lotus — ainda não implementado.
+description: Status planejado do LinkedIn Ads no Lots BI — ainda não implementado.
 status: draft
-owner: Engenharia / Dados Lotus
+owner: Engenharia / Dados Lots BI
 tags: [dashboard, linkedin, roadmap]
 difficulty: beginner
 last_review: 2026-06-26

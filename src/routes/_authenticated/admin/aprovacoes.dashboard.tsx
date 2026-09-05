@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft } from "lucide-react";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { SectionCard } from "@/components/lotus/SectionCard";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -15,8 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { listClientes } from "@/lib/admin.functions";
-import { OpsDashboardPanel } from "@/components/lotus/approval/dashboard/OpsDashboardPanel";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
+import { OpsDashboardPanel } from "@/components/lots/approval/dashboard/OpsDashboardPanel";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 
 export const Route = createFileRoute("/_authenticated/admin/aprovacoes/dashboard")({
   head: () => ({ meta: [{ title: adminTitle("Dashboard — Aprovações") }] }),

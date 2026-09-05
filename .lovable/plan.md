@@ -1,6 +1,6 @@
 ## Visão de produto
 
-Lotus é um SaaS de Business Intelligence para Marketing. Cada dashboard de plataforma precisa responder perguntas de negócio — não apenas listar métricas — e ser construído sobre uma arquitetura **declarativa**, na qual adicionar uma plataforma futura (LinkedIn, Pinterest, YouTube…) significa **escrever uma configuração**, não tocar componentes.
+Lots BI é um SaaS de Business Intelligence para Marketing. Cada dashboard de plataforma precisa responder perguntas de negócio — não apenas listar métricas — e ser construído sobre uma arquitetura **declarativa**, na qual adicionar uma plataforma futura (LinkedIn, Pinterest, YouTube…) significa **escrever uma configuração**, não tocar componentes.
 
 Nada de infra: Make, Supabase, views e banco permanecem como estão. Tudo acontece na camada de aplicação.
 
@@ -104,7 +104,7 @@ Nenhum componente React faz cálculo. Tudo passa pelo engine.
 
 ## 3. Componente genérico (`PlatformDashboard`)
 
-`src/components/lotus/PlatformDashboard.tsx` — recebe `def: PlatformDef`, `cliente`, `period`. Faz **uma única** query a `def.view` cobrindo `[prevFrom, to]` e renderiza, na mesma ordem para qualquer plataforma:
+`src/components/lots/PlatformDashboard.tsx` — recebe `def: PlatformDef`, `cliente`, `period`. Faz **uma única** query a `def.view` cobrindo `[prevFrom, to]` e renderiza, na mesma ordem para qualquer plataforma:
 
 1. **Header narrativo** — título, descrição, período analisado, última sincronização, lista de perguntas que o dashboard responde.
 2. **Cards principais** — `def.metrics` com delta vs período anterior.
@@ -165,7 +165,7 @@ Cada rota se reduz a:
 ```tsx
 // src/routes/_authenticated/cliente.$cliente.google-ads.tsx
 import { googleAdsDef } from "@/lib/platforms/google-ads";
-import { PlatformDashboardPage } from "@/components/lotus/PlatformDashboardPage";
+import { PlatformDashboardPage } from "@/components/lots/PlatformDashboardPage";
 
 export const Route = createFileRoute("/_authenticated/cliente/$cliente/google-ads")({
   component: () => <PlatformDashboardPage def={googleAdsDef} />,
@@ -187,8 +187,8 @@ Mesma forma para `meta-ads`, `instagram`, `ga4`.
 **Novos**
 
 - `src/lib/platforms/{types,aggregations,formulas,engine,registry,google-ads,meta-ads,instagram,ga4}.ts`
-- `src/components/lotus/PlatformDashboard.tsx`
-- `src/components/lotus/PlatformDashboardPage.tsx` (PageHeader + PeriodPicker + Suspense)
+- `src/components/lots/PlatformDashboard.tsx`
+- `src/components/lots/PlatformDashboardPage.tsx` (PageHeader + PeriodPicker + Suspense)
 
 **Editados**
 

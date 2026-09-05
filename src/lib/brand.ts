@@ -2,8 +2,12 @@
 export const BRAND_NAME = "Lots BI";
 export const BRAND_NAME_SHORT = "Lots BI";
 export const BRAND_TAGLINE = "Business Intelligence para marketing digital";
-export const BRAND_DESCRIPTION =
-  "Lots BI — plataforma de inteligência de negócios para consolidar métricas, clientes e operações de marketing.";
+/** URL canônica de produção (Open Graph, canonical, WhatsApp). */
+export const BRAND_URL = "https://lotsbi.leandromajr.com";
+export const BRAND_OG_DESCRIPTION = `${BRAND_NAME} — ${BRAND_TAGLINE}`;
+export const BRAND_DESCRIPTION = BRAND_OG_DESCRIPTION;
+export const BRAND_OG_IMAGE_WIDTH = 1200;
+export const BRAND_OG_IMAGE_HEIGHT = 630;
 
 const SUPABASE_MEDIA_BASE =
   "https://ywvhoctcmibjitvwkkhb.supabase.co/storage/v1/object/public/Midias";
@@ -110,8 +114,10 @@ export const BRAND_ASSETS = {
   logoBi: `${SUPABASE_MEDIA_BASE}/3.png`,
   /** Palavra Lots (referência; no UI usamos texto tipográfico). */
   logoLots: `${SUPABASE_MEDIA_BASE}/4.png`,
-  favicon: `${SUPABASE_MEDIA_BASE}/2.png`,
-  ogImage: `${SUPABASE_MEDIA_BASE}/1.png`,
+  favicon: "/favicon.png",
+  appleTouchIcon: "/apple-touch-icon.png",
+  /** Card 1200×630 servido no domínio canônico (WhatsApp / LinkedIn / X). */
+  ogImage: `${BRAND_URL}/og-image.png`,
 } as const;
 
 /** Título de aba: `section` · Lots BI */

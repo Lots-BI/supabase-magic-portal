@@ -1,15 +1,15 @@
 ---
-title: "ADR-0012: Transição para Infraestrutura Interna Lotus"
+title: "ADR-0012: Transição para Infraestrutura Interna Lots BI"
 status: accepted
 date: 2026-06-26
-deciders: Engenharia Lotus
+deciders: Engenharia Lots BI
 ---
 
-# ADR-0012: Transição para Infraestrutura Interna Lotus
+# ADR-0012: Transição para Infraestrutura Interna Lots BI
 
 ## Contexto
 
-A Lotus evoluiu de protótipo Lovable para produto com:
+O Lots BI evoluiu de protótipo Lovable para produto com:
 
 - Engenharia oficial no **Cursor + Git** (ADR-0010)
 - Sistema de Engenharia com CI (ADR-0011)
@@ -24,7 +24,7 @@ Permanecem dependências **transitórias**:
 
 A visão estratégica (ADR-0009) é **infraestrutura proprietária**, sem Lovable, Make ou
 ferramentas externas de prototipagem. **Horizons** e **leandromajr.com** não fazem parte
-deste repositório — serão desacoplados em projetos futuros conforme a Lotus amadurecer.
+deste repositório — serão desacoplados em projetos futuros conforme o Lots BI amadurecer.
 
 ## Decisão
 
@@ -34,7 +34,7 @@ Adotar transição **faseada e sem ruptura**:
 2. **Adicionar** pipeline paralelo GitHub Actions → Cloudflare (`deploy.yml`, `deploy:cloudflare`).
 3. **Generalizar** observabilidade client (`error-reporting.ts`) com bridge Lovable como fallback.
 4. **Documentar** setup interno (`SETUP.md`, `npm run setup`).
-5. **Desconectar Lovable** somente após N deploys estáveis pelo pipeline Lotus.
+5. **Desconectar Lovable** somente após N deploys estáveis pelo pipeline Lots BI.
 
 ## Alternativas consideradas
 
@@ -58,7 +58,7 @@ Adotar transição **faseada e sem ruptura**:
 - Secrets devem ser mantidos em dois lugares até cutover.
 - Remoção do preset exige teste extensivo (Fase 6).
 
-## Checklist de cutover (Lovable → Lotus)
+## Checklist de cutover (Lovable → Lots BI)
 
 - [x] Dev oficial Cursor + Git
 - [x] CI completo (`npm run check`)

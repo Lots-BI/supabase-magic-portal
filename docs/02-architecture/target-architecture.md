@@ -1,8 +1,8 @@
 ---
 title: Arquitetura Alvo (Visão Futura)
-description: Como a Lotus deverá funcionar quando madura — plataforma proprietária end-to-end.
+description: Como o Lots BI deverá funcionar quando maduro — plataforma proprietária end-to-end.
 status: living
-owner: Engenharia Lotus / Arquitetura
+owner: Engenharia Lots BI / Arquitetura
 last_review: 2026-06-26
 ---
 
@@ -15,9 +15,9 @@ last_review: 2026-06-26
 
 ## Objetivo
 
-Tornar a Lotus uma plataforma **completamente proprietária**, onde toda inteligência —
+Tornar o Lots BI uma plataforma **completamente proprietária**, onde toda inteligência —
 coleta, normalização, agregação, cálculo de KPIs, APIs e dashboards — vive dentro do
-ecossistema Lotus, sem dependência operacional de Make, Lovable ou ferramentas equivalentes.
+ecossistema Lots BI, sem dependência operacional de Make, Lovable ou ferramentas equivalentes.
 
 ---
 
@@ -43,7 +43,7 @@ flowchart TB
 
     subgraph Processing["Processamento"]
         Q["Fila de Mensagens\n(ex.: SQS, Redis, BullMQ)"]
-        W["Workers Lotus\n(scheduler · retry · UPSERT)"]
+        W["Workers Lots BI\n(scheduler · retry · UPSERT)"]
     end
 
     subgraph Storage["Persistência"]
@@ -112,7 +112,7 @@ de forma externa. Ver [Coletores alvo](../07-integrations/target-collectors.md).
 Toda regra de negócio e fórmula existe **uma única vez**. Nenhum dashboard, relatório ou
 export calcula KPI de forma independente.
 
-**Recomendação:** pacote compartilhado `@lotus/metrics` (ou monorepo workspace) consumido
+**Recomendação:** pacote compartilhado `@lots/metrics` (ou monorepo workspace) consumido
 por API, workers e frontend.
 
 ### 2. Banco armazena apenas métricas oficiais
@@ -197,7 +197,7 @@ leitura analítica vai direto do browser → Supabase views.
 ```mermaid
 flowchart LR
     P0["Hoje\nMake + views SQL"] --> P1["Fase 1\nVersionar schema\n+ FK cliente"]
-    P1 --> P2["Fase 2\n1º coletor Lotus\n(Google Ads piloto)"]
+    P1 --> P2["Fase 2\n1º coletor Lots BI\n(Google Ads piloto)"]
     P2 --> P3["Fase 3\nFila + workers\n+ desligar Make por plataforma"]
     P3 --> P4["Fase 4\nMétricas só na app\n+ aposentar views derivadas"]
     P4 --> P5["Fase 5\nAPI interna\n+ desacoplar Lovable"]

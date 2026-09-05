@@ -1,4 +1,4 @@
-// Lotus · Server functions — Plano Estratégico (Centro de Inteligência).
+// Lots BI · Server functions — Plano Estratégico (Centro de Inteligência).
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isPlatformOwnerEmail } from "@/lib/platform-owner";

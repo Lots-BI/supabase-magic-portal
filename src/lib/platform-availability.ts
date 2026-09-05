@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · Detecção de plataformas com dados por cliente.
+// Lots BI · Detecção de plataformas com dados por cliente.
 // Usa views reais (PlatformDef) — não depende de colunas incorretas no overview.
 // ============================================================================
 

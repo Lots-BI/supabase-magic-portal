@@ -2,7 +2,7 @@
 title: Content Workflow — Fase 5 (Consolidação)
 description: Descontinuação do legado, redirects, polish UX e encerramento do Content Workflow v3.
 status: completed
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 
@@ -48,7 +48,7 @@ Nav admin: item "Calendário Editorial" removido — único entry point: **Aprov
 
 ## UX padronizada
 
-Componentes compartilhados em `components/lotus/approval/shared/`:
+Componentes compartilhados em `components/lots/approval/shared/`:
 
 | Componente              | Uso                                                    |
 | ----------------------- | ------------------------------------------------------ |

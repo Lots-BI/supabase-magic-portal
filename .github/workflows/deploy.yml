@@ -1,4 +1,4 @@
-# Deploy proprietário Lotus → Cloudflare Workers
+# Deploy proprietário Lots BI → Cloudflare Workers
 # Disparo MANUAL apenas — não substitui Lovable até validação em produção.
 # Secrets necessários: CLOUDFLARE_API_TOKEN + variáveis OFFICIAL_* / VITE_OFFICIAL_*
 

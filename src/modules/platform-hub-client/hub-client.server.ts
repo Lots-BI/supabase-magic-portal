@@ -25,7 +25,27 @@ import { sanitizeOAuthRedirectAfter } from "@/modules/platform-hub-admin/service
  * Apenas o que está confirmado funcionando ponta a ponta — expandir aqui quando
  * outras plataformas forem validadas para o cliente conectar sozinho.
  */
-export const CLIENT_SELF_SERVICE_PLUGIN_KEY = "instagram_organic" as const;
+export const CLIENT_SELF_SERVICE_PLUGIN_KEYS = ["instagram_organic", "meta_ads"] as const;
+export type ClientSelfServicePluginKey = (typeof CLIENT_SELF_SERVICE_PLUGIN_KEYS)[number];
+
+export const CLIENT_SELF_SERVICE_PLUGIN_LABELS: Record<ClientSelfServicePluginKey, string> = {
+  instagram_organic: "Instagram",
+  meta_ads: "Meta Ads",
+};
+
+/** Tipo de identidade "principal" (isPrimary) por plugin — usado ao vincular contas. */
+export const CLIENT_SELF_SERVICE_PRIMARY_IDENTITY_TYPE: Record<ClientSelfServicePluginKey, string> =
+  {
+    instagram_organic: "instagram",
+    meta_ads: "ad_account",
+  };
+
+function assertSelfServicePlugin(pluginKey: string): ClientSelfServicePluginKey {
+  if (!(CLIENT_SELF_SERVICE_PLUGIN_KEYS as readonly string[]).includes(pluginKey)) {
+    throw new Error("Plataforma não disponível para autoatendimento do cliente");
+  }
+  return pluginKey as ClientSelfServicePluginKey;
+}
 
 type AuthCtx = {
   supabase: SupabaseClient;
@@ -49,38 +69,52 @@ async function assertOwnCadastroAccess(ctx: AuthCtx, cadastroClienteId: number):
   }
 }
 
-async function findOwnInstagramConnection(cadastroClienteId: number) {
+async function findOwnConnection(cadastroClienteId: number, pluginKey: ClientSelfServicePluginKey) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("ph_connections")
     .select("id, plugin_key, status, active_provider_type, label")
     .eq("cadastro_id", cadastroClienteId)
-    .eq("plugin_key", CLIENT_SELF_SERVICE_PLUGIN_KEY)
+    .eq("plugin_key", pluginKey)
     .maybeSingle();
   if (error) throw new Error(error.message);
   return data;
 }
 
 /** Garante que connectionId pertence de fato ao cadastro informado (evita cross-client). */
-async function assertConnectionBelongsToCadastro(cadastroClienteId: number, connectionId: string) {
-  const own = await findOwnInstagramConnection(cadastroClienteId);
-  if (!own || own.id !== connectionId) {
+async function assertConnectionBelongsToCadastro(
+  cadastroClienteId: number,
+  connectionId: string,
+): Promise<{ id: string; plugin_key: ClientSelfServicePluginKey }> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("ph_connections")
+    .select("id, plugin_key, cadastro_id")
+    .eq("id", connectionId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data || data.cadastro_id !== cadastroClienteId) {
     throw new Error("Conexão não pertence a este cliente");
   }
-  return own;
+  const pluginKey = assertSelfServicePlugin(data.plugin_key);
+  return { id: data.id, plugin_key: pluginKey };
 }
 
 const cadastroInputSchema = z.object({
   cadastroClienteId: z.number().int().positive(),
 });
 
-export const getClientInstagramConnectionStatusFn = createServerFn({ method: "GET" })
+const pluginInputSchema = cadastroInputSchema.extend({
+  pluginKey: z.enum(CLIENT_SELF_SERVICE_PLUGIN_KEYS),
+});
+
+export const getClientConnectionStatusFn = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => cadastroInputSchema.parse(d))
+  .inputValidator((d: unknown) => pluginInputSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertOwnCadastroAccess(context, data.cadastroClienteId);
 
-    const connection = await findOwnInstagramConnection(data.cadastroClienteId);
+    const connection = await findOwnConnection(data.cadastroClienteId, data.pluginKey);
     if (!connection) {
       return { connected: false as const };
     }
@@ -102,13 +136,13 @@ export const getClientInstagramConnectionStatusFn = createServerFn({ method: "GE
     };
   });
 
-export const createClientInstagramConnectionFn = createServerFn({ method: "POST" })
+export const createClientConnectionFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => cadastroInputSchema.parse(d))
+  .inputValidator((d: unknown) => pluginInputSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertOwnCadastroAccess(context, data.cadastroClienteId);
 
-    const existing = await findOwnInstagramConnection(data.cadastroClienteId);
+    const existing = await findOwnConnection(data.cadastroClienteId, data.pluginKey);
     if (existing) {
       return { connectionId: existing.id };
     }
@@ -128,9 +162,10 @@ export const createClientInstagramConnectionFn = createServerFn({ method: "POST"
 
     const stack = await createAdminHubStack(supabase);
     const scopeRef = asScopeRef(`cadastro:${data.cadastroClienteId}`);
+    const label = `${CLIENT_SELF_SERVICE_PLUGIN_LABELS[data.pluginKey]} — ${cliente.nome_cliente}`;
     const conn = await stack.connectionService.create({
-      pluginKey: CLIENT_SELF_SERVICE_PLUGIN_KEY as never,
-      label: `Instagram — ${cliente.nome_cliente}`,
+      pluginKey: data.pluginKey as never,
+      label,
       scopeRef,
       activeProviderType: "official_api",
     });
@@ -141,13 +176,13 @@ export const createClientInstagramConnectionFn = createServerFn({ method: "POST"
       kind: "connection_created",
       title: "Conexão criada pelo cliente (autoatendimento)",
       actorEmail: context.claims?.email ?? undefined,
-      metadata: { pluginKey: CLIENT_SELF_SERVICE_PLUGIN_KEY, provider: "official_api" },
+      metadata: { pluginKey: data.pluginKey, provider: "official_api" },
     });
 
     return { connectionId: conn.connectionId };
   });
 
-export const startClientInstagramOAuthFn = createServerFn({ method: "POST" })
+export const startClientOAuthFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
@@ -160,13 +195,10 @@ export const startClientInstagramOAuthFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertOwnCadastroAccess(context, data.cadastroClienteId);
-    await assertConnectionBelongsToCadastro(data.cadastroClienteId, data.connectionId);
+    const own = await assertConnectionBelongsToCadastro(data.cadastroClienteId, data.connectionId);
 
     const stack = await createAdminHubStack(getSupabaseAdmin());
     const conn = await stack.connectionService.get(asConnectionId(data.connectionId));
-    if (conn.pluginKey !== CLIENT_SELF_SERVICE_PLUGIN_KEY) {
-      throw new Error("Plataforma não disponível para autoatendimento do cliente");
-    }
 
     const state = randomBytes(24).toString("hex");
     await stack.oauthStates.create({
@@ -176,7 +208,7 @@ export const startClientInstagramOAuthFn = createServerFn({ method: "POST" })
       redirectAfter: sanitizeOAuthRedirectAfter(data.redirectAfter),
     });
     const oauth = createHubOAuthHandle(
-      conn.pluginKey,
+      own.plugin_key,
       new FetchHttpClient(),
       createCredentialAccess(stack.credentialVault),
     );
@@ -185,7 +217,7 @@ export const startClientInstagramOAuthFn = createServerFn({ method: "POST" })
     return { authorizationUrl: url };
   });
 
-export const discoverClientInstagramIdentitiesFn = createServerFn({ method: "GET" })
+export const discoverClientIdentitiesFn = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
@@ -197,10 +229,10 @@ export const discoverClientInstagramIdentitiesFn = createServerFn({ method: "GET
   )
   .handler(async ({ data, context }) => {
     await assertOwnCadastroAccess(context, data.cadastroClienteId);
-    await assertConnectionBelongsToCadastro(data.cadastroClienteId, data.connectionId);
+    const own = await assertConnectionBelongsToCadastro(data.cadastroClienteId, data.connectionId);
 
     const stack = await createAdminHubStack(getSupabaseAdmin());
-    const credentialKey = oauthCredentialKeyForPlugin(CLIENT_SELF_SERVICE_PLUGIN_KEY);
+    const credentialKey = oauthCredentialKeyForPlugin(own.plugin_key);
     if (!credentialKey) throw new Error("Credencial OAuth não configurada");
     const tokenPayload = await stack.credentialVault.retrieve(
       asConnectionId(data.connectionId),
@@ -208,16 +240,14 @@ export const discoverClientInstagramIdentitiesFn = createServerFn({ method: "GET
     );
     const accessToken = tokenPayload?.data?.accessToken;
     if (!accessToken || typeof accessToken !== "string") {
-      throw new Error("Faça login com o Instagram antes de listar contas");
+      throw new Error(
+        `Faça login com ${CLIENT_SELF_SERVICE_PLUGIN_LABELS[own.plugin_key]} antes de listar contas`,
+      );
     }
-    return discoverIdentitiesForPlugin(
-      new FetchHttpClient(),
-      CLIENT_SELF_SERVICE_PLUGIN_KEY,
-      accessToken,
-    );
+    return discoverIdentitiesForPlugin(new FetchHttpClient(), own.plugin_key, accessToken);
   });
 
-export const attachClientInstagramIdentityFn = createServerFn({ method: "POST" })
+export const attachClientIdentityFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z
@@ -240,17 +270,22 @@ export const attachClientInstagramIdentityFn = createServerFn({ method: "POST" }
   )
   .handler(async ({ data, context }) => {
     await assertOwnCadastroAccess(context, data.cadastroClienteId);
-    await assertConnectionBelongsToCadastro(data.cadastroClienteId, data.connectionId);
+    const own = await assertConnectionBelongsToCadastro(data.cadastroClienteId, data.connectionId);
 
     const stack = await createAdminHubStack(getSupabaseAdmin());
     const connectionId = asConnectionId(data.connectionId);
+    const primaryType = CLIENT_SELF_SERVICE_PRIMARY_IDENTITY_TYPE[own.plugin_key];
+    let primaryAssigned = false;
     for (const identity of data.identities) {
+      const isPrimary =
+        identity.isPrimary ?? (primaryType === identity.identityType && !primaryAssigned);
+      if (isPrimary) primaryAssigned = true;
       await stack.identityService.attach({
         connectionId,
         identityType: identity.identityType as never,
         externalId: identity.externalId,
         label: identity.label,
-        isPrimary: identity.isPrimary ?? false,
+        isPrimary,
       });
     }
 

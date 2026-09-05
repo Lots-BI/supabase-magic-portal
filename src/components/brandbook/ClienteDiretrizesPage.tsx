@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { FileText } from "lucide-react";
 import { getDiretrizesSignedUrl } from "@/lib/diretrizes.functions";
 import { DiretrizesPdfViewer } from "./DiretrizesPdfViewer";
-import { EmptyState } from "@/components/lotus/EmptyState";
+import { EmptyState } from "@/components/lots/EmptyState";
 
 export function ClienteDiretrizesPage({ cadastroId }: { cadastroId: number | null }) {
   const getUrl = useServerFn(getDiretrizesSignedUrl);
@@ -20,7 +20,7 @@ export function ClienteDiretrizesPage({ cadastroId }: { cadastroId: number | nul
   }
 
   if (isLoading) {
-    return <div className="lotus-skeleton h-[calc(100dvh-3.5rem)] w-full" />;
+    return <div className="lots-skeleton h-[calc(100dvh-3.5rem)] w-full" />;
   }
 
   if (error) {
@@ -43,7 +43,7 @@ export function ClienteDiretrizesPage({ cadastroId }: { cadastroId: number | nul
 function EmptyDiretrizes({ message }: { message: string }) {
   return (
     <div className="px-4 py-10 sm:px-6">
-      <div className="lotus-surface mx-auto max-w-lg">
+      <div className="lots-surface mx-auto max-w-lg">
         <EmptyState icon={FileText} title="Diretrizes da Marca" description={message} />
       </div>
     </div>

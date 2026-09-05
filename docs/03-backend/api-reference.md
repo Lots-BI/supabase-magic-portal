@@ -2,7 +2,7 @@
 title: Backend — Referência de API (Server Functions)
 description: Catálogo de todas as server functions, com auth exigida, input e retorno.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 

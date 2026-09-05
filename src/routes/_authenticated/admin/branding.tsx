@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BrandGuide } from "@/components/lotus/branding/BrandGuide";
+import { BrandGuide } from "@/components/lots/branding/BrandGuide";
 import { adminTitle } from "@/lib/brand";
 
 export const Route = createFileRoute("/_authenticated/admin/branding")({

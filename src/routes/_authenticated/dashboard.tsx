@@ -1,8 +1,8 @@
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
-import { DashboardsHub } from "@/components/lotus/DashboardsHub";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
+import { DashboardsHub } from "@/components/lots/DashboardsHub";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import { brandTitle } from "@/lib/brand";
 import { clientesAtivosQuery } from "@/lib/clientes-ativos";
 import { slugify } from "@/lib/slug";
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   },
   component: ClientDashboardsPage,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-danger">
+    <div className="lots-surface p-4 text-sm text-danger">
       Erro ao carregar dashboards: {error.message}
     </div>
   ),

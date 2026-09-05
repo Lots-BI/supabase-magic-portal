@@ -2,13 +2,13 @@
 title: Auditoria de Completude — Engineering Handbook
 description: CTO audit — cobertura da documentação, lacunas residuais e matriz de rastreabilidade.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
 # Auditoria de Completude — Engineering Handbook
 
-Revisão CTO da documentação vs código. Objetivo: um engenheiro sênior entender a Lotus
+Revisão CTO da documentação vs código. Objetivo: um engenheiro sênior entender o Lots BI
 **somente lendo `docs/`**.
 
 **Veredito (2026-06-26):** handbook **completo para onboarding e operação** com lacunas
@@ -66,7 +66,7 @@ Legenda: ✅ completo · ⚠️ parcial (lacuna marcada)
 | `src/lib/integrations-catalog.ts` | `07-integrations/integrations.md`                               |
 | `src/integrations/supabase/*`     | `03-backend/auth.md`, `overview.md`                             |
 | `src/routes/**`                   | `05-frontend/routing.md`, `06-dashboards/*`                     |
-| `src/components/lotus/*`          | `05-frontend/component-system.md`                               |
+| `src/components/lots/*`          | `05-frontend/component-system.md`                               |
 | `src/hooks/*`                     | `05-frontend/component-system.md` (parcial)                     |
 | `src/lib/error-*.ts`              | `05-frontend/observability-errors.md`                           |
 | `supabase/migrations-official/*`  | `04-database/migrations.md`, `schema.md`, `views.md`            |
@@ -85,7 +85,7 @@ Informação **não disponível** no repositório — marcada, não inventada:
 | L3  | URL / domínio produção          | `08-operations/environments.md`            |
 | L4  | Ambiente staging                | `08-operations/environments.md`            |
 | L5  | Canais do time / on-call        | `10-onboarding/onboarding.md`              |
-| L6  | Relação Majrá ↔ Lotus (negócio) | `00-company/mission.md`                    |
+| L6  | Identidade de marca (Lots BI)       | `00-company/mission.md`                    |
 | L7  | Horizons (ferramenta citada)    | N/A — não encontrado                       |
 | L8  | Suite de testes implementada    | `09-standards/testing.md`                  | ✅ Parcial (fórmulas, período) |
 | L9  | GitHub Actions workflow         | `08-operations/cicd.md`                    | ✅ ADR-0011                    |

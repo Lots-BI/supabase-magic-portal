@@ -8,7 +8,7 @@ export function AiInsightsPlaceholder({ insights }: { insights: AiInsightContrac
       {insights.map((insight) => (
         <div
           key={insight.id}
-          className="relative rounded-xl border border-dashed border-border/80 bg-muted/10 p-4 opacity-75"
+          className="relative rounded-xl border border-dashed border-border bg-muted/10 p-4 opacity-75"
         >
           <div className="mb-2 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">

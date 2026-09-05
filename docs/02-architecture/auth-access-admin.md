@@ -2,7 +2,7 @@
 title: Arquitetura Auth, Access e Admin
 description: Fronteiras dos módulos de autenticação, autorização e gestão de usuários (Auth Module v3).
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 tags: [auth, access, admin, architecture]
 last_review: 2026-07-01
 ---

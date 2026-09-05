@@ -2,7 +2,7 @@
 title: Organização de Código & Convenções
 description: Onde colocar código novo, naming, imports e padrões por camada.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-30
 ---
 
@@ -21,7 +21,7 @@ Complementa [Padrões de desenvolvimento](./development.md) e
 | Código de **autenticação** (sessão)   | `src/modules/auth/` — **nunca** Access/Postgres  |
 | Código de **autorização** (lifecycle) | `src/modules/access/`                            |
 | Gestão de **usuários** (admin)        | `src/modules/admin/`                             |
-| Adicionando componente de produto     | `src/components/lotus/`                          |
+| Adicionando componente de produto     | `src/components/lots/`                          |
 | Adicionando primitivo UI genérico     | `src/components/ui/`                             |
 | Adicionando cálculo/KPI               | `src/lib/platforms/formulas.ts` ou `engine.ts`   |
 | Adicionando plataforma                | `src/lib/platforms/{nome}.ts` + `registry.ts`    |

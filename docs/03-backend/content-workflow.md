@@ -2,7 +2,7 @@
 title: Content Workflow — Backend
 description: Server functions, repository pattern e API do módulo Aprovações.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 

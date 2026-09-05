@@ -2,7 +2,7 @@
 title: Content Workflow — Fase 4 (Biblioteca + Dashboard)
 description: Especificação e entrega da Fase 4 — repositório oficial e métricas operacionais.
 status: completed
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 
@@ -23,7 +23,7 @@ Submódulo: `src/modules/approval/library/`
 | Repository         | `repositories/library.repository.server.ts` — busca server-side paginada   |
 | Query / lifecycle  | `internal/library-query.server.ts`, `internal/library-lifecycle.server.ts` |
 | Server fns         | `library.server.ts`, `client-library.server.ts`                            |
-| UI                 | `components/lotus/approval/library/*`                                      |
+| UI                 | `components/lots/approval/library/*`                                      |
 
 ### Regras
 

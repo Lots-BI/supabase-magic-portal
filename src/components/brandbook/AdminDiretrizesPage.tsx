@@ -3,9 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { FileText, Search, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/lotus/PageHeader";
+import { PageHeader } from "@/components/lots/PageHeader";
 import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/components/lotus/ConfirmDialog";
+import { ConfirmDialog } from "@/components/lots/ConfirmDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -132,15 +132,15 @@ export function AdminDiretrizesPage() {
         onChange={(event) => void onFile(event.target.files?.[0])}
       />
 
-      <div className="lotus-surface overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-border/70 px-4 py-3 sm:flex-row sm:items-center">
+      <div className="lots-surface overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center">
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Buscar cliente"
-              className="lotus-focus h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm"
+              className="lots-focus h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm"
             />
           </div>
           <p className="text-[12px] text-muted-foreground">

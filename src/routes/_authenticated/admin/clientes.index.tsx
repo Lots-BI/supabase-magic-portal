@@ -3,7 +3,7 @@ import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { listClientes, toggleClienteAtivo } from "@/lib/admin.functions";
-import { PageHeader } from "@/components/lotus/PageHeader";
+import { PageHeader } from "@/components/lots/PageHeader";
 import { Button } from "@/components/ui/button";
 import { adminTitle } from "@/lib/brand";
 import { Search, Plus, MoreHorizontal, Filter, X } from "lucide-react";
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/admin/clientes/")({
   loader: ({ context }) => (context as any).queryClient?.ensureQueryData(clientesQuery),
   component: ClientesList,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-danger">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-danger">Erro: {error.message}</div>
   ),
 });
 
@@ -74,16 +74,16 @@ function ClientesList() {
         }
       />
 
-      <div className="lotus-surface overflow-hidden">
+      <div className="lots-surface overflow-hidden">
         {/* Toolbar */}
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border/70 px-4 py-3 sm:flex sm:flex-wrap">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4 py-3 sm:flex sm:flex-wrap">
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input
               placeholder="Buscar cliente por nome…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="lotus-focus h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-[13px] placeholder:text-muted-foreground/70"
+              className="lots-focus h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-[13px] placeholder:text-muted-foreground/70"
             />
           </div>
           <div className="flex shrink-0 items-center gap-1 rounded-lg border border-border bg-muted/40 p-0.5">
@@ -107,7 +107,7 @@ function ClientesList() {
 
         {/* Filter banner */}
         {filterActive && (
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/70 bg-muted/30 px-4 py-2 text-[12px]">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/30 px-4 py-2 text-[12px]">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Filter className="h-3.5 w-3.5" />
               <span>
@@ -131,7 +131,7 @@ function ClientesList() {
                 setFilter("todos");
                 setSearch("");
               }}
-              className="lotus-focus inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-0.5 text-[11.5px] font-medium text-muted-foreground hover:text-foreground"
+              className="lots-focus inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-0.5 text-[11.5px] font-medium text-muted-foreground hover:text-foreground"
             >
               <X className="h-3 w-3" /> Limpar filtros
             </button>
@@ -139,16 +139,16 @@ function ClientesList() {
         )}
 
         {/* Table */}
-        <div className="lotus-table-scroll">
+        <div className="lots-table-scroll">
           <table className="w-full min-w-max text-sm">
             <thead>
               <tr className="text-left text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
-                <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Cliente</th>
-                <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Empresa</th>
-                <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Serviços</th>
-                <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Acessos</th>
-                <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Status</th>
-                <th className="lotus-table-head-sticky px-4 py-2.5" />
+                <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Cliente</th>
+                <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Empresa</th>
+                <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Serviços</th>
+                <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Acessos</th>
+                <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Status</th>
+                <th className="lots-table-head-sticky px-4 py-2.5" />
               </tr>
             </thead>
             <tbody>
@@ -160,7 +160,7 @@ function ClientesList() {
                 </tr>
               )}
               {rows.map((c: any) => (
-                <tr key={c.id} className="lotus-row border-t border-border/60">
+                <tr key={c.id} className="lots-row border-t border-border">
                   <td className="px-4 py-3">
                     <Link
                       to="/admin/clientes/$id"
@@ -193,7 +193,7 @@ function ClientesList() {
                       {(c.servicos ?? []).slice(0, 3).map((s: string) => (
                         <span
                           key={s}
-                          className="inline-flex items-center rounded-md border border-border/70 bg-muted/50 px-1.5 py-0.5 text-[10.5px] font-medium text-muted-foreground"
+                          className="inline-flex items-center rounded-md border border-border bg-muted/50 px-1.5 py-0.5 text-[10.5px] font-medium text-muted-foreground"
                         >
                           {s}
                         </span>
@@ -229,7 +229,7 @@ function ClientesList() {
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => toggle(c.id, !c.ativo, c.nome_cliente)}
-                      className="lotus-focus inline-flex h-7 items-center rounded-md border border-border bg-card px-2.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-primary-300 hover:text-foreground"
+                      className="lots-focus inline-flex h-7 items-center rounded-md border border-border bg-card px-2.5 text-[11.5px] font-medium text-muted-foreground transition-colors hover:border-primary-300 hover:text-foreground"
                     >
                       {c.ativo ? "Desativar" : "Reativar"}
                     </button>

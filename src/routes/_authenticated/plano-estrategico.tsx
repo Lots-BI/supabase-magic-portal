@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Compass, ArrowRight } from "lucide-react";
 import { listPlanos } from "@/lib/strategic-plan.functions";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { SectionCard } from "@/components/lotus/SectionCard";
-import { EmptyState } from "@/components/lotus/EmptyState";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { SectionCard } from "@/components/lots/SectionCard";
+import { EmptyState } from "@/components/lots/EmptyState";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import { brandTitle } from "@/lib/brand";
 import { slugify } from "@/lib/slug";
 
@@ -50,7 +50,7 @@ function PlanoHubPage() {
               key={p.id}
               to="/cliente/$cliente/plano-estrategico/$planoId"
               params={{ cliente: slugify(p.cliente_nome), planoId: p.id }}
-              className="lotus-surface group flex flex-col gap-2 p-5 transition-colors hover:border-primary/30"
+              className="lots-surface group flex flex-col gap-2 p-5 transition-colors hover:border-primary/30"
             >
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {p.cliente_nome}

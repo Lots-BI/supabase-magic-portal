@@ -2,7 +2,7 @@
 title: Banco — Views Analíticas
 description: Catálogo das views vw_* que alimentam os dashboards.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
@@ -23,7 +23,6 @@ são versões anteriores das mesmas views).
 ```mermaid
 flowchart TD
     BM["base_metricas (long)"] --> N["vw_metricas_normalizadas"]
-    N --> META["vw_meta_ads_diario"]
     N --> GADS["vw_google_ads_diario"]
     N --> GA4["vw_ga4_diario"]
     N --> GBP["vw_google_business_diario"]
@@ -32,6 +31,9 @@ flowchart TD
     HUBIG["base_metricas_hub (Instagram)"] --> PH["vw_instagram_normalizada_prefer_hub"]
     BM --> PH
     PH --> IG["vw_instagram_diario"]
+    HUBMETA["base_metricas_hub (Meta Ads)"] --> PHM["vw_meta_ads_normalizada_prefer_hub"]
+    BM --> PHM
+    PHM --> META
     CAD["cadastro_clientes (+ serviços + acessos)"] --> ADM["vw_clientes_admin"]
 ```
 
@@ -56,7 +58,7 @@ Colunas: `id, data, cliente, plataforma, metrica, valor, campanha, created_at`.
 
 | View                        | Granularidade             | Colunas principais                                                                                                             |
 | --------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `vw_meta_ads_diario`        | data × cliente × campanha | reach, impressions, clicks, cpc, cpm, ctr, frequency, spend                                                                    |
+| `vw_meta_ads_diario`        | data × cliente × campanha | reach, impressions, clicks, cpc, cpm, ctr, frequency, spend, results, conversions                                              |
 | `vw_google_ads_diario`      | data × cliente × campanha | impressions, clicks, spend + ctr/cpc/cpm derivados na view                                                                     |
 | `vw_ga4_diario`             | data × cliente            | active_users, sessions, engaged_sessions, pageviews, event_count, conversions, engagement_rate                                 |
 | `vw_instagram_diario`       | data × cliente            | reach, interactions, accounts_engaged, likes, comments, saves, shares, profile_links_taps, engagement_rate                     |
@@ -67,20 +69,31 @@ Colunas: `id, data, cliente, plataforma, metrica, valor, campanha, created_at`.
 
 ---
 
-## `vw_instagram_diario` — exceção: prefere Hub (migration 34)
+## `vw_instagram_diario` e `vw_meta_ads_diario` — exceção: preferem Hub
 
-Diferente das demais views por plataforma, `vw_instagram_diario` **não** lê direto de
-`vw_metricas_normalizadas`. Ela lê de `vw_instagram_normalizada_prefer_hub`
-(`34_instagram_profile_prefer_hub.sql`), que por `data + cliente`:
+Diferente das demais views por plataforma, essas duas **não** leem direto de
+`vw_metricas_normalizadas`. Cada uma lê de uma view intermediária `vw_*_normalizada_prefer_hub`
+que, por `data + cliente` (Meta Ads inclui também `campanha` como coluna de passagem):
 
 1. Inclui a linha de `base_metricas_hub` quando existir (Platform Hub — Graph API oficial).
 2. Caso contrário, cai para `base_metricas_make` (Make, pipeline legado).
 
-A preferência é **por linha** (dia+cliente), restrita à plataforma Instagram —
-`ph_metricas_source.active_source` (troca global make↔hub) **não é alterado** por esta view.
-Isso permite o botão **Puxar métricas** em `/cliente/:slug/instagram` preencher gaps no Hub
-sem exigir cutover de nenhuma outra plataforma. Ver
-[instagram.md](../06-dashboards/platforms/instagram.md).
+| Dashboard | View final          | View intermediária                     | Migration                            |
+| --------- | -------------------- | --------------------------------------- | ------------------------------------- |
+| Instagram | `vw_instagram_diario` | `vw_instagram_normalizada_prefer_hub`   | `34_instagram_profile_prefer_hub.sql` |
+| Meta Ads  | `vw_meta_ads_diario`  | `vw_meta_ads_normalizada_prefer_hub`    | `36_meta_ads_prefer_hub.sql`          |
+
+A preferência é **por linha** (dia+cliente), restrita à plataforma correspondente —
+`ph_metricas_source.active_source` (troca global make↔hub) **não é alterado** por essas views.
+Isso permite o botão **Puxar métricas** em `/cliente/:slug/instagram` e no dashboard Meta Ads
+preencher gaps no Hub sem exigir cutover de nenhuma outra plataforma. Ver
+[instagram.md](../06-dashboards/platforms/instagram.md) e
+[meta-ads.md](../06-dashboards/platforms/meta-ads.md).
+
+> Nota Meta Ads: o coletor oficial grava `impressions`/`reach`/`clicks`/`spend`/`results`/
+> `conversions`. As colunas `cpc`/`cpm`/`ctr`/`frequency` do pivot (herdadas do Make) ficam
+> `NULL` em dias vindos do Hub. Sem impacto: o dashboard calcula esses KPIs no cliente
+> (`src/lib/platforms/meta-ads.ts`), não lê essas colunas da view.
 
 ---
 

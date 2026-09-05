@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { clienteRefQuery } from "./cliente.$cliente";
-import { StrategicPlanJourney } from "@/components/lotus/strategic-plan/StrategicPlanJourney";
+import { StrategicPlanJourney } from "@/components/lots/strategic-plan/StrategicPlanJourney";
 import { brandTitle } from "@/lib/brand";
 
 export const Route = createFileRoute("/_authenticated/cliente/$cliente/plano-estrategico/")({
@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/cliente/$cliente/plano-est
   }),
   component: ClientePlanoBootstrapPage,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-danger">
+    <div className="lots-surface p-4 text-sm text-danger">
       Não foi possível carregar o plano: {error.message}
     </div>
   ),
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/cliente/$cliente/plano-est
 function ClientePlanoBootstrapPage() {
   const { cliente: slug } = Route.useParams();
   return (
-    <Suspense fallback={<div className="lotus-skeleton h-48 w-full rounded-xl" />}>
+    <Suspense fallback={<div className="lots-skeleton h-48 w-full rounded-xl" />}>
       <ClientePlanoBootstrap slug={slug} />
     </Suspense>
   );

@@ -2,7 +2,7 @@
 title: Pipeline Make (Transitório)
 description: Ingestão atual via Make — estado observado, limitações e plano de substituição.
 status: living
-owner: Engenharia / Ops Lotus
+owner: Engenharia / Ops Lots BI
 last_review: 2026-06-26
 ---
 
@@ -57,7 +57,7 @@ sequenceDiagram
 - Onde credenciais OAuth são armazenadas (Make vault?).
 
 **Recomendação:** documentar cenários Make externamente (Notion/runbook ops) até migrar
-para coletores Lotus; ou exportar definição como artefato versionado.
+para coletores Lots BI; ou exportar definição como artefato versionado.
 
 ---
 
@@ -77,7 +77,7 @@ para coletores Lotus; ou exportar definição como artefato versionado.
 
 Substituir Make quando **todos** forem verdadeiros para aquela plataforma:
 
-- [ ] Coletor Lotus implementado e testado
+- [ ] Coletor Lots BI implementado e testado
 - [ ] Paridade de dados validada (amostragem ≥ 7 dias)
 - [ ] Scheduler + retries + alertas operacionais
 - [ ] UPSERT idempotente com `cliente_id` FK
@@ -86,7 +86,7 @@ Substituir Make quando **todos** forem verdadeiros para aquela plataforma:
 
 ### Instagram (perfil/conta) — status
 
-- [x] Coletor Lotus implementado — plugin `instagram_organic`, capability
+- [x] Coletor Lots BI implementado — plugin `instagram_organic`, capability
       `instagram_organic:profile:collect` (Graph API, `metrics-timeseries` → `base_metricas_hub`).
       Ver [instagram.md](../06-dashboards/platforms/instagram.md).
 - [x] Dashboard já prefere Hub por dia+cliente sem cutover global — migration
@@ -96,6 +96,25 @@ Substituir Make quando **todos** forem verdadeiros para aquela plataforma:
       workflow pendente de `/publicacoes` (`.github/workflows/instagram-media-sync-cron.yml`).
 - [ ] Runbook de reprocessamento — cobrir "backfill parcial" (cap de 30 dias/clique).
 - [ ] Make desligado para Instagram — **ainda não**; dual-run intencional nesta fase.
+- [x] Conexão self-service pelo cliente — disponível em `/cliente/:slug/conexoes`
+      (`CLIENT_SELF_SERVICE_PLUGIN_KEYS` inclui `instagram_organic`), além da via admin
+      (`/admin/conexoes/nova`).
+
+### Meta Ads (campanhas) — status
+
+- [x] Coletor Lots BI implementado — plugin `meta_ads`, capability `meta:metrics:collect`
+      (Marketing Insights API, `level=campaign`, `time_increment=1`, `metrics-timeseries` →
+      `base_metricas_hub`). Provider já validado em dual-run/E2E antes desta entrega — ver
+      [meta-ads.md](../06-dashboards/platforms/meta-ads.md).
+- [x] Dashboard já prefere Hub por dia+cliente sem cutover global — migration
+      `36_meta_ads_prefer_hub.sql`.
+- [ ] Paridade de dados validada (amostragem ≥ 7 dias, Gate B) — pendente.
+- [ ] Scheduler automático (cron) — hoje só manual via botão **Puxar métricas**.
+- [ ] Runbook de reprocessamento — cobrir "backfill parcial" (cap de 30 dias/clique).
+- [ ] Make desligado para Meta Ads — **ainda não**; dual-run intencional nesta fase.
+- [x] Conexão self-service pelo cliente — disponível em `/cliente/:slug/conexoes`
+      (`CLIENT_SELF_SERVICE_PLUGIN_KEYS` inclui `meta_ads`), além da via admin
+      (`/admin/conexoes/nova`).
 
 ---
 

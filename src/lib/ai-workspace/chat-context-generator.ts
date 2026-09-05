@@ -38,7 +38,7 @@ function buildProductSection(
   const future = product ? firstParagraphs(extractSection(product.body, "A solução"), 3) : "";
 
   const parts = [
-    "**Lots BI** (Lotus) é um SaaS de Business Intelligence para agências e empresas que operam marketing digital.",
+    "**Lots BI** é um SaaS de Business Intelligence para agências e empresas que operam marketing digital.",
     "",
     snapshot.overview.summary,
     "",

@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · Google Analytics 4 — PlatformDef.
+// Lots BI · Google Analytics 4 — PlatformDef.
 // View: public.vw_ga4_diario
 // Colunas: data, cliente, active_users, sessions, engaged_sessions, pageviews,
 //          event_count, conversions, engagement_rate.

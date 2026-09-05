@@ -3,7 +3,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
-import { PageHeader } from "@/components/lotus/PageHeader";
+import { PageHeader } from "@/components/lots/PageHeader";
 import { AccessAuditTimeline } from "@/features/access/components/AccessAuditTimeline";
 import { LifecycleStatusBadge } from "@/features/access/components/LifecycleStatusBadge";
 import { RecoveryModePanel } from "@/modules/admin/components/RecoveryModePanel";
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios/$userId")({
   },
   component: UsuarioDetalhePage,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-destructive">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-destructive">Erro: {error.message}</div>
   ),
 });
 
@@ -92,7 +92,7 @@ function UsuarioDetalhePage() {
         actions={
           <Link
             to="/admin/usuarios"
-            className="lotus-focus inline-flex h-9 items-center gap-1.5 rounded-lg border border-border px-3 text-[13px] font-medium"
+            className="lots-focus inline-flex h-9 items-center gap-1.5 rounded-lg border border-border px-3 text-[13px] font-medium"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Voltar
           </Link>
@@ -123,7 +123,7 @@ function UsuarioDetalhePage() {
         />
       </div>
 
-      <div className="lotus-surface p-4">
+      <div className="lots-surface p-4">
         <h3 className="mb-4 text-sm font-semibold">Timeline de auditoria</h3>
         <AccessAuditTimeline rows={audit} />
       </div>

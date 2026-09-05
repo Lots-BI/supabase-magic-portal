@@ -8,7 +8,7 @@
 | Item                             | Obrigatório | Como obter                                        |
 | -------------------------------- | ----------- | ------------------------------------------------- |
 | Node.js ≥ 22                     | Sim         | `node -v`                                         |
-| Dependências                     | Sim         | `npm install` na raiz de `supabase-magic-portal/` |
+| Dependências                     | Sim         | `npm install` na raiz de `lots-bi/` |
 | Token Meta long-lived            | Sim (live)  | Facebook Developer → token com `ads_read`         |
 | `OFFICIAL_SUPABASE_URL`          | Sim (live)  | `.env` local (read-only baseline)                 |
 | `OFFICIAL_SERVICE_ROLE_KEY`      | Sim (live)  | `.env` local — **não commitar**                   |
@@ -30,7 +30,7 @@
 ### 1. Validar ambiente (demo, sem credenciais reais)
 
 ```bash
-cd supabase-magic-portal
+cd lots-bi
 npm run gate-a:demo
 ```
 

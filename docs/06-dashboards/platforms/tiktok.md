@@ -1,8 +1,8 @@
 ---
 title: TikTok — Dashboard
-description: Status e roadmap do dashboard TikTok na Lotus.
+description: Status e roadmap do dashboard TikTok no Lots BI.
 status: living
-owner: Engenharia / Dados Lotus
+owner: Engenharia / Dados Lots BI
 tags: [dashboard, tiktok]
 difficulty: beginner
 last_review: 2026-06-26

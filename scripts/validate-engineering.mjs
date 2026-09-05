@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Lotus — validação do Sistema de Engenharia.
+ * Lots BI — validação do Sistema de Engenharia.
  * Garante que artefatos de governança existem no repositório.
  */
 import fs from "node:fs";
@@ -18,10 +18,10 @@ const requiredPaths = [
   "CONTRIBUTING.md",
   ".github/workflows/ci.yml",
   ".github/workflows/deploy.yml",
-  ".cursor/rules/lotus-engineering.mdc",
+  ".cursor/rules/lots-engineering.mdc",
   ".cursor/rules/docs-maintenance.mdc",
-  ".cursor/rules/lotus-governance.mdc",
-  ".cursor/rules/lotus-internal-dev.mdc",
+  ".cursor/rules/lots-governance.mdc",
+  ".cursor/rules/lots-internal-dev.mdc",
 ];
 
 const errors = [];
@@ -48,4 +48,4 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log("✅ Sistema de Engenharia Lotus — artefatos OK");
+console.log("✅ Sistema de Engenharia Lots BI — artefatos OK");

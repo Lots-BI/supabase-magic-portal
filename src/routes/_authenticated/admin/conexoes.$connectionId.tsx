@@ -3,8 +3,8 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { z } from "zod";
 import { adminTitle } from "@/lib/brand";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
-import { ConnectionDetailView } from "@/components/lotus/platform-hub/ConnectionDetailView";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
+import { ConnectionDetailView } from "@/components/lots/platform-hub/ConnectionDetailView";
 import { getHubConnectionDetail } from "@/modules/platform-hub-admin/hub-admin.server";
 import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
 

@@ -1,4 +1,4 @@
-// Lotus · Alertas operacionais do plano estratégico.
+// Lots BI · Alertas operacionais do plano estratégico.
 
 import type {
   MetricRefProgress,

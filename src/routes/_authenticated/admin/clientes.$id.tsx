@@ -26,16 +26,16 @@ import {
   toggleClienteAtivo,
   checkSlugAvailable,
 } from "@/lib/admin.functions";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { CollapsibleSection } from "@/components/lotus/CollapsibleSection";
-import { StatusBadge } from "@/components/lotus/StatusBadge";
-import { ConfirmDialog } from "@/components/lotus/ConfirmDialog";
-import { Field, FormRow, Select, TextArea, TextInput } from "@/components/lotus/FormField";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { CollapsibleSection } from "@/components/lots/CollapsibleSection";
+import { StatusBadge } from "@/components/lots/StatusBadge";
+import { ConfirmDialog } from "@/components/lots/ConfirmDialog";
+import { Field, FormRow, Select, TextArea, TextInput } from "@/components/lots/FormField";
 import { Switch } from "@/components/ui/switch";
 import { useDirtyBlocker } from "@/hooks/use-dirty-blocker";
 import { INTEGRATIONS, getIntegrationStatus } from "@/lib/integrations-catalog";
-import { IntegrationCard } from "@/components/lotus/IntegrationCard";
-import { ClientHubConnectionsSection } from "@/components/lotus/platform-hub/ClientHubConnectionsSection";
+import { IntegrationCard } from "@/components/lots/IntegrationCard";
+import { ClientHubConnectionsSection } from "@/components/lots/platform-hub/ClientHubConnectionsSection";
 
 const detailQuery = (id: number) => ({
   queryKey: ["admin", "cliente", id],
@@ -58,7 +58,7 @@ export const Route = createFileRoute("/_authenticated/admin/clientes/$id")({
   },
   component: ClienteEdit,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-destructive">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-destructive">Erro: {error.message}</div>
   ),
 });
 
@@ -313,7 +313,7 @@ function ClienteEdit() {
       <div className="space-y-3">
         <Link
           to="/admin/clientes"
-          className="lotus-focus inline-flex items-center gap-1 rounded-md text-[12px] text-muted-foreground hover:text-foreground"
+          className="lots-focus inline-flex items-center gap-1 rounded-md text-[12px] text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Voltar para clientes
         </Link>
@@ -326,7 +326,7 @@ function ClienteEdit() {
               <StatusBadge active={c.ativo} />
               <button
                 onClick={() => setToggleDialog(true)}
-                className="lotus-focus inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[12.5px] font-medium text-muted-foreground hover:border-primary-300 hover:text-foreground"
+                className="lots-focus inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-[12.5px] font-medium text-muted-foreground hover:border-primary-300 hover:text-foreground"
               >
                 <Power className="h-3.5 w-3.5" />
                 {c.ativo ? "Desativar" : "Reativar"}
@@ -372,7 +372,7 @@ function ClienteEdit() {
         </FormRow>
 
         <details className="group mt-4 rounded-lg border border-dashed border-border bg-muted/20 px-3 py-2 open:bg-muted/30">
-          <summary className="lotus-focus cursor-pointer select-none text-[11.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground">
+          <summary className="lots-focus cursor-pointer select-none text-[11.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground">
             Avançado — Slug (URL)
           </summary>
           <div className="mt-3">
@@ -383,7 +383,7 @@ function ClienteEdit() {
               hint={
                 <span className="inline-flex items-center gap-1.5">
                   <span className="font-mono text-foreground/80">
-                    lotus.app/cliente/{form.slug || "—"}
+                    lotsbi.leandromajr.com/cliente/{form.slug || "—"}
                   </span>
                   <SlugIndicator status={slugStatus} invalid={slugInvalid} />
                 </span>
@@ -634,7 +634,7 @@ function ClienteEdit() {
       <div className="fixed bottom-4 left-4 right-4 z-30 lg:left-[268px] lg:right-8">
         <div
           className={
-            "lotus-surface flex items-center justify-between gap-3 px-4 py-3 shadow-[var(--shadow-lg)] transition-all " +
+            "lots-surface flex items-center justify-between gap-3 px-4 py-3 shadow-[var(--shadow-lg)] transition-all " +
             (dirty ? "border-amber-300/60 dark:border-amber-500/40" : "border-border opacity-95")
           }
         >
@@ -658,14 +658,14 @@ function ClienteEdit() {
             <button
               onClick={() => setForm(initial)}
               disabled={!dirty || saving}
-              className="lotus-focus inline-flex h-9 items-center rounded-lg border border-border bg-card px-3 text-[12.5px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-40"
+              className="lots-focus inline-flex h-9 items-center rounded-lg border border-border bg-card px-3 text-[12.5px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-40"
             >
               Descartar
             </button>
             <button
               onClick={saveAll}
               disabled={!dirty || saving}
-              className="lotus-focus inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-transform hover:-translate-y-px disabled:translate-y-0 disabled:opacity-50"
+              className="lots-focus inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-transform hover:-translate-y-px disabled:translate-y-0 disabled:opacity-50"
             >
               {saving ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -837,7 +837,7 @@ function AcessosBlock({
         <button
           onClick={grant}
           disabled={!userId}
-          className="lotus-focus inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] hover:-translate-y-px disabled:opacity-50"
+          className="lots-focus inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] hover:-translate-y-px disabled:opacity-50"
         >
           <Plus className="h-3.5 w-3.5" /> Conceder
         </button>
@@ -865,7 +865,7 @@ function AcessosBlock({
                 </div>
                 <button
                   onClick={() => setRevokeTarget({ id: a.id, email })}
-                  className="lotus-focus inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11.5px] font-medium text-muted-foreground hover:border-destructive/40 hover:text-destructive"
+                  className="lots-focus inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11.5px] font-medium text-muted-foreground hover:border-destructive/40 hover:text-destructive"
                 >
                   <Trash2 className="h-3 w-3" /> Revogar
                 </button>

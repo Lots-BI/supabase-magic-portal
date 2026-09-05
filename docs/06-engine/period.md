@@ -2,7 +2,7 @@
 title: Período & Timezone
 description: API de src/lib/period.ts — janelas temporais em America/Sao_Paulo.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 

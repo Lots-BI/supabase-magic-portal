@@ -2,7 +2,7 @@
 title: Operações — Runbook
 description: Diagnóstico e resolução dos problemas operacionais mais comuns.
 status: living
-owner: Engenharia / Ops Lotus
+owner: Engenharia / Ops Lots BI
 last_review: 2026-06-26
 ---
 

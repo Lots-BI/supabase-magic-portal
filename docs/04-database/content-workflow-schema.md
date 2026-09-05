@@ -2,7 +2,7 @@
 title: Content Workflow — Schema
 description: Modelo de dados, migrations e RLS do módulo de Workflow de Conteúdo.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 

@@ -2,7 +2,7 @@
 title: Arquitetura — Fluxo de Dados
 description: Como os dados percorrem o sistema, da API de marketing ao dashboard.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
@@ -158,7 +158,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant API as APIs Oficiais
-    participant C as Coletor Lotus
+    participant C as Coletor Lots BI
     participant Q as Fila
     participant W as Worker
     participant DB as Postgres (métricas oficiais)

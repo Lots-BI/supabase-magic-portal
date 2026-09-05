@@ -3,7 +3,7 @@ description: Mantém o Centro de Conhecimento (docs/) atualizado a cada mudança
 alwaysApply: true
 ---
 
-# Documentação como código (Lotus)
+# Documentação como código (Lots BI)
 
 O Centro de Conhecimento vive em `docs/`. **Ponto de entrada:** `docs/START_HERE.md`.
 

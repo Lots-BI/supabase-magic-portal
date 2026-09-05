@@ -1,8 +1,8 @@
 ---
 title: Frontend — Design System & Engine de Plataformas
-description: Componentes lotus/*, kit ui/* e como o engine declarativo renderiza dashboards.
+description: Componentes lots/*, kit ui/* e como o engine declarativo renderiza dashboards.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-29
 ---
 
@@ -13,9 +13,9 @@ last_review: 2026-06-29
 | Camada                  | Pasta                  | Papel                                                                                                          |
 | ----------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
 | **Kit base**            | `src/components/ui`    | Primitivos shadcn/Radix (button, dialog, table, select, tabs, tooltip, sidebar…). Estilo neutro, reutilizável. |
-| **Design system Lotus** | `src/components/lotus` | Componentes de produto, com a identidade visual e a lógica de domínio.                                         |
+| **Design system Lots BI** | `src/components/lots` | Componentes de produto, com a identidade visual e a lógica de domínio.                                         |
 
-### Componentes-chave de `lotus/`
+### Componentes-chave de `lots/`
 
 - `AppShell` — casca com sidebar/topbar e navegação por grupos.
 - `PageHeader` — cabeçalho de página (eyebrow, título, descrição, ações).
@@ -23,11 +23,11 @@ last_review: 2026-06-29
 - `SectionCard` — bloco de seção com cabeçalho.
 - `PeriodPicker` / `PeriodToggle` — seleção de período.
 - `DeltaPill` — variação percentual colorida (respeita `positiveIsGood`).
-- `charts/` — `AreaChartLotus`, `BarChartLotus`, `DonutChartLotus`, `ChartFrame`, `EvolutionChart`.
+- `charts/` — `AreaChartLots`, `BarChartLots`, `DonutChartLots`, `ChartFrame`, `EvolutionChart`.
 - `IntegrationCard` / `IntegrationStatusPill` — central de integrações.
 - `ImpersonateClienteMenu` — "ver como cliente" (navegação).
 - `theme-provider` / `ThemeToggle` — tema claro/escuro.
-- `ConfirmDialog`, `FormField`, `CollapsibleSection`, `LotusSkeleton`, `LotusMark`.
+- `ConfirmDialog`, `FormField`, `CollapsibleSection`, `LotsSkeleton`, `LotsBIIcon`.
 
 ---
 
@@ -113,10 +113,10 @@ Breakpoints alvo: **320 / 375 / 390 / 414 / 768 px** e desktop.
 | ----------- | ----------------------------------------------------------------------------------- |
 | Shell       | `AppShell` — drawer &lt; `lg`, safe-area iOS, header sticky                         |
 | KPI grids   | `grid-cols-1` em 320px → `min-[375px]:grid-cols-2`                                  |
-| Tabelas     | wrapper `lotus-scroll-x` em `ui/table`                                              |
+| Tabelas     | wrapper `lots-scroll-x` em `ui/table`                                              |
 | Drawers     | `sheet.tsx` — `100dvh`, safe-area, largura fluida no mobile                         |
 | Formulários | `h-10` no mobile, `h-9` a partir de `sm`                                            |
-| Gráficos    | `AreaChartLotusLazy` (admin e plataformas); sem `min-width` fixo que force overflow |
+| Gráficos    | `AreaChartLotsLazy` (admin e plataformas); sem `min-width` fixo que force overflow |
 | KC          | `KnowledgeLayout` — índice em Sheet no mobile                                       |
 
-Utilitários em `src/styles.css`: `lotus-scroll-x`, `lotus-safe-bottom`, `lotus-table-scroll`.
+Utilitários em `src/styles.css`: `lots-scroll-x`, `lots-safe-bottom`, `lots-table-scroll`.

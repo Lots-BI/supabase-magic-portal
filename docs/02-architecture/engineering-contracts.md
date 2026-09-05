@@ -2,7 +2,7 @@
 title: Engineering Contracts — Platform Hub v3.3
 description: Contratos versionados, estrutura de pastas e processo de evolução.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-07
 ---
 

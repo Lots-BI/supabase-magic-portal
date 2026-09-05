@@ -5,7 +5,7 @@ description: Nome, cores, logo e personalização visual do portal.
 
 # Branding (`/admin/branding`)
 
-Personalize a **identidade visual** do portal Lotus para a agência ou white-label.
+Personalize a **identidade visual** do portal Lots BI para a agência ou white-label.
 
 ## O que pode ser alterado
 
@@ -14,7 +14,7 @@ Personalize a **identidade visual** do portal Lotus para a agência ou white-lab
 | **Nome da marca**   | Títulos de página, menu, e-mails             |
 | **Cores primárias** | Botões, destaques, gráficos                  |
 | **Logo**            | Cabeçalho e favicon (conforme implementação) |
-| **Tom visual**      | Variáveis CSS do design system Lotus         |
+| **Tom visual**      | Variáveis CSS do design system Lots BI         |
 
 ## Passo a passo
 

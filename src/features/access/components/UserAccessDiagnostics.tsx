@@ -24,7 +24,7 @@ function fmt(iso: string | null | undefined) {
 
 export function UserAccessDiagnostics({ profile }: { profile: UserAccessProfile }) {
   return (
-    <div className="lotus-surface space-y-4 p-4">
+    <div className="lots-surface space-y-4 p-4">
       <div>
         <h3 className="text-sm font-semibold">Diagnóstico de acesso</h3>
         <p className="text-xs text-muted-foreground">

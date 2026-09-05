@@ -2,7 +2,7 @@
 title: Content Workflow — Fase 2 (Portal Cliente)
 description: Especificação e entrega da Fase 2 — experiência cliente em /aprovacoes.
 status: completed
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 

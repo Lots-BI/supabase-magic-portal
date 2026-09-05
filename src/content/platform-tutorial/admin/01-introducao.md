@@ -5,7 +5,7 @@ description: Como navegar no painel admin, entender papéis e o mapa completo de
 
 # Introdução ao painel administrativo
 
-Este tutorial explica **cada aba** do painel admin da plataforma Lotus, passo a passo: o que você vê, o que preencher, como integrar dados e qual fluxo seguir no dia a dia.
+Este tutorial explica **cada aba** do painel admin da plataforma Lots BI, passo a passo: o que você vê, o que preencher, como integrar dados e qual fluxo seguir no dia a dia.
 
 ## Para quem é este guia
 

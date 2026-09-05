@@ -2,7 +2,7 @@
 title: AI Chat Context
 description: Contexto conversacional para modelos de chat — diferença vs Prompt Generator técnico.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 

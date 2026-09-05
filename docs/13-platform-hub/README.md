@@ -35,7 +35,7 @@ Esta pasta é a **aba dedicada** do Knowledge Center ao Platform Hub. Use-a quan
 src/modules/platform-hub/           # Kernel congelado (Runtime, Pipeline, Registry, Health)
 src/modules/platform-hub-bridges/   # Writers Supabase, ph_* persistence, Gate A, homologação
 src/modules/platform-hub-admin/     # Server functions admin, OAuth factory, diagnóstico
-src/components/lotus/platform-hub/  # UI /admin/conexoes/*
+src/components/lots/platform-hub/  # UI /admin/conexoes/*
 src/routes/oauth/*/callback.tsx     # Callbacks OAuth (Meta, Google, TikTok)
 supabase/migrations-official/
   28_platform_hub.sql

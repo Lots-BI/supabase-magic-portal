@@ -1,8 +1,8 @@
 ---
 title: Roadmap & Dívidas Técnicas
-description: Direção de evolução da Lotus — estado atual, arquitetura alvo e dívidas priorizadas.
+description: Direção de evolução do Lots BI — estado atual, arquitetura alvo e dívidas priorizadas.
 status: living
-owner: Engenharia / Produto Lotus
+owner: Engenharia / Produto Lots BI
 last_review: 2026-07-05
 ---
 
@@ -24,7 +24,7 @@ Itens 🔧 = dívida técnica · ✨ = evolução de produto · 🎯 = marco est
 flowchart LR
     F1["Fase 1\nFundações de dados"] --> F2["Fase 2\nConfiabilidade"]
     F2 --> F3["Fase 3\nPlataformas"]
-    F3 --> F4["Fase 4\nColetores Lotus"]
+    F3 --> F4["Fase 4\nColetores Lots BI"]
     F4 --> F5["Fase 5\nMotor de métricas"]
     F5 --> F6["Fase 6\nInfra proprietária"]
 ```
@@ -41,7 +41,7 @@ flowchart LR
 - 🎯 **Cursor como ambiente oficial de engenharia.** Lovable = build/deploy transitório apenas.
   Ver [ADR-0010](../02-architecture/adr/0010-cursor-official-development-environment.md).
 - 🎯 **Fluxo oficial documentado:** `docs/09-standards/development-workflow.md` +
-  `.cursor/rules/lotus-engineering.mdc`.
+  `.cursor/rules/lots-engineering.mdc`.
 - 🎯 **Sistema de Engenharia fundado:** CI, Vitest, CONTRIBUTING, governança.
   Ver [ADR-0011](../02-architecture/adr/0011-engineering-system-foundation.md).
 
@@ -194,10 +194,10 @@ Plano: [content-workflow-implementation-plan.md](../03-backend/content-workflow-
 
 - ✨ **Completar TikTok e Google Business** (view + PlatformDef + registry) ou remover.
 - 🔧 **Unificar agregação** (`metrics.ts` + `engine.ts` + insights duplicados).
-- ✨ **Resolver identidade Majrá vs Lotus.**
+- ~~✨ **Resolver identidade Lots BI vs Lots BI.**~~ — **Entregue:** produto padronizado como **Lots BI**.
 - ✨ **LinkedIn, Pinterest, YouTube** — apenas após Fase 4 (coletores).
 
-## Fase 4 — Coletores Lotus 🎯 (substituir Make)
+## Fase 4 — Coletores Lots BI 🎯 (substituir Make)
 
 > **Transitório → Proprietário.** Ver [ADR-0008](../02-architecture/adr/0008-proprietary-data-collectors.md).
 
@@ -213,7 +213,7 @@ Plano: [content-workflow-implementation-plan.md](../03-backend/content-workflow-
 > Ver [ADR-0007](../02-architecture/adr/0007-derived-metrics-in-application-layer.md).
 
 - 🎯 **Remover métricas derivadas das views SQL** (CTR, CPM, engagement_rate).
-- 🎯 **Pacote `@lotus/metrics`** — fórmulas compartilhadas entre API, workers e frontend.
+- 🎯 **Pacote `@lots/metrics`** — fórmulas compartilhadas entre API, workers e frontend.
 - 🎯 **API interna** — leitura analítica via server layer (não browser → views direto).
 - 🔧 **Testes de paridade** SQL vs TS durante transição.
 
@@ -241,7 +241,7 @@ Plano: [content-workflow-implementation-plan.md](../03-backend/content-workflow-
 | D7  | `signUp` público aberto               | ~~Médio~~ ✅ Auth v3 | —       | 2    |
 | D8  | Insights duplicados                   | Baixo                | Baixo   | 3    |
 | D9  | TikTok/GBP incompletos                | Médio                | Médio   | 3    |
-| D10 | Marca Majrá/Lotus                     | Baixo                | Baixo   | 3    |
+| D10 | Marca Lots BI                         | ~~Baixo~~ ✅         | —       | 3    |
 | D11 | Métricas derivadas no SQL             | Alto                 | Médio   | 5    |
 | D12 | Make como único pipeline              | Alto                 | Alto    | 4    |
 | D13 | Sem coletores proprietários           | Alto                 | Alto    | 4    |

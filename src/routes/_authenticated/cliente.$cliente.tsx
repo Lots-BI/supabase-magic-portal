@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft } from "lucide-react";
 import { brandTitle } from "@/lib/brand";
 import { detectClientPlatforms, type ClientPlatformRouteKey } from "@/lib/platform-availability";
-import { ClienteWorkspaceProvider } from "@/components/lotus/cliente-workspace-context";
+import { ClienteWorkspaceProvider } from "@/components/lots/cliente-workspace-context";
 import { slugify } from "@/lib/slug";
 
 // ---------------- Shared helpers (used by child routes) ----------------
@@ -79,10 +79,10 @@ export const Route = createFileRoute("/_authenticated/cliente/$cliente")({
   head: ({ params }) => ({ meta: [{ title: brandTitle(params.cliente) }] }),
   component: ClienteLayout,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-danger">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-danger">Erro: {error.message}</div>
   ),
   notFoundComponent: () => (
-    <div className="lotus-surface p-6 text-sm text-muted-foreground">Cliente não encontrado.</div>
+    <div className="lots-surface p-6 text-sm text-muted-foreground">Cliente não encontrado.</div>
   ),
 });
 
@@ -104,7 +104,7 @@ function ClienteLayout() {
         </div>
       )}
 
-      <Suspense fallback={<div className="lotus-skeleton h-96 w-full rounded-xl" />}>
+      <Suspense fallback={<div className="lots-skeleton h-96 w-full rounded-xl" />}>
         <ClienteShell slug={slug} />
       </Suspense>
     </div>
@@ -116,7 +116,7 @@ function ClienteShell({ slug }: { slug: string }) {
 
   if (!ref) {
     return (
-      <div className="lotus-surface p-6 text-sm text-muted-foreground">
+      <div className="lots-surface p-6 text-sm text-muted-foreground">
         Cliente não encontrado para o identificador <strong>{slug}</strong>.
       </div>
     );

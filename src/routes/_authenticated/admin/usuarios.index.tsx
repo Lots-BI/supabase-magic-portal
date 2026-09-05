@@ -11,10 +11,10 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
-import { PageHeader } from "@/components/lotus/PageHeader";
+import { PageHeader } from "@/components/lots/PageHeader";
 import { Button } from "@/components/ui/button";
-import { StatCard } from "@/components/lotus/StatCard";
-import { TextInput } from "@/components/lotus/FormField";
+import { StatCard } from "@/components/lots/StatCard";
+import { TextInput } from "@/components/lots/FormField";
 import {
   LifecycleStatusBadge,
   lifecycleStatusLabel,
@@ -49,7 +49,7 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios/")({
   },
   component: UsuariosPage,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-destructive">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-destructive">Erro: {error.message}</div>
   ),
 });
 
@@ -114,8 +114,8 @@ function UsuariosPage() {
         <StatCard label="Admins" value={String(counts.admin)} icon={ShieldCheck} />
       </div>
 
-      <div className="lotus-surface overflow-hidden">
-        <div className="flex flex-wrap items-center gap-3 border-b border-border/70 px-4 py-3">
+      <div className="lots-surface overflow-hidden">
+        <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3">
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <TextInput
@@ -144,16 +144,16 @@ function UsuariosPage() {
           </div>
         </div>
 
-        <div className="lotus-table-scroll">
+        <div className="lots-table-scroll">
           <table className="w-full min-w-max text-sm">
             <thead>
               <tr className="text-left text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
-                <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Usuário</th>
-                <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Perfil</th>
-                <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Lifecycle</th>
-                <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Clientes</th>
-                <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Último login</th>
-                <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Ações</th>
+                <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Usuário</th>
+                <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Perfil</th>
+                <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Lifecycle</th>
+                <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Clientes</th>
+                <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Último login</th>
+                <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -165,7 +165,7 @@ function UsuariosPage() {
                 </tr>
               )}
               {filtered.map((u) => (
-                <tr key={u.id} className="border-t border-border/60 hover:bg-muted/20">
+                <tr key={u.id} className="border-t border-border hover:bg-muted/45">
                   <td className="px-4 py-3">
                     <p className="text-[13px] font-medium">{u.email}</p>
                     <p className="font-mono text-[10.5px] text-muted-foreground">
@@ -203,7 +203,7 @@ function UsuariosPage() {
           </table>
         </div>
 
-        <div className="flex items-center justify-between border-t border-border/70 px-4 py-3">
+        <div className="flex items-center justify-between border-t border-border px-4 py-3">
           <p className="text-[12px] text-muted-foreground">
             Página {page} · ~{total} usuários no Auth
           </p>
@@ -212,7 +212,7 @@ function UsuariosPage() {
               type="button"
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="lotus-focus inline-flex h-8 items-center gap-1 rounded-md border border-border px-2 text-xs disabled:opacity-40"
+              className="lots-focus inline-flex h-8 items-center gap-1 rounded-md border border-border px-2 text-xs disabled:opacity-40"
             >
               <ChevronLeft className="h-3.5 w-3.5" /> Anterior
             </button>
@@ -220,7 +220,7 @@ function UsuariosPage() {
               type="button"
               disabled={profiles.length < 50}
               onClick={() => setPage((p) => p + 1)}
-              className="lotus-focus inline-flex h-8 items-center gap-1 rounded-md border border-border px-2 text-xs disabled:opacity-40"
+              className="lots-focus inline-flex h-8 items-center gap-1 rounded-md border border-border px-2 text-xs disabled:opacity-40"
             >
               Próxima <ChevronRight className="h-3.5 w-3.5" />
             </button>

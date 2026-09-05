@@ -24,7 +24,7 @@ export function TutorialDocViewer({
     <div className="relative">
       <Link
         to={base}
-        className="lotus-focus mb-4 inline-flex items-center gap-1 text-[13px] text-muted-foreground hover:text-foreground"
+        className="lots-focus mb-4 inline-flex items-center gap-1 text-[13px] text-muted-foreground hover:text-foreground"
       >
         <ChevronLeft className="h-3.5 w-3.5" />
         Voltar ao índice
@@ -44,7 +44,7 @@ export function TutorialDocViewer({
             )}
           </header>
 
-          <Suspense fallback={<div className="lotus-skeleton h-96 w-full rounded-lg" />}>
+          <Suspense fallback={<div className="lots-skeleton h-96 w-full rounded-lg" />}>
             <KnowledgeMarkdown content={doc.body} currentDocPath={doc.path} />
           </Suspense>
 
@@ -53,7 +53,7 @@ export function TutorialDocViewer({
               <Link
                 to={`${base}/$`}
                 params={{ _splat: prev.slug.replace(/^admin\/|^client\//, "") }}
-                className="lotus-focus inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                className="lots-focus inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
               >
                 <ChevronLeft className="h-4 w-4" />
                 {prev.label}
@@ -65,7 +65,7 @@ export function TutorialDocViewer({
               <Link
                 to={`${base}/$`}
                 params={{ _splat: next.slug.replace(/^admin\/|^client\//, "") }}
-                className="lotus-focus inline-flex items-center gap-1 text-sm font-medium text-primary hover:opacity-90"
+                className="lots-focus inline-flex items-center gap-1 text-sm font-medium text-primary hover:opacity-90"
               >
                 {next.label}
                 <ChevronRight className="h-4 w-4" />

@@ -2,14 +2,14 @@
 title: Auditoria de variáveis de ambiente — Platform Hub RC1
 description: Inventário completo process.env / import.meta.env vs documentação e .env.example
 status: report
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 audit_date: 2026-07-09
 scope: Platform Hub v3.3 homologação RC1
 ---
 
 # Auditoria de ambiente — Platform Hub RC1
 
-Auditoria estática do repositório `supabase-magic-portal` para preparar homologação RC1.  
+Auditoria estática do repositório `lots-bi` para preparar homologação RC1.  
 **Nenhum arquivo de código, `.env.example` ou `ENVIRONMENT_VARIABLES.md` foi alterado** — apenas este relatório foi gerado.
 
 ## Metodologia

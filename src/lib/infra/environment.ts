@@ -2,7 +2,7 @@
 
 import { isLocalhostUrl, normalizeAppUrl } from "@/lib/app-url";
 
-export type LotusEnvironment = "development" | "staging" | "production";
+export type LotsEnvironment = "development" | "staging" | "production";
 
 export const DEFAULT_PRODUCTION_APP_URL = "https://lotsbi.leandromajr.com";
 
@@ -24,10 +24,10 @@ export function hostnamesMatch(a: string, b: string): boolean {
 }
 
 /** Infere ambiente a partir do host da requisição / browser. */
-export function detectLotusEnvironment(
+export function detectLotsEnvironment(
   hostnameOrOrigin: string,
   opts?: { nodeEnv?: string; isViteProd?: boolean },
-): LotusEnvironment {
+): LotsEnvironment {
   const host = normalizeHostname(hostnameOrOrigin);
   if (isLocalhostUrl(`http://${host}`) || host === "[::1]") return "development";
 
@@ -48,7 +48,7 @@ export function detectLotusEnvironment(
   return nodeProd || !host.includes("localhost") ? "production" : "development";
 }
 
-export function environmentLabel(env: LotusEnvironment): string {
+export function environmentLabel(env: LotsEnvironment): string {
   switch (env) {
     case "development":
       return "Development";
@@ -60,7 +60,7 @@ export function environmentLabel(env: LotusEnvironment): string {
 }
 
 export function resolveExpectedAppUrl(
-  env: LotusEnvironment,
+  env: LotsEnvironment,
   envVars?: {
     productionUrl?: string;
     stagingUrl?: string;

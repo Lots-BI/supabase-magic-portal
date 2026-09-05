@@ -26,7 +26,7 @@ export function FavoriteButton({ slug, className }: FavoriteButtonProps) {
       onClick={onClick}
       aria-label={active ? "Remover dos favoritos" : "Adicionar aos favoritos"}
       className={cn(
-        "lotus-focus inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:border-primary-300 hover:text-foreground",
+        "lots-focus inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:border-primary-300 hover:text-foreground",
         active && "border-primary-300 bg-primary/10 text-primary-600 dark:text-primary-300",
         className,
       )}

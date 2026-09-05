@@ -2,7 +2,7 @@
 title: Content Workflow — Arquitetura
 description: Visão arquitetural do módulo de Workflow de Conteúdo (Aprovações) da Lots BI.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 

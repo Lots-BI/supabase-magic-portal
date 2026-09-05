@@ -2,7 +2,7 @@
 title: Content Workflow — Dashboards & Biblioteca
 description: Dashboard operacional, biblioteca de conteúdos e métricas do workflow.
 status: living
-owner: Engenharia / Produto Lotus
+owner: Engenharia / Produto Lots BI
 last_review: 2026-07-05
 ---
 

@@ -1,21 +1,21 @@
 ---
 title: Arquitetura — Estado Atual
-description: Como a Lotus funciona hoje, com base no código e migrations versionados.
+description: Como o Lots BI funciona hoje, com base no código e migrations versionados.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
 # Arquitetura — Estado Atual
 
-> **Escopo:** fatos observáveis no repositório `supabase-magic-portal/`. Para a visão futura,
+> **Escopo:** fatos observáveis no repositório `lots-bi/`. Para a visão futura,
 > ver [Arquitetura alvo](./target-architecture.md).
 
 ---
 
 ## Resumo
 
-A Lotus é uma aplicação **full-stack TypeScript** (TanStack Start + React 19) que consome
+O Lots BI é uma aplicação **full-stack TypeScript** (TanStack Start + React 19) que consome
 dados analíticos do **Supabase Postgres**, ingeridos por **automações Make** externas.
 
 Não existe servidor backend dedicado fora do runtime TanStack Start (server functions) e
@@ -28,7 +28,7 @@ do Supabase (Auth, RLS, views, funções SQL).
 | Camada                   | Tecnologia                             | Notas                                                             |
 | ------------------------ | -------------------------------------- | ----------------------------------------------------------------- |
 | Framework                | TanStack Start + TanStack Router       | Roteamento file-based em `src/routes/`                            |
-| UI                       | React 19, Tailwind v4, Radix, Recharts | Componentes Lotus em `src/components/lotus/`                      |
+| UI                       | React 19, Tailwind v4, Radix, Recharts | Componentes Lots BI em `src/components/lots/`                      |
 | Estado servidor          | TanStack React Query                   | Cache e refetch de views Supabase                                 |
 | Backend lógico           | Server functions                       | `admin.functions.ts`, `editorial.functions.ts`                    |
 | Banco/Auth               | Supabase                               | Project ID: `ywvhoctcmibjitvwkkhb`                                |

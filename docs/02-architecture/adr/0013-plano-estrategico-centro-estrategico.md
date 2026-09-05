@@ -8,7 +8,7 @@ date: 2026-06-29
 
 ## Contexto
 
-A Lotus precisava de um módulo que conecte planejamento estratégico, métricas de marketing,
+O Lots BI precisava de um módulo que conecte planejamento estratégico, métricas de marketing,
 calendário editorial e memória de decisões — sem duplicar KPIs nem parecer um CRUD genérico.
 
 ## Decisão

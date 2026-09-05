@@ -65,10 +65,13 @@ Frases sobre variações > limiar — “CTR subiu 15%”.
 | -------------------- | --------------------------------------------- |
 | Investimento         | Inclui Facebook + Instagram ads               |
 | Alcance / impressões | Frequência alta = possível fadiga de criativo |
-| Conversões           | Verifique tipo (lead, purchase, mensagem)     |
+| Resultados / conversões | Lead, compra, conversa — o que a campanha otimiza |
 | CPC / CPM            | Subida pode indicar leilão mais caro          |
 
 **Passo a passo:** compare donut de posicionamento (se houver) → identifique criativo vencedor no ranking.
+
+Botão **Puxar métricas** (ao lado do período) busca na Meta qualquer dia sem dados de campanha
+dentro do histórico disponível — use quantas vezes precisar até completar o período.
 
 ## Instagram (orgânico)
 

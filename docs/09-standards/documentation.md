@@ -1,8 +1,8 @@
 ---
 title: Documentação como Código (Doc-as-Code)
-description: Como a documentação da Lotus é mantida viva e atualizada a cada feature.
+description: Como a documentação do Lots BI é mantida viva e atualizada a cada feature.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
@@ -11,7 +11,7 @@ last_review: 2026-06-26
 > **Regra de ouro:** toda funcionalidade nova ou mudança relevante de comportamento deve vir
 > acompanhada da atualização da documentação correspondente, **no mesmo Pull Request**.
 
-A documentação da Lotus mora no Git, em Markdown, ao lado do código. **Entrada principal:**
+A documentação do Lots BI mora no Git, em Markdown, ao lado do código. **Entrada principal:**
 [`docs/START_HERE.md`](../START_HERE.md). Não é um artefato separado que envelhece — é parte
 da Definition of Done.
 
@@ -73,7 +73,7 @@ Regras de projeto em `.cursor/rules/`:
 
 | Regra                                                                | Função                                                    |
 | -------------------------------------------------------------------- | --------------------------------------------------------- |
-| [`lotus-engineering.mdc`](../../.cursor/rules/lotus-engineering.mdc) | Fluxo oficial, qualidade, arquitetura, Definition of Done |
+| [`lots-engineering.mdc`](../../.cursor/rules/lots-engineering.mdc) | Fluxo oficial, qualidade, arquitetura, Definition of Done |
 | [`docs-maintenance.mdc`](../../.cursor/rules/docs-maintenance.mdc)   | Matriz código → docs; doc-as-code                         |
 
 Elas instruem o agente a manter código e documentação alinhados no mesmo trabalho.

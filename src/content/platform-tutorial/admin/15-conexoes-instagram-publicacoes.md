@@ -33,21 +33,21 @@ Após o OAuth, se a etapa 4 aparecer vazia, recarregue a página — o assistent
 ## Alternativa: o cliente conecta sozinho
 
 O cliente também pode fazer essa conexão sem depender do admin, em
-`/cliente/{slug}/conexoes` (aba **Conexões** no menu dele). O fluxo é o mesmo OAuth Meta, só que
-restrito a **instagram_organic** e escopado ao próprio cadastro do cliente (não aparece seletor
-de cliente nem de plataforma/provider — sempre `official_api`).
+`/cliente/{slug}/conexoes` (aba **Conexões** no menu dele) — um card por plataforma liberada
+para autoatendimento. O fluxo é o mesmo OAuth Meta, só que escopado ao próprio cadastro do
+cliente (não aparece seletor de cliente nem de plataforma/provider — sempre `official_api`).
 
-- Server functions dedicadas em `src/modules/platform-hub-client/hub-client.server.ts`
-  (`createClientInstagramConnectionFn`, `startClientInstagramOAuthFn`,
-  `discoverClientInstagramIdentitiesFn`, `attachClientInstagramIdentityFn`), todas checando
+- Server functions genéricas (por `pluginKey`) em
+  `src/modules/platform-hub-client/hub-client.server.ts` (`createClientConnectionFn`,
+  `startClientOAuthFn`, `discoverClientIdentitiesFn`, `attachClientIdentityFn`), todas checando
   `assertClientPortalAccess` (ou admin) antes de qualquer operação.
-- Plugins liberados para autoatendimento ficam em
-  `CLIENT_SELF_SERVICE_PLUGIN_KEY` — hoje só `instagram_organic`. Expandir essa constante (e a
-  UI em `ClientConnectionsPage.tsx`) quando outra plataforma for validada para o cliente.
+- Plugins liberados para autoatendimento ficam em `CLIENT_SELF_SERVICE_PLUGIN_KEYS` — hoje
+  `instagram_organic` e `meta_ads`. Expandir esse array (e `PLUGIN_CARDS` em
+  `ClientConnectionsPage.tsx`) quando outra plataforma for validada para o cliente.
 - `sanitizeOAuthRedirectAfter` foi estendido para aceitar `/cliente/{slug}/conexoes` (além dos
   paths `/admin/conexoes/*`).
 - Continua existindo a via admin acima — útil para suporte, ou quando o cliente não tem acesso
-  de administrador da Página no Meta Business.
+  de administrador da Página/conta de anúncios no Meta Business.
 
 ## O que o cliente vê
 

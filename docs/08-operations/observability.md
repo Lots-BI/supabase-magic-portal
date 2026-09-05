@@ -2,7 +2,7 @@
 title: Observabilidade & Monitoramento
 description: Logs, métricas operacionais, saúde de ingestão e APM — atual e alvo.
 status: living
-owner: Engenharia / Ops Lotus
+owner: Engenharia / Ops Lots BI
 last_review: 2026-06-26
 ---
 
@@ -75,7 +75,7 @@ Não há structured logging (JSON). Apenas `console.*` textual.
 
 ```mermaid
 flowchart TB
-    APP["App Lotus"] --> APM["APM\n(Sentry/Datadog)"]
+    APP["App Lots BI"] --> APM["APM\n(Sentry/Datadog)"]
     COL["Coletores"] --> MET["Métricas sync\n(success/latency/errors)"]
     MET --> DASH["Dashboard Ops"]
     MET --> ALERT["Alertas\n(PagerDuty/Slack)"]

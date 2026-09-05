@@ -2,7 +2,7 @@
 title: Frontend — Visão Geral
 description: Stack, estrutura de pastas, padrões de estado e tema.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
@@ -27,7 +27,7 @@ src/
 │   └── _authenticated/     # Tudo que exige login (guarda em route.tsx)
 ├── components/
 │   ├── ui/                 # Kit base shadcn/Radix (button, table, dialog...)
-│   └── lotus/              # Design system Lotus (AppShell, StatCard, charts...)
+│   └── lots/              # Design system Lots BI (AppShell, StatCard, charts...)
 ├── lib/                    # Lógica de negócio pura + server functions
 │   ├── platforms/          # Engine declarativo de plataformas
 │   ├── metrics.ts          # Agregação do overview + insights
@@ -46,8 +46,8 @@ src/
 `src/routes/__root.tsx` monta o app:
 
 - `QueryClientProvider` (React Query).
-- `ThemeProvider` (`src/components/lotus/theme-provider.tsx`) + `Toaster` (sonner).
-- Meta tags da Lotus (título, OG, theme-color `#9769b1`).
+- `ThemeProvider` (`src/components/lots/theme-provider.tsx`) + `Toaster` (sonner).
+- Meta tags do Lots BI (título, OG, theme-color `#9769b1`).
 - Script anti-FOUC: lê o tema de `localStorage` (`lotus-theme`) antes da hidratação.
 - Escuta `supabase.auth.onAuthStateChange` para invalidar rotas/queries em login/logout.
 
@@ -56,7 +56,7 @@ src/
 - Queries declaradas como `queryOptions` com `queryKey` que inclui parâmetros relevantes
   (cliente, período) para cache correto.
 - Rotas usam `loader` para `ensureQueryData` (prefetch) e `useSuspenseQuery` no corpo.
-- `<Suspense>` + _skeletons_ (`lotus-skeleton`) para carregamento; _empty states_ dedicados.
+- `<Suspense>` + _skeletons_ (`lots-skeleton`) para carregamento; _empty states_ dedicados.
 
 ## Estado de UI
 
@@ -68,6 +68,6 @@ src/
 
 - Claro/escuro via classe `dark` no `<html>`, persistido em `localStorage`.
 - Tokens de cor/spacing definidos em `src/styles.css` (Tailwind v4) e usados via utilitários
-  `lotus-*` (ex.: `lotus-surface`, `lotus-skeleton`, `lotus-focus`).
+  `lots-*` (ex.: `lots-surface`, `lots-skeleton`, `lots-focus`).
 
 Ver também: [Roteamento](./routing.md) e [Design System & Engine](./component-system.md).

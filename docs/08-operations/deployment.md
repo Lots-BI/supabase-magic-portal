@@ -2,7 +2,7 @@
 title: Operações — Deployment & Ambiente
 description: Build, runtime, variáveis de ambiente, deploy e papel transitório do Lovable.
 status: living
-owner: Engenharia / Ops Lotus
+owner: Engenharia / Ops Lots BI
 last_review: 2026-06-26
 ---
 
@@ -19,7 +19,7 @@ flowchart LR
     CUR["Cursor\n(dev local)"] --> GIT["Git / GitHub"]
     GIT --> BUILD["Build\n(Vite + Nitro)"]
     BUILD --> CF["Cloudflare\n(alvo atual)"]
-    CF --> PORTAL["Portal Lotus"]
+    CF --> PORTAL["Portal Lots BI"]
 ```
 
 | Etapa           | Ferramenta atual                           | Status         |

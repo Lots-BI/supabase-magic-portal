@@ -1,18 +1,18 @@
 ---
-title: Centro de Conhecimento da Lotus
-description: Documentação interna de engenharia, produto e operações da plataforma Lotus.
+title: Centro de Conhecimento do Lots BI
+description: Documentação interna de engenharia, produto e operações da plataforma Lots BI.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
-# 🪷 Centro de Conhecimento da Lotus
+# 🪷 Centro de Conhecimento do Lots BI
 
-> A fonte única de verdade sobre **como a Lotus funciona, por que foi construída assim e como evoluí-la com segurança**.
+> A fonte única de verdade sobre **como o Lots BI funciona, por que foi construído assim e como evoluí-lo com segurança**.
 
 Este Centro de Conhecimento é escrito no padrão _docs-as-code_: mora junto do código, em
 Markdown, versionado no Git. Foi estruturado para, no futuro, ser publicado **dentro da
-própria plataforma Lotus** como uma central de ajuda/engenharia (estilo Stripe Docs ou
+própria plataforma Lots BI** como uma central de ajuda/engenharia (estilo Stripe Docs ou
 Vercel Docs).
 
 **Novo no time?** Comece por **[START HERE](./START_HERE.md)** — onboarding em menos de 1 hora.
@@ -41,7 +41,7 @@ Ferramentas **transitórias**: Make (ingestão), Lovable (build/deploy). Ver
 | --- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
 | —   | **[START HERE](./START_HERE.md)**                | Ponto de entrada, mapa mental, roteiro de 1h                                                                                                                                                                | Novos devs      |
 | 00  | [Empresa](./00-company/mission.md)               | Missão, [Sistema de Engenharia](./00-company/engineering-system.md), filosofia, glossário                                                                                                                   | Todos           |
-| 01  | [Produto](./01-product/product-overview.md)      | O que a Lotus faz, personas, jornadas                                                                                                                                                                       | PM, Eng, Vendas |
+| 01  | [Produto](./01-product/product-overview.md)      | O que o Lots BI faz, personas, jornadas                                                                                                                                                                       | PM, Eng, Vendas |
 | 02  | [Arquitetura](./02-architecture/overview.md)     | Estado atual, arquitetura alvo, fluxo de dados, ADRs                                                                                                                                                        | Engenharia      |
 | 03  | [Backend](./03-backend/overview.md)              | Server functions, [auth](./03-backend/auth.md), [segurança](./03-backend/security.md), API                                                                                                                  | Engenharia      |
 | 04  | [Banco de dados](./04-database/schema.md)        | Schema, [RLS](./04-database/rls-policies.md), views, migrations, métricas                                                                                                                                   | Eng, Dados      |
@@ -77,7 +77,7 @@ flowchart LR
         Domain["Tabelas de domínio\nclientes · usuários · editorial"]
     end
 
-    subgraph App["App Lotus (TanStack Start)"]
+    subgraph App["App Lots BI (TanStack Start)"]
         SF["Server Functions\n(admin · editorial)"]
         UI["Frontend React 19\nDashboards"]
     end

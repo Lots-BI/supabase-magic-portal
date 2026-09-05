@@ -1,6 +1,6 @@
 -- =========================================================
 -- 09_owner_admin_guard.sql  (aditivo, idempotente)
--- Garante admin permanente para o dono da plataforma Lotus.
+-- Garante admin permanente para o dono da plataforma Lots BI.
 -- Email: leandromajr@gmail.com
 -- =========================================================
 

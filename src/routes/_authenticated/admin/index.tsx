@@ -3,16 +3,16 @@ import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { Suspense, useMemo, useState } from "react";
 import { listClientes, listServicos } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { StatCard } from "@/components/lotus/StatCard";
-import { SectionCard } from "@/components/lotus/SectionCard";
-import { PeriodToggle, type PeriodDays } from "@/components/lotus/PeriodToggle";
-import { DeltaPill } from "@/components/lotus/DeltaPill";
-import { ChartFrame, ChartLegendItem } from "@/components/lotus/charts/ChartFrame";
-import { getSeriesColor } from "@/components/lotus/charts/chart-colors";
-import { BarChartLotus } from "@/components/lotus/charts/BarChartLotus";
-import { DonutChartLotus } from "@/components/lotus/charts/DonutChartLotus";
-import { AreaChartLotusLazy } from "@/components/lotus/charts/AreaChartLotusLazy";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { StatCard } from "@/components/lots/StatCard";
+import { SectionCard } from "@/components/lots/SectionCard";
+import { PeriodToggle, type PeriodDays } from "@/components/lots/PeriodToggle";
+import { DeltaPill } from "@/components/lots/DeltaPill";
+import { ChartFrame, ChartLegendItem } from "@/components/lots/charts/ChartFrame";
+import { getSeriesColor } from "@/components/lots/charts/chart-colors";
+import { BarChartLots } from "@/components/lots/charts/BarChartLots";
+import { DonutChartLots } from "@/components/lots/charts/DonutChartLots";
+import { AreaChartLotsLazy } from "@/components/lots/charts/AreaChartLotsLazy";
 import { adminTitle, BRAND_NAME } from "@/lib/brand";
 import {
   PLATFORM_LABEL,
@@ -30,7 +30,7 @@ import {
   type OverviewRow,
 } from "@/lib/metrics";
 import { slugify } from "@/lib/slug";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import {
   Users,
   UserCheck,
@@ -105,7 +105,7 @@ export const Route = createFileRoute("/_authenticated/admin/")({
   },
   component: AdminOverview,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-danger">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-danger">Erro: {error.message}</div>
   ),
   notFoundComponent: () => <div>Não encontrado</div>,
 });
@@ -124,7 +124,7 @@ function AdminOverview() {
             <PeriodToggle value={days} onChange={setDays} />
             <Link
               to="/admin/clientes/novo"
-              className="lotus-focus inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-transform hover:-translate-y-px sm:h-9 sm:w-auto"
+              className="lots-focus inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-transform hover:-translate-y-px sm:h-9 sm:w-auto"
             >
               Novo cliente
               <ArrowUpRight className="h-3.5 w-3.5" />
@@ -271,7 +271,7 @@ function ExecutiveBody({ days }: { days: PeriodDays }) {
           {cT.spend === 0 && cT.conversions === 0 ? (
             <EmptyChart />
           ) : (
-            <AreaChartLotusLazy
+            <AreaChartLotsLazy
               data={daily}
               yMetric="spend"
               series={[
@@ -292,7 +292,7 @@ function ExecutiveBody({ days }: { days: PeriodDays }) {
           {share.length === 0 ? (
             <EmptyMini icon={Compass} text="Sem investimento registrado no período." />
           ) : (
-            <DonutChartLotus
+            <DonutChartLots
               slices={share.map((s) => ({
                 key: s.platform,
                 label: s.label,
@@ -315,7 +315,7 @@ function ExecutiveBody({ days }: { days: PeriodDays }) {
           description="Ordenado por orçamento de mídia executado."
           className="xl:col-span-2"
         >
-          <BarChartLotus
+          <BarChartLots
             rows={topClientes.map((c, idx) => ({
               key: c.cliente,
               label: (
@@ -350,7 +350,7 @@ function ExecutiveBody({ days }: { days: PeriodDays }) {
               Sem dados em <code>base_metricas</code> ainda.
             </p>
           ) : (
-            <ul className="divide-y divide-border/60">
+            <ul className="divide-y divide-border">
               {ativos.slice(0, 6).map((a) => (
                 <li key={a.cliente} className="px-5 py-3">
                   <div className="flex items-center justify-between gap-2">
@@ -369,7 +369,7 @@ function ExecutiveBody({ days }: { days: PeriodDays }) {
                     {(a.plataformas_ativas ?? []).slice(0, 5).map((p) => (
                       <span
                         key={p}
-                        className="inline-flex items-center rounded-md border border-border/60 bg-muted/60 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
+                        className="inline-flex items-center rounded-md border border-border bg-muted/60 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
                       >
                         {PLATFORM_LABEL[p as keyof typeof PLATFORM_LABEL] ?? p}
                       </span>

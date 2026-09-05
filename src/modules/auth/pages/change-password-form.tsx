@@ -68,7 +68,7 @@ export function ChangePasswordForm({
           autoComplete="current-password"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
-          className="lotus-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          className="lots-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
       </div>
       <div>
@@ -80,7 +80,7 @@ export function ChangePasswordForm({
           autoComplete="new-password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          className="lotus-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          className="lots-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
       </div>
       <div>
@@ -92,7 +92,7 @@ export function ChangePasswordForm({
           autoComplete="new-password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="lotus-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          className="lots-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}

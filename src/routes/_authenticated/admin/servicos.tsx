@@ -4,9 +4,9 @@ import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { listServicos, upsertServico } from "@/lib/admin.functions";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { SectionCard } from "@/components/lotus/SectionCard";
-import { EmptyState } from "@/components/lotus/EmptyState";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { SectionCard } from "@/components/lots/SectionCard";
+import { EmptyState } from "@/components/lots/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -111,19 +111,19 @@ function ServicosAdmin() {
             compact
           />
         ) : (
-          <div className="lotus-table-scroll">
+          <div className="lots-table-scroll">
             <table className="w-full min-w-max text-sm">
               <thead className="text-left text-[10.5px] uppercase tracking-wider text-muted-foreground">
                 <tr>
-                  <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Serviço</th>
-                  <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Descrição</th>
-                  <th className="lotus-table-head-sticky px-4 py-2.5 font-medium">Status</th>
-                  <th className="lotus-table-head-sticky px-4 py-2.5 font-medium" />
+                  <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Serviço</th>
+                  <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Descrição</th>
+                  <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Status</th>
+                  <th className="lots-table-head-sticky px-4 py-2.5 font-medium" />
                 </tr>
               </thead>
               <tbody>
                 {servicos.map((s) => (
-                  <tr key={s.id} className="border-t border-border/60 hover:bg-muted/20">
+                  <tr key={s.id} className="border-t border-border hover:bg-muted/45">
                     <td className="px-4 py-3 font-medium text-foreground">{s.nome}</td>
                     <td className="px-4 py-3 text-muted-foreground">{s.descricao ?? "—"}</td>
                     <td className="px-4 py-3">

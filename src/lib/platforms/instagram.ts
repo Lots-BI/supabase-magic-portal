@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · Instagram — PlatformDef.
+// Lots BI · Instagram — PlatformDef.
 // View: public.vw_instagram_diario
 // Colunas: data, cliente, reach, interactions, accounts_engaged, likes,
 //          comments, saves, shares, profile_links_taps, engagement_rate.

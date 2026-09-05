@@ -5,10 +5,11 @@ import { resolveBlockedRedirect } from "@/modules/access/services/resolve-blocke
 import { useSignOut } from "@/modules/auth";
 import { assertAccessActive } from "@/lib/access.functions.server";
 import { checkIsAdmin } from "@/lib/admin.functions";
-import { AppShell, type NavGroup } from "@/components/lotus/AppShell";
-import { AuthDiagnosticsBanner } from "@/components/lotus/infra/AuthDiagnosticsBanner";
-import { NotificationCenter } from "@/components/lotus/NotificationCenter";
-import { useClientNavAccount } from "@/components/lotus/dashboards-nav";
+import { AppShell, type NavGroup } from "@/components/lots/AppShell";
+import { AuthDiagnosticsBanner } from "@/components/lots/infra/AuthDiagnosticsBanner";
+import { NotificationCenter } from "@/components/lots/NotificationCenter";
+import { PlatformNewsAnnouncer } from "@/components/lots/platform-news/PlatformNewsAnnouncer";
+import { useClientNavAccount } from "@/components/lots/dashboards-nav";
 import { BRAND_NAME } from "@/lib/brand";
 import { FEATURE_PLANO_ESTRATEGICO_NAV } from "@/lib/feature-flags";
 import { isPlatformOwnerEmail } from "@/lib/platform-owner";
@@ -31,14 +32,16 @@ import {
   BrainCircuit,
   SwatchBook,
   Plug,
+  Newspaper,
+  Info,
 } from "lucide-react";
 import { lazy, Suspense } from "react";
 
 const GlobalSearch = lazy(() =>
-  import("@/components/lotus/GlobalSearch").then((m) => ({ default: m.GlobalSearch })),
+  import("@/components/lots/GlobalSearch").then((m) => ({ default: m.GlobalSearch })),
 );
 const ImpersonateClienteMenu = lazy(() =>
-  import("@/components/lotus/ImpersonateClienteMenu").then((m) => ({
+  import("@/components/lots/ImpersonateClienteMenu").then((m) => ({
     default: m.ImpersonateClienteMenu,
   })),
 );
@@ -171,6 +174,11 @@ function AuthenticatedLayout() {
         ...(FEATURE_PLANO_ESTRATEGICO_NAV
           ? [{ to: "/plano-estrategico", label: "Plano Estratégico", icon: Compass }]
           : []),
+      ],
+    },
+    {
+      label: "Social",
+      items: [
         {
           to: diretrizesSlug ? `/cliente/${diretrizesSlug}/aprovacoes` : "/aprovacoes",
           label: "Aprovações",
@@ -183,16 +191,34 @@ function AuthenticatedLayout() {
                 label: "Diretrizes da Marca",
                 icon: SwatchBook,
               },
+            ]
+          : []),
+      ],
+    },
+    ...(diretrizesSlug
+      ? [
+          {
+            label: "Integrações",
+            items: [
               {
                 to: `/cliente/${diretrizesSlug}/conexoes`,
                 label: "Conexões",
                 icon: Plug,
               },
-            ]
-          : []),
-        { to: "/tutorial", label: "Tutorial", icon: GraduationCap },
-        { to: "/novidades", label: "Novidades", icon: Sparkles },
+            ],
+          } as NavGroup,
+        ]
+      : []),
+    {
+      label: "Úteis",
+      items: [
+        { to: "/novidades", label: "Novidades", icon: Newspaper },
+        { to: "/tutorial", label: "Ajuda", icon: GraduationCap },
       ],
+    },
+    {
+      label: "Sobre Lots BI",
+      items: [{ to: "/sobre", label: "O que é", icon: Info }],
     },
     ...(isAdmin
       ? [
@@ -229,7 +255,7 @@ function AuthenticatedLayout() {
             type="button"
             onClick={signOut}
             aria-label="Sair da conta"
-            className="lotus-focus inline-flex h-10 min-w-10 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-0 text-xs font-medium text-muted-foreground transition-colors hover:border-primary-300 hover:text-foreground active:scale-[0.98] sm:h-9 sm:min-w-0 sm:px-3"
+            className="lots-focus inline-flex h-10 min-w-10 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-0 text-xs font-medium text-muted-foreground transition-colors hover:border-primary-300 hover:text-foreground active:scale-[0.98] sm:h-9 sm:min-w-0 sm:px-3"
           >
             <LogOut className="h-4 w-4 shrink-0" aria-hidden />
             <span className="hidden sm:inline">Sair</span>
@@ -250,6 +276,7 @@ function AuthenticatedLayout() {
         </div>
       }
     >
+      <PlatformNewsAnnouncer enabled={!isAdmin} />
       {inAdmin && isAdmin && <AuthDiagnosticsBanner />}
       <Outlet />
     </AppShell>

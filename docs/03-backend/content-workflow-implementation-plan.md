@@ -2,7 +2,7 @@
 title: Content Workflow v1 — Plano de Implementação
 description: Plano técnico aprovado para o módulo de Workflow de Conteúdo (Aprovações).
 status: approved
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 version: 3.0
 ---

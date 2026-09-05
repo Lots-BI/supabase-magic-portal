@@ -2,7 +2,7 @@
 title: Variáveis de ambiente — Platform Hub & Admin
 description: Inventário auditado de todas as variáveis usadas pelo Platform Hub e pelo módulo administrativo.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-09
 ---
 

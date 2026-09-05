@@ -76,8 +76,9 @@ describe("OfficialMetaProvider", () => {
 
     expect(envelope.profile).toBe("metrics-timeseries");
     expect(envelope.payload.platformLabel).toBe(META_PLATFORM_LABEL);
-    expect(envelope.payload.rows).toHaveLength(4);
+    expect(envelope.payload.rows).toHaveLength(6);
     expect(envelope.payload.rows.find((row) => row.metricKey === "spend")?.value).toBe(25.5);
+    expect(envelope.payload.rows.find((row) => row.metricKey === "results")?.value).toBe(0);
 
     const pipeline = createMetricPipelineStack();
     const pipelineResult = await pipeline.metricPipeline.accept(envelope);
@@ -151,7 +152,7 @@ describe("OfficialMetaProvider", () => {
     });
 
     expect(callCount).toBe(2);
-    expect(envelope.payload.rows).toHaveLength(2);
+    expect(envelope.payload.rows).toHaveLength(6);
   });
 
   it("falha autenticação quando token ausente", async () => {

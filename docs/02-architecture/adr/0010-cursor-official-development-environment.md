@@ -2,14 +2,14 @@
 title: "ADR-0010: Cursor como ambiente oficial de engenharia"
 status: accepted
 date: 2026-06-26
-deciders: Engenharia Lotus / Liderança
+deciders: Engenharia Lots BI / Liderança
 ---
 
 # ADR-0010: Cursor como ambiente oficial de engenharia
 
 ## Contexto
 
-A Lotus foi inicialmente prototipada no **Lovable**, que acelerou validação de produto e
+O Lots BI foi inicialmente prototipada no **Lovable**, que acelerou validação de produto e
 deploy inicial. Com o amadurecimento da plataforma e a criação do **Centro de Conhecimento**
 (`docs/`), o time precisa de engenharia tradicional: código versionado, PRs, revisão,
 documentação como código e evolução arquitetural de longo prazo.
@@ -26,13 +26,13 @@ vive e como features devem ser entregues.
 
 ## Decisão
 
-1. **Cursor passa a ser o ambiente oficial de engenharia** da Lotus.
-2. **Todo desenvolvimento** acontece neste repositório (`supabase-magic-portal/`).
-3. **Fluxo oficial:** Desenvolvimento → Commit → Git → GitHub → Deploy → Portal Lotus.
+1. **Cursor passa a ser o ambiente oficial de engenharia** do Lots BI.
+2. **Todo desenvolvimento** acontece neste repositório (`lots-bi/`).
+3. **Fluxo oficial:** Desenvolvimento → Commit → Git → GitHub → Deploy → Portal Lots BI.
 4. **Lovable** é reclassificado como plataforma **transitória de build/deploy** apenas —
    não é ambiente de implementação de features.
 5. Toda feature segue Definition of Done: build, lint, tipagem, documentação, ADR quando aplicável.
-6. Regras enforceadas via `.cursor/rules/lotus-engineering.mdc` e
+6. Regras enforceadas via `.cursor/rules/lots-engineering.mdc` e
    `docs/09-standards/development-workflow.md`.
 
 ## Alternativas consideradas
@@ -63,7 +63,7 @@ vive e como features devem ser entregues.
 | Item                                 | Status                       |
 | ------------------------------------ | ---------------------------- |
 | Cursor como ambiente oficial         | ✅ Decisão aceita            |
-| Regra Cursor `lotus-engineering.mdc` | ✅ Criada                    |
+| Regra Cursor `lots-engineering.mdc` | ✅ Criada                    |
 | Doc `development-workflow.md`        | ✅ Criada                    |
 | Remoção dependência Lovable no build | ❌ Pendente (Fase 6 roadmap) |
 | CI/CD GitHub Actions                 | ✅ ADR-0011                  |

@@ -83,7 +83,7 @@ Integrações: card na Central (`HubIntegrationsAlertCard`), seção na ficha do
 
 ## Setup local (mínimo)
 
-1. Clone + `npm install` em `supabase-magic-portal/`
+1. Clone + `npm install` em `lots-bi/`
 2. Copie `.env.example` → `.env` e preencha:
    - `OFFICIAL_SUPABASE_URL`, `OFFICIAL_SERVICE_ROLE_KEY`
    - `VITE_OFFICIAL_SUPABASE_URL`, `VITE_OFFICIAL_SUPABASE_ANON_KEY`
@@ -125,7 +125,7 @@ Estágios de migração por conexão: `make_passive` → `parity` → `dual_run`
 
 ## Onde **pode** mexer com segurança
 
-- UI em `components/lotus/platform-hub/`
+- UI em `components/lots/platform-hub/`
 - Server admin em `platform-hub-admin/`
 - Novos plugins seguindo `npm run create:plugin`
 - Docs em `docs/13-platform-hub/`

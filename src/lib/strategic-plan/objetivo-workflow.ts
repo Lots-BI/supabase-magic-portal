@@ -1,4 +1,4 @@
-// Lotus · Workflow de objetivos — um plano contínuo, objetivos sucessivos.
+// Lots BI · Workflow de objetivos — um plano contínuo, objetivos sucessivos.
 
 import type { PlanoItemStatus, PlanoObjetivo } from "./types";
 

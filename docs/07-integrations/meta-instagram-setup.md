@@ -2,7 +2,7 @@
 title: Setup Meta — Instagram orgânico (post metrics)
 description: Passo a passo para configurar app Meta lots_bi e conectar Instagram no Platform Hub.
 status: living
-owner: Engenharia / Ops Lotus
+owner: Engenharia / Ops Lots BI
 last_review: 2026-09-01
 ---
 
@@ -28,7 +28,7 @@ last_review: 2026-09-01
 5. Business Verification da Lots
 6. Modo **Live** (ou testers em Development)
 
-## Lotus
+## Lots BI
 
 Variáveis: `META_APP_ID`, `META_APP_SECRET`, `APP_URL`, `HUB_CREDENTIAL_ENCRYPTION_KEY`
 

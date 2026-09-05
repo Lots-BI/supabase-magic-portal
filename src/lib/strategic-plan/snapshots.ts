@@ -1,4 +1,4 @@
-// Lotus · Snapshots do plano estratégico (versionamento colaborativo).
+// Lots BI · Snapshots do plano estratégico (versionamento colaborativo).
 
 import type { PlanoDetail } from "./types";
 

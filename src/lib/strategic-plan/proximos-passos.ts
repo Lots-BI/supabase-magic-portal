@@ -1,4 +1,4 @@
-// Lotus · Próximos passos — derivação automática v1.
+// Lots BI · Próximos passos — derivação automática v1.
 
 import type {
   MetricRefProgress,

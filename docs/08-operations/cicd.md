@@ -2,7 +2,7 @@
 title: CI/CD
 description: Pipeline de integração e deploy — GitHub Actions, gates e deploy futuro.
 status: living
-owner: Engenharia / Ops Lotus
+owner: Engenharia / Ops Lots BI
 last_review: 2026-06-26
 ---
 

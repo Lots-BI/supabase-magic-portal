@@ -21,6 +21,42 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Adicionado
 
+- **Meta Ads: Resultados das campanhas (2026-09-05):** o coletor oficial pede `actions`
+  (e `conversions` quando a API aceita) na Marketing Insights API e grava `results`
+  (coluna Resultados do Gerenciador, conforme o objective da campanha). O dashboard exibe
+  só **Resultados** + custo por resultado por enquanto — conversões ficam ocultas até a
+  feature própria. Migration `37_meta_ads_results_conversions` acrescenta as colunas na
+  view. Insert no Hub ignora chaves já existentes (re-coleta não quebra em spend/clicks).
+  Writer e gap-finder cobrem dias sem `results`.
+
+- **Conexão Meta Ads self-service pelo cliente (2026-09-05):** aba **Conexões**
+  (`/cliente/:slug/conexoes`) generalizada para suportar múltiplas plataformas — agora exibe um
+  card por plugin liberado (`PLUGIN_CARDS` em `ClientConnectionsPage.tsx`), com **Meta Ads**
+  somado ao Instagram já existente. Server functions em
+  `src/modules/platform-hub-client/hub-client.server.ts` deixaram de ser hardcoded para
+  Instagram — agora recebem `pluginKey` e validam contra `CLIENT_SELF_SERVICE_PLUGIN_KEYS`
+  (`instagram_organic`, `meta_ads`); renomeadas para nomes genéricos
+  (`getClientConnectionStatusFn`, `createClientConnectionFn`, `startClientOAuthFn`,
+  `discoverClientIdentitiesFn`, `attachClientIdentityFn`). Tipo de identidade principal por
+  plugin em `CLIENT_SELF_SERVICE_PRIMARY_IDENTITY_TYPE` (`ad_account` para Meta Ads). Docs:
+  [instagram-posts.md](../06-dashboards/instagram-posts.md),
+  [meta-ads.md](../06-dashboards/platforms/meta-ads.md). Tutorial client `10-conexoes`; admin
+  `15-conexoes-instagram-publicacoes` (seção "Alternativa: o cliente conecta sozinho").
+
+- **Coleta de campanhas Meta Ads via Platform Hub (2026-09-05):** botão **Puxar métricas** no
+  dashboard Meta Ads agora coleta insights de campanha direto da Marketing Insights API
+  (plugin `meta_ads`, capability `meta:metrics:collect` — já existente, reaproveitada, sem
+  necessidade de nova capability), detectando e preenchendo dias faltantes (lookback de 89 dias,
+  cap de 30 dias/clique) e gravando em `base_metricas_hub`. Diferente do Instagram, a Insights
+  API aceita um range de dias por chamada (`time_increment=1`), então cada intervalo contíguo
+  faltante custa 1 chamada, não 1 por dia. Migration `36_meta_ads_prefer_hub` faz
+  `vw_meta_ads_diario` preferir Hub por dia+cliente, com fallback automático para Make (dual-run,
+  sem desligar Make). Server functions em `src/modules/meta-ads/` (`meta-ads.server.ts`,
+  `meta-ads-campaigns-sync.server.ts`) — reaproveita o gap finder e utilitários de data já
+  testados do backfill de Instagram. Docs:
+  [meta-ads.md](../06-dashboards/platforms/meta-ads.md), [views.md](../04-database/views.md),
+  [current-pipeline-make.md](../07-integrations/current-pipeline-make.md).
+
 - **Conexão Instagram self-service pelo cliente (2026-09-05):** aba **Conexões**
   (`/cliente/:slug/conexoes`) permite ao próprio cliente autorizar o Instagram via OAuth Meta,
   escolher a conta e vincular — sem depender do admin. Restrito por ora ao plugin
@@ -143,7 +179,7 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
   [auth-access-admin.md](../02-architecture/auth-access-admin.md),
   [ADR-0014](../02-architecture/adr/0014-auth-module-v3-architecture.md)).
 - **Sprint de performance:** `manualChunks` no Vite (react, supabase, recharts, mermaid, fuse…),
-  `QueryClient` com `staleTime`/`gcTime`, lazy load de Recharts (`AreaChartLotusLazy`), registry
+  `QueryClient` com `staleTime`/`gcTime`, lazy load de Recharts (`AreaChartLotsLazy`), registry
   do KC assíncrono, `db-selects.ts` para payloads menores, `React.memo` em `StatCard`.
 - **Sprint de responsividade:** plataforma utilizável em 320–768px — drawer mobile no `AppShell`
   e no KC, touch targets (44px), sheets/dialogs com safe-area iOS, KPI grids adaptativos,
@@ -175,7 +211,7 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 - **`column vw_clientes_admin.tiktok_ativo does not exist`:** select explícito pedia colunas da
   migration 05 antes dela estar em produção; `listClientes`/`getCliente` voltaram a `select("*")`
   até o banco estar alinhado (após aplicar `05_cadastro_clientes_make_ids.sql`).
-- **Dashboard admin (`/admin`):** `AreaChartLotusLazy` usado sem import — `ReferenceError` ao
+- **Dashboard admin (`/admin`):** `AreaChartLotsLazy` usado sem import — `ReferenceError` ao
   renderizar gráfico de evolução quando havia dados no período.
 - **`getCliente`:** restaurado `.eq("id", data.id)` removido acidentalmente na sprint de performance.
 - **Sintaxe em server functions:** `EDITORIAL_BUCKET`, `;` faltando em selects Supabase
@@ -221,7 +257,7 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 - **Automação:** `scripts/validate-engineering.mjs`, `npm run check`
 - **`.gitattributes`** + Prettier LF
 - **ADR-0011** — Fundação do Sistema de Engenharia
-- **Regra Cursor:** `lotus-governance.mdc`
+- **Regra Cursor:** `lots-governance.mdc`
 
 ### Adicionado (auditoria CTO)
 
@@ -241,7 +277,7 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 - **Fluxo oficial de desenvolvimento:** Cursor como ambiente de engenharia; Lovable rebaixado
   a build/deploy transitório.
 - **ADR-0010:** Cursor como ambiente oficial de engenharia.
-- **`.cursor/rules/lotus-engineering.mdc`:** regras de qualidade, arquitetura e Definition of Done.
+- **`.cursor/rules/lots-engineering.mdc`:** regras de qualidade, arquitetura e Definition of Done.
 - **`docs/09-standards/development-workflow.md`:** pipeline Dev → Git → GitHub → Deploy.
 - **START HERE** (`docs/START_HERE.md`): ponto de entrada principal do handbook (< 1h).
 - **Estado atual vs arquitetura alvo:** documentos dedicados em `02-architecture/`.
@@ -250,7 +286,7 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 - **Pipeline Make (transitório)** e **Coletores alvo** (`07-integrations/`).
 - **ADRs 0007–0009:** métricas na app, coletores proprietários, infra proprietária.
 - **Roadmap expandido** (Fases 4–6: coletores, motor de métricas, infra proprietária).
-- **Centro de Conhecimento da Lotus** (`docs/`): handbook completo com ADRs, diagramas,
+- **Centro de Conhecimento do Lots BI** (`docs/`): handbook completo com ADRs, diagramas,
   runbook, onboarding e regra Cursor para manutenção contínua.
 
 ---

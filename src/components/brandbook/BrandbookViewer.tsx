@@ -139,7 +139,7 @@ export function BrandbookViewer({ entry, clientLabel, mode = "admin" }: Brandboo
       <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
         <nav
           aria-label="Seções do brand book"
-          className="lotus-surface sticky top-20 h-fit max-h-[calc(100vh-6rem)] overflow-y-auto p-3"
+          className="lots-surface sticky top-20 h-fit max-h-[calc(100vh-6rem)] overflow-y-auto p-3"
         >
           <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             Seções
@@ -151,7 +151,7 @@ export function BrandbookViewer({ entry, clientLabel, mode = "admin" }: Brandboo
                   type="button"
                   onClick={() => scrollToSection(section.id)}
                   className={cn(
-                    "lotus-focus w-full rounded-md px-2 py-1.5 text-left text-[12px] transition-colors",
+                    "lots-focus w-full rounded-md px-2 py-1.5 text-left text-[12px] transition-colors",
                     activeSection === section.id
                       ? "bg-primary/10 font-medium text-primary"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -162,12 +162,12 @@ export function BrandbookViewer({ entry, clientLabel, mode = "admin" }: Brandboo
               </li>
             ))}
           </ul>
-          <div className="mt-4 border-t border-border/70 pt-3">
+          <div className="mt-4 border-t border-border pt-3">
             <a
               href={entry.repoUrl.replace(/\.git$/, "")}
               target="_blank"
               rel="noopener noreferrer"
-              className="lotus-focus inline-flex items-center gap-1.5 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+              className="lots-focus inline-flex items-center gap-1.5 px-2 text-[11px] text-muted-foreground hover:text-foreground"
             >
               Ver no GitHub <ExternalLink className="h-3 w-3" />
             </a>

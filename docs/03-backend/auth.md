@@ -2,7 +2,7 @@
 title: Autenticação & Autorização
 description: Fluxo de auth Supabase, papéis, guards de rota e server functions.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-01
 ---
 
@@ -48,7 +48,7 @@ Empresas, dados, dashboards, relatórios, integrações. **Auth nunca importa es
 
 ## Visão geral
 
-A Lotus usa **Supabase Auth** (email/senha). Autorização combina:
+O Lots BI usa **Supabase Auth** (email/senha). Autorização combina:
 
 1. **Papéis** (`admin` | `cliente`) em `user_roles`
 2. **Acesso por cliente** em `client_access`

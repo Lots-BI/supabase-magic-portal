@@ -2,7 +2,7 @@
 title: Fórmulas Oficiais de Marketing
 description: Referência completa de src/lib/platforms/formulas.ts — fonte única de KPIs derivados.
 status: living
-owner: Engenharia / Dados Lotus
+owner: Engenharia / Dados Lots BI
 last_review: 2026-06-26
 ---
 

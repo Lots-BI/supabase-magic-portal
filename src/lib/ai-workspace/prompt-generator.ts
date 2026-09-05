@@ -231,7 +231,7 @@ export function generateContextPrompt(snapshot: AiWorkspaceSnapshot): string {
   lines.push("---");
   lines.push("");
   lines.push(
-    "**Instruções para a IA:** Use este contexto como base. O Knowledge Center em `/admin/knowledge` contém documentação técnica detalhada. ADRs em `docs/02-architecture/adr/`. Código em `supabase-magic-portal/src/`. Siga as convenções listadas acima.",
+    "**Instruções para a IA:** Use este contexto como base. O Knowledge Center em `/admin/knowledge` contém documentação técnica detalhada. ADRs em `docs/02-architecture/adr/`. Código em `lots-bi/src/`. Siga as convenções listadas acima.",
   );
 
   return lines.filter(Boolean).join("\n");

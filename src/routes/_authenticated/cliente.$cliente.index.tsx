@@ -1,8 +1,8 @@
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
-import { DashboardsHub } from "@/components/lotus/DashboardsHub";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
+import { DashboardsHub } from "@/components/lots/DashboardsHub";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import { clientePlatformsQuery, clienteRefQuery } from "./cliente.$cliente";
 
 export const Route = createFileRoute("/_authenticated/cliente/$cliente/")({
@@ -29,7 +29,7 @@ function ClienteDashboardsBody({ slug }: { slug: string }) {
   const { data: ref } = useSuspenseQuery(clienteRefQuery(slug));
   if (!ref) {
     return (
-      <div className="lotus-surface p-6 text-sm text-muted-foreground">
+      <div className="lots-surface p-6 text-sm text-muted-foreground">
         Cliente não encontrado para o identificador <strong>{slug}</strong>.
       </div>
     );

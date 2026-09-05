@@ -57,7 +57,7 @@ export function KnowledgeSearchDialog() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="lotus-focus flex h-9 w-full max-w-sm items-center gap-2 rounded-lg border border-border bg-card px-3 text-left text-xs text-muted-foreground transition-colors hover:border-primary-300"
+        className="lots-focus flex h-9 w-full max-w-sm items-center gap-2 rounded-lg border border-border bg-card px-3 text-left text-xs text-muted-foreground transition-colors hover:border-primary-300"
       >
         <Search className="h-3.5 w-3.5 shrink-0" />
         <span className="flex-1 truncate">Buscar documentação…</span>

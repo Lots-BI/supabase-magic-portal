@@ -2,13 +2,13 @@
 title: Governança de Engenharia
 description: Processos de decisão, PRs, versionamento, ADRs e melhoria contínua.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
 # Governança de Engenharia
 
-Como a Lotus toma decisões técnicas, contribui com código e mantém qualidade ao longo do tempo.
+Como o Lots BI toma decisões técnicas, contribui com código e mantém qualidade ao longo do tempo.
 
 ---
 
@@ -94,7 +94,7 @@ Engenheiros e agentes Cursor devem **proativamente**:
 - Atualizar handbook quando código mudar
 - Propor padrões para processos repetitivos
 
-Regra Cursor: `.cursor/rules/lotus-governance.mdc`
+Regra Cursor: `.cursor/rules/lots-governance.mdc`
 
 ---
 

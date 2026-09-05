@@ -1,4 +1,4 @@
-// Lotus · Oportunidades — regras v1 (manual + regra; IA via origem futura).
+// Lots BI · Oportunidades — regras v1 (manual + regra; IA via origem futura).
 
 import type { PeriodAggregates } from "@/lib/platforms/engine";
 import { pctDelta } from "@/lib/platforms/engine";

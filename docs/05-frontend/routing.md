@@ -2,13 +2,13 @@
 title: Frontend — Roteamento & Guardas
 description: Mapa de rotas file-based, guarda de autenticação e navegação por papel.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
 # Roteamento & Guardas
 
-A Lotus usa **file-based routing** do TanStack Start. Cada arquivo em `src/routes` é uma
+O Lots BI usa **file-based routing** do TanStack Start. Cada arquivo em `src/routes` é uma
 rota. `routeTree.gen.ts` é **gerado automaticamente** — nunca editar à mão. Convenções
 completas em `src/routes/README.md`.
 

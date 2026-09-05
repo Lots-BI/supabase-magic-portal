@@ -2,7 +2,7 @@
 title: Modelo de Métricas — Oficiais vs Derivadas
 description: O que armazenar no banco, o que calcular na aplicação, e o gap do estado atual.
 status: living
-owner: Engenharia / Dados Lotus
+owner: Engenharia / Dados Lots BI
 last_review: 2026-06-26
 ---
 

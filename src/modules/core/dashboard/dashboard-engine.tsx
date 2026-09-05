@@ -66,7 +66,7 @@ function RegisteredWidget({
 
 function WidgetLoading({ title }: { title: string }): ReactNode {
   return (
-    <section className="lotus-surface flex min-h-[120px] animate-pulse flex-col justify-center p-6">
+    <section className="lots-surface flex min-h-[120px] animate-pulse flex-col justify-center p-6">
       <p className="text-sm text-muted-foreground">Carregando {title}…</p>
     </section>
   );

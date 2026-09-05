@@ -2,7 +2,7 @@
 title: "ADR-0008: Coletores proprietários substituem Make"
 status: proposed
 date: 2026-06-26
-deciders: Engenharia Lotus / Arquitetura
+deciders: Engenharia Lots BI / Arquitetura
 ---
 
 # ADR-0008: Coletores proprietários substituem Make
@@ -17,12 +17,12 @@ repositório. Isso permitiu validação rápida do produto, mas impõe:
 - Dependência operacional de ferramenta terceira.
 - Dificuldade de escalar para centenas de clientes e dezenas de plataformas.
 
-A visão estratégica da Lotus exige **coletores proprietários** por plataforma, com fila,
+A visão estratégica do Lots BI exige **coletores proprietários** por plataforma, com fila,
 workers, retries, UPSERT e monitoramento.
 
 ## Decisão (alvo)
 
-1. Implementar coletores Lotus (`GoogleAdsCollector`, `MetaCollector`, etc.) como workers
+1. Implementar coletores Lots BI (`GoogleAdsCollector`, `MetaCollector`, etc.) como workers
    dedicados.
 2. Orquestrar sync via fila de processamento (tecnologia TBD).
 3. Migrar **plataforma a plataforma** — não big-bang.
@@ -35,7 +35,7 @@ workers, retries, UPSERT e monitoramento.
 | ------------------------------------- | ------------------------------------------- |
 | Manter Make indefinidamente           | Sem controle, sem escala, bus factor        |
 | Zapier/n8n/outro iPaaS                | Mesmos problemas de propriedade intelectual |
-| ETL batch externo (Airbyte, Fivetran) | Custo, menos controle sobre regras Lotus    |
+| ETL batch externo (Airbyte, Fivetran) | Custo, menos controle sobre regras Lots BI    |
 
 Make permanece **aceitável no curto prazo** enquanto coletores não existem.
 
@@ -51,13 +51,13 @@ Make permanece **aceitável no curto prazo** enquanto coletores não existem.
 
 - Investimento inicial significativo (auth OAuth, rate limits, backfill).
 - Operação de fila/workers (infra adicional).
-- Período de dual-run (Make + Lotus) durante migração.
+- Período de dual-run (Make + Lots BI) durante migração.
 
 ## Estado de implementação
 
 | Item                                | Status                 |
 | ----------------------------------- | ---------------------- |
-| Coletores Lotus                     | ❌ Não implementado    |
+| Coletores Lots BI                     | ❌ Não implementado    |
 | Fila/workers                        | ❌ Não implementado    |
 | Make operacional                    | ✅ (externo, inferido) |
 | IDs técnicos em `cadastro_clientes` | ✅ Migration 05        |

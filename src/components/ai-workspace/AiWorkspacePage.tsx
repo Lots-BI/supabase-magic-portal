@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { CollapsibleSection } from "@/components/lotus/CollapsibleSection";
+import { CollapsibleSection } from "@/components/lots/CollapsibleSection";
 import { aiWorkspaceSnapshotQuery } from "@/lib/ai-workspace/queries";
 import { generateContextPrompt } from "@/lib/ai-workspace/prompt-generator";
 import { invalidateAiWorkspaceSnapshot } from "@/lib/ai-workspace/snapshot";
@@ -26,17 +26,17 @@ function AiWorkspaceLoadingSkeleton() {
       aria-label="Carregando AI Workspace"
     >
       <div className="space-y-3">
-        <div className="lotus-skeleton h-3 w-28" />
-        <div className="lotus-skeleton h-8 w-56" />
-        <div className="lotus-skeleton h-4 w-full max-w-xl" />
+        <div className="lots-skeleton h-3 w-28" />
+        <div className="lots-skeleton h-8 w-56" />
+        <div className="lots-skeleton h-4 w-full max-w-xl" />
       </div>
-      <div className="lotus-surface h-24 p-4">
-        <div className="lotus-skeleton mb-2 h-3 w-40" />
-        <div className="lotus-skeleton h-2 w-full" />
+      <div className="lots-surface h-24 p-4">
+        <div className="lots-skeleton mb-2 h-3 w-40" />
+        <div className="lots-skeleton h-2 w-full" />
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="lotus-surface min-h-[280px]" />
-        <div className="lotus-surface min-h-[280px]" />
+        <div className="lots-surface min-h-[280px]" />
+        <div className="lots-surface min-h-[280px]" />
       </div>
     </div>
   );
@@ -161,7 +161,7 @@ export function AiWorkspacePage() {
           </p>
         </div>
 
-        <div className="lotus-surface p-4">
+        <div className="lots-surface p-4">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-sm font-medium">AI Context Completeness</span>
             <span className="font-display text-lg font-semibold text-primary">
@@ -253,7 +253,7 @@ export function AiWorkspacePage() {
             <p className="mb-4 text-sm">{snapshot.architecture.summary}</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {snapshot.architecture.layers.map((l) => (
-                <div key={l.name} className="rounded-lg border border-border/60 p-3">
+                <div key={l.name} className="rounded-lg border border-border p-3">
                   <p className="text-xs font-semibold">{l.name}</p>
                   <p className="mt-1 text-[11px] text-muted-foreground">{l.description}</p>
                 </div>
@@ -311,7 +311,7 @@ export function AiWorkspacePage() {
             <p className="mb-4 text-sm text-muted-foreground">
               {snapshot.database.summaryMarkdown.slice(0, 400)}…
             </p>
-            <div className="max-h-64 overflow-auto rounded-lg border border-border/60">
+            <div className="max-h-64 overflow-auto rounded-lg border border-border">
               <table className="w-full text-left text-[11px]">
                 <thead className="sticky top-0 bg-muted/80">
                   <tr>
@@ -322,7 +322,7 @@ export function AiWorkspacePage() {
                 </thead>
                 <tbody>
                   {snapshot.database.tables.slice(0, 30).map((t) => (
-                    <tr key={t.name} className="border-t border-border/40">
+                    <tr key={t.name} className="border-t border-border">
                       <td className="px-3 py-1.5 font-mono">{t.name}</td>
                       <td className="px-3 py-1.5 text-muted-foreground">{t.migration}</td>
                       <td className="px-3 py-1.5 text-muted-foreground">
@@ -351,7 +351,7 @@ export function AiWorkspacePage() {
           >
             <div className="space-y-3">
               {snapshot.adrs.map((adr) => (
-                <div key={adr.slug} className="rounded-lg border border-border/60 p-3">
+                <div key={adr.slug} className="rounded-lg border border-border p-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-semibold">{adr.id}</span>
                     <Badge variant="outline" className="text-[10px]">
@@ -463,7 +463,7 @@ export function AiWorkspacePage() {
           >
             <ul className="space-y-2">
               {snapshot.conventions.map((c) => (
-                <li key={c.id} className="rounded-lg border border-border/50 p-3">
+                <li key={c.id} className="rounded-lg border border-border p-3">
                   <p className="text-sm font-medium">{c.title}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">{c.description}</p>
                   <p className="mt-1 text-[10px] text-muted-foreground/70">{c.source}</p>

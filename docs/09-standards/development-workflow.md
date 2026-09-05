@@ -2,13 +2,13 @@
 title: Fluxo Oficial de Desenvolvimento
 description: Cursor como ambiente de engenharia, pipeline Git → GitHub → Deploy e Definition of Done.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
 # Fluxo Oficial de Desenvolvimento
 
-> **Decisão oficial (2026-06-26):** o **Cursor** é o ambiente principal de engenharia da Lotus.
+> **Decisão oficial (2026-06-26):** o **Cursor** é o ambiente principal de engenharia do Lots BI.
 > O **Lovable** deixa de ser ambiente de desenvolvimento e passa a ser tratado apenas como
 > plataforma **transitória de build/deploy** enquanto ainda fizer parte da arquitetura.
 >
@@ -25,7 +25,7 @@ flowchart LR
     GIT["Git"]
     GH["GitHub"]
     DEPLOY["Deploy"]
-    PORTAL["Portal Lotus"]
+    PORTAL["Portal Lots BI"]
 
     DEV --> COMMIT --> GIT --> GH --> DEPLOY --> PORTAL
 ```
@@ -36,7 +36,7 @@ flowchart LR
 | Commit          | Git local                                | Mensagem clara; código pronto para produção |
 | GitHub          | Remote                                   | PR, revisão, histórico versionado           |
 | Deploy          | Pipeline (Lovable/Nitro/Cloudflare hoje) | Build e publicação                          |
-| Portal Lotus    | Produção                                 | Usuários finais                             |
+| Portal Lots BI    | Produção                                 | Usuários finais                             |
 
 **Regra:** toda implementação é feita **aqui**, no código. Não desenvolver no editor Lovable.
 
@@ -48,7 +48,7 @@ Checklist obrigatório para toda nova funcionalidade:
 
 1. **Analisar** o código existente nos módulos relacionados.
 2. **Identificar** arquivos e camadas afetados (routes, lib, components, migrations, docs).
-3. **Verificar** se já existe implementação semelhante (engine, componentes Lotus, server functions).
+3. **Verificar** se já existe implementação semelhante (engine, componentes Lots BI, server functions).
 4. **Reutilizar** antes de criar — componentes, hooks, fórmulas, patterns de query.
 5. **Evitar duplicação** — nunca código paralelo quando houver solução reutilizável.
 
@@ -66,13 +66,13 @@ Não pular direto para implementação. Não entregar atalhos que aumentem dívi
 
 Prioridades em toda implementação:
 
-| Princípio         | Prática na Lotus                                   |
+| Princípio         | Prática no Lots BI                                   |
 | ----------------- | -------------------------------------------------- |
 | Simplicidade      | Menor diff que resolve o problema                  |
 | Clareza           | Nomes explícitos; comentários só para o _porquê_   |
 | Escalabilidade    | Engine declarativo; coletores isolados (futuro)    |
 | Performance       | Queries enxutas; React Query com keys corretas     |
-| Reutilização      | `PlatformDef`, componentes `lotus/`, `formulas.ts` |
+| Reutilização      | `PlatformDef`, componentes `lots/`, `formulas.ts` |
 | Tipagem forte     | TypeScript estrito; evitar `any`                   |
 | Baixo acoplamento | Lógica em `src/lib/`; UI só consome                |
 
@@ -143,10 +143,10 @@ ADRs em `docs/02-architecture/adr/` para decisões difíceis de reverter.
 
 ## Visão estratégica
 
-Cada decisão de hoje deve aproximar a Lotus da **autossuficiência total**:
+Cada decisão de hoje deve aproximar o Lots BI da **autossuficiência total**:
 
 - Remover Make, Lovable, Horizons e dependências operacionais externas.
-- Toda inteligência dentro do ecossistema Lotus.
+- Toda inteligência dentro do ecossistema Lots BI.
 
 Ver [Missão](../00-company/mission.md) · [Roadmap](../11-roadmap/roadmap.md)
 
@@ -158,5 +158,5 @@ O agente e desenvolvedores no Cursor devem seguir:
 
 | Regra                      | Arquivo                               |
 | -------------------------- | ------------------------------------- |
-| Engenharia e fluxo oficial | `.cursor/rules/lotus-engineering.mdc` |
+| Engenharia e fluxo oficial | `.cursor/rules/lots-engineering.mdc` |
 | Manutenção de documentação | `.cursor/rules/docs-maintenance.mdc`  |

@@ -1,8 +1,8 @@
 ---
 title: Visão Geral do Produto
-description: O que a Lotus faz, para quem, e as principais jornadas de uso.
+description: O que o Lots BI faz, para quem, e as principais jornadas de uso.
 status: living
-owner: Produto Lotus
+owner: Produto Lots BI
 last_review: 2026-06-26
 ---
 
@@ -18,7 +18,7 @@ não apenas números em planilhas.
 
 ## A solução
 
-A Lotus é um **SaaS de Business Intelligence** que consolida métricas de marketing em
+O Lots BI é um **SaaS de Business Intelligence** que consolida métricas de marketing em
 **dashboards especializados por plataforma** e uma **visão consolidada**, com KPIs
 calculados de forma consistente, comparativos de período e insights automáticos.
 
@@ -29,12 +29,8 @@ aprovação de conteúdo**.
 **Visão futura:** plataforma proprietária end-to-end, com coletores próprios substituindo
 Make e motor de métricas unificado. Ver [Arquitetura alvo](../02-architecture/target-architecture.md).
 
-> **Nota de marca:** o restante do app usa "Lotus", mas as telas de entrada
-> (`src/routes/auth.tsx`, `src/routes/index.tsx`) exibem **"Majrá"**.
->
-> ⚠️ **INFORMAÇÃO NÃO ENCONTRADA** — não há no repositório a definição oficial da relação
-> entre "Majrá" e "Lotus" (empresa vs. produto). Padronizar é item do
-> [Roadmap](../11-roadmap/roadmap.md).
+A identidade oficial do produto é **Lots BI**. Telas, metadados de compartilhamento e
+documentação usam este nome (não mais Majrá ou Lotus como nome de produto).
 
 ---
 
@@ -123,13 +119,13 @@ journey
 
 ## Estados de "vazio" são parte do produto
 
-A Lotus trata explicitamente contas sem dados ("Sua conta está sendo preparada"),
+O Lots BI trata explicitamente contas sem dados ("Sua conta está sendo preparada"),
 plataformas sem ingestão e períodos sem registros — sempre com mensagens claras em vez de
 telas quebradas. Isso é um princípio de produto, não um detalhe.
 
 ---
 
-## O que **não** é a Lotus (hoje)
+## O que **não** é o Lots BI (hoje)
 
 - Não é a ferramenta que **coleta** os dados das APIs — isso é feito por automações
   externas no Make (ver [workers](../07-integrations/integrations.md#pipeline-de-ingestão-workers)).

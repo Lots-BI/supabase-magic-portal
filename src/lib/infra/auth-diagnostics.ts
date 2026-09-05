@@ -3,11 +3,11 @@
  */
 import { buildAuthInviteRedirectUrl, isLocalhostUrl } from "@/lib/app-url";
 import {
-  detectLotusEnvironment,
+  detectLotsEnvironment,
   environmentLabel,
   hostnamesMatch,
   resolveExpectedAppUrl,
-  type LotusEnvironment,
+  type LotsEnvironment,
 } from "./environment";
 
 export type DiagnosticStatus = "ok" | "warn" | "error";
@@ -20,7 +20,7 @@ export interface DiagnosticCheck {
 }
 
 export interface AuthDiagnosticsReport {
-  environment: LotusEnvironment;
+  environment: LotsEnvironment;
   environment_label: string;
   app_url_configured: string | null;
   current_domain: string | null;
@@ -60,7 +60,7 @@ function worst(...statuses: DiagnosticStatus[]): DiagnosticStatus {
 export function buildAuthDiagnostics(input: AuthDiagnosticsInput): AuthDiagnosticsReport {
   const currentDomain = input.currentDomain;
   const hostname = currentDomain ?? input.appUrlConfigured ?? "localhost";
-  const environment = detectLotusEnvironment(hostname, {
+  const environment = detectLotsEnvironment(hostname, {
     nodeEnv: input.nodeEnv,
     isViteProd: input.isViteProd,
   });

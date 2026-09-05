@@ -9,12 +9,12 @@ export {
   type DiagnosticStatus,
 } from "./auth-diagnostics";
 export {
-  detectLotusEnvironment,
+  detectLotsEnvironment,
   environmentLabel,
   hostnamesMatch,
   resolveExpectedAppUrl,
   DEFAULT_PRODUCTION_APP_URL,
-  type LotusEnvironment,
+  type LotsEnvironment,
 } from "./environment";
 export {
   recordInviteAudit,

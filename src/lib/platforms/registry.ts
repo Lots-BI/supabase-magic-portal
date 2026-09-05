@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · Registry of PlatformDefs.
+// Lots BI · Registry of PlatformDefs.
 // Adicionar LinkedIn / TikTok / Pinterest / etc = importar + adicionar aqui.
 // ============================================================================
 

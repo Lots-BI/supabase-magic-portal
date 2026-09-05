@@ -2,14 +2,14 @@
 title: "ADR-0011: Fundação do Sistema de Engenharia"
 status: accepted
 date: 2026-06-26
-deciders: Engenharia Lotus / CTO
+deciders: Engenharia Lots BI / CTO
 ---
 
 # ADR-0011: Fundação do Sistema de Engenharia
 
 ## Contexto
 
-A Lotus possuía um Engineering Handbook completo (61+ documentos) mas carecia de **infraestrutura
+O Lots BI possuía um Engineering Handbook completo (61+ documentos) mas carecia de **infraestrutura
 de engenharia executável**: CI, testes, governança de PR, validação automatizada e mandato
 explícito de melhoria contínua.
 
@@ -25,7 +25,7 @@ automatizados e processos claros — não apenas Markdown.
 
 ## Decisão
 
-Estabelecer o **Sistema de Engenharia Lotus** com:
+Estabelecer o **Sistema de Engenharia Lots BI** com:
 
 1. **Charter** — `docs/00-company/engineering-system.md`
 2. **Governança** — `docs/09-standards/governance.md`, `CONTRIBUTING.md`
@@ -34,7 +34,7 @@ Estabelecer o **Sistema de Engenharia Lotus** com:
 5. **Validação** — `scripts/validate-engineering.mjs`
 6. **PR template** — checklist alinhado ao handbook
 7. **Line endings** — `.gitattributes` + Prettier `endOfLine: lf`
-8. **Regra Cursor** — `lotus-governance.mdc` (melhoria proativa)
+8. **Regra Cursor** — `lots-governance.mdc` (melhoria proativa)
 9. **Script `npm run check`** — gate local = gate CI
 
 ## Alternativas consideradas

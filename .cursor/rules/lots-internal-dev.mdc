@@ -1,0 +1,35 @@
+---
+description: Setup interno Lots BI — independência de Lovable/Horizons, deploy proprietário
+alwaysApply: true
+---
+
+# Desenvolvimento interno Lots BI
+
+## Onde trabalhar
+
+- **App:** `lots-bi/` (único código de produção)
+- **Setup:** `SETUP.md` · `npm run setup`
+- **Não usar:** editor Lovable, Horizons, leandromajr.com para implementar features
+
+## Transição de infraestrutura (ADR-0012)
+
+| Componente | Hoje | Alvo |
+| ---------- | ---- | ---- |
+| Dev | Cursor + Git ✅ | — |
+| Build | preset Lovable (transitório) | Vite/Nitro explícito |
+| Deploy | Lovable + Cloudflare | GitHub Actions → Cloudflare |
+| Erros client | `error-reporting.ts` (+ bridge Lovable) | Sentry/Datadog |
+
+**Não remover** `@lovable.dev/vite-tanstack-config` até deploy Cloudflare validado.
+
+## Deploy proprietário (quando pronto)
+
+1. Secrets no GitHub: `CLOUDFLARE_API_TOKEN` + `OFFICIAL_*` / `VITE_OFFICIAL_*`
+2. Actions → **Deploy (Cloudflare)** → confirmar com `deploy`
+3. Ou local: `npm run build && npm run deploy:cloudflare`
+
+## Git
+
+- Sem force-push no `main` enquanto Lovable estiver conectado
+- `npm run check` antes de merge
+- **Nunca** commitar `.env` — ver regra `lots-secrets.mdc`

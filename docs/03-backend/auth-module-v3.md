@@ -2,7 +2,7 @@
 title: Auth Module v3
 description: Registro oficial de conclusão da refatoração Auth + Access + Admin.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 tags: [auth, delivery, v3]
 last_review: 2026-07-01
 ---

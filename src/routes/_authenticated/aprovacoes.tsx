@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_authenticated/aprovacoes")({
   head: () => ({ meta: [{ title: brandTitle("Aprovações") }] }),
   component: AprovacoesClientePage,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-danger">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-danger">Erro: {error.message}</div>
   ),
 });
 

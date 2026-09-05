@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · período global com fuso America/Sao_Paulo
+// Lots BI · período global com fuso America/Sao_Paulo
 // Fonte única de verdade para QUALQUER cálculo de janela temporal na UI.
 // NUNCA usar `new Date().toISOString()` para derivar "hoje" — esse caminho
 // produz o dia UTC, o que desloca o último dia (entre 21:00 e 23:59 BRT).

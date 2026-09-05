@@ -1,14 +1,14 @@
 ---
-title: Sistema de Engenharia Lotus
-description: Charter do sistema de engenharia — como a Lotus constrói software em escala.
+title: Sistema de Engenharia Lots BI
+description: Charter do sistema de engenharia — como o Lots BI constrói software em escala.
 status: living
-owner: Engenharia Lotus / CTO
+owner: Engenharia Lots BI / CTO
 last_review: 2026-06-26
 ---
 
-# Sistema de Engenharia Lotus
+# Sistema de Engenharia Lots BI
 
-> A Lotus não é apenas um produto SaaS — é uma **empresa de engenharia** em construção.
+> O Lots BI não é apenas um produto SaaS — é uma **empresa de engenharia** em construção.
 > Este documento define o sistema que sustenta qualidade, velocidade e consistência ao longo
 > de anos.
 

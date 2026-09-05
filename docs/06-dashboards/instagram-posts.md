@@ -2,7 +2,7 @@
 title: Publicações Instagram — Dashboard por post
 description: Coleta e visualização de métricas por publicação via Platform Hub + Meta Graph API.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-09-01
 ---
 
@@ -31,15 +31,15 @@ last_review: 2026-09-01
 ## Conexão self-service do cliente
 
 Além do fluxo admin (`/admin/conexoes/nova`), o cliente pode conectar o próprio Instagram
-sozinho em `/cliente/:slug/conexoes` (componente `ClientConnectionsPage.tsx`). Server functions
-dedicadas em `src/modules/platform-hub-client/hub-client.server.ts`:
+sozinho em `/cliente/:slug/conexoes` (componente `ClientConnectionsPage.tsx`, card Instagram —
+há também um card Meta Ads, ver [meta-ads.md](./platforms/meta-ads.md)). Server functions
+genéricas por `pluginKey` em `src/modules/platform-hub-client/hub-client.server.ts`:
 
-- `getClientInstagramConnectionStatusFn` / `createClientInstagramConnectionFn` /
-  `startClientInstagramOAuthFn` / `discoverClientInstagramIdentitiesFn` /
-  `attachClientInstagramIdentityFn`.
+- `getClientConnectionStatusFn` / `createClientConnectionFn` / `startClientOAuthFn` /
+  `discoverClientIdentitiesFn` / `attachClientIdentityFn`.
 - Todas checam `assertClientPortalAccess` (dono do cadastro) ou admin, e travam a operação ao
-  `pluginKey` liberado em `CLIENT_SELF_SERVICE_PLUGIN_KEY` (hoje só `instagram_organic` —
-  único confirmado ponta a ponta). Reaproveita o mesmo `AdminHubStack`, `HubOAuthHandle` e
+  `pluginKey` liberado em `CLIENT_SELF_SERVICE_PLUGIN_KEYS` (hoje `instagram_organic` e
+  `meta_ads`). Reaproveita o mesmo `AdminHubStack`, `HubOAuthHandle` e
   `discoverIdentitiesForPlugin` do fluxo admin — só a checagem de acesso e o escopo de
   plugin/cliente mudam.
 - `sanitizeOAuthRedirectAfter` aceita `/cliente/{slug}/conexoes` além dos paths

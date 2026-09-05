@@ -1,4 +1,4 @@
-// Lotus · Radar executivo — eixos normalizados com peso das estratégias.
+// Lots BI · Radar executivo — eixos normalizados com peso das estratégias.
 
 import { PLATFORM_REGISTRY } from "@/lib/platforms/registry";
 import type { MetricRefProgress, PlanoEstrategia, RadarAxis } from "./types";

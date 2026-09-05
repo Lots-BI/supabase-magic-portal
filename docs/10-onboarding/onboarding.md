@@ -1,8 +1,8 @@
 ---
 title: Onboarding de Desenvolvedores
-description: Do zero ao primeiro PR na Lotus — setup, mapa mental e primeiros passos.
+description: Do zero ao primeiro PR no Lots BI — setup, mapa mental e primeiros passos.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
@@ -46,8 +46,8 @@ Leia, nesta ordem:
 
 ```bash
 # 1. Clonar o repositório do app
-#    (o app fica em supabase-magic-portal)
-cd supabase-magic-portal
+#    (o app fica em lots-bi)
+cd lots-bi
 
 # 2. Instalar dependências
 npm install
@@ -85,7 +85,7 @@ flowchart TD
     Q -->|Novo KPI/fórmula| F["src/lib/platforms/formulas.ts"]
     Q -->|Operação de escrita/admin| S["src/lib/*.functions.ts (server fn + Zod)"]
     Q -->|Mudança de dados/RLS| M["supabase/migrations-official/**"]
-    Q -->|Componente visual| C["src/components/lotus/** e ui/**"]
+    Q -->|Componente visual| C["src/components/lots/** e ui/**"]
     R --> D["Atualizar docs!"]
     P --> D
     F --> D

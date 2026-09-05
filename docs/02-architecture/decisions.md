@@ -2,7 +2,7 @@
 title: Arquitetura — Decisões (resumo)
 description: Resumo narrativo das principais escolhas arquiteturais e seus porquês.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 

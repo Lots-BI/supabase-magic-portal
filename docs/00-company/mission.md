@@ -1,8 +1,8 @@
 ---
 title: Missão & Visão Estratégica
-description: Propósito da Lotus, visão de longo prazo e posicionamento como SaaS de BI.
+description: Propósito do Lots BI, visão de longo prazo e posicionamento como SaaS de BI.
 status: living
-owner: Liderança / Engenharia Lotus
+owner: Liderança / Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
@@ -15,7 +15,7 @@ last_review: 2026-06-26
 > Transformar dados brutos de marketing em **informações confiáveis** para tomada de decisão —
 > em um único ambiente, para agências e empresas que operam em escala.
 
-A Lotus existe para que gestores de marketing, analistas e clientes finais possam confiar nos
+O Lots BI existe para que gestores de marketing, analistas e clientes finais possam confiar nos
 números que veem nos dashboards — sem divergência entre telas, sem cálculos ocultos e sem
 dependência de planilhas paralelas.
 
@@ -45,8 +45,8 @@ Plataformas na visão de produto (estratégica):
 
 ## Visão de longo prazo (estratégica)
 
-A Lotus deve tornar-se uma **plataforma completamente proprietária**. No futuro, toda a
-inteligência operacional e analítica deve residir dentro do ecossistema Lotus.
+O Lots BI deve tornar-se uma **plataforma completamente proprietária**. No futuro, toda a
+inteligência operacional e analítica deve residir dentro do ecossistema Lots BI.
 
 ### Ferramentas a serem substituídas
 
@@ -69,7 +69,7 @@ Detalhamento: [Arquitetura alvo](../02-architecture/target-architecture.md)
 
 ## Diferenciação
 
-| Aspecto                | Lotus (alvo)                                | Planilhas / ferramentas isoladas |
+| Aspecto                | Lots BI (alvo)                                | Planilhas / ferramentas isoladas |
 | ---------------------- | ------------------------------------------- | -------------------------------- |
 | Fonte única de verdade | Sim — regras centralizadas                  | Não — fórmulas duplicadas        |
 | Multi-plataforma       | Dashboards por canal + overview             | Silos por ferramenta             |
@@ -90,9 +90,7 @@ visão proprietária.
 
 ---
 
-## Relacionamento Majrá ↔ Lotus
+## Marca
 
-**⚠️ INFORMAÇÃO NÃO ENCONTRADA** de forma explícita na documentação de negócio versionada.
-
-**Observado no código:** referências a "Majrá" em strings de UI/branding coexistem com
-"Lotus". Recomenda-se ADR ou doc de produto quando a identidade for formalizada.
+O produto chama-se **Lots BI**. Esse é o nome exibido na UI, no PWA e no preview de
+compartilhamento (WhatsApp, LinkedIn, X).

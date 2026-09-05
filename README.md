@@ -1,6 +1,6 @@
 # Lots BI — Portal de performance e operação
 
-Portal **Lots BI** (Lotus): dashboards multi-plataforma, painel administrativo, fluxo editorial/aprovações e **Platform Hub** para conexões oficiais (Meta, Google, TikTok).
+Portal **Lots BI**: dashboards multi-plataforma, painel administrativo, fluxo editorial/aprovações e **Platform Hub** para conexões oficiais (Meta, Google, TikTok).
 
 - **Produção:** [lotsbi.leandromajr.com](https://lotsbi.leandromajr.com)
 - **Repositório:** [Lots-BI/supabase-magic-portal](https://github.com/Lots-BI/supabase-magic-portal)
@@ -24,8 +24,8 @@ Desenvolvimento oficial: **Cursor + Git** neste repositório. Lovable permanece 
 ## Início rápido
 
 ```bash
-git clone https://github.com/Lots-BI/supabase-magic-portal.git
-cd supabase-magic-portal
+git clone https://github.com/Lots-BI/supabase-magic-portal.git lots-bi
+cd lots-bi
 npm run setup
 npm install
 cp .env.example .env   # Windows: copy .env.example .env
@@ -55,11 +55,11 @@ Documentação completa: [`docs/START_HERE.md`](./docs/START_HERE.md) · setup l
 ## Estrutura do repositório
 
 ```
-supabase-magic-portal/
+lots-bi/
 ├── docs/                    # Knowledge Center (fonte única de docs técnicas)
 ├── src/
 │   ├── routes/              # TanStack Start — file-based routing
-│   ├── components/lotus/    # UI do produto
+│   ├── components/lots/    # UI do produto
 │   ├── content/
 │   │   ├── platform-tutorial/   # Tutorial admin + cliente
 │   │   └── platform-news/       # Novidades visíveis ao cliente
@@ -130,4 +130,4 @@ Deploy alternativo (futuro): `npm run deploy:cloudflare` — ver [`SETUP.md`](./
 
 ## Licença
 
-Projeto privado — Lots BI / Lotus. Uso interno e clientes autorizados.
+Projeto privado — Lots BI / Lots BI. Uso interno e clientes autorizados.

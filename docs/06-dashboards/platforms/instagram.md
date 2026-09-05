@@ -2,7 +2,7 @@
 title: Instagram — Dashboard
 description: Métricas orgânicas do Instagram, agregação MAX para reach e KPIs de engajamento.
 status: living
-owner: Engenharia / Dados Lotus
+owner: Engenharia / Dados Lots BI
 tags: [dashboard, instagram, platformdef]
 difficulty: intermediate
 last_review: 2026-09-05

@@ -2,21 +2,21 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { SectionCard } from "@/components/lotus/SectionCard";
-import { EmptyState } from "@/components/lotus/EmptyState";
-import { ApprovalPanelSkeleton } from "@/components/lotus/approval/shared/ApprovalPanelSkeleton";
-import { KanbanBoardView } from "@/components/lotus/approval/kanban/KanbanBoard";
-import { ClientCardDetailDrawer } from "@/components/lotus/approval/card/ClientCardDetailDrawer";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { SectionCard } from "@/components/lots/SectionCard";
+import { EmptyState } from "@/components/lots/EmptyState";
+import { ApprovalPanelSkeleton } from "@/components/lots/approval/shared/ApprovalPanelSkeleton";
+import { KanbanBoardView } from "@/components/lots/approval/kanban/KanbanBoard";
+import { ClientCardDetailDrawer } from "@/components/lots/approval/card/ClientCardDetailDrawer";
 import { buildPillarMap } from "@/modules/approval/services/group-cards-by-date";
 import {
   ApprovalWorkspaceTabs,
   type ApprovalTab,
-} from "@/components/lotus/approval/shared/ApprovalWorkspaceTabs";
-import { ApprovalCalendar } from "@/components/lotus/approval/calendar/ApprovalCalendar";
-import { EditorialPillarsPanel } from "@/components/lotus/approval/pillars/EditorialPillarsPanel";
-import { StoryPlanSheet } from "@/components/lotus/approval/stories/StoryPlanSheet";
-import { LibraryPanel } from "@/components/lotus/approval/library/LibraryPanel";
+} from "@/components/lots/approval/shared/ApprovalWorkspaceTabs";
+import { ApprovalCalendar } from "@/components/lots/approval/calendar/ApprovalCalendar";
+import { EditorialPillarsPanel } from "@/components/lots/approval/pillars/EditorialPillarsPanel";
+import { StoryPlanSheet } from "@/components/lots/approval/stories/StoryPlanSheet";
+import { LibraryPanel } from "@/components/lots/approval/library/LibraryPanel";
 import { ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useClientScope } from "@/modules/client/context";

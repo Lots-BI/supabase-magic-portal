@@ -2,20 +2,20 @@
 title: Engine de Métricas — Visão Geral
 description: Arquitetura do motor declarativo, fluxo de dados e módulos.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
 # Engine de Métricas — Visão Geral
 
-A Lotus possui **dois motores complementares** de agregação:
+O Lots BI possui **dois motores complementares** de agregação:
 
 | Motor               | Módulo               | Uso                                       |
 | ------------------- | -------------------- | ----------------------------------------- |
 | **Platform engine** | `src/lib/platforms/` | Dashboards por plataforma (`PlatformDef`) |
 | **Overview engine** | `src/lib/metrics.ts` | Overview consolidado, relatórios admin    |
 
-**Meta de longo prazo:** convergir em um único pacote `@lotus/metrics`. Dívida D8 no roadmap.
+**Meta de longo prazo:** convergir em um único pacote `@lots/metrics`. Dívida D8 no roadmap.
 
 ---
 

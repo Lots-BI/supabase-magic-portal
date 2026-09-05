@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { brandTitle } from "@/lib/brand";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import { ClientScopeProvider } from "@/modules/client/context";
 import { ClientApprovalWorkspace } from "@/modules/client/components/ClientApprovalWorkspace";
 import { clienteRefQuery } from "./cliente.$cliente";
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/cliente/$cliente/aprovacoe
   }),
   component: ClienteAprovacoesPage,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-danger">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-danger">Erro: {error.message}</div>
   ),
 });
 
@@ -32,7 +32,7 @@ function ClienteAprovacoesScoped({ slug }: { slug: string }) {
 
   if (!ref?.cadastroId) {
     return (
-      <div className="lotus-surface p-6 text-sm text-muted-foreground">
+      <div className="lots-surface p-6 text-sm text-muted-foreground">
         Cliente não encontrado para o identificador <strong>{slug}</strong>.
       </div>
     );

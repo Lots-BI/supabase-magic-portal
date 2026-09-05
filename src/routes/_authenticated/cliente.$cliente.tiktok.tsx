@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PlatformPlaceholder } from "@/components/lotus/PlatformPlaceholder";
+import { PlatformPlaceholder } from "@/components/lots/PlatformPlaceholder";
 import { Music2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/cliente/$cliente/tiktok")({

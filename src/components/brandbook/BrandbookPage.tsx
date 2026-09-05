@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { BookOpen, ExternalLink } from "lucide-react";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { SectionCard } from "@/components/lotus/SectionCard";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -132,7 +132,7 @@ export function BrandbookPage({
       ) : null}
 
       {isLoading ? (
-        <div className="lotus-surface p-8 text-sm text-muted-foreground">Carregando clientes…</div>
+        <div className="lots-surface p-8 text-sm text-muted-foreground">Carregando clientes…</div>
       ) : null}
 
       {!isLoading && active ? (
@@ -186,7 +186,7 @@ function EmptyBrandbookState({
                 href={entry.repoUrl.replace(/\.git$/, "")}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="lotus-focus inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
+                className="lots-focus inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
               >
                 {entry.label}
                 <ExternalLink className="h-3.5 w-3.5" />

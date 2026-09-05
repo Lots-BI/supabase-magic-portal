@@ -6,11 +6,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { Suspense, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { StatCard } from "@/components/lotus/StatCard";
-import { SectionCard } from "@/components/lotus/SectionCard";
-import { PeriodToggle, type PeriodDays } from "@/components/lotus/PeriodToggle";
-import { DeltaPill } from "@/components/lotus/DeltaPill";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { StatCard } from "@/components/lots/StatCard";
+import { SectionCard } from "@/components/lots/SectionCard";
+import { PeriodToggle, type PeriodDays } from "@/components/lots/PeriodToggle";
+import { DeltaPill } from "@/components/lots/DeltaPill";
 import { adminTitle, BRAND_NAME, brandTitle } from "@/lib/brand";
 import {
   PLATFORM_LABEL,
@@ -27,7 +27,7 @@ import {
 } from "@/lib/metrics";
 import { VW_CLIENTES_ATIVOS_SELECT } from "@/lib/db-selects";
 import { slugify } from "@/lib/slug";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import {
   ArrowUpRight,
   DollarSign,
@@ -88,7 +88,7 @@ export const Route = createFileRoute("/_authenticated/admin/relatorios")({
   },
   component: RelatoriosHub,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-danger">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-danger">Erro: {error.message}</div>
   ),
   notFoundComponent: () => <div>Não encontrado</div>,
 });
@@ -146,7 +146,7 @@ function ShortcutCard({
   return (
     <Link
       to={to}
-      className="lotus-surface group relative flex items-start gap-4 p-5 transition-all hover:-translate-y-px hover:shadow-[var(--shadow-md)]"
+      className="lots-surface group relative flex items-start gap-4 p-5 transition-all hover:-translate-y-px hover:shadow-[var(--shadow-md)]"
     >
       <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary-600 dark:text-primary-300">
         <Icon className="h-5 w-5" />
@@ -250,7 +250,7 @@ function HubBody({ days }: { days: PeriodDays }) {
         description="Cada linha abre o relatório completo do cliente, com KPIs, evolução e detalhe por plataforma."
         bodyClassName="px-0 py-0"
       >
-        <div className="flex items-center gap-2 border-b border-border/60 px-4 py-3">
+        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
           <Search className="h-3.5 w-3.5 text-muted-foreground" />
           <input
             value={q}
@@ -268,7 +268,7 @@ function HubBody({ days }: { days: PeriodDays }) {
             Nenhum cliente encontrado.
           </p>
         ) : (
-          <ul className="divide-y divide-border/60">
+          <ul className="divide-y divide-border">
             {filtered.map((c) => {
               const prev = prevByCliente.get(c.cliente);
               const spendDelta = prev ? pctDelta(c.totals.spend, prev.spend) : null;
@@ -295,7 +295,7 @@ function HubBody({ days }: { days: PeriodDays }) {
                         {(ativo?.plataformas_ativas ?? []).slice(0, 5).map((p) => (
                           <span
                             key={p}
-                            className="inline-flex items-center rounded-md border border-border/60 bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
+                            className="inline-flex items-center rounded-md border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
                           >
                             {PLATFORM_LABEL[p as keyof typeof PLATFORM_LABEL] ?? p}
                           </span>

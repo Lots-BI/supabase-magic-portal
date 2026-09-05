@@ -62,7 +62,7 @@ O KC herda o `AppShell` (menu lateral em drawer no mobile). Dentro do módulo:
 | &lt; `lg`  | Sidebar oculta; botão **menu** abre Sheet com `KnowledgeSidebar` |
 | `lg+`      | Sidebar fixa à esquerda (260px) + conteúdo scrollável            |
 
-Conteúdo markdown usa tipografia fluida e tabelas com `lotus-scroll-x` quando necessário.
+Conteúdo markdown usa tipografia fluida e tabelas com `lots-scroll-x` quando necessário.
 
 ## Relação com AI Workspace
 

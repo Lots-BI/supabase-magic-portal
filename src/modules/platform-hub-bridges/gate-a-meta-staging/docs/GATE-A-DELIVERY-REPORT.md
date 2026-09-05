@@ -53,7 +53,7 @@
 ## 2. Como executar a validação passo a passo
 
 ```bash
-cd supabase-magic-portal
+cd lots-bi
 
 # 1. Smoke test sem credenciais reais
 npm run gate-a:demo

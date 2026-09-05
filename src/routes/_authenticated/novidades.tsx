@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { brandTitle } from "@/lib/brand";
-import { PlatformNewsPage } from "@/components/lotus/platform-news/PlatformNewsPage";
+import { PlatformNewsPage } from "@/components/lots/platform-news/PlatformNewsPage";
 import { checkIsAdmin } from "@/lib/admin.functions";
+import { markAllClientReleasesSeen } from "@/lib/platform-news/announce-new-releases";
 
 export const Route = createFileRoute("/_authenticated/novidades")({
   head: () => ({ meta: [{ title: brandTitle("Novidades") }] }),
@@ -17,5 +19,8 @@ export const Route = createFileRoute("/_authenticated/novidades")({
 
 function NovidadesPage() {
   const { isAdmin } = Route.useLoaderData();
+  useEffect(() => {
+    markAllClientReleasesSeen();
+  }, []);
   return <PlatformNewsPage audience={isAdmin ? "admin" : "client"} />;
 }

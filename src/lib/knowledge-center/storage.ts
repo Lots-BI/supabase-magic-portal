@@ -1,5 +1,5 @@
-const FAVORITES_KEY = "lotus-knowledge-favorites";
-const RECENT_KEY = "lotus-knowledge-recent";
+const FAVORITES_KEY = "lots-knowledge-favorites";
+const RECENT_KEY = "lots-knowledge-recent";
 const MAX_RECENT = 12;
 
 function readJson<T>(key: string, fallback: T): T {

@@ -2,7 +2,7 @@
 title: "ADR-0014: Auth Module v3 — Separação Auth, Access e Admin"
 status: accepted
 date: 2026-06-30
-deciders: Engenharia Lotus
+deciders: Engenharia Lots BI
 ---
 
 # ADR-0014: Auth Module v3 — Separação Auth, Access e Admin

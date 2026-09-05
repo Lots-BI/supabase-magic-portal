@@ -27,7 +27,11 @@ A novidade mais recente aparece destacada no topo.
 
 ## Exemplo recente (set/2026)
 
-**Publicações Instagram** — métricas por post com miniaturas, disponível no menu da sua marca quando o Instagram está conectado. Veja o capítulo **Publicações Instagram** neste tutorial.
+- **Meta Ads — Resultados:** o dashboard Meta Ads mostra a coluna Resultados do Gerenciador (venda, lead, etc.). Use **Puxar métricas** se algum dia estiver vazio.
+- **Conexões:** conecte Instagram e Meta Ads você mesmo em **Conexões**.
+- **Publicações Instagram:** métricas por post com miniaturas (capítulo **Publicações Instagram**).
+
+Quando houver novidade nova, o sino do topo avisa. Se as notificações do navegador estiverem permitidas para o Lots BI, também aparece um aviso do sistema.
 
 ## Dúvidas
 

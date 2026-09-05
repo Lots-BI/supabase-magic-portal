@@ -2,7 +2,7 @@
 title: AI Workspace
 description: Context Pack automático para IAs — agregação e síntese do repositório, exclusivo para Platform Owner.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-07
 ---
 

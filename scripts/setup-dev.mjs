@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Lotus — verificação do ambiente de desenvolvimento local.
+ * Lots BI — verificação do ambiente de desenvolvimento local.
  * Uso: npm run setup
  */
 import fs from "node:fs";
@@ -42,7 +42,7 @@ if (checks.length > 0) {
   process.exit(1);
 }
 
-console.log("✅ Ambiente Lotus — verificação básica OK\n");
+console.log("✅ Ambiente Lots BI — verificação básica OK\n");
 console.log("Próximos passos:");
 console.log("  1. npm install");
 console.log("  2. cp .env.example .env  (e preencher chaves)");

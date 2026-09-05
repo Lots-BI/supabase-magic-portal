@@ -2,7 +2,7 @@
 title: Content Workflow — Fase 1 (Kanban interno)
 description: Especificação e entrega da Fase 1 — Kanban admin, CRUD, drawer, timeline, upload.
 status: completed
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 
@@ -41,7 +41,7 @@ Fluxo: **UI → Server Fn → `internal/*` → Repository → Supabase**
 
 ---
 
-## UI (`src/components/lotus/approval/`)
+## UI (`src/components/lots/approval/`)
 
 ```
 kanban/   KanbanBoard, KanbanColumn, KanbanCard, MobileStatusPicker, kanban-meta

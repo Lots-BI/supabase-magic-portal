@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · camada única de normalização e agregação de métricas.
+// Lots BI · camada única de normalização e agregação de métricas.
 // Toda lógica de KPIs / deltas / séries diárias / agregações por plataforma
 // vive aqui — para que dashboards (admin + cliente) e relatórios consumam a
 // MESMA fonte de verdade, sem duplicação.
@@ -181,6 +181,7 @@ export const PLATFORM_METRIC_DESCRIPTIONS: Record<string, string> = {
   actions_per_view: "Ações divididas por visualizações do perfil.",
   cpa: "Custo por conversão.",
   conv_rate: "Taxa de conversões sobre sessões.",
+  results: "Resultado primário da campanha (equivalente à coluna Resultados do Gerenciador).",
 };
 
 export function resolveMetricDescription(key: string, fallback?: string): string | undefined {
@@ -397,7 +398,7 @@ export function deriveCpa(spend: number, conversions: number): number {
 }
 
 // ----------------------------------------------------------------------------
-// Séries diárias — formato consumido por AreaChartLotus.
+// Séries diárias — formato consumido por AreaChartLots.
 // ----------------------------------------------------------------------------
 export interface DailyPoint {
   date: string;

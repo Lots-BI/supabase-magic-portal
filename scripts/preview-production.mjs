@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Lotus — preview local do build de produção (Nitro + Cloudflare Workers).
+ * Lots BI — preview local do build de produção (Nitro + Cloudflare Workers).
  * Requer: npm run build concluído.
  *
  * Uso: npm run preview [-- --port 4173]

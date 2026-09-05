@@ -1,10 +1,9 @@
 // ============================================================================
-// Lotus · Meta Ads — PlatformDef.
+// Lots BI · Meta Ads — PlatformDef.
 // View: public.vw_meta_ads_diario
 // Colunas: data, cliente, campanha, reach, impressions, clicks, cpc, cpm, ctr,
-//          frequency, spend.
-// Conversões não estão materializadas na view — CPA/ConvRate só serão expostos
-// quando uma nova MetricDef for adicionada (sem refactor).
+//          frequency, spend, results (, conversions — coletado no Hub, oculto no UI).
+// Conversões voltam depois (feature própria / CRM); por enquanto só Resultados.
 // ============================================================================
 
 import {
@@ -16,6 +15,7 @@ import {
   Target,
   Activity,
   Sparkles,
+  Trophy,
 } from "lucide-react";
 import type { PlatformDef } from "./types";
 import * as f from "./formulas";
@@ -33,6 +33,7 @@ export const metaAdsDef: PlatformDef = {
     "Quantas pessoas únicas eu alcancei?",
     "Quantas vezes em média cada pessoa viu meus anúncios?",
     "Qual foi o CTR e o custo por clique?",
+    "Quantos resultados as campanhas geraram?",
     "Qual campanha teve melhor desempenho?",
     "Como tudo evoluiu vs o período anterior?",
   ],
@@ -78,8 +79,19 @@ export const metaAdsDef: PlatformDef = {
       positiveIsGood: true,
       description: "Cliques registrados no período.",
     },
+    {
+      key: "results",
+      column: "results",
+      label: "Resultados",
+      format: "int",
+      aggregation: { kind: "sum" },
+      icon: Trophy,
+      positiveIsGood: true,
+      description:
+        "Resultado primário da campanha no dia (compra, lead, conversa, etc.) — equivalente à coluna Resultados do Gerenciador de Anúncios.",
+    },
   ],
-  heroMetrics: ["spend", "reach", "impressions", "clicks"],
+  heroMetrics: ["spend", "results", "clicks", "impressions"],
   kpis: [
     {
       key: "ctr",
@@ -116,6 +128,15 @@ export const metaAdsDef: PlatformDef = {
       compute: (t) => f.frequency(t.impressions, t.reach),
       description: "Impressions ÷ Reach do período.",
     },
+    {
+      key: "cpa",
+      label: "Custo por resultado",
+      format: "currency",
+      positiveIsGood: false,
+      compute: (t) => f.cpa(t.spend, t.results),
+      icon: Activity,
+      description: "Spend ÷ Resultados.",
+    },
   ],
   charts: [
     {
@@ -137,6 +158,15 @@ export const metaAdsDef: PlatformDef = {
         { metric: "reach", label: "Alcance", tone: "secondary" },
         { metric: "impressions", label: "Impressões", tone: "primary" },
       ],
+      height: 240,
+    },
+    {
+      key: "evolucao-resultados",
+      kind: "area",
+      title: "Resultados",
+      description: "Resultado primário da campanha por dia (coluna Resultados do Gerenciador).",
+      yMetric: "results",
+      series: [{ metric: "results", label: "Resultados", tone: "success" }],
       height: 240,
     },
   ],

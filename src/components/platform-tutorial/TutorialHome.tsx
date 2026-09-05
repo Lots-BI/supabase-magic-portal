@@ -25,7 +25,7 @@ export function TutorialHome({ audience }: { audience: TutorialAudience }) {
           <Link
             to={`${base}/$`}
             params={{ _splat: first.slug.replace(/^admin\/|^client\//, "") }}
-            className="lotus-focus mt-5 inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            className="lots-focus mt-5 inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
             Começar pelo primeiro capítulo
             <ArrowRight className="h-4 w-4" />

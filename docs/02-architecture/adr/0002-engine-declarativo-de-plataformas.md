@@ -8,7 +8,7 @@ date: 2026-06-26
 
 ## Contexto
 
-A Lotus exibe dashboards para várias plataformas de marketing (Meta Ads, Google Ads, GA4,
+O Lots BI exibe dashboards para várias plataformas de marketing (Meta Ads, Google Ads, GA4,
 Instagram…), cada uma com métricas, KPIs e gráficos próprios. Implementar uma tela por
 plataforma levaria a duplicação massiva e a divergência de cálculos entre telas.
 
@@ -17,7 +17,7 @@ plataforma levaria a duplicação massiva e a divergência de cálculos entre te
 Descrever cada plataforma como **dados** — um objeto `PlatformDef`
 (`src/lib/platforms/types.ts`) contendo métricas, estratégias de agregação, KPIs derivados,
 gráficos e perguntas de negócio. Um único componente genérico
-(`src/components/lotus/PlatformDashboard.tsx`) renderiza qualquer plataforma a partir do
+(`src/components/lots/PlatformDashboard.tsx`) renderiza qualquer plataforma a partir do
 `PlatformDef`. Todo cálculo passa por um engine puro (`engine.ts`, `aggregations.ts`,
 `formulas.ts`).
 

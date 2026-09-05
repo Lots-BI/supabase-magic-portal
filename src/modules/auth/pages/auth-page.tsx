@@ -219,7 +219,7 @@ export function AuthPage({
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="lotus-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="lots-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
@@ -269,7 +269,7 @@ export function AuthPage({
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="lotus-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="lots-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             />
           </div>
           <div>
@@ -281,7 +281,7 @@ export function AuthPage({
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="lotus-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="lots-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
@@ -308,7 +308,7 @@ export function AuthPage({
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="lotus-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="lots-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           />
         </div>
         <div>
@@ -320,7 +320,7 @@ export function AuthPage({
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="lotus-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="lots-focus mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           />
         </div>
         {error && <p className="text-sm text-destructive">{error}</p>}

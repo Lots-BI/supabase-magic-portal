@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { brandTitle } from "@/lib/brand";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
-import { ClientConnectionsPage } from "@/components/lotus/platform-hub/ClientConnectionsPage";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
+import { ClientConnectionsPage } from "@/components/lots/platform-hub/ClientConnectionsPage";
 import { clienteRefQuery } from "./cliente.$cliente";
 
 export const Route = createFileRoute("/_authenticated/cliente/$cliente/conexoes")({
@@ -28,7 +28,7 @@ function ClienteConexoesResolved({ slug }: { slug: string }) {
 
   if (!ref?.cadastroId) {
     return (
-      <div className="lotus-surface p-6 text-sm text-muted-foreground">
+      <div className="lots-surface p-6 text-sm text-muted-foreground">
         Cliente não encontrado para o identificador <strong>{slug}</strong>.
       </div>
     );

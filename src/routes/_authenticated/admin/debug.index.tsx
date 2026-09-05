@@ -2,10 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { adminTitle } from "@/lib/brand";
 import { getDebugSnapshot, getSystemDiagnostics } from "@/lib/admin.functions";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { StatCard } from "@/components/lotus/StatCard";
-import { SectionCard } from "@/components/lotus/SectionCard";
-import { SystemDiagnosticsPanel } from "@/components/lotus/infra/SystemDiagnosticsPanel";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { StatCard } from "@/components/lots/StatCard";
+import { SectionCard } from "@/components/lots/SectionCard";
+import { SystemDiagnosticsPanel } from "@/components/lots/infra/SystemDiagnosticsPanel";
 import { Database, Users, CalendarClock, Layers } from "lucide-react";
 
 const clientOrigin = typeof window !== "undefined" ? window.location.origin : null;
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/admin/debug/")({
   },
   component: DebugPage,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-destructive">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-destructive">Erro: {error.message}</div>
   ),
 });
 

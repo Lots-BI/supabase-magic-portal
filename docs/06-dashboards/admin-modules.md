@@ -2,7 +2,7 @@
 title: Módulos Admin & Operacionais
 description: Telas administrativas, editorial, aprovações, relatórios e debug.
 status: living
-owner: Engenharia / Produto Lotus
+owner: Engenharia / Produto Lots BI
 last_review: 2026-07-07
 ---
 
@@ -151,7 +151,7 @@ Seção `ClientHubConnectionsSection` — atalho para conexões do cliente em `/
 | Item    | Detalhe                                                                 |
 | ------- | ----------------------------------------------------------------------- |
 | Módulos | `platform-hub/`, `platform-hub-admin/`, `platform-hub-bridges/`         |
-| UI      | `src/components/lotus/platform-hub/`                                    |
+| UI      | `src/components/lots/platform-hub/`                                    |
 | Rotas   | index, nova, `:connectionId`, health, migracao, testing, rollout        |
 | OAuth   | `/oauth/meta`, `/oauth/google`, `/oauth/tiktok` callbacks               |
 | Docs    | [platform-hub-admin.md](./platform-hub-admin.md) · [13-platform-hub/](../13-platform-hub/README.md) |

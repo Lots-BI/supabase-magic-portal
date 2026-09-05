@@ -11,7 +11,7 @@
 - [ ] Infra / CI
 - [ ] Dados (migration)
 
-## Checklist — Sistema de Engenharia Lotus
+## Checklist — Sistema de Engenharia Lots BI
 
 ### Código
 

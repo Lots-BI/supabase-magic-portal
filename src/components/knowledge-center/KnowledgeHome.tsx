@@ -56,7 +56,7 @@ const HIGHLIGHTS = [
 
 export function KnowledgeHome() {
   return (
-    <Suspense fallback={<div className="lotus-skeleton mx-auto h-64 max-w-3xl rounded-2xl" />}>
+    <Suspense fallback={<div className="lots-skeleton mx-auto h-64 max-w-3xl rounded-2xl" />}>
       <KnowledgeHomeBody />
     </Suspense>
   );
@@ -86,7 +86,7 @@ function KnowledgeHomeBody() {
         <Link
           to="/admin/knowledge/$"
           params={{ _splat: "start-here" }}
-          className="lotus-focus mt-5 inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          className="lots-focus mt-5 inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
         >
           Começar por START HERE
         </Link>

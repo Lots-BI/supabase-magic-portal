@@ -4,12 +4,12 @@ import { toast } from "sonner";
 import { ArrowLeft, ChevronDown, Loader2, Save } from "lucide-react";
 import { adminTitle } from "@/lib/brand";
 import { createCliente } from "@/lib/admin.functions";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { Field, FormRow, TextArea, TextInput } from "@/components/lotus/FormField";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { Field, FormRow, TextArea, TextInput } from "@/components/lots/FormField";
 import { Switch } from "@/components/ui/switch";
-import { CollapsibleSection } from "@/components/lotus/CollapsibleSection";
+import { CollapsibleSection } from "@/components/lots/CollapsibleSection";
 import { INTEGRATIONS, getIntegrationStatus } from "@/lib/integrations-catalog";
-import { IntegrationCard } from "@/components/lotus/IntegrationCard";
+import { IntegrationCard } from "@/components/lots/IntegrationCard";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin/clientes/novo")({
@@ -162,7 +162,7 @@ function NovoCliente() {
         <button
           type="button"
           onClick={() => router.navigate({ to: "/admin/clientes" })}
-          className="lotus-focus inline-flex items-center gap-1 rounded-md text-[12px] text-muted-foreground hover:text-foreground"
+          className="lots-focus inline-flex items-center gap-1 rounded-md text-[12px] text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Voltar para clientes
         </button>
@@ -174,8 +174,8 @@ function NovoCliente() {
       </div>
 
       {/* Identidade & contato (rápido) */}
-      <div className="lotus-surface overflow-hidden">
-        <div className="border-b border-border/70 px-5 py-4">
+      <div className="lots-surface overflow-hidden">
+        <div className="border-b border-border px-5 py-4">
           <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-300">
             Essencial
           </p>
@@ -224,7 +224,7 @@ function NovoCliente() {
       <button
         type="button"
         onClick={() => setAdvancedOpen((o) => !o)}
-        className="lotus-focus inline-flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/20 px-3.5 py-2 text-[12.5px] font-medium text-muted-foreground hover:border-primary-300 hover:text-foreground"
+        className="lots-focus inline-flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/20 px-3.5 py-2 text-[12.5px] font-medium text-muted-foreground hover:border-primary-300 hover:text-foreground"
       >
         <ChevronDown
           className={cn("h-3.5 w-3.5 transition-transform", advancedOpen && "rotate-180")}
@@ -249,7 +249,7 @@ function NovoCliente() {
               error={errors.slug}
               hint={
                 <span className="font-mono text-foreground/80">
-                  lotus.app/cliente/{effectiveSlug || "—"}
+                  lotsbi.leandromajr.com/cliente/{effectiveSlug || "—"}
                 </span>
               }
             >
@@ -394,14 +394,14 @@ function NovoCliente() {
         <button
           type="button"
           onClick={() => router.navigate({ to: "/admin/clientes" })}
-          className="lotus-focus inline-flex h-9 items-center rounded-lg border border-border bg-card px-3.5 text-[12.5px] font-medium text-muted-foreground hover:text-foreground"
+          className="lots-focus inline-flex h-9 items-center rounded-lg border border-border bg-card px-3.5 text-[12.5px] font-medium text-muted-foreground hover:text-foreground"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={saving}
-          className="lotus-focus inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] hover:-translate-y-px disabled:opacity-50"
+          className="lots-focus inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] hover:-translate-y-px disabled:opacity-50"
         >
           {saving ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />

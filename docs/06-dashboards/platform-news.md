@@ -42,10 +42,13 @@ Ordem: **mais recente primeiro** (topo do array).
 2. Atualizar [Changelog](../12-changelog/changelog.md).
 3. Capítulo do [Tutorial](../../src/content/platform-tutorial/) se fluxo novo (admin e/ou client).
 4. Doc técnica em `docs/` se arquitetura/dados mudou (KC indexa no build).
+5. Clientes recebem aviso automático no **sino** ao entrar (e no browser se
+   `Notification.permission === "granted"`). Ver
+   `src/lib/platform-news/announce-new-releases.ts`.
 
 ## UI
 
-Componente: `src/components/lotus/platform-news/PlatformNewsPage.tsx`  
+Componente: `src/components/lots/platform-news/PlatformNewsPage.tsx`  
 Rota: `src/routes/_authenticated/novidades.tsx`  
 Menu: sidebar cliente e admin (**Novidades**).
 

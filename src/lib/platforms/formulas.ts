@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · Fórmulas oficiais de marketing.
+// Lots BI · Fórmulas oficiais de marketing.
 // Fonte ÚNICA de verdade. Toda KPI derivada (Dashboard Executivo, Visão Geral
 // do Cliente, Dashboards de Plataforma, exportações) passa por aqui.
 // Recebem TOTAIS já agregados — nunca calcular sobre média de médias.

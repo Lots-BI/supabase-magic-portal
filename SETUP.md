@@ -15,7 +15,7 @@ Lovable permanece apenas como pipeline transitório de build/deploy até a Fase 
 ## Primeira vez
 
 ```bash
-cd supabase-magic-portal
+cd lots-bi
 npm run setup          # verifica Node e .env
 npm install
 cp .env.example .env   # Windows: copy .env.example .env

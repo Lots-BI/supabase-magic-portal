@@ -1,4 +1,4 @@
-// Lotus · Catálogo de métricas/KPIs para o Plano Estratégico — lê PLATFORM_REGISTRY.
+// Lots BI · Catálogo de métricas/KPIs para o Plano Estratégico — lê PLATFORM_REGISTRY.
 
 import { PLATFORM_REGISTRY } from "@/lib/platforms/registry";
 

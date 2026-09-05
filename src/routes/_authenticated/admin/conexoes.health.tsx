@@ -2,10 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { adminTitle } from "@/lib/brand";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { SectionCard } from "@/components/lotus/SectionCard";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
-import { HubHealthBadge } from "@/components/lotus/platform-hub/hub-badges";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { SectionCard } from "@/components/lots/SectionCard";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
+import { HubHealthBadge } from "@/components/lots/platform-hub/hub-badges";
 import { getHubConnections } from "@/modules/platform-hub-admin/hub-admin.server";
 import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
 

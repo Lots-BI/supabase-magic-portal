@@ -2,7 +2,7 @@
 title: Plano Estratégico — Centro de Inteligência
 description: Módulo de planejamento estratégico integrado a métricas, editorial e timeline colaborativa.
 status: living
-owner: Engenharia / Produto Lotus
+owner: Engenharia / Produto Lots BI
 last_review: 2026-06-29
 ---
 
@@ -83,7 +83,7 @@ KPIs **nunca duplicados** — apenas referência (`platform_key` + `metric_key`/
 | ---------------- | ------------------------------------------------------------------------------------------------- |
 | Tipos + motores  | `src/lib/strategic-plan/`                                                                         |
 | Server functions | `src/lib/strategic-plan.functions.ts`                                                             |
-| UI               | `src/components/lotus/strategic-plan/`                                                            |
+| UI               | `src/components/lots/strategic-plan/`                                                            |
 | Rotas cliente    | `cliente.$cliente.plano-estrategico.tsx` (layout), `.index.tsx` (lista), `.$planoId.tsx` (centro) |
 | Testes           | `src/lib/strategic-plan/*.test.ts`                                                                |
 

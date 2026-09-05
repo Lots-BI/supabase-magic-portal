@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { adminTitle } from "@/lib/brand";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
-import { ConnectionsHubView } from "@/components/lotus/platform-hub/ConnectionsHubView";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
+import { ConnectionsHubView } from "@/components/lots/platform-hub/ConnectionsHubView";
 import { getHubOverview } from "@/modules/platform-hub-admin/hub-admin.server";
 import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
 

@@ -5,30 +5,30 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { DollarSign, Users, FolderKanban, Target, Radio, Plus, ListTodo } from "lucide-react";
 import { adminTitle, BRAND_NAME } from "@/lib/brand";
-import { PageHeader } from "@/components/lotus/PageHeader";
+import { PageHeader } from "@/components/lots/PageHeader";
 import { Button } from "@/components/ui/button";
-import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
-import { SectionCard } from "@/components/lotus/SectionCard";
-import { SmartBriefing } from "@/components/lotus/agency-os/SmartBriefing";
-import { ContextualKpiCard } from "@/components/lotus/agency-os/ContextualKpiCard";
-import { IntelligentFeed } from "@/components/lotus/agency-os/IntelligentFeed";
-import { ClientOperationalCard } from "@/components/lotus/agency-os/ClientOperationalCard";
-import { AgencyFilterBar } from "@/components/lotus/agency-os/AgencyFilterBar";
-import { AddNoteDialog } from "@/components/lotus/agency-os/AddNoteDialog";
-import { CreateLeadDialog } from "@/components/lotus/agency-os/CreateLeadDialog";
-import { CreateProjectDialog } from "@/components/lotus/agency-os/CreateProjectDialog";
-import { CreateTaskDialog } from "@/components/lotus/agency-os/CreateTaskDialog";
-import { UpdateClientOpsDialog } from "@/components/lotus/agency-os/UpdateClientOpsDialog";
-import { PrioritiesSection, prioritiesQuery } from "@/components/lotus/agency-os/PrioritiesSection";
-import { HubIntegrationsAlertCard } from "@/components/lotus/platform-hub/HubIntegrationsAlertCard";
+import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
+import { SectionCard } from "@/components/lots/SectionCard";
+import { SmartBriefing } from "@/components/lots/agency-os/SmartBriefing";
+import { ContextualKpiCard } from "@/components/lots/agency-os/ContextualKpiCard";
+import { IntelligentFeed } from "@/components/lots/agency-os/IntelligentFeed";
+import { ClientOperationalCard } from "@/components/lots/agency-os/ClientOperationalCard";
+import { AgencyFilterBar } from "@/components/lots/agency-os/AgencyFilterBar";
+import { AddNoteDialog } from "@/components/lots/agency-os/AddNoteDialog";
+import { CreateLeadDialog } from "@/components/lots/agency-os/CreateLeadDialog";
+import { CreateProjectDialog } from "@/components/lots/agency-os/CreateProjectDialog";
+import { CreateTaskDialog } from "@/components/lots/agency-os/CreateTaskDialog";
+import { UpdateClientOpsDialog } from "@/components/lots/agency-os/UpdateClientOpsDialog";
+import { PrioritiesSection, prioritiesQuery } from "@/components/lots/agency-os/PrioritiesSection";
+import { HubIntegrationsAlertCard } from "@/components/lots/platform-hub/HubIntegrationsAlertCard";
 import {
   ProductionKanbanSection,
   productionKanbanQuery,
-} from "@/components/lotus/agency-os/ProductionKanbanSection";
+} from "@/components/lots/agency-os/ProductionKanbanSection";
 import {
   PipelineKanbanSection,
   pipelineQuery,
-} from "@/components/lotus/agency-os/PipelineKanbanSection";
+} from "@/components/lots/agency-os/PipelineKanbanSection";
 import {
   addAgencyNote,
   createAgencyLead,
@@ -104,7 +104,7 @@ export const Route = createFileRoute("/_authenticated/admin/central")({
   },
   component: CentralPage,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-danger">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-danger">Erro: {error.message}</div>
   ),
 });
 

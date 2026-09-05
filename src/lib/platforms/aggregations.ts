@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · Aggregation strategies.
+// Lots BI · Aggregation strategies.
 // Implementação pura das estratégias declaradas em MetricDef.aggregation.
 // Recebe valores numéricos JÁ FILTRADOS pelo período + as linhas originais
 // (para custom). Ignora null/NaN.

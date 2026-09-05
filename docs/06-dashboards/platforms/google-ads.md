@@ -1,8 +1,8 @@
 ---
 title: Google Ads — Dashboard
-description: Origem dos dados, métricas, fórmulas e comportamento do dashboard Google Ads na Lotus.
+description: Origem dos dados, métricas, fórmulas e comportamento do dashboard Google Ads no Lots BI.
 status: living
-owner: Engenharia / Dados Lotus
+owner: Engenharia / Dados Lots BI
 tags: [dashboard, google-ads, platformdef]
 difficulty: intermediate
 last_review: 2026-06-26

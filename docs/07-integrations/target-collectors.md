@@ -1,8 +1,8 @@
 ---
 title: Coletores Proprietários (Alvo)
-description: Arquitetura futura de coleta de dados — workers Lotus por plataforma.
+description: Arquitetura futura de coleta de dados — workers Lots BI por plataforma.
 status: living
-owner: Engenharia Lotus / Arquitetura
+owner: Engenharia Lots BI / Arquitetura
 last_review: 2026-06-26
 ---
 
@@ -22,7 +22,7 @@ flowchart TB
         Q["Fila de jobs\nsync por cliente+plataforma"]
     end
 
-    subgraph Workers["Workers Lotus"]
+    subgraph Workers["Workers Lots BI"]
         W1["GoogleAdsCollector"]
         W2["MetaCollector"]
         W3["InstagramCollector"]

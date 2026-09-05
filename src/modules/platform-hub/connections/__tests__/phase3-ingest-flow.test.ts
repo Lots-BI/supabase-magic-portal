@@ -38,6 +38,39 @@ describe("Fase 3 — ConnectionResolver", () => {
       resolver.resolveScopeRef(asConnectionId("00000000-0000-4000-8000-000000009999")),
     ).rejects.toThrow(/Connection not found/);
   });
+
+  it("hidrata ScopeRef a partir do repositório quando o mapa em memória está vazio", async () => {
+    const connectionId = asConnectionId("0edfa02e-0b95-444c-8348-5ef28c3b58c8");
+    const resolver = createConnectionResolver(createLegacyCadastroBridge(), {
+      async get(id) {
+        if (id !== connectionId) return null;
+        return {
+          connectionId,
+          pluginKey: "meta_ads",
+          label: "Meta - Antena",
+          scopeRef: "cadastro:42" as never,
+          capability: "meta:metrics:collect" as never,
+          activeProviderType: "official_api",
+          status: "active",
+          createdAt: "2026-09-05T00:00:00.000Z",
+          updatedAt: "2026-09-05T00:00:00.000Z",
+        };
+      },
+      async create(record) {
+        return record;
+      },
+      async update() {
+        throw new Error("unused");
+      },
+      async list() {
+        return [];
+      },
+      async delete() {},
+    });
+
+    await expect(resolver.resolveScopeRef(connectionId)).resolves.toBe("cadastro:42");
+    await expect(resolver.resolveCanonicalClientName(connectionId)).resolves.toBe("acme_corp");
+  });
 });
 
 describe("Fase 3 — fluxo Provider → IngestEnvelope", () => {

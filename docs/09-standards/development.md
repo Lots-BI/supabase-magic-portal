@@ -2,7 +2,7 @@
 title: Padrões de Desenvolvimento
 description: Convenções de código, estrutura, segurança e fluxo de contribuição.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 

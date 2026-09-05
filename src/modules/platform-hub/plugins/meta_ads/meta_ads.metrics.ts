@@ -22,4 +22,14 @@ export const META_ADS_METRICS = [
     format: "currency_micros",
     official: true,
   },
+  {
+    key: "results",
+    format: "int",
+    official: true,
+  },
+  {
+    key: "conversions",
+    format: "int",
+    official: true,
+  },
 ] as const;

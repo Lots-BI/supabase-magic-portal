@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { completeHubGoogleOAuth } from "@/modules/platform-hub-admin/hub-admin.server";
-import { navigateOAuthError, navigateOAuthRedirect } from "@/components/lotus/platform-hub/oauth-redirect";
+import { navigateOAuthError, navigateOAuthRedirect } from "@/components/lots/platform-hub/oauth-redirect";
 
 const searchSchema = z.object({
   code: z.string().optional(),

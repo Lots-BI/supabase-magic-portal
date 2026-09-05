@@ -80,7 +80,17 @@ export function createOfficialMetaProvider(config: OfficialMetaProviderConfig): 
           window,
         });
 
-        const rows = mapMetaInsightsToMetricRows(insights);
+        let campaignObjectives = new Map<string, string>();
+        try {
+          campaignObjectives = await graphClient.fetchCampaignObjectives({
+            accessToken: tokenBundle.accessToken,
+            adAccountId: adAccount.externalId,
+          });
+        } catch {
+          // Insights já vieram; sem objective só contamos conversão de negócio.
+        }
+
+        const rows = mapMetaInsightsToMetricRows(insights, { campaignObjectives });
         timer.finish({
           campaignsCount: countDistinctCampaigns(insights),
           metricsCount: rows.length,

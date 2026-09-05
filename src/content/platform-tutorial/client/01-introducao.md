@@ -5,7 +5,7 @@ description: Como acessar, navegar e entender o que você pode fazer na platafor
 
 # Introdução ao portal do cliente
 
-Bem-vindo ao tutorial para **clientes** da plataforma Lotus. Aqui você aprende, passo a passo, como usar cada área disponível para a sua marca.
+Bem-vindo ao tutorial para **clientes** da plataforma Lots BI. Aqui você aprende, passo a passo, como usar cada área disponível para a sua marca.
 
 ## Para quem é este guia
 

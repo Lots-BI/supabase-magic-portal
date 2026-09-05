@@ -2,7 +2,7 @@
 title: PlatformDef — Catálogo de Plataformas
 description: Métricas, KPIs, gráficos e views de cada plataforma registrada.
 status: living
-owner: Engenharia / Dados Lotus
+owner: Engenharia / Dados Lots BI
 last_review: 2026-06-26
 ---
 
@@ -57,10 +57,13 @@ Fonte: `src/lib/platforms/*.ts` + `registry.ts`.
 | reach       | reach       | **sum** | Soma diária — ver semântica abaixo |
 | impressions | impressions | sum     |                                    |
 | clicks      | clicks      | sum     |                                    |
+| results     | results     | sum     | Coluna Resultados do Gerenciador   |
+| conversions | conversions | sum     | Campo `conversions` da Insights API |
 
 ### KPIs derivados
 
-CTR, CPC, CPM, **Frequency** (`impressions / reach`)
+CTR, CPC, CPM, Frequency, **Custo por resultado** (`spend / results`), **Taxa de conversão**
+(`conversions / clicks`)
 
 ### Semântica de reach (importante)
 
@@ -146,7 +149,7 @@ Engagement rate (sessões), eventos/sessão, views/user, conv/sessão, conv/user
 ## Gráficos por plataforma
 
 Cada `PlatformDef.charts` declara séries `area` ou `bar`. Renderizados por
-`PlatformDashboard` via componentes em `components/lotus/charts/`.
+`PlatformDashboard` via componentes em `components/lots/charts/`.
 
 ---
 

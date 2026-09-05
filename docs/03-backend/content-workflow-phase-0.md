@@ -2,7 +2,7 @@
 title: Content Workflow — Fase 0 (Infraestrutura)
 description: Especificação executável da Fase 0 — scaffold, migration 18, boundaries.
 status: completed
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 

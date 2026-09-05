@@ -24,7 +24,7 @@ confiáveis** para tomada de decisão.
 
 **Hoje (observado no repositório):** o Lots BI opera como portal de performance e operação
 para uma agência de marketing, com dashboards multi-plataforma, painel administrativo e
-fluxo editorial/aprovações. O código vive em `supabase-magic-portal/`.
+fluxo editorial/aprovações. O código vive em `lots-bi/`.
 
 **Visão futura (estratégica):** plataforma completamente proprietária, multi-tenant em
 escala, consolidando dezenas de integrações de marketing com coletores próprios, fila de
@@ -36,11 +36,11 @@ Detalhes: [Missão](./00-company/mission.md) · [Visão de produto](./01-product
 
 ## Dois estados — leia isto antes de tudo (10 minutos)
 
-Toda a documentação da Lotus distingue **dois mundos**. Não confunda um com o outro.
+Toda a documentação do Lots BI distingue **dois mundos**. Não confunda um com o outro.
 
 |                        | **Estado Atual**                                   | **Visão Futura (Arquitetura Alvo)**                          |
 | ---------------------- | -------------------------------------------------- | ------------------------------------------------------------ |
-| **O que é**            | Como o sistema funciona **hoje**, no código        | Como a Lotus **deverá** funcionar quando madura              |
+| **O que é**            | Como o sistema funciona **hoje**, no código        | Como o Lots BI **deverá** funcionar quando maduro              |
 | **Ingestão**           | Make → Supabase (`base_metricas`)                  | Coletores proprietários → Fila → Workers → Supabase          |
 | **App**                | TanStack Start + Supabase + Lovable                | Stack proprietária (TanStack ou evolução) **sem** Lovable    |
 | **Métricas derivadas** | Parte calculada nas **views SQL** (dívida)         | Calculadas **somente** na camada de aplicação                |
@@ -55,7 +55,7 @@ flowchart TB
     end
 
     subgraph FUTURE["Visão Futura (proprietária)"]
-        A2["APIs oficiais"] --> C["Coletores Lotus"]
+        A2["APIs oficiais"] --> C["Coletores Lots BI"]
         C --> Q["Fila"]
         Q --> W["Workers"]
         W --> S2["Supabase\n(só métricas oficiais)"]
@@ -75,7 +75,7 @@ Ferramentas **transitórias** (a serem removidas no longo prazo):
 
 ## Sistema de Engenharia (2 minutos)
 
-A Lotus trata **engenharia como sistema**, não como documentação solta.
+O Lots BI trata **engenharia como sistema**, não como documentação solta.
 
 | Artefato                                                    | Função                         |
 | ----------------------------------------------------------- | ------------------------------ |
@@ -94,7 +94,7 @@ Mandato: **código ↔ docs sincronizados** · melhoria contínua · ADRs para d
 **Cursor** é o ambiente de engenharia. Todo código é escrito neste repositório.
 
 ```
-Desenvolvimento (Cursor) → Commit → Git → GitHub → Deploy → Portal Lotus
+Desenvolvimento (Cursor) → Commit → Git → GitHub → Deploy → Portal Lots BI
 ```
 
 Detalhes: [Fluxo oficial](./09-standards/development-workflow.md) · [ADR-0010](./02-architecture/adr/0010-cursor-official-development-environment.md)
@@ -104,10 +104,10 @@ Detalhes: [Fluxo oficial](./09-standards/development-workflow.md) · [ADR-0010](
 ## Mapa do repositório (10 minutos)
 
 ```
-supabase-magic-portal/
+lots-bi/
 ├── src/
 │   ├── routes/              # Rotas TanStack Router (file-based)
-│   ├── components/lotus/    # Componentes de domínio (dashboards, KPIs)
+│   ├── components/lots/    # Componentes de domínio (dashboards, KPIs)
 │   ├── lib/
 │   │   ├── platforms/       # Engine declarativo (PlatformDef, fórmulas)
 │   │   ├── admin.functions.ts
@@ -135,7 +135,7 @@ supabase-magic-portal/
 3. Views SQL (`vw_*`) normalizam e agregam por dia/plataforma.
 4. Frontend lê views via Supabase client (anon + RLS) e aplica engine TS para KPIs adicionais.
 
-**Visão futura:** coletores Lotus substituem Make; banco armazena **apenas métricas oficiais**
+**Visão futura:** coletores Lots BI substituem Make; banco armazena **apenas métricas oficiais**
 das APIs; CTR, CPC, CPA etc. são calculados exclusivamente no motor de métricas da aplicação.
 
 Diagrama completo: [Fluxo de dados](./02-architecture/data-flow.md)

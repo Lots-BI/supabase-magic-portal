@@ -21,6 +21,48 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-09-05-meta-ads-resultados",
+    date: "2026-09-05",
+    title: "Meta Ads agora mostra Resultados das campanhas",
+    summary:
+      "O dashboard Meta Ads passa a trazer a coluna Resultados do Gerenciador de Anúncios — o resultado primário de cada campanha no dia (venda, lead, mensagem, etc.).",
+    bullets: [
+      "Card e gráfico de **Resultados** no dashboard Meta Ads.",
+      "KPI de **custo por resultado** no período.",
+      "Use **Puxar métricas** de novo se algum dia ainda não tiver Resultados.",
+    ],
+    audience: "client",
+    tags: ["Meta Ads", "Novidade"],
+  },
+  {
+    id: "2026-09-05-conexoes-cliente-meta-ads",
+    date: "2026-09-05",
+    title: "Agora dá para conectar o Meta Ads sozinho também",
+    summary:
+      "A aba Conexões ganhou um novo card: você já podia conectar o Instagram, agora pode conectar sua conta de anúncios Meta Ads também, sem precisar da agência.",
+    bullets: [
+      "Mesmo menu **Conexões**, um card por plataforma.",
+      "Login com sua conta do Facebook que administra a conta de anúncios.",
+      "Depois de conectar, use Puxar métricas no dashboard Meta Ads.",
+    ],
+    audience: "client",
+    tags: ["Meta Ads", "Novidade"],
+  },
+  {
+    id: "2026-09-05-meta-ads-campanhas-hub",
+    date: "2026-09-05",
+    title: "Meta Ads: métricas de campanha sem dias faltantes",
+    summary:
+      "O dashboard Meta Ads agora pode coletar direto da Meta, preenchendo automaticamente qualquer dia sem dados dentro do histórico disponível.",
+    bullets: [
+      "Botão **Puxar métricas** no topo do dashboard Meta Ads, ao lado do período.",
+      "Preenche dias faltantes por campanha, até 30 dias por clique.",
+      "Pode ser usado várias vezes até completar todo o histórico disponível.",
+    ],
+    audience: "client",
+    tags: ["Meta Ads", "Novidade"],
+  },
+  {
     id: "2026-09-05-conexoes-cliente-instagram",
     date: "2026-09-05",
     title: "Conecte o Instagram sozinho, direto do seu painel",

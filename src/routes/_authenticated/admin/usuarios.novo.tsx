@@ -3,9 +3,9 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createUserAccount, listClientes } from "@/lib/admin.functions";
-import { PageHeader } from "@/components/lotus/PageHeader";
-import { Field, FormRow, TextInput, Select } from "@/components/lotus/FormField";
-import { SectionCard } from "@/components/lotus/SectionCard";
+import { PageHeader } from "@/components/lots/PageHeader";
+import { Field, FormRow, TextInput, Select } from "@/components/lots/FormField";
+import { SectionCard } from "@/components/lots/SectionCard";
 import { adminTitle, BRAND_NAME } from "@/lib/brand";
 import { Copy, Send, KeyRound } from "lucide-react";
 
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/admin/usuarios/novo")({
   loader: ({ context }) => (context as any).queryClient.ensureQueryData(clientesQuery),
   component: NovoUsuarioPage,
   errorComponent: ({ error }) => (
-    <div className="lotus-surface p-4 text-sm text-destructive">Erro: {error.message}</div>
+    <div className="lots-surface p-4 text-sm text-destructive">Erro: {error.message}</div>
   ),
 });
 
@@ -91,7 +91,7 @@ function NovoUsuarioPage() {
                   receberá um link para definir a senha.
                 </p>
                 {result.invite_redirect_to && (
-                  <p className="rounded-lg border border-border/70 bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
+                  <p className="rounded-lg border border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
                     Link de redirecionamento:{" "}
                     <span className="font-mono text-foreground">{result.invite_redirect_to}</span>
                   </p>
@@ -111,7 +111,7 @@ function NovoUsuarioPage() {
                       navigator.clipboard.writeText(result.temp_password ?? "");
                       toast.success("Senha copiada.");
                     }}
-                    className="lotus-focus inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+                    className="lots-focus inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
                   >
                     <Copy className="h-3 w-3" /> Copiar
                   </button>
@@ -122,7 +122,7 @@ function NovoUsuarioPage() {
           <div className="mt-5 flex gap-2">
             <button
               onClick={() => router.navigate({ to: "/admin/usuarios" })}
-              className="lotus-focus h-9 rounded-lg bg-primary px-4 text-[13px] font-medium text-primary-foreground"
+              className="lots-focus h-9 rounded-lg bg-primary px-4 text-[13px] font-medium text-primary-foreground"
             >
               Ir para usuários
             </button>
@@ -133,7 +133,7 @@ function NovoUsuarioPage() {
                 setNome("");
                 setClienteId("");
               }}
-              className="lotus-focus h-9 rounded-lg border border-border bg-card px-4 text-[13px] font-medium text-muted-foreground hover:text-foreground"
+              className="lots-focus h-9 rounded-lg border border-border bg-card px-4 text-[13px] font-medium text-muted-foreground hover:text-foreground"
             >
               Criar outro
             </button>
@@ -221,7 +221,7 @@ function NovoUsuarioPage() {
                 type="button"
                 onClick={() => setMode(opt.key)}
                 className={
-                  "lotus-focus rounded-lg border p-3 text-left transition-colors " +
+                  "lots-focus rounded-lg border p-3 text-left transition-colors " +
                   (mode === opt.key
                     ? "border-primary bg-primary/8"
                     : "border-border hover:border-primary-300")
@@ -238,14 +238,14 @@ function NovoUsuarioPage() {
           <button
             type="button"
             onClick={() => router.navigate({ to: "/admin/usuarios" })}
-            className="lotus-focus h-9 rounded-lg border border-border bg-card px-4 text-[13px] font-medium text-muted-foreground hover:text-foreground"
+            className="lots-focus h-9 rounded-lg border border-border bg-card px-4 text-[13px] font-medium text-muted-foreground hover:text-foreground"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="lotus-focus h-9 rounded-lg bg-primary px-4 text-[13px] font-medium text-primary-foreground disabled:opacity-60"
+            className="lots-focus h-9 rounded-lg bg-primary px-4 text-[13px] font-medium text-primary-foreground disabled:opacity-60"
           >
             {saving ? "Criando…" : "Criar usuário"}
           </button>

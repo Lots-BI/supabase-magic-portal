@@ -7,7 +7,7 @@ export function ModuleCardGrid({ modules }: { modules: ModuleInfo[] }) {
       {modules.map((mod) => (
         <div
           key={mod.id}
-          className="rounded-xl border border-border/70 bg-card/50 p-4 transition-colors hover:border-primary/30"
+          className="rounded-xl border border-border bg-card/50 p-4 transition-colors hover:border-primary/30"
         >
           <div className="mb-2 flex items-center gap-2">
             <h3 className="font-display text-sm font-semibold">{mod.label}</h3>

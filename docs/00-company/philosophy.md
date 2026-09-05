@@ -1,14 +1,14 @@
 ---
 title: Filosofia & Princípios de Engenharia
-description: Cultura, valores e princípios que guiam como construímos a Lotus.
+description: Cultura, valores e princípios que guiam como construímos o Lots BI.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 
 # Filosofia & Princípios de Engenharia
 
-A Lotus é um **SaaS de Business Intelligence** para agências e empresas acompanharem
+O Lots BI é um **SaaS de Business Intelligence** para agências e empresas acompanharem
 indicadores de marketing em um único ambiente. Nosso trabalho é transformar dados dispersos
 de várias plataformas de mídia em uma **leitura clara, confiável e acionável** — para a
 agência e para o cliente final.
@@ -85,7 +85,7 @@ Código sem documentação atualizada é trabalho pela metade. Ver
 ### 9. Propriedade intelectual total (visão de longo prazo)
 
 Ferramentas transitórias (Make, Lovable) aceleraram a validação, mas **não são a arquitetura
-definitiva**. Toda inteligência operacional e analítica deve migrar para o ecossistema Lotus.
+definitiva**. Toda inteligência operacional e analítica deve migrar para o ecossistema Lots BI.
 Ver [ADR-0008](../02-architecture/adr/0008-proprietary-data-collectors.md) e
 [ADR-0009](../02-architecture/adr/0009-platform-proprietary-infrastructure.md).
 

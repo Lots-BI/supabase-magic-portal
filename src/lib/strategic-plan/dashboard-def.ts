@@ -1,4 +1,4 @@
-// Lotus · Definição declarativa das seções do Centro Estratégico.
+// Lots BI · Definição declarativa das seções do Centro Estratégico.
 
 export const DIAGNOSTICO_THRESHOLDS = {
   spendUp: 5,

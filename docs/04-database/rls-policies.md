@@ -2,7 +2,7 @@
 title: RLS — Catálogo de Policies
 description: Todas as Row Level Security policies do Postgres, por tabela.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 

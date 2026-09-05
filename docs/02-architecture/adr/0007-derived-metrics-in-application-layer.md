@@ -2,14 +2,14 @@
 title: "ADR-0007: Métricas derivadas na camada de aplicação"
 status: proposed
 date: 2026-06-26
-deciders: Engenharia Lotus
+deciders: Engenharia Lots BI
 ---
 
 # ADR-0007: Métricas derivadas na camada de aplicação
 
 ## Contexto
 
-Princípio arquitetural da Lotus: o banco armazena **apenas métricas oficiais** das APIs.
+Princípio arquitetural do Lots BI: o banco armazena **apenas métricas oficiais** das APIs.
 KPIs derivados (CTR, CPC, CPA, CPM, engagement rate, frequency) devem ser calculados em
 **um único módulo** compartilhado.
 
@@ -21,7 +21,7 @@ calcula esses KPIs. Isso cria risco de divergência.
 
 1. **Proibir** persistência e exposição de métricas derivadas nas views SQL.
 2. Views expõem somente agregações de métricas oficiais (SUM, COUNT por dia).
-3. Toda métrica derivada é calculada em `formulas.ts` (evoluir para pacote `@lotus/metrics`).
+3. Toda métrica derivada é calculada em `formulas.ts` (evoluir para pacote `@lots/metrics`).
 4. Componentes React **nunca** implementam fórmulas — apenas consomem resultados do motor.
 
 ## Consequências

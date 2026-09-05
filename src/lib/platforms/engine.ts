@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · Platform engine.
+// Lots BI · Platform engine.
 // Funções puras que operam sobre uma PlatformDef + linhas + período.
 // Nenhum componente React faz cálculo: tudo passa por aqui.
 // ============================================================================
@@ -12,6 +12,7 @@ import { applyAggregation } from "./aggregations";
 /** Colunas mínimas para queries à view da plataforma. */
 export function platformViewSelect(def: PlatformDef): string {
   const cols = new Set(["data", "cliente"]);
+  if (def.campaignField) cols.add(def.campaignField);
   for (const m of def.metrics) cols.add(m.column);
   return [...cols].join(",");
 }

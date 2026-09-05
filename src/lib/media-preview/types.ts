@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · Media Preview — contrato declarativo.
+// Lots BI · Media Preview — contrato declarativo.
 // Novo formato = registrar MediaFormatDef + Renderer. Nenhum switch espalhado.
 // ============================================================================
 

@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { EmptyState } from "@/components/lotus/EmptyState";
+import { EmptyState } from "@/components/lots/EmptyState";
 import type { AiWorkspaceSnapshot } from "@/lib/ai-workspace/types";
 import {
   copyToClipboard,
@@ -74,8 +74,8 @@ export function ChatContextGeneratorPanel({
   }
 
   return (
-    <div className="lotus-surface flex h-full flex-col overflow-hidden">
-      <div className="border-b border-border/70 px-5 py-4">
+    <div className="lots-surface flex h-full flex-col overflow-hidden">
+      <div className="border-b border-border px-5 py-4">
         <h2 className="font-display text-lg font-semibold tracking-tight">
           Contexto para IA Conversacional
         </h2>
@@ -111,7 +111,7 @@ export function ChatContextGeneratorPanel({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 border-b border-border/70 px-5 py-4">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-4">
         <Button onClick={onGenerate} disabled={isGenerating} className="gap-2">
           {isGenerating ? (
             <Loader2 className="h-4 w-4 animate-spin" />

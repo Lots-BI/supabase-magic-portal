@@ -1,5 +1,5 @@
 // ============================================================================
-// Lotus · Google Business Profile — PlatformDef.
+// Lots BI · Google Business Profile — PlatformDef.
 // View: public.vw_google_business_diario
 // ============================================================================
 

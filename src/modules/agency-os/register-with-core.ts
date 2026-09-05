@@ -7,6 +7,7 @@ import {
   Compass,
   FileBarChart,
   GraduationCap,
+  Info,
   LayoutDashboard,
   Palette,
   SwatchBook,
@@ -134,6 +135,13 @@ const NAVIGATION_ROUTES: ModuleRouteDef[] = [
     keywords: ["ajuda", "guia", "como usar", "onboarding"],
   },
   {
+    id: "sobre",
+    label: "O que é o Lots BI",
+    href: "/sobre",
+    icon: Info,
+    keywords: ["sobre", "plataforma", "business intelligence", "o que é", "marca"],
+  },
+  {
     id: "knowledge",
     label: "Knowledge Center",
     href: "/admin/knowledge",
@@ -178,47 +186,47 @@ function navigationSearch(ctx: SearchContext): SearchResult[] {
 }
 
 const HealthDiagnosisWidget = lazy(() =>
-  import("@/components/lotus/agency-os/workspace/IntelligenceWidgets").then((m) => ({
+  import("@/components/lots/agency-os/workspace/IntelligenceWidgets").then((m) => ({
     default: m.HealthDiagnosisWidget,
   })),
 );
 const InsightsWidget = lazy(() =>
-  import("@/components/lotus/agency-os/workspace/IntelligenceWidgets").then((m) => ({
+  import("@/components/lots/agency-os/workspace/IntelligenceWidgets").then((m) => ({
     default: m.InsightsWidget,
   })),
 );
 const RecommendationsWidget = lazy(() =>
-  import("@/components/lotus/agency-os/workspace/IntelligenceWidgets").then((m) => ({
+  import("@/components/lots/agency-os/workspace/IntelligenceWidgets").then((m) => ({
     default: m.RecommendationsWidget,
   })),
 );
 const PerformanceWidget = lazy(() =>
-  import("@/components/lotus/agency-os/workspace/IntelligenceWidgets").then((m) => ({
+  import("@/components/lots/agency-os/workspace/IntelligenceWidgets").then((m) => ({
     default: m.PerformanceWidget,
   })),
 );
 const FinanceWidget = lazy(() =>
-  import("@/components/lotus/agency-os/workspace/IntelligenceWidgets").then((m) => ({
+  import("@/components/lots/agency-os/workspace/IntelligenceWidgets").then((m) => ({
     default: m.FinanceWidget,
   })),
 );
 const CampaignsWidget = lazy(() =>
-  import("@/components/lotus/agency-os/workspace/IntelligenceWidgets").then((m) => ({
+  import("@/components/lots/agency-os/workspace/IntelligenceWidgets").then((m) => ({
     default: m.CampaignsWidget,
   })),
 );
 const ProjectsWidget = lazy(() =>
-  import("@/components/lotus/agency-os/workspace/ProjectsWidget").then((m) => ({
+  import("@/components/lots/agency-os/workspace/ProjectsWidget").then((m) => ({
     default: m.ProjectsWidget,
   })),
 );
 const NotesWidget = lazy(() =>
-  import("@/components/lotus/agency-os/workspace/NotesWidget").then((m) => ({
+  import("@/components/lots/agency-os/workspace/NotesWidget").then((m) => ({
     default: m.NotesWidget,
   })),
 );
 const TimelineWidget = lazy(() =>
-  import("@/components/lotus/agency-os/workspace/TimelineWidget").then((m) => ({
+  import("@/components/lots/agency-os/workspace/TimelineWidget").then((m) => ({
     default: m.TimelineWidget,
   })),
 );

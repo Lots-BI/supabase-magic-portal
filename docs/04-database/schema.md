@@ -1,8 +1,8 @@
 ---
 title: Banco — Schema & Modelo de Dados
-description: Tabelas, enums, relacionamentos, RLS e o modelo multi-tenant da Lotus.
+description: Tabelas, enums, relacionamentos, RLS e o modelo multi-tenant do Lots BI.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-26
 ---
 

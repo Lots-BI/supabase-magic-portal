@@ -2,7 +2,7 @@
 title: OS Core — Infraestrutura do Lots BI
 description: Camada central de eventos, comandos, registries e integração de módulos.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-07-06
 ---
 

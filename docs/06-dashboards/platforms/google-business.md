@@ -1,8 +1,8 @@
 ---
 title: Google Business — Dashboard
-description: Status, view e limitações do dashboard Google Business Profile na Lotus.
+description: Status, view e limitações do dashboard Google Business Profile no Lots BI.
 status: living
-owner: Engenharia / Dados Lotus
+owner: Engenharia / Dados Lots BI
 tags: [dashboard, google-business]
 difficulty: beginner
 last_review: 2026-06-26

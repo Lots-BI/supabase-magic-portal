@@ -1,8 +1,8 @@
 ---
 title: Banco — Migrations
-description: Histórico, convenções e princípios das migrations da Lotus.
+description: Histórico, convenções e princípios das migrations do Lots BI.
 status: living
-owner: Engenharia Lotus
+owner: Engenharia Lots BI
 last_review: 2026-06-30
 ---
 
@@ -42,7 +42,10 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `30_parallel_metricas_homologation.sql`   | Paralelismo métricas — `base_metricas_hub`, `ph_metricas_source`, `vw_metricas` com fonte configurável (`make` default).                                                                                      |
 | `31_plano_alinhamento.sql`                | Funil inteligente 1:1 — `plano_alinhamentos` (quiz → proposta → aprovação), RLS por `current_user_clientes`, trigger de guarda de colunas comerciais.                                                      |
 | `33_instagram_media_metrics.sql`          | Métricas por publicação Instagram — `ig_media`, `ig_media_metrics_history`, view `vw_ig_media_dashboard`, bucket `ig-media-thumbs`, RLS. Ver [instagram-posts.md](../06-dashboards/instagram-posts.md). |
+| `34_instagram_profile_prefer_hub.sql`     | `vw_instagram_diario` passa a preferir `base_metricas_hub` por dia+cliente (via `vw_instagram_normalizada_prefer_hub`), fallback Make. Só recria views. Ver [instagram.md](../06-dashboards/platforms/instagram.md). |
 | `35_cliente_diretrizes.sql`            | PDF de diretrizes da marca por cliente — tabela `cliente_diretrizes`, bucket `diretrizes-marca`, RLS admin/cliente. |
+| `36_meta_ads_prefer_hub.sql`              | `vw_meta_ads_diario` passa a preferir `base_metricas_hub` por dia+cliente (via `vw_meta_ads_normalizada_prefer_hub`), fallback Make. Mesma receita da 34, com dimensão `campanha`. Só recria views. Ver [meta-ads.md](../06-dashboards/platforms/meta-ads.md). |
+| `37_meta_ads_results_conversions.sql`     | Acrescenta `results` e `conversions` em `vw_meta_ads_diario` (colunas no fim). Coletor oficial passa a pedir `actions` + `conversions` na Insights API. |
 
 > **Não existe `04`.** A tentativa `04_integracoes_make.sql` foi **deprecada e substituída**
 > pela `05` (que usa nomes de coluna diferentes); a 04 nunca foi aplicada ao banco.
@@ -107,6 +110,9 @@ Projeto Supabase: `ywvhoctcmibjitvwkkhb`.
 … (32 — ver arquivos em supabase/migrations-official/)
 33_instagram_media_metrics.sql
 34_instagram_profile_prefer_hub.sql
+35_cliente_diretrizes.sql
+36_meta_ads_prefer_hub.sql
+37_meta_ads_results_conversions.sql
 ```
 
 ### Rollback

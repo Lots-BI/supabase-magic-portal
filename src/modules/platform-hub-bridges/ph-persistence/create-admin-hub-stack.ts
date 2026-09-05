@@ -1,6 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { asConnectionId } from "../../../../contracts/connection/connection-id.v1";
+import { asScopeRef } from "../../../../contracts/connection/scope-ref.v1";
 import { createLegacyCadastroBridge } from "@/modules/platform-hub-bridges/legacy-cadastro";
-import { registerCadastroRecord } from "@/modules/platform-hub-bridges/legacy-cadastro";
+import {
+  registerCadastroRecord,
+  registerConnectionScope,
+} from "@/modules/platform-hub-bridges/legacy-cadastro";
 import { createConnectionResolver } from "@/modules/platform-hub/connections/create-connection-resolver";
 import { ConnectionService } from "@/modules/platform-hub/connections/connection-service";
 import { IdentityService } from "@/modules/platform-hub/identity/identity-service";
@@ -47,10 +52,15 @@ async function hydrateCadastroBridge(
 ): Promise<void> {
   const { data } = await supabase
     .from("ph_connections")
-    .select("scope_ref,cadastro_clientes(nome_cliente)")
+    .select("id,scope_ref,cadastro_clientes(nome_cliente)")
     .not("cadastro_id", "is", null);
   for (const row of data ?? []) {
-    const match = /^cadastro:(\d+)$/.exec(row.scope_ref as string);
+    const scopeRef = typeof row.scope_ref === "string" ? row.scope_ref : "";
+    const connectionId = typeof row.id === "string" ? row.id : "";
+    if (connectionId && scopeRef) {
+      registerConnectionScope(asConnectionId(connectionId), asScopeRef(scopeRef));
+    }
+    const match = /^cadastro:(\d+)$/.exec(scopeRef);
     const nome = (row.cadastro_clientes as { nome_cliente?: string } | null)?.nome_cliente;
     if (match && nome) {
       registerCadastroRecord({ cadastroId: Number(match[1]), nomeCanonico: nome });
@@ -72,7 +82,7 @@ export async function createAdminHubStack(supabase: SupabaseClient) {
 
   const connectionService = new ConnectionService(connectionRepository, registry, bridge);
   const identityService = new IdentityService(identityRepository, connectionRepository, registry);
-  const resolver = createConnectionResolver(bridge);
+  const resolver = createConnectionResolver(bridge, connectionRepository);
   const healthStack = createHealthStack();
   const pipelineStack = createMetricPipelineStack({
     writerMode: "both",
