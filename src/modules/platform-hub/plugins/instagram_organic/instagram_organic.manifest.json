@@ -4,7 +4,7 @@
   "kind": "platform",
   "label": "Instagram",
   "category": "organic",
-  "capabilities": ["instagram_organic:metrics:collect"],
+  "capabilities": ["instagram_organic:metrics:collect", "instagram_organic:profile:collect"],
   "metrics": [
     { "key": "views", "format": "int", "official": true },
     { "key": "reach", "format": "int", "official": true },
@@ -42,5 +42,5 @@
     { "provider": "make_passive", "apiVersion": "v1" },
     { "provider": "official_api", "apiVersion": "v22.0" }
   ],
-  "ingestProfiles": ["entity-upsert"]
+  "ingestProfiles": ["entity-upsert", "metrics-timeseries"]
 }

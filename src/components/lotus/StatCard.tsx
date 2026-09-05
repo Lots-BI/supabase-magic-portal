@@ -48,22 +48,22 @@ export const StatCard = memo(function StatCard({
   return (
     <div
       className={cn(
-        "lotus-surface lotus-hoverable relative flex min-w-0 flex-col justify-between overflow-hidden",
+        "lotus-surface lotus-hoverable relative isolate z-0 flex h-full min-w-0 flex-col overflow-hidden",
         isHero && "lotus-petal-accent bg-gradient-to-br from-card to-card/60",
-        isCompact ? "p-4" : "p-5",
+        isCompact ? "p-3.5 sm:p-4" : "p-4 sm:p-5",
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-2">
         <MetricLabel
           label={label}
           description={description}
-          className={cn(isHero ? "text-[11px]" : "text-[10.5px]")}
+          className={cn("min-w-0", isHero ? "text-[11px]" : "text-[10.5px]")}
         />
         {Icon && (
           <span
             className={cn(
-              "grid place-items-center rounded-lg border border-border/70 bg-background/60 text-primary-600 dark:text-primary-300",
+              "grid shrink-0 place-items-center rounded-lg border border-border/70 bg-background/60 text-primary-600 dark:text-primary-300",
               isCompact ? "h-7 w-7" : "h-8 w-8",
             )}
           >
@@ -72,15 +72,15 @@ export const StatCard = memo(function StatCard({
         )}
       </div>
 
-      <div className={cn("mt-3 flex items-baseline gap-2", isHero && "mt-5")}>
+      <div className={cn("mt-auto flex min-w-0 flex-col gap-1.5 pt-3", isHero && "sm:pt-4")}>
         <span
           className={cn(
-            "font-display font-semibold tracking-[-0.02em] tabular-nums text-foreground",
+            "min-w-0 max-w-full truncate font-display font-semibold tracking-[-0.02em] tabular-nums text-foreground",
             isHero
-              ? "text-2xl min-[375px]:text-3xl sm:text-4xl"
+              ? "text-[1.35rem] leading-none sm:text-3xl lg:text-4xl"
               : isCompact
-                ? "text-lg min-[375px]:text-xl"
-                : "text-xl min-[375px]:text-2xl",
+                ? "text-lg leading-none sm:text-xl"
+                : "text-xl leading-none sm:text-2xl",
           )}
         >
           {numberFmt(value)}
@@ -88,25 +88,24 @@ export const StatCard = memo(function StatCard({
         {hasDelta && (
           <span
             className={cn(
-              "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums",
+              "inline-flex w-fit max-w-full items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums",
               good === null && "bg-muted text-muted-foreground",
               good === true && "bg-success/12 text-[color:var(--success)]",
               good === false && "bg-danger/12 text-[color:var(--danger)]",
             )}
           >
             {trend === "flat" ? (
-              <Minus className="h-3 w-3" />
+              <Minus className="h-3 w-3 shrink-0" />
             ) : trend === "up" ? (
-              <ArrowUpRight className="h-3 w-3" />
+              <ArrowUpRight className="h-3 w-3 shrink-0" />
             ) : (
-              <ArrowDownRight className="h-3 w-3" />
+              <ArrowDownRight className="h-3 w-3 shrink-0" />
             )}
             {Math.abs(delta!).toFixed(1)}%
           </span>
         )}
+        {hint && <p className="truncate text-xs text-muted-foreground">{hint}</p>}
       </div>
-
-      {hint && <p className="mt-2 text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 });

@@ -22,7 +22,7 @@ function ChartSkeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn("lotus-skeleton w-full rounded-lg", className)}
-      style={{ minHeight: "clamp(200px, 45vw, 260px)" }}
+        style={{ minHeight: "clamp(176px, 38vw, 240px)" }}
     />
   );
 }

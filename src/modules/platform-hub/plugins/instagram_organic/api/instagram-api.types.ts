@@ -33,3 +33,15 @@ export interface InstagramInsightsResponseV1 {
   }>;
   error?: { message: string; code?: number };
 }
+
+/** Resposta de Insights de CONTA (period=day, metric_type=total_value). */
+export interface InstagramAccountInsightsResponseV1 {
+  data?: Array<{
+    name: string;
+    period?: string;
+    title?: string;
+    description?: string;
+    total_value?: { value?: number };
+  }>;
+  error?: { message: string; code?: number };
+}

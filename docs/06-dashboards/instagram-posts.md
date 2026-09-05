@@ -10,6 +10,12 @@ last_review: 2026-09-01
 
 Área exclusiva para métricas **por publicação** (Feed, Reels, Carrossel, Stories), separada do dashboard diário de perfil (`/cliente/:slug/instagram`).
 
+> **Perfil vs. publicações — dois syncs independentes, mesma conexão `instagram_organic`:**
+> `/instagram` (perfil/conta, `syncInstagramProfileFn`, capability `instagram_organic:profile:collect`,
+> grava em `base_metricas_hub`) e `/publicacoes` (posts, `syncInstagramPostsFn` nesta página,
+> capability `instagram_organic:metrics:collect`, grava em `ig_media`). Clicar em um não afeta o
+> outro. Detalhe do sync de perfil: [instagram.md](./platforms/instagram.md).
+
 ## Rota
 
 - Cliente: `/cliente/:slug/publicacoes`
@@ -21,6 +27,25 @@ last_review: 2026-09-01
 - OAuth Meta com scopes `instagram_manage_insights`, etc.
 - Sync manual: botão **Puxar métricas** (cooldown 5 min)
 - Admin: `/admin/conexoes` → sincronizar conexão Instagram
+
+## Conexão self-service do cliente
+
+Além do fluxo admin (`/admin/conexoes/nova`), o cliente pode conectar o próprio Instagram
+sozinho em `/cliente/:slug/conexoes` (componente `ClientConnectionsPage.tsx`). Server functions
+dedicadas em `src/modules/platform-hub-client/hub-client.server.ts`:
+
+- `getClientInstagramConnectionStatusFn` / `createClientInstagramConnectionFn` /
+  `startClientInstagramOAuthFn` / `discoverClientInstagramIdentitiesFn` /
+  `attachClientInstagramIdentityFn`.
+- Todas checam `assertClientPortalAccess` (dono do cadastro) ou admin, e travam a operação ao
+  `pluginKey` liberado em `CLIENT_SELF_SERVICE_PLUGIN_KEY` (hoje só `instagram_organic` —
+  único confirmado ponta a ponta). Reaproveita o mesmo `AdminHubStack`, `HubOAuthHandle` e
+  `discoverIdentitiesForPlugin` do fluxo admin — só a checagem de acesso e o escopo de
+  plugin/cliente mudam.
+- `sanitizeOAuthRedirectAfter` aceita `/cliente/{slug}/conexoes` além dos paths
+  `/admin/conexoes/*`.
+- OAuth reaproveita popup + callback compartilhados (`oauth-popup.ts`,
+  `/oauth/meta/callback` → `completeHubMetaOAuth`, que não é admin-gated).
 
 ## Sync automático (pendente)
 

@@ -1,17 +1,27 @@
 import type { LucideIcon } from "lucide-react";
 import { PageHeader } from "./PageHeader";
+import { PlatformSwitcher } from "./PlatformSwitcher";
 import { SectionCard } from "./SectionCard";
 
 interface PlatformPlaceholderProps {
   icon: LucideIcon;
   title: string;
   description?: string;
+  platformId: string;
 }
 
-export function PlatformPlaceholder({ icon: Icon, title, description }: PlatformPlaceholderProps) {
+export function PlatformPlaceholder({
+  icon: Icon,
+  title,
+  platformId,
+}: PlatformPlaceholderProps) {
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Plataforma" title={title} description={description} />
+      <PageHeader
+        eyebrow="Plataforma"
+        title={<PlatformSwitcher currentId={platformId} currentLabel={title} />}
+        description="Dados coletados para o período selecionado"
+      />
       <SectionCard
         eyebrow="Em construção"
         title="Conteúdo em breve"
@@ -23,7 +33,7 @@ export function PlatformPlaceholder({ icon: Icon, title, description }: Platform
           </div>
           <p className="max-w-sm text-sm text-muted-foreground">
             A visualização detalhada de <strong>{title}</strong> chega em uma próxima etapa. Por
-            enquanto, consulte a visão geral da conta.
+            enquanto, volte aos dashboards e escolha outra plataforma.
           </p>
         </div>
       </SectionCard>

@@ -17,4 +17,17 @@ describe("sanitizeOAuthRedirectAfter", () => {
   it("rejeita paths fora do escopo", () => {
     expect(() => sanitizeOAuthRedirectAfter("/dashboard")).toThrow();
   });
+
+  it("aceita a aba de conexões do portal cliente", () => {
+    expect(sanitizeOAuthRedirectAfter("/cliente/agencia-lots/conexoes?connectionId=abc")).toBe(
+      "/cliente/agencia-lots/conexoes?connectionId=abc",
+    );
+    expect(sanitizeOAuthRedirectAfter("/cliente/agencia-lots/conexoes")).toBe(
+      "/cliente/agencia-lots/conexoes",
+    );
+  });
+
+  it("rejeita paths do cliente fora da aba de conexões", () => {
+    expect(() => sanitizeOAuthRedirectAfter("/cliente/agencia-lots/publicacoes")).toThrow();
+  });
 });

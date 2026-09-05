@@ -3,12 +3,12 @@ import { Suspense } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { brandTitle } from "@/lib/brand";
 import { DashboardSkeleton } from "@/components/lotus/DashboardSkeleton";
-import { BrandbookPage } from "@/components/brandbook/BrandbookPage";
+import { ClienteDiretrizesPage } from "@/components/brandbook/ClienteDiretrizesPage";
 import { clienteRefQuery } from "./cliente.$cliente";
 
 export const Route = createFileRoute("/_authenticated/cliente/$cliente/brandbook")({
   head: ({ params }) => ({
-    meta: [{ title: brandTitle(`Brand book — ${params.cliente}`) }],
+    meta: [{ title: brandTitle(`Diretrizes da Marca — ${params.cliente}`) }],
   }),
   component: ClienteBrandbookPage,
   errorComponent: ({ error }) => (
@@ -29,7 +29,7 @@ function ClienteBrandbookPage() {
 function ClienteBrandbookScoped({ slug }: { slug: string }) {
   const { data: ref } = useSuspenseQuery(clienteRefQuery(slug));
 
-  if (!ref?.cadastroId) {
+  if (!ref) {
     return (
       <div className="lotus-surface p-6 text-sm text-muted-foreground">
         Cliente não encontrado para o identificador <strong>{slug}</strong>.
@@ -37,5 +37,5 @@ function ClienteBrandbookScoped({ slug }: { slug: string }) {
     );
   }
 
-  return <BrandbookPage fixedClient={{ slug, nome: ref.nome }} mode="client" />;
+  return <ClienteDiretrizesPage cadastroId={ref.cadastroId} />;
 }

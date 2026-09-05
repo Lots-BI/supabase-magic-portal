@@ -16,6 +16,9 @@ export interface NavItem {
   icon: LucideIcon;
   prefixMatch?: boolean;
   badge?: ReactNode;
+  params?: { cliente: string };
+  children?: NavItem[];
+  brandMark?: string;
 }
 
 export interface NavGroup {

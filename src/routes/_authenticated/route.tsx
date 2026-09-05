@@ -8,7 +8,9 @@ import { checkIsAdmin } from "@/lib/admin.functions";
 import { AppShell, type NavGroup } from "@/components/lotus/AppShell";
 import { AuthDiagnosticsBanner } from "@/components/lotus/infra/AuthDiagnosticsBanner";
 import { NotificationCenter } from "@/components/lotus/NotificationCenter";
+import { useClientNavAccount } from "@/components/lotus/dashboards-nav";
 import { BRAND_NAME } from "@/lib/brand";
+import { FEATURE_PLANO_ESTRATEGICO_NAV } from "@/lib/feature-flags";
 import { isPlatformOwnerEmail } from "@/lib/platform-owner";
 import "@/modules/os-bootstrap";
 import {
@@ -113,6 +115,9 @@ function AuthenticatedLayout() {
   const clienteSlug = clienteSlugMatch?.[1];
   const isClientBrandbook = /^\/cliente\/[^/]+\/brandbook\/?$/.test(pathname);
   const signOut = useSignOut(user.email);
+  const clientNav = useClientNavAccount(pathname, !(inAdmin && isAdmin));
+  const clientDashboards = clientNav.nav;
+  const diretrizesSlug = clientNav.slug ?? clienteSlug;
 
   const adminGroups: NavGroup[] = [
     {
@@ -122,8 +127,10 @@ function AuthenticatedLayout() {
         { to: "/admin", label: "Visão geral", icon: LayoutDashboard },
         { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
         { to: "/admin/aprovacoes", label: "Aprovações", icon: ClipboardCheck },
-        { to: "/admin/brandbook", label: "Brand book", icon: SwatchBook },
-        { to: "/admin/plano-estrategico", label: "Plano Estratégico", icon: Compass },
+        { to: "/admin/brandbook", label: "Diretrizes da Marca", icon: SwatchBook },
+        ...(FEATURE_PLANO_ESTRATEGICO_NAV
+          ? [{ to: "/admin/plano-estrategico", label: "Plano Estratégico", icon: Compass }]
+          : []),
         { to: "/admin/clientes", label: "Clientes", icon: Users },
         { to: "/admin/usuarios", label: "Usuários", icon: UserCircle2 },
         { to: "/admin/servicos", label: "Serviços", icon: Briefcase },
@@ -158,21 +165,28 @@ function AuthenticatedLayout() {
 
   const clientGroups: NavGroup[] = [
     {
-      label: "Plataforma",
+      label: "Dados",
       items: [
-        { to: "/dashboard", label: "Visão geral", icon: LayoutDashboard, prefixMatch: false },
-        { to: "/plano-estrategico", label: "Plano Estratégico", icon: Compass },
+        clientDashboards,
+        ...(FEATURE_PLANO_ESTRATEGICO_NAV
+          ? [{ to: "/plano-estrategico", label: "Plano Estratégico", icon: Compass }]
+          : []),
         {
-          to: clienteSlug ? `/cliente/${clienteSlug}/aprovacoes` : "/aprovacoes",
+          to: diretrizesSlug ? `/cliente/${diretrizesSlug}/aprovacoes` : "/aprovacoes",
           label: "Aprovações",
           icon: ClipboardCheck,
         },
-        ...(clienteSlug
+        ...(diretrizesSlug
           ? [
               {
-                to: `/cliente/${clienteSlug}/brandbook`,
-                label: "Brand book",
+                to: `/cliente/${diretrizesSlug}/brandbook`,
+                label: "Diretrizes da Marca",
                 icon: SwatchBook,
+              },
+              {
+                to: `/cliente/${diretrizesSlug}/conexoes`,
+                label: "Conexões",
+                icon: Plug,
               },
             ]
           : []),

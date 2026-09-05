@@ -7,6 +7,7 @@ export const Route = createFileRoute("/_authenticated/cliente/$cliente/tiktok")(
     <PlatformPlaceholder
       icon={Music2}
       title="TikTok"
+      platformId="tiktok"
       description="Métricas de campanhas e conteúdo da conta TikTok."
     />
   ),

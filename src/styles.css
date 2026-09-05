@@ -423,10 +423,12 @@
     box-shadow var(--motion-base) var(--ease-out-soft),
     border-color var(--motion-base) var(--ease-out-soft),
     transform var(--motion-base) var(--ease-out-soft);
-  &:hover {
-    border-color: color-mix(in oklab, var(--primary-500) 35%, var(--border));
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: color-mix(in oklab, var(--primary-500) 35%, var(--border));
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
   }
 }
 

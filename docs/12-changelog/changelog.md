@@ -21,6 +21,25 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Adicionado
 
+- **Conexão Instagram self-service pelo cliente (2026-09-05):** aba **Conexões**
+  (`/cliente/:slug/conexoes`) permite ao próprio cliente autorizar o Instagram via OAuth Meta,
+  escolher a conta e vincular — sem depender do admin. Restrito por ora ao plugin
+  `instagram_organic` (`CLIENT_SELF_SERVICE_PLUGIN_KEY`), único validado ponta a ponta. Server
+  functions em `src/modules/platform-hub-client/hub-client.server.ts`, componente
+  `ClientConnectionsPage.tsx`. `sanitizeOAuthRedirectAfter` passou a aceitar o path
+  `/cliente/{slug}/conexoes`. Docs: [instagram-posts.md](../06-dashboards/instagram-posts.md).
+  Tutorial client `10-conexoes`; admin `15-conexoes-instagram-publicacoes` (seção "Alternativa:
+  o cliente conecta sozinho").
+
+- **Coleta de perfil Instagram via Platform Hub (2026-09-05):** botão **Puxar métricas** no
+  dashboard `/cliente/:slug/instagram` agora coleta insights de conta direto da Graph API
+  (capability `instagram_organic:profile:collect`), detectando e preenchendo dias faltantes
+  no lookback de ~90 dias da Meta e gravando em `base_metricas_hub`. Migration
+  `34_instagram_profile_prefer_hub` faz `vw_instagram_diario` preferir Hub por dia+cliente,
+  com fallback automático para Make (dual-run, sem desligar Make). Docs:
+  [instagram.md](../06-dashboards/platforms/instagram.md), [views.md](../04-database/views.md),
+  [current-pipeline-make.md](../07-integrations/current-pipeline-make.md).
+
 - **Publicações Instagram (2026-09-01):** plugin Platform Hub `instagram_organic`, migration `33_instagram_media_metrics`, rota cliente `/cliente/:slug/publicacoes`, sync manual e bridge `ig_media`. Docs: [instagram-posts.md](../06-dashboards/instagram-posts.md), [meta-instagram-setup.md](../07-integrations/meta-instagram-setup.md). Tutorial admin `15-conexoes-instagram-publicacoes`; client `08-publicacoes-instagram`.
 
 - **Novidades da plataforma (2026-09-02):** rota `/novidades` para clientes e admins; fonte `src/content/platform-news/releases.ts`. Doc: [platform-news.md](../06-dashboards/platform-news.md). README na raiz do repositório.

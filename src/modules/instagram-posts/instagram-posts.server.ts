@@ -5,18 +5,30 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { resolveIsAdmin } from "@/lib/owner-admin";
 import { assertClientPortalAccess } from "@/modules/approval/internal/client-access.server";
 import { syncInstagramMediaConnection } from "./instagram-media-sync.server";
+import { syncInstagramProfileConnection } from "./instagram-profile-sync.server";
 import type { IgMediaMetrics, IgMediaRow } from "./types";
 
 const SYNC_COOLDOWN_MS = 5 * 60 * 1000;
+const PROFILE_SYNC_COOLDOWN_MS = 5 * 60 * 1000;
 
 const listInputSchema = z.object({
   cadastroClienteId: z.number().int().positive(),
-  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  from: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  to: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   productType: z.string().optional(),
 });
 
 const syncInputSchema = z.object({
+  cadastroClienteId: z.number().int().positive(),
+});
+
+const syncProfileInputSchema = z.object({
   cadastroClienteId: z.number().int().positive(),
 });
 
@@ -109,8 +121,7 @@ export const listInstagramPostsFn = createServerFn({ method: "GET" })
     return {
       posts: (rows ?? []).map((row) => mapRow(row as Record<string, unknown>)),
       hasConnection: Boolean(connection),
-      lastSyncedAt:
-        rows?.[0]?.last_synced_at != null ? String(rows[0].last_synced_at) : null,
+      lastSyncedAt: rows?.[0]?.last_synced_at != null ? String(rows[0].last_synced_at) : null,
     };
   });
 
@@ -154,6 +165,60 @@ export const syncInstagramPostsFn = createServerFn({ method: "POST" })
       ok: true,
       mediaCount: result.mediaCount ?? 0,
       lastSyncedAt: new Date().toISOString(),
+    };
+  });
+
+export const syncInstagramProfileFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => syncProfileInputSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertClienteAccess(context, data.cadastroClienteId);
+
+    const connection = await findInstagramConnection(data.cadastroClienteId);
+    if (!connection?.id) {
+      return { ok: false, error: "Instagram não conectado para este cliente" };
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { data: cadastro } = await supabase
+      .from("cadastro_clientes")
+      .select("nome_cliente")
+      .eq("id", data.cadastroClienteId)
+      .maybeSingle();
+
+    const { data: recentHub } = cadastro?.nome_cliente
+      ? await supabase
+          .from("base_metricas_hub")
+          .select("created_at")
+          .eq("cliente", cadastro.nome_cliente)
+          .ilike("plataforma", "instagram")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : { data: null };
+
+    if (recentHub?.created_at) {
+      const elapsed = Date.now() - new Date(String(recentHub.created_at)).getTime();
+      if (elapsed < PROFILE_SYNC_COOLDOWN_MS) {
+        return {
+          ok: false,
+          error: "Aguarde alguns minutos antes de puxar métricas novamente",
+          cooldownMs: PROFILE_SYNC_COOLDOWN_MS - elapsed,
+        };
+      }
+    }
+
+    const result = await syncInstagramProfileConnection(supabase, connection.id);
+    if (!result.ok) {
+      return { ok: false, error: result.error ?? "Falha na sincronização" };
+    }
+
+    return {
+      ok: true,
+      daysFilled: result.daysFilled,
+      daysRequested: result.daysRequested,
+      from: result.from,
+      to: result.to,
     };
   });
 

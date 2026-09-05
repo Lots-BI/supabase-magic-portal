@@ -37,4 +37,5 @@ A novidade mais recente aparece destacada no topo.
 
 ## Próximo passo
 
-Volte ao **Dashboard** ou explore **Plataformas de mídia** para métricas de anúncios e analytics.
+Volte ao **Dashboard**, explore **Plataformas de mídia** para métricas de anúncios e analytics,
+ou veja **Conexões** para conectar suas próprias contas de redes sociais.

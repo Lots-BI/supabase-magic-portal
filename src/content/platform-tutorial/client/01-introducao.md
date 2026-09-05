@@ -25,7 +25,7 @@ Se você é da **equipe interna da agência**, use o tutorial em `/admin/tutoria
 
 | Aba                   | Rota                                               | Função                                           |
 | --------------------- | -------------------------------------------------- | ------------------------------------------------ |
-| **Visão geral**       | `/dashboard`                                       | Resumo de investimento, conversões e performance |
+| **Dashboards**        | `/dashboard`                                       | Entrar no dashboard de cada plataforma           |
 | **Plano Estratégico** | `/plano-estrategico`                               | Objetivos e estratégias acordados com a agência  |
 | **Aprovações**        | `/aprovacoes` ou `/cliente/{sua-marca}/aprovacoes` | Revisar e aprovar conteúdos                      |
 | **Tutorial**          | `/tutorial`                                        | Este guia                                        |
@@ -56,11 +56,11 @@ Abre atalhos rápidos — rotas e glossário de métricas.
 
 ## Ordem de leitura sugerida
 
-1. **Visão geral** — entender seus números
+1. **Dashboards** — escolher a plataforma e ler os números
 2. **Painel da sua marca** — detalhe por plataforma
 3. **Aprovações** — como aprovar posts
 4. **Plano Estratégico** — alinhamento de longo prazo
 
 ## Próximo capítulo
 
-**Visão geral** — seu dashboard principal.
+**Dashboards** — escolha a plataforma e abra o dashboard correspondente.

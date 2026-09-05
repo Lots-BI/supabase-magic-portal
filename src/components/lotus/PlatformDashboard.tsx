@@ -8,15 +8,7 @@
 
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { Suspense, useMemo } from "react";
-import {
-  CalendarRange,
-  Inbox,
-  Sparkles,
-  TrendingDown,
-  TrendingUp,
-  RefreshCw,
-  Trophy,
-} from "lucide-react";
+import { Inbox, Sparkles, TrendingDown, TrendingUp, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { PlatformDef, ValueFormat } from "@/lib/platforms/types";
 import type { CommonMetric } from "@/lib/metrics";
@@ -120,9 +112,7 @@ function PlatformDashboardBody({ def, cliente, period }: Props) {
   const hasData = rows.some((r) => r.data >= period.from && r.data <= period.to);
 
   return (
-    <div className="space-y-7">
-      <NarrativeHeader def={def} period={period} lastSync={agg.lastSync} />
-
+    <div className="relative isolate space-y-6 sm:space-y-7">
       {!hasData ? (
         <SectionCard eyebrow="Sem dados" title="Nada para mostrar no período selecionado">
           <EmptyState
@@ -147,51 +137,6 @@ function PlatformDashboardBody({ def, cliente, period }: Props) {
   );
 }
 
-// ---------- Header narrativo -----------------------------------------------
-
-function NarrativeHeader({
-  def,
-  period,
-  lastSync,
-}: {
-  def: PlatformDef;
-  period: Period;
-  lastSync: string | null;
-}) {
-  return (
-    <SectionCard
-      eyebrow={def.label}
-      title={def.description}
-      description={`Período analisado: ${formatBR(period.from)} → ${formatBR(period.to)} · ${period.days} ${period.days === 1 ? "dia" : "dias"}`}
-      bodyClassName="px-5 py-4"
-    >
-      <div className="flex flex-wrap items-center gap-4 text-[12px] text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5">
-          <CalendarRange className="h-3.5 w-3.5" />
-          {formatBR(period.prevFrom)} – {formatBR(period.prevTo)} (comparativo)
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <RefreshCw className="h-3.5 w-3.5" />
-          Última sincronização: {lastSync ? formatBR(lastSync) : "—"}
-        </span>
-      </div>
-      {def.questions.length > 0 && (
-        <ul className="mt-4 grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
-          {def.questions.map((q) => (
-            <li
-              key={q}
-              className="flex items-start gap-2 rounded-md border border-border/50 bg-background/40 px-2.5 py-1.5 text-[12px] text-foreground"
-            >
-              <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-primary-500" />
-              {q}
-            </li>
-          ))}
-        </ul>
-      )}
-    </SectionCard>
-  );
-}
-
 // ---------- Cards ----------------------------------------------------------
 
 function metricDescription(key: string, explicit?: string): string | undefined {
@@ -204,7 +149,7 @@ function metricDescription(key: string, explicit?: string): string | undefined {
 function HeroCards({ def, agg }: { def: PlatformDef; agg: ReturnType<typeof aggregatePeriod> }) {
   const heroes = def.metrics.filter((m) => def.heroMetrics.includes(m.key));
   return (
-    <section className="grid grid-cols-1 gap-3 min-[375px]:grid-cols-2 lg:grid-cols-4">
+    <section className="relative isolate grid grid-cols-2 gap-3 lg:grid-cols-4">
       {heroes.map((m, i) => {
         const cur = agg.current[m.key] ?? 0;
         const prev = agg.previous[m.key] ?? 0;
@@ -229,7 +174,7 @@ function HeroCards({ def, agg }: { def: PlatformDef; agg: ReturnType<typeof aggr
 function KpiCards({ def, agg }: { def: PlatformDef; agg: ReturnType<typeof aggregatePeriod> }) {
   if (def.kpis.length === 0) return null;
   return (
-    <section className="grid grid-cols-1 gap-3 min-[375px]:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+    <section className="relative isolate grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-5">
       {def.kpis.map((k) => {
         const cur = agg.currentKpis[k.key] ?? 0;
         const prev = agg.previousKpis[k.key] ?? 0;
@@ -260,7 +205,7 @@ function ChartsSection({
   agg: ReturnType<typeof aggregatePeriod>;
 }) {
   return (
-    <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+    <section className="relative isolate grid grid-cols-1 gap-5 xl:grid-cols-2">
       {def.charts.map((chart) => {
         const yMetricDef = def.metrics.find((m) => m.key === chart.yMetric);
         const yChartMetric = yMetricDef

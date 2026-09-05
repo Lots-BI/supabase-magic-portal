@@ -7,6 +7,8 @@ description: Google Ads, Meta Ads, Instagram e GA4 — KPIs, gráficos e campanh
 
 Cada plataforma de anúncios ou analytics tem uma **tela dedicada** com KPIs, gráficos e tabelas. A estrutura é parecida — aprenda uma vez, repita nas outras.
 
+Chegue por **Dashboards** no menu e toque no card da plataforma.
+
 ## Plataformas disponíveis
 
 | Rota típica      | Plataforma                        |
@@ -17,35 +19,32 @@ Cada plataforma de anúncios ou analytics tem uma **tela dedicada** com KPIs, gr
 | `.../publicacoes`| Publicações — métricas por post     |
 | `.../ga4`        | Google Analytics 4 (site)         |
 
-Se uma aba não aparece, a agência ainda não conectou ou não há dados no período.
+Se uma aba não aparece, a agência ainda não conectou ou não há dados no período. Para o
+Instagram, você mesmo pode conectar sua conta em **Conexões** — veja o capítulo dedicado.
 
 ## Anatomia de todo dashboard de plataforma
 
-### 1. Cabeçalho narrativo
-
-Texto explicando **que perguntas** aquela tela responde — ex.: “Seus anúncios no Google estão gerando cliques qualificados?”
-
-### 2. Hero KPIs
+### 1. Hero KPIs
 
 2–4 números grandes — investimento, cliques, conversões, CTR (varia por plataforma).
 
-### 3. Gráficos
+### 2. Gráficos
 
 Evolução diária, barras por campanha, etc. Passe o mouse para ver valor exato do dia.
 
-### 4. Comparativo período atual × anterior
+### 3. Comparativo período atual × anterior
 
 Tabela com variação % — ideal para ver se a última semana piorou um KPI específico.
 
-### 5. Ranking de campanhas
+### 4. Ranking de campanhas
 
 Quando disponível, lista campanhas ordenadas por gasto ou conversões — identifique campeãs e freiras.
 
-### 6. Tabela diária
+### 5. Tabela diária
 
 Detalhe dia a dia para exportar mentalmente ou pedir planilha à agência.
 
-### 7. Insights
+### 6. Insights
 
 Frases sobre variações > limiar — “CTR subiu 15%”.
 
@@ -77,6 +76,8 @@ Foco em **alcance, engajamento, interações** — não confunda com Meta Ads.
 
 - Engagement rate alto = conteúdo ressoando
 - Alcance baixo com bom engajamento = audiência fiel mas pequena
+- Botão **Puxar métricas** (ao lado do período) busca na Meta qualquer dia sem dados dentro
+  do histórico disponível (~90 dias) — use quantas vezes precisar até completar o período.
 
 Para **cada publicação** (post a post, com miniatura), use **Publicações** no menu da marca — capítulo dedicado neste tutorial.
 

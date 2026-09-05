@@ -4,8 +4,11 @@ import type {
   InstagramMediaListResponseV1,
   InstagramMediaRowV1,
   InstagramInsightsResponseV1,
+  InstagramAccountInsightsResponseV1,
 } from "./instagram-api.types";
 import { insightMetricsForProductType } from "./instagram-insights.mapper";
+import { ACCOUNT_INSIGHTS_METRICS_PARAM } from "./instagram-account-insights.mapper";
+import { spDayBoundsUnixSeconds } from "./date-utils";
 
 export interface InstagramGraphClientConfig {
   httpClient: HttpClientPort;
@@ -26,7 +29,11 @@ export class InstagramGraphClient {
     this.graphVersion = config.graphVersion ?? "v22.0";
   }
 
-  async listMedia(accessToken: string, igUserId: string, maxPages = 10): Promise<InstagramMediaRowV1[]> {
+  async listMedia(
+    accessToken: string,
+    igUserId: string,
+    maxPages = 10,
+  ): Promise<InstagramMediaRowV1[]> {
     const baseUrl = `${graphBaseUrl(this.graphVersion)}/${igUserId}/media`;
     const { items } = await paginateCursorPages({
       maxPages,
@@ -79,6 +86,40 @@ export class InstagramGraphClient {
     const body = await response.json<InstagramInsightsResponseV1>();
     if (body.error?.message) {
       // Story com poucos viewers ou métrica incompatível — retorna vazio
+      if (body.error.code === 10 || body.error.code === 100) {
+        return { data: [] };
+      }
+      throw new Error(body.error.message);
+    }
+    return body;
+  }
+
+  /**
+   * Insights de CONTA para um único dia (period=day, metric_type=total_value).
+   * Apenas `reach` suporta time_series; as demais métricas só total_value —
+   * por isso pedimos o dia inteiro (since 00:00 → until 00:00 do dia seguinte,
+   * fuso America/Sao_Paulo) em uma única chamada com todas as métricas.
+   */
+  async fetchAccountInsightsForDay(
+    accessToken: string,
+    igUserId: string,
+    date: string,
+  ): Promise<InstagramAccountInsightsResponseV1> {
+    const { sinceUnix, untilUnix } = spDayBoundsUnixSeconds(date);
+    const url = `${graphBaseUrl(this.graphVersion)}/${igUserId}/insights`;
+    const response = await this.config.httpClient.request(url, {
+      searchParams: {
+        access_token: accessToken,
+        metric: ACCOUNT_INSIGHTS_METRICS_PARAM,
+        period: "day",
+        metric_type: "total_value",
+        since: String(sinceUnix),
+        until: String(untilUnix),
+      },
+    });
+    const body = await response.json<InstagramAccountInsightsResponseV1>();
+    if (body.error?.message) {
+      // Dia sem dados suficientes para estimar métricas — trata como vazio.
       if (body.error.code === 10 || body.error.code === 100) {
         return { data: [] };
       }

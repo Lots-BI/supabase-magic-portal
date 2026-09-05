@@ -24,14 +24,15 @@ import { agencyLeadRepository } from "./repositories/lead.repository.server";
 import { agencyProjectRepository } from "./repositories/project.repository.server";
 import { agencyTaskRepository } from "./repositories/task.repository.server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { FEATURE_PLANO_ESTRATEGICO_NAV } from "@/lib/feature-flags";
 
 const NAVIGATION_ROUTES: ModuleRouteDef[] = [
   {
     id: "dashboard",
-    label: "Visão geral (cliente)",
+    label: "Dashboards",
     href: "/dashboard",
     icon: LayoutDashboard,
-    keywords: ["home", "painel", "métricas"],
+    keywords: ["home", "painel", "métricas", "visão geral", "plataformas"],
   },
   {
     id: "aprovacoes",
@@ -40,13 +41,18 @@ const NAVIGATION_ROUTES: ModuleRouteDef[] = [
     icon: ClipboardCheck,
     keywords: ["posts", "conteúdo", "aprovar"],
   },
-  {
-    id: "plano-estrategico",
-    label: "Plano Estratégico",
-    href: "/plano-estrategico",
-    icon: Compass,
-    keywords: ["estratégia", "objetivos", "centro estratégico"],
-  },
+  // Arquivado — reativar com FEATURE_PLANO_ESTRATEGICO_NAV
+  ...(FEATURE_PLANO_ESTRATEGICO_NAV
+    ? [
+        {
+          id: "plano-estrategico",
+          label: "Plano Estratégico",
+          href: "/plano-estrategico",
+          icon: Compass,
+          keywords: ["estratégia", "objetivos", "centro estratégico"],
+        } satisfies ModuleRouteDef,
+      ]
+    : []),
   {
     id: "admin",
     label: "Admin — Visão geral",
@@ -80,20 +86,24 @@ const NAVIGATION_ROUTES: ModuleRouteDef[] = [
   },
   {
     id: "brandbook",
-    label: "Brand book",
+    label: "Diretrizes da Marca",
     href: "/admin/brandbook",
     icon: SwatchBook,
     adminOnly: true,
-    keywords: ["marca", "identidade", "figma", "manual", "guia visual", "brandbook"],
+    keywords: ["marca", "identidade", "pdf", "manual", "guia visual", "brandbook", "diretrizes"],
   },
-  {
-    id: "plano-admin",
-    label: "Plano Estratégico (admin)",
-    href: "/admin/plano-estrategico",
-    icon: Compass,
-    adminOnly: true,
-    keywords: ["estratégia", "objetivos"],
-  },
+  ...(FEATURE_PLANO_ESTRATEGICO_NAV
+    ? [
+        {
+          id: "plano-admin",
+          label: "Plano Estratégico (admin)",
+          href: "/admin/plano-estrategico",
+          icon: Compass,
+          adminOnly: true,
+          keywords: ["estratégia", "objetivos"],
+        } satisfies ModuleRouteDef,
+      ]
+    : []),
   {
     id: "clientes",
     label: "Clientes",

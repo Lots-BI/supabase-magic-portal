@@ -42,6 +42,7 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `30_parallel_metricas_homologation.sql`   | Paralelismo métricas — `base_metricas_hub`, `ph_metricas_source`, `vw_metricas` com fonte configurável (`make` default).                                                                                      |
 | `31_plano_alinhamento.sql`                | Funil inteligente 1:1 — `plano_alinhamentos` (quiz → proposta → aprovação), RLS por `current_user_clientes`, trigger de guarda de colunas comerciais.                                                      |
 | `33_instagram_media_metrics.sql`          | Métricas por publicação Instagram — `ig_media`, `ig_media_metrics_history`, view `vw_ig_media_dashboard`, bucket `ig-media-thumbs`, RLS. Ver [instagram-posts.md](../06-dashboards/instagram-posts.md). |
+| `35_cliente_diretrizes.sql`            | PDF de diretrizes da marca por cliente — tabela `cliente_diretrizes`, bucket `diretrizes-marca`, RLS admin/cliente. |
 
 > **Não existe `04`.** A tentativa `04_integracoes_make.sql` foi **deprecada e substituída**
 > pela `05` (que usa nomes de coluna diferentes); a 04 nunca foi aplicada ao banco.
@@ -102,6 +103,10 @@ Projeto Supabase: `ywvhoctcmibjitvwkkhb`.
 28_platform_hub.sql
 29_platform_hub_homologation.sql
 30_parallel_metricas_homologation.sql
+31_plano_alinhamento.sql
+… (32 — ver arquivos em supabase/migrations-official/)
+33_instagram_media_metrics.sql
+34_instagram_profile_prefer_hub.sql
 ```
 
 ### Rollback

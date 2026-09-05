@@ -49,7 +49,7 @@ Sua conta mostra **apenas as marcas** vinculadas a você. Se enxergar dados de o
 | Busca               | `Ctrl+K` (Windows) ou `⌘K` (Mac)          |
 | Tutorial            | Menu → **Tutorial**                       |
 | Aprovações urgentes | Menu → **Aprovações** → coluna aguardando |
-| Visão rápida        | Menu → **Visão geral**                    |
+| Visão rápida        | Menu → **Dashboards**                     |
 
 ## Fim do tutorial cliente
 

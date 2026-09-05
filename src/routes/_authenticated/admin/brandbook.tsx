@@ -1,19 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
 import { adminTitle } from "@/lib/brand";
-import { BrandbookPage } from "@/components/brandbook/BrandbookPage";
-
-const brandbookSearchSchema = z.object({
-  id: z.string().optional(),
-});
+import { AdminDiretrizesPage } from "@/components/brandbook/AdminDiretrizesPage";
 
 export const Route = createFileRoute("/_authenticated/admin/brandbook")({
-  head: () => ({ meta: [{ title: adminTitle("Brand book") }] }),
-  validateSearch: brandbookSearchSchema,
-  component: AdminBrandbookRoute,
+  head: () => ({ meta: [{ title: adminTitle("Diretrizes da Marca") }] }),
+  component: AdminDiretrizesPage,
 });
-
-function AdminBrandbookRoute() {
-  const search = Route.useSearch();
-  return <BrandbookPage initialBrandbookId={search.id} />;
-}

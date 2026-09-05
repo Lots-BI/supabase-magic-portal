@@ -55,6 +55,7 @@ import { Route as AuthenticatedClienteClienteInstagramRouteImport } from './rout
 import { Route as AuthenticatedClienteClienteGoogleBusinessRouteImport } from './routes/_authenticated/cliente.$cliente.google-business'
 import { Route as AuthenticatedClienteClienteGoogleAdsRouteImport } from './routes/_authenticated/cliente.$cliente.google-ads'
 import { Route as AuthenticatedClienteClienteGa4RouteImport } from './routes/_authenticated/cliente.$cliente.ga4'
+import { Route as AuthenticatedClienteClienteConexoesRouteImport } from './routes/_authenticated/cliente.$cliente.conexoes'
 import { Route as AuthenticatedClienteClienteBrandbookRouteImport } from './routes/_authenticated/cliente.$cliente.brandbook'
 import { Route as AuthenticatedClienteClienteAprovacoesRouteImport } from './routes/_authenticated/cliente.$cliente.aprovacoes'
 import { Route as AuthenticatedAdminUsuariosNovoRouteImport } from './routes/_authenticated/admin/usuarios.novo'
@@ -336,6 +337,12 @@ const AuthenticatedClienteClienteGa4Route =
     path: '/ga4',
     getParentRoute: () => AuthenticatedClienteClienteRoute,
   } as any)
+const AuthenticatedClienteClienteConexoesRoute =
+  AuthenticatedClienteClienteConexoesRouteImport.update({
+    id: '/conexoes',
+    path: '/conexoes',
+    getParentRoute: () => AuthenticatedClienteClienteRoute,
+  } as any)
 const AuthenticatedClienteClienteBrandbookRoute =
   AuthenticatedClienteClienteBrandbookRouteImport.update({
     id: '/brandbook',
@@ -498,6 +505,7 @@ export interface FileRoutesByFullPath {
   '/admin/usuarios/novo': typeof AuthenticatedAdminUsuariosNovoRoute
   '/cliente/$cliente/aprovacoes': typeof AuthenticatedClienteClienteAprovacoesRoute
   '/cliente/$cliente/brandbook': typeof AuthenticatedClienteClienteBrandbookRoute
+  '/cliente/$cliente/conexoes': typeof AuthenticatedClienteClienteConexoesRoute
   '/cliente/$cliente/ga4': typeof AuthenticatedClienteClienteGa4Route
   '/cliente/$cliente/google-ads': typeof AuthenticatedClienteClienteGoogleAdsRoute
   '/cliente/$cliente/google-business': typeof AuthenticatedClienteClienteGoogleBusinessRoute
@@ -557,6 +565,7 @@ export interface FileRoutesByTo {
   '/admin/usuarios/novo': typeof AuthenticatedAdminUsuariosNovoRoute
   '/cliente/$cliente/aprovacoes': typeof AuthenticatedClienteClienteAprovacoesRoute
   '/cliente/$cliente/brandbook': typeof AuthenticatedClienteClienteBrandbookRoute
+  '/cliente/$cliente/conexoes': typeof AuthenticatedClienteClienteConexoesRoute
   '/cliente/$cliente/ga4': typeof AuthenticatedClienteClienteGa4Route
   '/cliente/$cliente/google-ads': typeof AuthenticatedClienteClienteGoogleAdsRoute
   '/cliente/$cliente/google-business': typeof AuthenticatedClienteClienteGoogleBusinessRoute
@@ -624,6 +633,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/usuarios/novo': typeof AuthenticatedAdminUsuariosNovoRoute
   '/_authenticated/cliente/$cliente/aprovacoes': typeof AuthenticatedClienteClienteAprovacoesRoute
   '/_authenticated/cliente/$cliente/brandbook': typeof AuthenticatedClienteClienteBrandbookRoute
+  '/_authenticated/cliente/$cliente/conexoes': typeof AuthenticatedClienteClienteConexoesRoute
   '/_authenticated/cliente/$cliente/ga4': typeof AuthenticatedClienteClienteGa4Route
   '/_authenticated/cliente/$cliente/google-ads': typeof AuthenticatedClienteClienteGoogleAdsRoute
   '/_authenticated/cliente/$cliente/google-business': typeof AuthenticatedClienteClienteGoogleBusinessRoute
@@ -692,6 +702,7 @@ export interface FileRouteTypes {
     | '/admin/usuarios/novo'
     | '/cliente/$cliente/aprovacoes'
     | '/cliente/$cliente/brandbook'
+    | '/cliente/$cliente/conexoes'
     | '/cliente/$cliente/ga4'
     | '/cliente/$cliente/google-ads'
     | '/cliente/$cliente/google-business'
@@ -751,6 +762,7 @@ export interface FileRouteTypes {
     | '/admin/usuarios/novo'
     | '/cliente/$cliente/aprovacoes'
     | '/cliente/$cliente/brandbook'
+    | '/cliente/$cliente/conexoes'
     | '/cliente/$cliente/ga4'
     | '/cliente/$cliente/google-ads'
     | '/cliente/$cliente/google-business'
@@ -817,6 +829,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/usuarios/novo'
     | '/_authenticated/cliente/$cliente/aprovacoes'
     | '/_authenticated/cliente/$cliente/brandbook'
+    | '/_authenticated/cliente/$cliente/conexoes'
     | '/_authenticated/cliente/$cliente/ga4'
     | '/_authenticated/cliente/$cliente/google-ads'
     | '/_authenticated/cliente/$cliente/google-business'
@@ -1170,6 +1183,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClienteClienteGa4RouteImport
       parentRoute: typeof AuthenticatedClienteClienteRoute
     }
+    '/_authenticated/cliente/$cliente/conexoes': {
+      id: '/_authenticated/cliente/$cliente/conexoes'
+      path: '/conexoes'
+      fullPath: '/cliente/$cliente/conexoes'
+      preLoaderRoute: typeof AuthenticatedClienteClienteConexoesRouteImport
+      parentRoute: typeof AuthenticatedClienteClienteRoute
+    }
     '/_authenticated/cliente/$cliente/brandbook': {
       id: '/_authenticated/cliente/$cliente/brandbook'
       path: '/brandbook'
@@ -1497,6 +1517,7 @@ const AuthenticatedClienteClientePlanoEstrategicoRouteWithChildren =
 interface AuthenticatedClienteClienteRouteChildren {
   AuthenticatedClienteClienteAprovacoesRoute: typeof AuthenticatedClienteClienteAprovacoesRoute
   AuthenticatedClienteClienteBrandbookRoute: typeof AuthenticatedClienteClienteBrandbookRoute
+  AuthenticatedClienteClienteConexoesRoute: typeof AuthenticatedClienteClienteConexoesRoute
   AuthenticatedClienteClienteGa4Route: typeof AuthenticatedClienteClienteGa4Route
   AuthenticatedClienteClienteGoogleAdsRoute: typeof AuthenticatedClienteClienteGoogleAdsRoute
   AuthenticatedClienteClienteGoogleBusinessRoute: typeof AuthenticatedClienteClienteGoogleBusinessRoute
@@ -1514,6 +1535,8 @@ const AuthenticatedClienteClienteRouteChildren: AuthenticatedClienteClienteRoute
       AuthenticatedClienteClienteAprovacoesRoute,
     AuthenticatedClienteClienteBrandbookRoute:
       AuthenticatedClienteClienteBrandbookRoute,
+    AuthenticatedClienteClienteConexoesRoute:
+      AuthenticatedClienteClienteConexoesRoute,
     AuthenticatedClienteClienteGa4Route: AuthenticatedClienteClienteGa4Route,
     AuthenticatedClienteClienteGoogleAdsRoute:
       AuthenticatedClienteClienteGoogleAdsRoute,
@@ -1589,3 +1612,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

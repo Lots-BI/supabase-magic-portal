@@ -22,7 +22,12 @@ export function SectionCard({
   bodyClassName,
 }: SectionCardProps) {
   return (
-    <section className={cn("lotus-surface min-w-0 max-w-full overflow-hidden", className)}>
+    <section
+      className={cn(
+        "lotus-surface relative isolate z-0 min-w-0 max-w-full overflow-hidden",
+        className,
+      )}
+    >
       <header className="flex flex-col gap-3 border-b border-border/70 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5">
         <div className="min-w-0 flex-1">
           {eyebrow && (

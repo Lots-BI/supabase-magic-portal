@@ -119,7 +119,7 @@ function RelatoriosHub() {
           icon={FileBarChart}
           eyebrow="Visão pessoal"
           title={brandTitle("Sua conta")}
-          description="Resultados consolidados que o cliente final enxerga ao entrar na plataforma."
+          description="Hub de dashboards por plataforma que o cliente vê ao entrar na conta."
         />
       </section>
 

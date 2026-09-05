@@ -35,7 +35,6 @@ const PRODUCT_FILTERS = [
 
 export function InstagramPostsPage({
   cadastroClienteId,
-  clienteNome,
 }: {
   cadastroClienteId: number;
   clienteNome: string;
@@ -89,7 +88,7 @@ export function InstagramPostsPage({
       <PageHeader
         eyebrow="Instagram"
         title="Publicações"
-        description={`Performance por post de ${clienteNome}. Stories aparecem por até 24h após publicação.`}
+        description="Dados coletados para o período selecionado"
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <PeriodPicker value={periodInput} onChange={setPeriodInput} />

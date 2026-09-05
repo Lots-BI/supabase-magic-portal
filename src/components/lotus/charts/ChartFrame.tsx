@@ -31,9 +31,9 @@ export function ChartFrame({
   bodyClassName,
 }: ChartFrameProps) {
   return (
-    <section className={cn("lotus-surface overflow-hidden", className)}>
-      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-border/60 px-5 pb-3.5 pt-4">
-        <div className="min-w-0">
+    <section className={cn("lotus-surface relative isolate z-0 overflow-hidden", className)}>
+      <header className="flex flex-col gap-3 border-b border-border/60 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5">
+        <div className="min-w-0 flex-1">
           {eyebrow && (
             <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-300">
               {eyebrow}
@@ -43,26 +43,28 @@ export function ChartFrame({
             {title}
           </h3>
           {description && (
-            <p className="mt-0.5 text-[11.5px] text-muted-foreground">{description}</p>
+            <p className="mt-0.5 text-[11.5px] leading-relaxed text-muted-foreground">
+              {description}
+            </p>
           )}
         </div>
-        <div className="flex flex-wrap items-end gap-3">
-          {headline && (
-            <div className="text-right">
-              <div className="font-display text-2xl font-semibold tabular-nums leading-none text-foreground">
-                {headline}
-              </div>
-              {meta && <div className="mt-1 text-[11px] text-muted-foreground">{meta}</div>}
+        {headline && (
+          <div className="min-w-0 shrink-0 sm:text-right">
+            <div className="font-display text-xl font-semibold tabular-nums leading-none text-foreground sm:text-2xl">
+              {headline}
             </div>
-          )}
-        </div>
+            {meta && <div className="mt-1 text-[11px] text-muted-foreground">{meta}</div>}
+          </div>
+        )}
       </header>
       {legend && (
-        <div className="flex flex-wrap items-center gap-3 border-b border-border/40 bg-muted/30 px-5 py-2">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-border/40 bg-muted/30 px-4 py-2 sm:px-5">
           {legend}
         </div>
       )}
-      <div className={cn("lotus-scroll-x min-w-0 px-2 py-3 sm:px-3", bodyClassName)}>
+      <div
+        className={cn("relative min-w-0 overflow-hidden px-1 py-2 sm:px-3 sm:py-3", bodyClassName)}
+      >
         {children}
       </div>
     </section>

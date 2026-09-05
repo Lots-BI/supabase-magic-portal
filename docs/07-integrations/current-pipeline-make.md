@@ -84,6 +84,19 @@ Substituir Make quando **todos** forem verdadeiros para aquela plataforma:
 - [ ] Runbook de reprocessamento documentado
 - [ ] Make desligado para aquela plataforma (não big-bang global)
 
+### Instagram (perfil/conta) — status
+
+- [x] Coletor Lotus implementado — plugin `instagram_organic`, capability
+      `instagram_organic:profile:collect` (Graph API, `metrics-timeseries` → `base_metricas_hub`).
+      Ver [instagram.md](../06-dashboards/platforms/instagram.md).
+- [x] Dashboard já prefere Hub por dia+cliente sem cutover global — migration
+      `34_instagram_profile_prefer_hub.sql`.
+- [ ] Paridade de dados validada (amostragem ≥ 7 dias, Gate B) — pendente.
+- [ ] Scheduler automático (cron) — hoje só manual via botão **Puxar métricas**; reaproveitar
+      workflow pendente de `/publicacoes` (`.github/workflows/instagram-media-sync-cron.yml`).
+- [ ] Runbook de reprocessamento — cobrir "backfill parcial" (cap de 30 dias/clique).
+- [ ] Make desligado para Instagram — **ainda não**; dual-run intencional nesta fase.
+
 ---
 
 ## Relacionamento com cadastro de clientes

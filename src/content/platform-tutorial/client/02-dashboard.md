@@ -1,53 +1,33 @@
 ---
-title: Visão geral — seu dashboard
-description: KPIs, gráficos, insights e contas vinculadas na tela inicial.
+title: Dashboards — escolha a plataforma
+description: Hub inicial para abrir o dashboard de cada plataforma conectada.
 ---
 
-# Visão geral (`/dashboard`)
+# Dashboards (`/dashboard`)
 
-É a **primeira tela** após o login. Mostra a performance consolidada da(s) sua(s) marca(s) no período escolhido.
+É a **primeira tela** após o login. Em vez de um resumo misturado, você escolhe **qual dashboard** abrir — separado por plataforma.
 
 ## O que aparece na tela
 
-### Cabeçalho
+Os dashboards são agrupados em três famílias:
 
-- Nome da sua conta / marca
-- Seletor de **período** (7, 30, 90 dias)
+| Família        | Dashboards                                      |
+| -------------- | ----------------------------------------------- |
+| **Mídia paga** | Meta Ads, Google Ads, TikTok                    |
+| **Orgânico**   | Instagram, Publicações, Google Business         |
+| **Analytics**  | Google Analytics 4                              |
 
-### Hero — principais números
+Cada card leva ao dashboard daquela plataforma. Se você tem mais de uma marca, o card lista as contas — escolha a marca e entre.
 
-| KPI              | O que significa                                               |
-| ---------------- | ------------------------------------------------------------- |
-| **Investimento** | Quanto foi gasto em mídia (Google + Meta)                     |
-| **Conversões**   | Resultados principais (leads, compras — conforme configurado) |
-| **Sessões**      | Visitas ao site (Google Analytics)                            |
-| **Cliques**      | Cliques nos anúncios                                          |
+Se um card não aparece, a agência ainda não conectou aquela plataforma ou ainda não há dados.
 
-Cada card mostra variação vs período anterior.
+## Passo a passo
 
-### Gráfico de evolução
-
-Linha ou área com investimento e conversões **dia a dia** — identifique picos (campanhas, promoções, fins de semana).
-
-### Insights automáticos
-
-Frases geradas quando há mudança relevante — ex.: “Conversões subiram 12% vs período anterior”. Leia como **ponto de partida** para conversar com a agência, não como diagnóstico final.
-
-### Plataformas conectadas
-
-Badges das fontes com dados: Google Ads, Meta Ads, Instagram, GA4, etc. Se faltar uma plataforma, a agência ainda pode estar configurando.
-
-### Contas vinculadas
-
-Lista técnica das contas de anúncio/analytics ligadas ao seu cadastro.
-
-## Passo a passo: revisão semanal (5 minutos)
-
-1. Selecione **7 dias**.
-2. Olhe **investimento** e **conversões** — estão alinhados ao esperado?
-3. Leia os **insights** — algo chama atenção?
-4. Abra o gráfico — houve dia com queda brusca? Anote a data para perguntar à agência.
-5. Clique no link para o **painel detalhado** da sua marca (próximo capítulo).
+1. Abra **Dashboards** no menu.
+2. Escolha a família (paga, orgânico ou analytics).
+3. Toque no card da plataforma.
+4. Leia os KPIs e o gráfico daquele canal.
+5. Para trocar de plataforma, volte aos dashboards e escolha outro card.
 
 ## O que você não faz aqui
 
@@ -57,11 +37,10 @@ Lista técnica das contas de anúncio/analytics ligadas ao seu cadastro.
 
 ## Dados vazios?
 
-Se tudo zerado:
+Se nenhum card aparecer:
 
-1. Confirme com a agência se integrações estão ativas.
+1. Confirme com a agência se as integrações estão ativas.
 2. Pode levar até 24–48h após conectar uma conta nova.
-3. Verifique se está no **período** certo (campanha começou há 2 dias? use 7 dias).
 
 ## Próximo capítulo
 

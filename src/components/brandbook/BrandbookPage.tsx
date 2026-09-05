@@ -164,10 +164,10 @@ function EmptyBrandbookState({
 }) {
   return (
     <SectionCard
-      title={fixedClient ? "Brand book indisponível" : "Nenhum brand book vinculado"}
+      title={fixedClient ? "Diretrizes da Marca indisponíveis" : "Nenhum brand book vinculado"}
       description={
         fixedClient
-          ? `Não há brand book cadastrado para ${fixedClient.nome ?? fixedClient.slug}.`
+          ? `Não há diretrizes cadastradas para ${fixedClient.nome ?? fixedClient.slug}.`
           : "Associe um cliente ao registro em src/lib/brandbook/registry.ts ou cadastre o slug correspondente."
       }
     >

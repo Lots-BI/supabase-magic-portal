@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 interface PageHeaderProps {
   eyebrow?: string;
-  title: string;
+  title: ReactNode;
   description?: string;
   actions?: ReactNode;
   className?: string;
@@ -23,7 +23,7 @@ export function PageHeader({ eyebrow, title, description, actions, className }: 
             {eyebrow}
           </p>
         )}
-        <h1 className="break-words font-display text-xl font-semibold tracking-[-0.02em] text-foreground sm:text-2xl lg:text-[28px]">
+        <h1 className="flex min-w-0 items-center break-words font-display text-xl font-semibold tracking-[-0.02em] text-foreground sm:text-2xl lg:text-[28px]">
           {title}
         </h1>
         {description && (

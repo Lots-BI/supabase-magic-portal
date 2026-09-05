@@ -7,7 +7,10 @@ const ALLOWED_PREFIXES = [
   "/admin/conexoes/migracao",
 ] as const;
 
-/** Bloqueia open redirect — apenas paths internos do Platform Hub admin. */
+/** Portal cliente: aba de conexões self-service, ex. /cliente/agencia-lots/conexoes. */
+const ALLOWED_PATTERNS = [/^\/cliente\/[^/]+\/conexoes(?:\/.*)?$/] as const;
+
+/** Bloqueia open redirect — apenas paths internos do Platform Hub (admin ou cliente). */
 export function sanitizeOAuthRedirectAfter(redirectAfter: string): string {
   const trimmed = redirectAfter.trim();
   if (!trimmed.startsWith("/")) {
@@ -17,11 +20,11 @@ export function sanitizeOAuthRedirectAfter(redirectAfter: string): string {
     throw new Error("redirectAfter externo não permitido");
   }
   const pathOnly = trimmed.split("?")[0] ?? trimmed;
-  const allowed = ALLOWED_PREFIXES.some(
-    (prefix) => pathOnly === prefix || pathOnly.startsWith(`${prefix}/`),
-  );
+  const allowed =
+    ALLOWED_PREFIXES.some((prefix) => pathOnly === prefix || pathOnly.startsWith(`${prefix}/`)) ||
+    ALLOWED_PATTERNS.some((pattern) => pattern.test(pathOnly));
   if (!allowed) {
-    throw new Error("redirectAfter fora do escopo admin");
+    throw new Error("redirectAfter fora do escopo permitido");
   }
   return trimmed;
 }

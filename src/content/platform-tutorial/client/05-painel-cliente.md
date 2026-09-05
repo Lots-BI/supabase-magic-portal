@@ -1,57 +1,37 @@
 ---
 title: Painel da sua marca
-description: KPIs, comparativos 7/30/90 dias e navegação por plataforma.
+description: Hub da conta e navegação para o dashboard de cada plataforma.
 ---
 
 # Painel da sua marca (`/cliente/{slug}`)
 
-Dashboard **completo** da sua marca — mais detalhado que a Visão geral. Use para análise profunda e reuniões com a agência.
+Tela da sua marca com os **mesmos dashboards** do menu, já filtrados para esta conta.
 
 ## Como chegar
 
-1. Na **Visão geral**, clique no card da sua marca ou link “Ver detalhes”.
-2. Ou acesse direto `/cliente/nome-da-sua-marca` (a agência informa o slug).
-3. `Ctrl+K` → digite o nome da marca.
+1. No menu, abra **Dashboards**.
+2. Escolha a plataforma (Instagram, Meta Ads, Google Ads, GA4…).
+3. Ou acesse `/cliente/nome-da-sua-marca` para ver os cards desta conta.
+4. `Ctrl+K` → digite o nome da marca ou da plataforma.
 
 ## Estrutura da tela
 
-### Hero KPIs
+### Cards por família
 
-Métricas como alcance, engajamento, impressões, cliques, conversões — dependem das plataformas conectadas.
+- **Mídia paga** — Meta Ads, Google Ads, TikTok
+- **Orgânico** — Instagram, Publicações, Google Business
+- **Analytics** — Google Analytics 4
 
-### Comparativo 7 / 30 / 90 dias
-
-Três colunas ou blocos lado a lado — compare curto vs médio prazo sem trocar filtro manualmente.
-
-### Mix de investimento
-
-Gráfico de pizza/rosca: quanto % foi Meta vs Google vs outras fontes.
-
-### Insights
-
-Destaques automáticos de variação — mesma lógica da Visão geral, focados nesta marca.
-
-### Abas por plataforma
-
-Embaixo ou ao lado, selecione:
-
-- Google Ads
-- Meta Ads
-- Instagram
-- Google Analytics (GA4)
-- (outras conforme contrato)
-
-Cada aba abre o dashboard específico (próximo capítulo).
+Toque no card para abrir o dashboard da plataforma. Para trocar de canal, volte aos **Dashboards**.
 
 ## Passo a passo: análise mensal
 
-1. Abra o painel da marca.
-2. Leia hero KPIs no bloco **30 dias**.
-3. Compare com coluna **7 dias** — tendência recente melhor ou pior?
-4. Abra **mix** — dependência de uma só plataforma?
-5. Leia **insights**.
-6. Entre em cada **aba de plataforma** com gasto relevante.
-7. Anote 3 perguntas para a agência com **datas** específicas de queda/pico.
+1. Abra **Dashboards**.
+2. Entre no canal com mais investimento ou mais conteúdo no mês.
+3. Ajuste o período para **30 dias**.
+4. Compare com o período anterior nos KPIs e no gráfico.
+5. Repita nas outras plataformas relevantes.
+6. Anote 3 perguntas para a agência com **datas** específicas de queda/pico.
 
 ## Sync / última atualização
 

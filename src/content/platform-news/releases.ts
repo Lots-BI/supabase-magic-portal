@@ -21,6 +21,34 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-09-05-conexoes-cliente-instagram",
+    date: "2026-09-05",
+    title: "Conecte o Instagram sozinho, direto do seu painel",
+    summary:
+      "Nova aba Conexões: agora você mesmo pode autorizar o acesso ao seu Instagram, sem precisar pedir para a agência.",
+    bullets: [
+      "Menu **Conexões**, no painel da sua marca.",
+      "Login com sua conta do Facebook/Instagram em uma janela dedicada.",
+      "Por enquanto disponível para Instagram (publicações e insights de perfil).",
+    ],
+    audience: "client",
+    tags: ["Instagram", "Novidade"],
+  },
+  {
+    id: "2026-09-05-instagram-perfil-hub",
+    date: "2026-09-05",
+    title: "Instagram: métricas de perfil sem dias faltantes",
+    summary:
+      "O dashboard Instagram (perfil) agora pode coletar direto da Meta, preenchendo automaticamente qualquer dia sem dados dentro do histórico disponível.",
+    bullets: [
+      "Botão **Puxar métricas** no topo do dashboard Instagram, ao lado do período.",
+      "Preenche dias faltantes dos últimos ~90 dias (limite da própria Meta).",
+      "Pode ser usado várias vezes até completar todo o histórico disponível.",
+    ],
+    audience: "client",
+    tags: ["Instagram", "Novidade"],
+  },
+  {
     id: "2026-09-01-instagram-publicacoes",
     date: "2026-09-01",
     title: "Publicações Instagram — métricas por post",

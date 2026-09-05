@@ -26,10 +26,12 @@ flowchart TD
     N --> META["vw_meta_ads_diario"]
     N --> GADS["vw_google_ads_diario"]
     N --> GA4["vw_ga4_diario"]
-    N --> IG["vw_instagram_diario"]
     N --> GBP["vw_google_business_diario"]
     N --> OV["vw_overview_cliente"]
     N --> AT["vw_clientes_ativos"]
+    HUBIG["base_metricas_hub (Instagram)"] --> PH["vw_instagram_normalizada_prefer_hub"]
+    BM --> PH
+    PH --> IG["vw_instagram_diario"]
     CAD["cadastro_clientes (+ serviços + acessos)"] --> ADM["vw_clientes_admin"]
 ```
 
@@ -62,6 +64,23 @@ Colunas: `id, data, cliente, plataforma, metrica, valor, campanha, created_at`.
 
 > `vw_meta_ads_diario` usa `AVG` para cpc/cpm/ctr/frequency (médias do dia) e `SUM` para
 > volumes. `vw_google_ads_diario` deriva ctr/cpc/cpm a partir dos totais (não média de médias).
+
+---
+
+## `vw_instagram_diario` — exceção: prefere Hub (migration 34)
+
+Diferente das demais views por plataforma, `vw_instagram_diario` **não** lê direto de
+`vw_metricas_normalizadas`. Ela lê de `vw_instagram_normalizada_prefer_hub`
+(`34_instagram_profile_prefer_hub.sql`), que por `data + cliente`:
+
+1. Inclui a linha de `base_metricas_hub` quando existir (Platform Hub — Graph API oficial).
+2. Caso contrário, cai para `base_metricas_make` (Make, pipeline legado).
+
+A preferência é **por linha** (dia+cliente), restrita à plataforma Instagram —
+`ph_metricas_source.active_source` (troca global make↔hub) **não é alterado** por esta view.
+Isso permite o botão **Puxar métricas** em `/cliente/:slug/instagram` preencher gaps no Hub
+sem exigir cutover de nenhuma outra plataforma. Ver
+[instagram.md](../06-dashboards/platforms/instagram.md).
 
 ---
 
