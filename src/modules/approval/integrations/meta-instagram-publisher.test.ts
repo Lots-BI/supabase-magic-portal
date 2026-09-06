@@ -81,10 +81,16 @@ describe("publishCardWithClient", () => {
       adminClient,
       "c1",
       expect.objectContaining({
-        status: "publicado",
         publish_status: "published",
         external_post_id: "ig-media",
         publish_container_id: "cont-1",
+      }),
+    );
+    expect(contentCardRepository.update).toHaveBeenCalledWith(
+      adminClient,
+      "c1",
+      expect.objectContaining({
+        status: "publicado",
       }),
     );
     expect(contentCardEventRepository.append).toHaveBeenCalledWith(
@@ -118,6 +124,38 @@ describe("publishCardWithClient", () => {
       adminClient,
       expect.objectContaining({ event_type: "publish_failed" }),
     );
+  });
+
+  it("does not mark failed after the Instagram id is already saved", async () => {
+    vi.mocked(contentCardRepository.update)
+      .mockResolvedValueOnce({} as never)
+      .mockResolvedValueOnce({ external_post_id: "ig-media" } as never)
+      .mockRejectedValueOnce(new Error("Clientes só podem alterar status via fluxo de aprovação."));
+    vi.mocked(contentCardRepository.findById)
+      .mockResolvedValueOnce(card as never)
+      .mockResolvedValueOnce({
+        ...card,
+        external_post_id: "ig-media",
+        publish_status: "published",
+      } as never);
+
+    const graph = {
+      createMediaContainer: vi.fn(async () => ({ id: "cont-1" })),
+      getContainerStatus: vi.fn(async () => ({ status_code: "FINISHED" })),
+      publishMedia: vi.fn(async () => ({ id: "ig-media" })),
+    };
+
+    await expect(
+      publishCardWithClient(adminClient as never, "c1", {
+        resolveTarget: async () => ({ accessToken: "tok", igUserId: "ig1" }),
+        graph,
+      }),
+    ).rejects.toThrow(/Não publique de novo/);
+
+    const failedWrites = vi
+      .mocked(contentCardRepository.update)
+      .mock.calls.filter(([, , patch]) => patch.publish_status === "failed");
+    expect(failedWrites).toHaveLength(0);
   });
 
   it("returns the existing post when already published", async () => {

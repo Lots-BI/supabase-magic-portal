@@ -243,6 +243,12 @@ describe("MetaOAuthService", () => {
           body: { access_token: "long-lived", token_type: "bearer", expires_in: 3600 },
         }),
       },
+      {
+        match: (url) => url.includes("/debug_token"),
+        respond: () => ({
+          body: { data: { is_valid: true, scopes: ["instagram_content_publish", "pages_manage_posts"] } },
+        }),
+      },
     ]);
 
     const stack = createConnectionStack();

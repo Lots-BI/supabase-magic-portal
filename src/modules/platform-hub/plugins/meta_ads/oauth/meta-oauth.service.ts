@@ -73,6 +73,10 @@ export class MetaOAuthService {
 
     const body = await response.json<MetaOAuthTokenResponseV1>();
     const bundle = this.toTokenBundle(body);
+    if (bundle.accessToken) {
+      const validation = await this.validateAccessToken(bundle.accessToken);
+      if (validation.scopes?.length) bundle.scopes = validation.scopes;
+    }
     await this.credentialAccess.storeOAuthToken(
       params.connectionId,
       this.credentialKey,

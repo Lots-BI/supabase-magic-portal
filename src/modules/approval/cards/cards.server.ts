@@ -295,7 +295,8 @@ export const publishNowFn = createServerFn({ method: "POST" })
       await publisher.publishNow(data.card_id);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Falha ao publicar";
-      await updateContentCard(context.supabase, actor, data.card_id, {
+      const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await updateContentCard(getSupabaseAdmin(), actor, data.card_id, {
         publish_status: "failed",
         publish_error: msg,
         publish_attempted_at: new Date().toISOString(),

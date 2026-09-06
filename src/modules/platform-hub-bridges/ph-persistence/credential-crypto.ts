@@ -36,12 +36,18 @@ export function decryptCredentialPayload(encoded: string): CredentialPayloadV1 {
   const iv = buffer.subarray(0, 12);
   const tag = buffer.subarray(12, 28);
   const data = buffer.subarray(28);
-  const decipher = createDecipheriv(ALGO, key, iv);
-  decipher.setAuthTag(tag);
-  const plaintext = Buffer.concat([decipher.update(data), decipher.final()]).toString("utf8");
-  const parsed = JSON.parse(plaintext) as CredentialPayloadV1;
-  return {
-    version: parsed.version ?? CREDENTIAL_VAULT_CONTRACT_VERSION,
-    data: { ...parsed.data },
-  };
+  try {
+    const decipher = createDecipheriv(ALGO, key, iv);
+    decipher.setAuthTag(tag);
+    const plaintext = Buffer.concat([decipher.update(data), decipher.final()]).toString("utf8");
+    const parsed = JSON.parse(plaintext) as CredentialPayloadV1;
+    return {
+      version: parsed.version ?? CREDENTIAL_VAULT_CONTRACT_VERSION,
+      data: { ...parsed.data },
+    };
+  } catch {
+    throw new Error(
+      "missing_publish_scope: Token Instagram não pôde ser lido neste ambiente. Refazer login em Conexões no mesmo ambiente (produção ou local) — a chave do cofre precisa ser a mesma.",
+    );
+  }
 }

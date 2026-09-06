@@ -118,14 +118,18 @@ export async function publishCardWithClient(
     const published = await executeInstagramPublishPlan({ graph, target, plan });
     const publishedAt = now().toISOString();
 
+    // Grava o ID antes do status: se o guard do banco barrar "publicado",
+    // o próximo retry não cria outro post no Instagram.
     await contentCardRepository.update(db, cardId, {
-      status: "publicado",
       publish_status: "published",
       publish_container_id: published.containerId,
       external_post_id: published.mediaId,
-      published_at: publishedAt,
       publish_error: null,
       publish_attempted_at: publishedAt,
+    });
+    await contentCardRepository.update(db, cardId, {
+      status: "publicado",
+      published_at: publishedAt,
       integration_metadata: {
         ...card.integration_metadata,
         ...(published.permalink ? { instagram_permalink: published.permalink } : {}),
@@ -149,6 +153,12 @@ export async function publishCardWithClient(
       url: published.permalink,
     };
   } catch (error) {
+    const latest = await contentCardRepository.findById(db, cardId);
+    if (latest?.external_post_id) {
+      throw new Error(
+        "Post criado no Instagram, mas o Lots não concluiu o status. Não publique de novo neste card.",
+      );
+    }
     const msg = formatInstagramPublishError(error);
     await contentCardRepository.update(db, cardId, {
       publish_status: "failed",
