@@ -26,7 +26,8 @@ last_review: 2026-09-06
    - `pages_show_list`
    - `pages_manage_posts` (token da Página — necessário para publicar)
    - `business_management`
-   - `instagram_content_publish` (só depois que o caso de uso existir; senão o login quebra com Invalid Scopes)
+   - `instagram_content_publish` (Facebook Login — obrigatório para publicar; diferente de `instagram_business_content_publish`)
+   - `ads_read` (papel da Página via Business Manager)
 5. Business Verification da Lots
 6. Modo **Live** (ou testers em Development)
 
@@ -37,7 +38,7 @@ O Instagram **não agenda** nativamente. O Lots guarda `scheduled_publish_at` (h
 1. Adicione as permissões no App Dashboard **antes** de pedir no OAuth.
 2. Em Conexões, **Refazer login** com a conta Meta da agência que gerencia o portfólio — token antigo não ganha escopo novo sozinho.
 3. O app usa o **token da Página** (`GET /me/accounts`) ligada ao Instagram do cliente, não só o token do usuário.
-4. `pages_manage_posts` libera o token da Página. Publicar no feed do Instagram ainda exige o caso de uso **Instagram Content Publish**. Quando ele existir no app, ligue `META_REQUEST_IG_PUBLISH_SCOPE=1` e reconecte.
+4. `pages_manage_posts` libera o token da Página. Publicar no feed exige também `instagram_content_publish` no **mesmo** login. Token antigo não ganha permissão nova. Se o dialog quebrar com Invalid Scopes, o caso de uso ainda não está no app — use `META_REQUEST_IG_PUBLISH_SCOPE=0` só como escape.
 
 ## Lots BI
 

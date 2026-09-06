@@ -169,17 +169,21 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
           <AlertTitle>Permissão necessária</AlertTitle>
           <AlertDescription className="space-y-2">
             <p>
-              Publicar no Instagram exige o token da Página do cliente (você já adicionou{" "}
-              <span className="font-medium">pages_manage_posts</span>) e, se a Meta ainda recusar,
-              o caso de uso <span className="font-medium">Instagram Content Publish</span>.
+              A Meta recusou o token: falta a permissão{" "}
+              <span className="font-medium">instagram_content_publish</span>. Adicionar o caso de
+              uso no App Dashboard não atualiza o token antigo.{" "}
+              <span className="font-medium">pages_manage_posts</span> sozinho não publica no
+              Instagram.
             </p>
             <p>
-              Em{" "}
+              Confirme o caso de uso <span className="font-medium">Instagram Content Publish</span>{" "}
+              (Facebook Login — não é <span className="font-medium">instagram_business_content_publish</span>
+              ). Depois, em{" "}
               <Link to="/admin/conexoes" className="underline">
                 Conexões
               </Link>
-              , use <span className="font-medium">Refazer login</span> com a conta Meta que
-              gerencia o portfólio. Depois volte e clique em Publicar agora.
+              , use <span className="font-medium">Refazer login</span> e aceite criar/publicar
+              conteúdo. Só então volte e clique em Publicar agora.
             </p>
           </AlertDescription>
         </Alert>
