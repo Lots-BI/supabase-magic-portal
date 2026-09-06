@@ -56,7 +56,7 @@ export class MetaOAuthService {
     url.searchParams.set("state", params.state);
     url.searchParams.set("scope", scopes.join(","));
     url.searchParams.set("response_type", "code");
-    // Sem isso o Facebook reusa o grant antigo e não pede instagram_content_publish de novo.
+    // Sem isso o Facebook reusa o grant antigo e não pede pages_manage_posts de novo.
     url.searchParams.set("auth_type", "rerequest");
     return url.toString();
   }

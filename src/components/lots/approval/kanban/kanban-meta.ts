@@ -77,15 +77,15 @@ export function publishConfirmationLabel(card: {
   publish_status: string;
   publish_error: string | null;
 }): string | null {
-  if (card.publish_status === "published") return "Publicado no Meta";
+  if (card.publish_status === "published") return "Publicado no Instagram";
   if (card.publish_status === "failed") {
-    return card.publish_error ? `Falha no agendamento: ${card.publish_error}` : "Falha no agendamento";
+    return card.publish_error ? `Falha na publicação: ${card.publish_error}` : "Falha na publicação";
   }
   if (card.publish_status === "publishing" || card.publish_status === "queued") {
     return "Confirmando publicação…";
   }
   if (card.status === "agendado" && (card.publish_status === "scheduled" || card.publish_status === "none")) {
-    return "Agendado no Meta";
+    return "Agendado no Lots — publica no horário";
   }
   return null;
 }

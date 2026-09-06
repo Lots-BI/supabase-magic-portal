@@ -9,7 +9,7 @@ import { GOOGLE_ADS_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/
 import { GoogleBusinessOAuthService } from "@/modules/platform-hub/plugins/google_business/oauth/google-business-oauth.service";
 import { GOOGLE_BUSINESS_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/google_business/google-business-credential-keys";
 import { INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/instagram_organic/instagram-credential-keys";
-import { INSTAGRAM_ORGANIC_OAUTH_SCOPES } from "@/modules/platform-hub/plugins/instagram_organic/oauth/instagram-organic-oauth.config";
+import { instagramOrganicOauthScopes } from "@/modules/platform-hub/plugins/instagram_organic/oauth/instagram-organic-oauth.config";
 import { MetaOAuthService } from "@/modules/platform-hub/plugins/meta_ads/oauth/meta-oauth.service";
 import { META_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/meta_ads/meta-credential-keys";
 import { TikTokOAuthService } from "@/modules/platform-hub/plugins/tiktok/oauth/tiktok-oauth.service";
@@ -135,7 +135,7 @@ export function createHubOAuthHandle(
         {
           ...metaOAuthConfig(),
           credentialKey: INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY,
-          defaultScopes: INSTAGRAM_ORGANIC_OAUTH_SCOPES,
+          defaultScopes: instagramOrganicOauthScopes(),
         },
         httpClient,
         credentialAccess,

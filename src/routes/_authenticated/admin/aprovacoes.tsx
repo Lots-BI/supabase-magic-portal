@@ -295,7 +295,7 @@ function AprovacoesAdminPage() {
       <PageHeader
         eyebrow="Social"
         title="Conteúdos"
-        description="Calendário e roteiro → cliente aprova e envia mídias → produção → aprovação final já agendada no Meta."
+        description="Calendário e roteiro → cliente aprova e envia mídias → produção → aprovação final já com horário no Lots."
       />
 
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">

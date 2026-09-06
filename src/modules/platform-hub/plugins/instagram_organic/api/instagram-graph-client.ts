@@ -128,6 +128,46 @@ export class InstagramGraphClient {
     return body;
   }
 
+  async listManagedPages(accessToken: string): Promise<
+    {
+      id: string;
+      name?: string;
+      access_token?: string;
+      instagram_business_account?: { id: string; username?: string };
+    }[]
+  > {
+    const url = `${graphBaseUrl(this.graphVersion)}/me/accounts`;
+    const { items } = await paginateCursorPages({
+      maxPages: 10,
+      fetchPage: async (after) => {
+        const response = await this.config.httpClient.request(url, {
+          searchParams: {
+            access_token: accessToken,
+            fields: "id,name,access_token,instagram_business_account{id,username}",
+            limit: "100",
+            after,
+          },
+        });
+        const body = await response.json<{
+          data?: {
+            id: string;
+            name?: string;
+            access_token?: string;
+            instagram_business_account?: { id: string; username?: string };
+          }[];
+          paging?: { cursors?: { after?: string } };
+          error?: { message?: string };
+        }>();
+        if (body.error?.message) throw new Error(body.error.message);
+        return {
+          data: body.data ?? [],
+          nextCursor: body.paging?.cursors?.after,
+        };
+      },
+    });
+    return items;
+  }
+
   async createMediaContainer(
     accessToken: string,
     igUserId: string,

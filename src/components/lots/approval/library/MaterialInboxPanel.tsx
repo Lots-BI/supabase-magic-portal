@@ -77,8 +77,8 @@ export function MaterialInboxPanel({ cadastroClienteId }: { cadastroClienteId: n
     return (
       <ApprovalEmptyState
         icon={FolderOpen}
-        title="Nenhum conteúdo no calendário"
-        description="Crie conteúdos no calendário editorial — cada um vira um slot nesta biblioteca."
+        title="Nenhum material nesta biblioteca"
+        description="Quando o calendário tiver conteúdos, os originais do cliente aparecem aqui para download."
       />
     );
   }

@@ -295,7 +295,7 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
 
       <SectionCard
         title="Agendamento"
-        description="A aprovação do cliente dispara o agendamento automático no Meta nesta data e hora."
+        description="A aprovação do cliente agenda no Lots nesta data e hora. O Instagram só recebe o post nesse momento."
       >
         <BrDateTimeFields
           date={dataPub}
@@ -320,7 +320,7 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
           title={pendingRequired.length > 0 ? `Pendente: ${pendingLabels}` : undefined}
         >
           <Send className="mr-2 h-4 w-4" />
-          Enviar para aprovação (já agendado)
+          Enviar para aprovação com horário
         </Button>
         {pendingRequired.length > 0 && (
           <p className="flex items-center gap-1 text-xs text-muted-foreground">

@@ -94,7 +94,7 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
       return scheduleServerFn({ data: { card_id: cardId, scheduled_at: iso } });
     },
     onSuccess: () => {
-      toast.success("Publicação agendada.");
+      toast.success("Agendado no Lots. O Instagram só recebe o post no horário combinado.");
       setScopeError(false);
       invalidate();
     },
@@ -169,18 +169,17 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
           <AlertTitle>Permissão necessária</AlertTitle>
           <AlertDescription className="space-y-2">
             <p>
-              O Instagram recusou o token: falta a permissão{" "}
-              <span className="font-medium">instagram_content_publish</span>. A conexão atual
-              serve para métricas, mas ainda não autoriza publicar.
+              Publicar no Instagram exige o token da Página do cliente (você já adicionou{" "}
+              <span className="font-medium">pages_manage_posts</span>) e, se a Meta ainda recusar,
+              o caso de uso <span className="font-medium">Instagram Content Publish</span>.
             </p>
             <p>
               Em{" "}
               <Link to="/admin/conexoes" className="underline">
                 Conexões
               </Link>
-              , abra o Instagram deste cliente e use <span className="font-medium">Refazer login</span>.
-              Na tela da Meta, aceite criar/publicar conteúdo. Depois volte e clique em Publicar
-              agora.
+              , use <span className="font-medium">Refazer login</span> com a conta Meta que
+              gerencia o portfólio. Depois volte e clique em Publicar agora.
             </p>
           </AlertDescription>
         </Alert>
@@ -259,7 +258,7 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
             <dt className="text-muted-foreground">Status:</dt>
             <dd className="font-medium">
               {card.publish_status === "published"
-                ? "Publicado no Meta"
+                ? "Publicado no Instagram"
                 : card.publish_status === "failed"
                   ? "Falha na publicação"
                   : card.publish_status === "scheduled"

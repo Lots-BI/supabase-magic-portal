@@ -3,7 +3,7 @@ title: Setup Meta — Instagram orgânico (post metrics)
 description: Passo a passo para configurar app Meta lots_bi e conectar Instagram no Platform Hub.
 status: living
 owner: Engenharia / Ops Lots BI
-last_review: 2026-09-01
+last_review: 2026-09-06
 ---
 
 # Setup Meta — Instagram orgânico
@@ -19,14 +19,25 @@ last_review: 2026-09-01
 1. [Meta for Developers](https://developers.facebook.com/) → app existente
 2. Produtos: **Facebook Login** + **Instagram Platform**
 3. Redirect URI: `{APP_URL}/oauth/meta/callback`
-4. App Review → Advanced Access:
+4. App Dashboard → Casos de uso / Permissions:
    - `instagram_basic`
    - `instagram_manage_insights`
    - `pages_read_engagement`
    - `pages_show_list`
+   - `pages_manage_posts` (token da Página — necessário para publicar)
    - `business_management`
+   - `instagram_content_publish` (só depois que o caso de uso existir; senão o login quebra com Invalid Scopes)
 5. Business Verification da Lots
 6. Modo **Live** (ou testers em Development)
+
+## Publicar pelo Conteúdos
+
+O Instagram **não agenda** nativamente. O Lots guarda `scheduled_publish_at` (horário de Brasília) e o job publica via Graph.
+
+1. Adicione as permissões no App Dashboard **antes** de pedir no OAuth.
+2. Em Conexões, **Refazer login** com a conta Meta da agência que gerencia o portfólio — token antigo não ganha escopo novo sozinho.
+3. O app usa o **token da Página** (`GET /me/accounts`) ligada ao Instagram do cliente, não só o token do usuário.
+4. `pages_manage_posts` libera o token da Página. Publicar no feed do Instagram ainda exige o caso de uso **Instagram Content Publish**. Quando ele existir no app, ligue `META_REQUEST_IG_PUBLISH_SCOPE=1` e reconecte.
 
 ## Lots BI
 

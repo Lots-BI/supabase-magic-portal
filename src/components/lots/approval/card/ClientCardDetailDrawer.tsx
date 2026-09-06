@@ -424,6 +424,13 @@ export function ClientCardDetailDrawer({
                                 />
                               </a>
                             )}
+                            <p className="px-2 py-1 text-[11px] text-muted-foreground">
+                              {m.mediaRole === "final"
+                                ? "Peça final"
+                                : m.mediaRole === "cliente_material"
+                                  ? "Original do cliente"
+                                  : "Anexo"}
+                            </p>
                           </li>
                         ))}
                       </ul>
