@@ -14,7 +14,8 @@ export async function getClientKanbanBoard(supabase: SupabaseClient, scope: Clie
     scope.cadastroClienteIds,
     { excludeArchived: true },
   );
-  return buildKanbanBoard(cards);
+  // Rascunhos internos (roteiro) não entram na fila do cliente.
+  return buildKanbanBoard(cards.filter((c) => c.status !== "roteiro"));
 }
 
 export async function getClientCardDetail(
@@ -28,6 +29,7 @@ export async function getClientCardDetail(
     scope.cadastroClienteIds,
   );
   if (!card) return null;
+  if (card.status === "roteiro") return null;
 
   const [events, attachments] = await Promise.all([
     contentCardEventRepository.listByCardId(supabase, cardId),

@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { Suspense, useMemo, useState } from "react";
-import { listClientes, listServicos } from "@/lib/admin.functions";
+import { useServerFn } from "@tanstack/react-start";
+import { listClientes } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { StatCard } from "@/components/lots/StatCard";
@@ -10,13 +11,11 @@ import { PeriodToggle, type PeriodDays } from "@/components/lots/PeriodToggle";
 import { DeltaPill } from "@/components/lots/DeltaPill";
 import { ChartFrame, ChartLegendItem } from "@/components/lots/charts/ChartFrame";
 import { getSeriesColor } from "@/components/lots/charts/chart-colors";
-import { BarChartLots } from "@/components/lots/charts/BarChartLots";
 import { DonutChartLots } from "@/components/lots/charts/DonutChartLots";
 import { AreaChartLotsLazy } from "@/components/lots/charts/AreaChartLotsLazy";
 import { adminTitle, BRAND_NAME } from "@/lib/brand";
 import {
   PLATFORM_LABEL,
-  aggregateByCliente,
   dailyFromOverview,
   deriveCpa,
   deriveCtr,
@@ -25,27 +24,30 @@ import {
   periodRange,
   spendShareByPlatform,
   sumOverview,
+  aggregateByCliente,
   METRIC_META,
   OVERVIEW_CLIENTE_SELECT,
   type OverviewRow,
 } from "@/lib/metrics";
 import { slugify } from "@/lib/slug";
 import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
+import { getApprovalOpsDashboard } from "@/modules/approval/dashboard/dashboard.server";
+import { getHubAgencyAlerts } from "@/modules/platform-hub-admin/hub-admin.server";
+import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
 import {
-  Users,
-  UserCheck,
-  Briefcase,
-  ArrowUpRight,
-  RadioTower,
   DollarSign,
-  Eye,
   Activity,
   Target,
   Compass,
   Sparkles,
+  Percent,
+  Clock,
+  ClipboardCheck,
+  Plug,
+  RadioTower,
+  AlertTriangle,
 } from "lucide-react";
-
-// ---------------- Types & queries ----------------
+import { cn } from "@/lib/utils";
 
 type ClienteAtivo = {
   cliente: string;
@@ -58,11 +60,6 @@ type ClienteAtivo = {
 const clientesAdminQuery = queryOptions({
   queryKey: ["admin", "clientes"],
   queryFn: () => listClientes(),
-});
-
-const servicosQuery = queryOptions({
-  queryKey: ["admin", "servicos"],
-  queryFn: () => listServicos(),
 });
 
 const clientesAtivosQuery = queryOptions({
@@ -93,13 +90,12 @@ const overviewAdminQuery = (days: PeriodDays) =>
     },
   });
 
-// ---------------- Route ----------------
+const STALE_MS = 48 * 3600_000;
 
 export const Route = createFileRoute("/_authenticated/admin/")({
-  head: () => ({ meta: [{ title: adminTitle("Centro executivo") }] }),
+  head: () => ({ meta: [{ title: adminTitle("Visão geral") }] }),
   loader: ({ context }) => {
     void context.queryClient.ensureQueryData(clientesAdminQuery);
-    void context.queryClient.ensureQueryData(servicosQuery);
     void context.queryClient.ensureQueryData(clientesAtivosQuery);
     void context.queryClient.ensureQueryData(overviewAdminQuery(30));
   },
@@ -116,35 +112,36 @@ function AdminOverview() {
   return (
     <div className="space-y-7">
       <PageHeader
-        eyebrow="Painel administrativo"
-        title="Centro executivo"
-        description={`Visão consolidada da operação ${BRAND_NAME} — investimento, performance e portfólio.`}
-        actions={
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
-            <PeriodToggle value={days} onChange={setDays} />
-            <Link
-              to="/admin/clientes/novo"
-              className="lots-focus inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-transform hover:-translate-y-px sm:h-9 sm:w-auto"
-            >
-              Novo cliente
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-        }
+        eyebrow="Dados"
+        title="Visão geral"
+        description={`Pulso do portfólio ${BRAND_NAME} — o que precisa de atenção hoje.`}
+        actions={<PeriodToggle value={days} onChange={setDays} />}
       />
 
-      <Suspense fallback={<DashboardSkeleton kpiCount={6} />}>
-        <ExecutiveBody days={days} />
+      <Suspense fallback={<DashboardSkeleton kpiCount={4} />}>
+        <OverviewBody days={days} />
       </Suspense>
     </div>
   );
 }
 
-function ExecutiveBody({ days }: { days: PeriodDays }) {
+function OverviewBody({ days }: { days: PeriodDays }) {
   const { data: clientes } = useSuspenseQuery(clientesAdminQuery);
-  const { data: servicos } = useSuspenseQuery(servicosQuery);
   const { data: ativos } = useSuspenseQuery(clientesAtivosQuery);
   const { data: overview } = useSuspenseQuery(overviewAdminQuery(days));
+  const opsFn = useServerFn(getApprovalOpsDashboard);
+
+  const opsQ = useQuery({
+    queryKey: ["approval", "ops-dashboard", "all"],
+    queryFn: () => opsFn({ data: {} }),
+    staleTime: 60_000,
+  });
+
+  const alertsQ = useQuery({
+    queryKey: [...hubAdminKeys.all, "agency-alerts"],
+    queryFn: () => getHubAgencyAlerts(),
+    staleTime: 60_000,
+  });
 
   const period = useMemo(() => periodRange(days), [days]);
   const current = overview.filter((r) => r.data >= period.from && r.data <= period.to);
@@ -155,55 +152,130 @@ function ExecutiveBody({ days }: { days: PeriodDays }) {
   const daily = dailyFromOverview(current, period);
   const share = spendShareByPlatform(current);
   const ctr = deriveCtr(cT.impressions, cT.clicks);
+  const prevCtr = deriveCtr(pT.impressions, pT.clicks);
   const cpa = deriveCpa(cT.spend, cT.conversions);
 
-  const ativosCount = clientes.filter((c: any) => c.ativo).length;
-  const servicosCount = servicos.filter((s: any) => s.ativo).length;
-  const totalAcessos = clientes.reduce((sum: number, c: any) => sum + (c.qtd_acessos ?? 0), 0);
   const ultimaSync = ativos
     .map((a) => a.ultima_ingestao)
     .filter(Boolean)
     .sort()
     .pop() as string | undefined;
 
-  const topClientes = aggregateByCliente(current)
-    .sort((a, b) => b.totals.spend - a.totals.spend)
-    .slice(0, 6);
+  const idByNome = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of clientes as { id: number; nome_cliente: string }[]) {
+      m.set(c.nome_cliente, c.id);
+    }
+    return m;
+  }, [clientes]);
+
+  const staleAccounts = useMemo(
+    () =>
+      ativos.filter((a) => {
+        if (!a.ultima_ingestao) return true;
+        return Date.now() - new Date(a.ultima_ingestao).getTime() > STALE_MS;
+      }),
+    [ativos],
+  );
+
+  const awaiting = opsQ.data?.awaitingApproval ?? 0;
+  const failedConnections = alertsQ.data?.unhealthy.length ?? 0;
+
+  const attentionItems = useMemo(() => {
+    const items: Array<{
+      key: string;
+      cliente: string;
+      reason: string;
+      to: string;
+      search?: Record<string, number>;
+    }> = [];
+
+    const prevByCliente = new Map(aggregateByCliente(previous).map((c) => [c.cliente, c] as const));
+    for (const c of aggregateByCliente(current)) {
+      const prev = prevByCliente.get(c.cliente);
+      if (!prev || prev.cpa <= 0 || c.cpa <= 0) continue;
+      const delta = pctDelta(c.cpa, prev.cpa);
+      if (delta != null && delta >= 40) {
+        items.push({
+          key: `cpa-${c.cliente}`,
+          cliente: c.cliente,
+          reason: `CPA +${delta.toFixed(0)}% vs período anterior`,
+          to: "/cliente/$cliente",
+        });
+      }
+    }
+
+    for (const a of staleAccounts.slice(0, 6)) {
+      items.push({
+        key: `sync-${a.cliente}`,
+        cliente: a.cliente,
+        reason: a.ultima_ingestao
+          ? `Sync atrasada · ${relTime(a.ultima_ingestao)}`
+          : "Sem ingestão registrada",
+        to: "/cliente/$cliente",
+      });
+    }
+
+    for (const row of (opsQ.data?.byClient ?? []).slice(0, 4)) {
+      const already = items.some((i) => i.cliente === row.cliente_nome);
+      if (already || row.count <= 0) continue;
+      items.push({
+        key: `cards-${row.cadastro_cliente_id}`,
+        cliente: row.cliente_nome,
+        reason: `${row.count} ${row.count === 1 ? "card" : "cards"} no pipeline`,
+        to: "/admin/aprovacoes",
+        search: { cliente: row.cadastro_cliente_id },
+      });
+    }
+
+    return items.slice(0, 8);
+  }, [current, previous, staleAccounts, opsQ.data?.byClient]);
 
   return (
     <div className="space-y-7">
-      {/* HERO KPIs */}
-      <section className="grid grid-cols-1 gap-3 min-[375px]:grid-cols-2 lg:grid-cols-6">
+      <p className="text-[12px] text-muted-foreground">
+        Última sync:{" "}
+        <span className="font-medium text-foreground">{relTime(ultimaSync ?? null)}</span>
+      </p>
+
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Atenção">
+        <AttentionChip
+          to="/admin/aprovacoes"
+          icon={ClipboardCheck}
+          label={awaiting === 1 ? "1 aguardando aprovação" : `${awaiting} aguardando aprovação`}
+          tone={awaiting > 0 ? "warn" : "ok"}
+        />
+        <AttentionChip
+          to="/admin/relatorios"
+          icon={RadioTower}
+          label={
+            staleAccounts.length === 1
+              ? "1 conta sem sync >48h"
+              : `${staleAccounts.length} contas sem sync >48h`
+          }
+          tone={staleAccounts.length > 0 ? "warn" : "ok"}
+        />
+        <AttentionChip
+          to="/admin/conexoes/health"
+          icon={Plug}
+          label={
+            failedConnections === 1
+              ? "1 conexão com falha"
+              : `${failedConnections} conexões com falha`
+          }
+          tone={failedConnections > 0 ? "warn" : "ok"}
+        />
+      </section>
+
+      <section className="grid grid-cols-1 gap-3 min-[375px]:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Investimento total"
+          label="Investimento"
           value={formatMetric("spend", cT.spend)}
           icon={DollarSign}
           emphasis="hero"
           delta={pctDelta(cT.spend, pT.spend)}
           description={METRIC_META.spend.description}
           hint={`Meta ${formatMetric("spend", cT.meta_spend)} · Google ${formatMetric("spend", cT.google_spend)}`}
-          className="lg:col-span-2"
-        />
-        <StatCard
-          label="Clientes ativos"
-          value={ativosCount}
-          icon={UserCheck}
-          hint={`${clientes.length} no total`}
-          description="Contas com dados recebidos recentemente nas integrações."
-        />
-        <StatCard
-          label="Alcance Instagram"
-          value={formatMetric("reach", cT.reach)}
-          icon={Eye}
-          delta={pctDelta(cT.reach, pT.reach)}
-          description={METRIC_META.reach.description}
-        />
-        <StatCard
-          label="Sessões GA4"
-          value={formatMetric("sessions", cT.sessions)}
-          icon={Activity}
-          delta={pctDelta(cT.sessions, pT.sessions)}
-          description={METRIC_META.sessions.description}
         />
         <StatCard
           label="Conversões"
@@ -213,33 +285,22 @@ function ExecutiveBody({ days }: { days: PeriodDays }) {
           description={METRIC_META.conversions.description}
           hint={cpa > 0 ? `CPA ${formatMetric("spend", cpa)}` : undefined}
         />
-      </section>
-
-      {/* SECUNDÁRIOS — operacional */}
-      <section className="grid grid-cols-1 gap-3 min-[375px]:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Serviços ativos"
-          value={servicosCount}
-          icon={Briefcase}
-          emphasis="compact"
-        />
-        <StatCard label="Acessos vinculados" value={totalAcessos} icon={Users} emphasis="compact" />
-        <StatCard
-          label="Última sync"
-          value={relTime(ultimaSync ?? null)}
-          icon={RadioTower}
-          emphasis="compact"
+          label="Sessões GA4"
+          value={formatMetric("sessions", cT.sessions)}
+          icon={Activity}
+          delta={pctDelta(cT.sessions, pT.sessions)}
+          description={METRIC_META.sessions.description}
         />
         <StatCard
           label="CTR consolidado"
           value={cT.impressions > 0 ? `${ctr.toFixed(2)}%` : "—"}
-          icon={Sparkles}
-          emphasis="compact"
+          icon={Percent}
+          delta={pctDelta(ctr, prevCtr)}
           description={METRIC_META.ctr.description}
         />
       </section>
 
-      {/* EVOLUÇÃO + DISTRIBUIÇÃO */}
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-3">
         <ChartFrame
           eyebrow="Evolução"
@@ -307,40 +368,57 @@ function ExecutiveBody({ days }: { days: PeriodDays }) {
         </ChartFrame>
       </section>
 
-      {/* TOP CLIENTES + INGESTÃO */}
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-        <ChartFrame
-          eyebrow="Top clientes"
-          title={`Maior investimento · ${days} dias`}
-          description="Ordenado por orçamento de mídia executado."
+        <SectionCard
+          eyebrow="Fila"
+          title="O que precisa de atenção"
+          description="Pendências, sync atrasada e variação de CPA."
+          bodyClassName="px-0 py-0"
           className="xl:col-span-2"
         >
-          <BarChartLots
-            rows={topClientes.map((c, idx) => ({
-              key: c.cliente,
-              label: (
-                <Link
-                  to="/cliente/$cliente"
-                  params={{ cliente: slugify(c.cliente) }}
-                  className="hover:underline"
-                >
-                  {c.cliente}
-                </Link>
-              ),
-              value: c.totals.spend,
-              metric: "spend",
-              tone: idx === 0 ? "primary" : "secondary",
-              trailing:
-                c.totals.conversions > 0
-                  ? `${formatMetric("conversions", c.totals.conversions)} conv.`
-                  : undefined,
-            }))}
-            empty="Nenhum cliente com investimento no período."
-          />
-        </ChartFrame>
+          {attentionItems.length === 0 ? (
+            <p className="px-5 py-8 text-sm text-muted-foreground">
+              Nenhuma pendência no recorte atual.
+            </p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {attentionItems.map((item) => {
+                const clienteId = idByNome.get(item.cliente);
+                const isApproval = item.to === "/admin/aprovacoes";
+                return (
+                  <li key={item.key}>
+                    {isApproval && (item.search?.cliente ?? clienteId) ? (
+                      <Link
+                        to="/admin/aprovacoes"
+                        search={{ cliente: item.search?.cliente ?? clienteId }}
+                        className="flex items-center justify-between gap-3 px-5 py-3 text-[13px] transition-colors hover:bg-muted/40"
+                      >
+                        <span className="truncate font-medium text-foreground">{item.cliente}</span>
+                        <span className="shrink-0 text-[12px] text-muted-foreground">
+                          {item.reason}
+                        </span>
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/cliente/$cliente"
+                        params={{ cliente: slugify(item.cliente) }}
+                        className="flex items-center justify-between gap-3 px-5 py-3 text-[13px] transition-colors hover:bg-muted/40"
+                      >
+                        <span className="truncate font-medium text-foreground">{item.cliente}</span>
+                        <span className="shrink-0 text-[12px] text-muted-foreground">
+                          {item.reason}
+                        </span>
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </SectionCard>
 
         <SectionCard
-          eyebrow="Ingestão"
+          eyebrow="Contas"
           title="Status das contas"
           description="Última atualização recebida por cliente."
           bodyClassName="px-0 py-0"
@@ -351,7 +429,7 @@ function ExecutiveBody({ days }: { days: PeriodDays }) {
             </p>
           ) : (
             <ul className="divide-y divide-border">
-              {ativos.slice(0, 6).map((a) => (
+              {ativos.slice(0, 8).map((a) => (
                 <li key={a.cliente} className="px-5 py-3">
                   <div className="flex items-center justify-between gap-2">
                     <Link
@@ -385,7 +463,39 @@ function ExecutiveBody({ days }: { days: PeriodDays }) {
   );
 }
 
-// ---------------- Helpers ----------------
+function AttentionChip({
+  to,
+  icon: Icon,
+  label,
+  tone,
+}: {
+  to: "/admin/aprovacoes" | "/admin/relatorios" | "/admin/conexoes/health";
+  icon: typeof Clock;
+  label: string;
+  tone: "warn" | "ok";
+}) {
+  return (
+    <Link
+      to={to}
+      className={cn(
+        "lots-surface flex items-center gap-3 px-4 py-3 text-[13px] font-medium transition-colors hover:bg-muted/50",
+        tone === "warn" ? "text-foreground" : "text-muted-foreground",
+      )}
+    >
+      <span
+        className={cn(
+          "grid h-8 w-8 shrink-0 place-items-center rounded-lg",
+          tone === "warn"
+            ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+            : "bg-muted text-muted-foreground",
+        )}
+      >
+        {tone === "warn" ? <AlertTriangle className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+      </span>
+      {label}
+    </Link>
+  );
+}
 
 function relTime(iso: string | null) {
   if (!iso) return "—";

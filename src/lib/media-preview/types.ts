@@ -12,12 +12,16 @@ export interface MediaAsset {
   id: string;
   kind: MediaKind;
   url: string;
+  downloadUrl?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
   posterUrl?: string | null;
   mimeType?: string;
   width?: number | null;
   height?: number | null;
   durationSeconds?: number | null;
   ordem?: number;
+  mediaRole?: string;
 }
 
 /** Contexto completo para renderizar preview fiel à publicação. */

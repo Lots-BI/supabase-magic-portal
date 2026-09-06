@@ -1,4 +1,5 @@
 import type { ContentCardStatus } from "../types/content-card";
+import { KANBAN_ACTIVE_STATUSES } from "../types/content-card";
 
 export type KanbanColumnConfig = {
   status: ContentCardStatus;
@@ -8,17 +9,31 @@ export type KanbanColumnConfig = {
 
 /** Colunas Kanban ativas (exclui arquivado — Biblioteca). */
 export const KANBAN_COLUMNS: KanbanColumnConfig[] = [
-  { status: "producao", label: "Em Produção", colorToken: "--cw-col-producao" },
-  { status: "edicao", label: "Em Edição", colorToken: "--cw-col-edicao" },
+  { status: "roteiro", label: "Roteiro", colorToken: "--cw-col-edicao" },
   {
     status: "aguardando_aprovacao",
-    label: "Aguardando Aprovação",
+    label: "Cliente: roteiro + mídia",
     colorToken: "--cw-col-aguardando",
   },
-  { status: "aprovado", label: "Aprovado", colorToken: "--cw-col-aprovado" },
+  {
+    status: "aguardando_material",
+    label: "Material recebido",
+    colorToken: "--cw-col-aguardando",
+  },
+  { status: "producao", label: "Em produção", colorToken: "--cw-col-producao" },
+  {
+    status: "aguardando_aprovacao_final",
+    label: "Aprovar publicação",
+    colorToken: "--cw-col-aprovado",
+  },
+  { status: "agendado", label: "Agendado", colorToken: "--cw-col-aprovado" },
   { status: "publicado", label: "Publicado", colorToken: "--cw-col-publicado" },
 ];
 
 export function getColumnForStatus(status: ContentCardStatus): KanbanColumnConfig | undefined {
-  return KANBAN_COLUMNS.find((c) => c.status === status);
+  return KANBAN_COLUMNS.find((col) => col.status === status);
+}
+
+export function isKanbanActiveStatus(status: ContentCardStatus): boolean {
+  return KANBAN_ACTIVE_STATUSES.includes(status);
 }

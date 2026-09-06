@@ -54,6 +54,19 @@ export function capaUrlToAsset(capaUrl: string | null): MediaAsset[] {
   ];
 }
 
+/** Preview da publicação: peça final. Originais do cliente nunca entram aqui. */
+export function assetsForPublishPreview(
+  assets: MediaAsset[],
+  mode: "final" | "draft" = "final",
+): MediaAsset[] {
+  if (mode === "final") {
+    return assets.filter((asset) => asset.mediaRole === "final");
+  }
+  return assets.filter(
+    (asset) => asset.mediaRole !== "cliente_material" && asset.mediaRole !== "final",
+  );
+}
+
 export function buildPreviewContext(
   post: {
     formato: string | null;

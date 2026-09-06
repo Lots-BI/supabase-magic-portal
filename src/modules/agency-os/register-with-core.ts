@@ -25,7 +25,7 @@ import { agencyLeadRepository } from "./repositories/lead.repository.server";
 import { agencyProjectRepository } from "./repositories/project.repository.server";
 import { agencyTaskRepository } from "./repositories/task.repository.server";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { FEATURE_PLANO_ESTRATEGICO_NAV } from "@/lib/feature-flags";
+import { FEATURE_ADMIN_CENTRAL_NAV, FEATURE_PLANO_ESTRATEGICO_NAV } from "@/lib/feature-flags";
 
 const NAVIGATION_ROUTES: ModuleRouteDef[] = [
   {
@@ -37,10 +37,10 @@ const NAVIGATION_ROUTES: ModuleRouteDef[] = [
   },
   {
     id: "aprovacoes",
-    label: "Aprovações pendentes",
+    label: "Conteúdos",
     href: "/aprovacoes",
     icon: ClipboardCheck,
-    keywords: ["posts", "conteúdo", "aprovar"],
+    keywords: ["posts", "conteúdo", "aprovar", "calendário"],
   },
   // Arquivado — reativar com FEATURE_PLANO_ESTRATEGICO_NAV
   ...(FEATURE_PLANO_ESTRATEGICO_NAV
@@ -61,14 +61,18 @@ const NAVIGATION_ROUTES: ModuleRouteDef[] = [
     icon: LayoutDashboard,
     adminOnly: true,
   },
-  {
-    id: "central",
-    label: "Central — Agency OS",
-    href: "/admin/central",
-    icon: Building2,
-    adminOnly: true,
-    keywords: ["operações", "agência", "crm", "prioridades", "pipeline", "workspace"],
-  },
+  ...(FEATURE_ADMIN_CENTRAL_NAV
+    ? [
+        {
+          id: "central",
+          label: "Central — Agency OS",
+          href: "/admin/central",
+          icon: Building2,
+          adminOnly: true,
+          keywords: ["operações", "agência", "crm", "prioridades", "pipeline", "workspace"],
+        } satisfies ModuleRouteDef,
+      ]
+    : []),
   {
     id: "relatorios",
     label: "Relatórios",
@@ -79,7 +83,7 @@ const NAVIGATION_ROUTES: ModuleRouteDef[] = [
   },
   {
     id: "aprovacoes-kanban",
-    label: "Aprovações (Kanban)",
+    label: "Conteúdos",
     href: "/admin/aprovacoes",
     icon: ClipboardCheck,
     adminOnly: true,

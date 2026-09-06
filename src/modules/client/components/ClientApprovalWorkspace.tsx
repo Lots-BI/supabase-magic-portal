@@ -15,7 +15,6 @@ import {
 } from "@/components/lots/approval/shared/ApprovalWorkspaceTabs";
 import { ApprovalCalendar } from "@/components/lots/approval/calendar/ApprovalCalendar";
 import { EditorialPillarsPanel } from "@/components/lots/approval/pillars/EditorialPillarsPanel";
-import { StoryPlanSheet } from "@/components/lots/approval/stories/StoryPlanSheet";
 import { LibraryPanel } from "@/components/lots/approval/library/LibraryPanel";
 import { ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,17 +44,18 @@ export function ClientApprovalWorkspace() {
   const accessFn = useServerFn(checkScopedPortalAccessFn);
   const boardFn = useServerFn(getScopedKanbanBoardFn);
   const pillarsFn = useServerFn(listScopedEditorialPillarsFn);
-  const [tab, setTab] = useState<ApprovalTab>("kanban");
+  const [tab, setTab] = useState<ApprovalTab>("calendar");
   const [openCardId, setOpenCardId] = useState<string | null>(null);
-
-  const isSlugMode = scope.mode === "slug_context";
 
   const accessQ = useQuery({
     queryKey: ["client-aprovacoes", "access", scope.scopeQueryKey],
     queryFn: () => accessFn({ data: scope.scopeInput }),
+    retry: 1,
   });
 
-  const portalReady = accessQ.data?.role === "cliente" || accessQ.data?.role === "slug_context";
+  const isStaffPreview = accessQ.data?.role === "slug_context";
+  const portalReady = accessQ.data?.role === "cliente" || isStaffPreview;
+  const canMutate = accessQ.data?.role === "cliente";
 
   const boardQ = useQuery({
     queryKey: ["client-aprovacoes", "kanban", scope.scopeQueryKey],
@@ -89,40 +89,79 @@ export function ClientApprovalWorkspace() {
 
   if (accessQ.isLoading) return <ApprovalPanelSkeleton rows={4} />;
 
-  if (!isSlugMode && accessQ.data?.role === "staff_redirect") {
+  if (accessQ.isError) {
+    const msg =
+      accessQ.error instanceof Error
+        ? accessQ.error.message
+        : "Não foi possível validar o acesso ao portal.";
     return (
       <div className="space-y-6">
         <PageHeader
-          eyebrow="Conteúdo"
-          title="Aprovações"
+          eyebrow="Social"
+          title="Conteúdos"
+          description="Não foi possível abrir o workspace do cliente."
+        />
+        <SectionCard title="Acesso">
+          <p className="text-sm text-destructive">
+            Não foi possível abrir seus conteúdos. Entre novamente ou fale com a agência para
+            liberar o acesso.
+          </p>
+          {msg ? <p className="mt-2 text-xs text-muted-foreground">{msg}</p> : null}
+        </SectionCard>
+      </div>
+    );
+  }
+
+  if (!isStaffPreview && accessQ.data?.role === "staff_redirect") {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Social"
+          title="Conteúdos"
           description="Este ambiente é destinado a clientes. Use o painel administrativo para produção."
         />
         <SectionCard title="Acesso administrativo">
           <p className="mb-4 text-sm text-muted-foreground">
-            Você está autenticado como equipe interna. O Kanban de produção fica em Aprovações
+            Você está autenticado como equipe interna. O workflow de produção fica em Conteúdos
             (admin).
           </p>
           <Button asChild>
-            <Link to="/admin/aprovacoes">Ir para Aprovações (admin)</Link>
+            <Link to="/admin/aprovacoes">Ir para Conteúdos (admin)</Link>
           </Button>
         </SectionCard>
       </div>
     );
   }
 
-  const description = isSlugMode
+  if (!portalReady) {
+    return (
+      <div className="space-y-6">
+        <PageHeader eyebrow="Social" title="Conteúdos" description="Aguardando permissão…" />
+        <ApprovalPanelSkeleton rows={4} />
+      </div>
+    );
+  }
+
+  const description = isStaffPreview
     ? `Visualização do cliente ${scope.clienteNome ?? scope.clienteSlug} — somente leitura.`
-    : "Estratégia editorial, calendário e pipeline de aprovação — somente leitura.";
+    : "Calendário, fila e aprovação de conteúdos — acompanhe e valide o que a agência preparou.";
 
   return (
     <div className="space-y-7">
-      <PageHeader eyebrow="Conteúdo" title="Aprovações" description={description} />
+      <PageHeader eyebrow="Social" title="Conteúdos" description={description} />
 
-      <ApprovalWorkspaceTabs value={tab} onChange={setTab} />
+      <ApprovalWorkspaceTabs value={tab} onChange={setTab} variant="client" />
 
       {tab === "kanban" && boardQ.isLoading && <ApprovalPanelSkeleton rows={6} />}
 
-      {tab === "kanban" && !boardQ.isLoading && totalCards === 0 && (
+      {tab === "kanban" && boardQ.isError && (
+        <p className="text-sm text-destructive">
+          Não foi possível carregar a fila.
+          {boardQ.error instanceof Error ? ` ${boardQ.error.message}` : ""}
+        </p>
+      )}
+
+      {tab === "kanban" && !boardQ.isLoading && !boardQ.isError && totalCards === 0 && (
         <SectionCard eyebrow="Workflow" title="Seu pipeline">
           <EmptyState
             icon={ClipboardList}
@@ -143,20 +182,25 @@ export function ClientApprovalWorkspace() {
       )}
 
       {tab === "calendar" && (
-        <ApprovalCalendar pillarMap={pillarMap} onOpenCard={setOpenCardId} readOnly clientMode />
+        <ApprovalCalendar
+          pillarMap={pillarMap}
+          onOpenCard={setOpenCardId}
+          readOnly
+          clientMode
+          ready={portalReady}
+        />
       )}
 
-      {tab === "pillars" && <EditorialPillarsPanel readOnly clientMode />}
+      {tab === "pillars" && <EditorialPillarsPanel readOnly clientMode ready={portalReady} />}
 
-      {tab === "stories" && <StoryPlanSheet readOnly clientMode onOpenCard={setOpenCardId} />}
-
-      {tab === "library" && <LibraryPanel readOnly clientMode />}
+      {tab === "library" && <LibraryPanel readOnly clientMode ready={portalReady} />}
 
       {openCardId && (
         <ClientCardDetailDrawer
           cardId={openCardId}
           onClose={() => setOpenCardId(null)}
           onMutated={() => invalidateScopedViews(qc, scope.scopeQueryKey, openCardId)}
+          allowMutations={canMutate}
         />
       )}
     </div>

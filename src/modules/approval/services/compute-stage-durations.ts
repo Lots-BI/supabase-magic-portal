@@ -8,24 +8,30 @@ export type StageDuration = {
 };
 
 const STATUS_FROM_EVENTS: Partial<Record<ContentCardEventType, ContentCardStatus>> = {
-  moved: undefined as never,
   approval_requested: "aguardando_aprovacao",
-  approved: "aprovado",
-  rejected: "edicao",
+  approved: "aguardando_material",
+  changes_requested: "roteiro",
+  rejected: "roteiro",
   published: "publicado",
   archived: "arquivado",
+  material_submitted: "producao",
+  publish_queued: "agendado",
+  publish_succeeded: "publicado",
 };
 
 function statusFromEvent(
   event: ContentCardEvent,
   payloadStatus?: string,
 ): ContentCardStatus | null {
+  if (typeof payloadStatus === "string") {
+    return payloadStatus as ContentCardStatus;
+  }
   if (event.event_type === "moved" && typeof payloadStatus === "string") {
     return payloadStatus as ContentCardStatus;
   }
   const mapped = STATUS_FROM_EVENTS[event.event_type];
   if (mapped) return mapped;
-  if (event.event_type === "created") return "producao";
+  if (event.event_type === "created") return "roteiro";
   return null;
 }
 

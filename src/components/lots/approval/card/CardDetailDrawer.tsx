@@ -3,12 +3,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,7 +38,7 @@ import { CardMediaUpload } from "./CardMediaUpload";
 import { MobileStatusPicker } from "../kanban/MobileStatusPicker";
 import { KANBAN_COLUMN_META } from "../kanban/kanban-meta";
 import { MediaPreview } from "@/components/lots/MediaPreview/MediaPreview";
-import { buildPreviewContext } from "@/lib/media-preview";
+import { assetsForPublishPreview, buildPreviewContext } from "@/lib/media-preview";
 import { Copy, Archive, MessageSquare } from "lucide-react";
 import { PillarBadge } from "../shared/PillarBadge";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
@@ -136,7 +136,7 @@ export function CardDetailDrawer({
           direcao_arte: draft.direcao_arte || null,
           cta: draft.cta || null,
           observacoes: draft.observacoes || null,
-          pilar_id: draft.pilar_id,
+          pilar_id: draft.pilar_id || null,
           data_publicacao: draft.data_publicacao,
           hora_publicacao: draft.hora_publicacao || null,
         },
@@ -203,6 +203,8 @@ export function CardDetailDrawer({
   };
 
   const statusMeta = card ? KANBAN_COLUMN_META[card.status] : null;
+  const cardAttachments = detailQ.data?.attachments ?? [];
+  const finalPreview = assetsForPublishPreview(cardAttachments, "final");
   const previewCtx =
     card &&
     buildPreviewContext(
@@ -214,258 +216,293 @@ export function CardDetailDrawer({
         data_publicacao: card.data_publicacao,
         localizacao: card.localizacao,
       },
-      detailQ.data?.attachments ?? [],
+      finalPreview.length > 0 ? finalPreview : assetsForPublishPreview(cardAttachments, "draft"),
     );
 
   return (
-    <Sheet open onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="flex h-[100dvh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
-        <SheetHeader className="shrink-0 border-b border-border px-6 py-4">
-          <SheetTitle className="pr-8 text-left">{card?.titulo ?? "Carregando…"}</SheetTitle>
-          <SheetDescription className="text-left">
-            {card && (
-              <span className="inline-flex items-center gap-2">
-                {statusMeta?.emoji} {KANBAN_COLUMNS.find((c) => c.status === card.status)?.label}
-              </span>
-            )}
-          </SheetDescription>
-        </SheetHeader>
+    <>
+      <Dialog open onOpenChange={(o) => !o && onClose()}>
+        <DialogContent
+          className="flex max-h-[min(100dvh-2rem,920px)] w-[calc(100vw-1.5rem)] max-w-4xl flex-col gap-0 overflow-hidden p-0 sm:rounded-xl [&>button]:right-4 [&>button]:top-4"
+          onPointerDownOutside={(e) => {
+            const t = e.target as HTMLElement | null;
+            if (t?.closest("[data-radix-select-content]")) e.preventDefault();
+          }}
+          onInteractOutside={(e) => {
+            const t = e.target as HTMLElement | null;
+            if (t?.closest("[data-radix-select-content]")) e.preventDefault();
+          }}
+        >
+          <DialogHeader className="shrink-0 border-b border-border px-6 py-4">
+            <DialogTitle className="pr-8 text-left">{card?.titulo ?? "Carregando…"}</DialogTitle>
+            <DialogDescription className="text-left">
+              {card && (
+                <span className="inline-flex items-center gap-2">
+                  {statusMeta?.emoji}{" "}
+                  {KANBAN_COLUMNS.find((c) => c.status === card.status)?.label}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
 
-        {detailQ.isLoading && (
-          <div className="p-6">
-            <ApprovalPanelSkeleton rows={5} />
-          </div>
-        )}
-
-        {detailQ.isError && (
-          <p className="p-6 text-sm text-destructive">Não foi possível carregar o card.</p>
-        )}
-
-        {card && (
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-4">
-            <div className="mb-4 flex flex-wrap gap-2">
-              <div className="hidden sm:block">
-                <Select
-                  value={card.status}
-                  onValueChange={(v) => moveMut.mutate(v as ContentCardStatus)}
-                >
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {KANBAN_COLUMNS.filter((col) =>
-                      canTransitionStatus(card.status, col.status),
-                    ).map((col) => (
-                      <SelectItem key={col.status} value={col.status}>
-                        {KANBAN_COLUMN_META[col.status].emoji} {col.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <MobileStatusPicker currentStatus={card.status} onSelect={(s) => moveMut.mutate(s)} />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => duplicateMut.mutate()}
-                disabled={duplicateMut.isPending}
-              >
-                <Copy className="mr-1.5 h-4 w-4" />
-                Duplicar
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setArchiveOpen(true)}
-                disabled={archiveMut.isPending || card.status === "arquivado"}
-              >
-                <Archive className="mr-1.5 h-4 w-4" />
-                Arquivar
-              </Button>
+          {detailQ.isLoading && (
+            <div className="p-6">
+              <ApprovalPanelSkeleton rows={5} />
             </div>
+          )}
 
-            <Tabs defaultValue="conteudo" className="min-h-0 flex-1">
-              <TabsList className="mb-4 w-full justify-start">
-                <TabsTrigger value="conteudo">Conteúdo</TabsTrigger>
-                <TabsTrigger value="arquivos">Arquivos</TabsTrigger>
-                <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                <TabsTrigger value="comentarios">Comentários</TabsTrigger>
-              </TabsList>
+          {detailQ.isError && (
+            <p className="p-6 text-sm text-destructive">Não foi possível carregar o card.</p>
+          )}
 
-              <TabsContent value="conteudo" className="space-y-4">
-                {selectedPillar && <PillarBadge pillar={selectedPillar} />}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="data-pub">Data publicação</Label>
-                    <Input
-                      id="data-pub"
-                      type="date"
-                      value={draft.data_publicacao}
-                      onChange={(e) => setDraft((d) => ({ ...d, data_publicacao: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="hora-pub">Hora</Label>
-                    <Input
-                      id="hora-pub"
-                      type="time"
-                      value={draft.hora_publicacao}
-                      onChange={(e) => setDraft((d) => ({ ...d, hora_publicacao: e.target.value }))}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="titulo">Título</Label>
-                  <Input
-                    id="titulo"
-                    value={draft.titulo}
-                    onChange={(e) => setDraft((d) => ({ ...d, titulo: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Pilar editorial *</Label>
+          {card && (
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-4">
+              <div className="mb-4 flex flex-wrap gap-2">
+                <div className="hidden sm:block">
                   <Select
-                    value={draft.pilar_id}
-                    onValueChange={(v) => setDraft((d) => ({ ...d, pilar_id: v }))}
+                    value={card.status}
+                    onValueChange={(v) => moveMut.mutate(v as ContentCardStatus)}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
+                    <SelectTrigger className="w-[220px]">
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {(pillarsQ.data ?? []).map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.titulo}
+                      {KANBAN_COLUMNS.filter((col) =>
+                        canTransitionStatus(card.status, col.status),
+                      ).map((col) => (
+                        <SelectItem key={col.status} value={col.status}>
+                          {KANBAN_COLUMN_META[col.status].emoji} {col.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="copy">Copy</Label>
-                  <Textarea
-                    id="copy"
-                    rows={3}
-                    value={draft.copy_text}
-                    onChange={(e) => setDraft((d) => ({ ...d, copy_text: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="legenda">Legenda</Label>
-                  <Textarea
-                    id="legenda"
-                    rows={3}
-                    value={draft.legenda}
-                    onChange={(e) => setDraft((d) => ({ ...d, legenda: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="roteiro">Roteiro</Label>
-                  <Textarea
-                    id="roteiro"
-                    rows={3}
-                    value={draft.roteiro}
-                    onChange={(e) => setDraft((d) => ({ ...d, roteiro: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="direcao">Direção de Arte</Label>
-                  <Textarea
-                    id="direcao"
-                    rows={2}
-                    value={draft.direcao_arte}
-                    onChange={(e) => setDraft((d) => ({ ...d, direcao_arte: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cta">CTA</Label>
-                  <Input
-                    id="cta"
-                    value={draft.cta}
-                    onChange={(e) => setDraft((d) => ({ ...d, cta: e.target.value }))}
-                  />
-                </div>
-                {card.checklist.length > 0 && (
+                <MobileStatusPicker
+                  currentStatus={card.status}
+                  onSelect={(s) => moveMut.mutate(s)}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => duplicateMut.mutate()}
+                  disabled={duplicateMut.isPending}
+                >
+                  <Copy className="mr-1.5 h-4 w-4" />
+                  Duplicar
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setArchiveOpen(true)}
+                  disabled={archiveMut.isPending || card.status === "arquivado"}
+                >
+                  <Archive className="mr-1.5 h-4 w-4" />
+                  Arquivar
+                </Button>
+              </div>
+
+              <Tabs defaultValue="conteudo" className="min-h-0 flex-1">
+                <TabsList className="mb-4 w-full justify-start">
+                  <TabsTrigger value="conteudo">Conteúdo</TabsTrigger>
+                  <TabsTrigger value="arquivos">Arquivos</TabsTrigger>
+                  <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                  <TabsTrigger value="comentarios">Comentários</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="conteudo" className="space-y-4">
+                  {selectedPillar && <PillarBadge pillar={selectedPillar} />}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="data-pub">Data publicação</Label>
+                      <Input
+                        id="data-pub"
+                        type="date"
+                        value={draft.data_publicacao}
+                        onChange={(e) =>
+                          setDraft((d) => ({ ...d, data_publicacao: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="hora-pub">Hora</Label>
+                      <Input
+                        id="hora-pub"
+                        type="time"
+                        value={draft.hora_publicacao}
+                        onChange={(e) =>
+                          setDraft((d) => ({ ...d, hora_publicacao: e.target.value }))
+                        }
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-2">
-                    <Label>Checklist</Label>
-                    <ul className="space-y-2">
-                      {card.checklist.map((item) => (
-                        <li key={item.id} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={item.done}
-                            onChange={() => toggleChecklist(item.id)}
-                            className="rounded border-border"
-                          />
-                          <span className={item.done ? "text-muted-foreground line-through" : ""}>
-                            {item.label}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+                    <Label htmlFor="titulo">Título</Label>
+                    <Input
+                      id="titulo"
+                      value={draft.titulo}
+                      onChange={(e) => setDraft((d) => ({ ...d, titulo: e.target.value }))}
+                    />
                   </div>
-                )}
-                {previewCtx && (
-                  <div className="rounded-xl border border-border p-3">
-                    <Label className="mb-2 block">Preview</Label>
-                    <MediaPreview context={previewCtx} />
+                  <div className="space-y-2">
+                    <Label>Pilar editorial</Label>
+                    {pillarsQ.isLoading ? (
+                      <p className="text-sm text-muted-foreground">Carregando pilares…</p>
+                    ) : pillarsQ.isError ? (
+                      <p className="text-sm text-destructive">
+                        Não foi possível carregar os pilares.
+                        {pillarsQ.error instanceof Error ? ` ${pillarsQ.error.message}` : ""}
+                      </p>
+                    ) : (pillarsQ.data ?? []).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        Nenhum pilar ativo neste cliente. Crie em Conteúdos → Pilares.
+                      </p>
+                    ) : (
+                      <Select
+                        value={draft.pilar_id || "__none__"}
+                        onValueChange={(v) =>
+                          setDraft((d) => ({ ...d, pilar_id: v === "__none__" ? "" : v }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent position="popper" sideOffset={4}>
+                          <SelectItem value="__none__">Sem pilar</SelectItem>
+                          {(pillarsQ.data ?? []).map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.titulo}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
-                )}
+                  <div className="space-y-2">
+                    <Label htmlFor="copy">Copy</Label>
+                    <Textarea
+                      id="copy"
+                      rows={3}
+                      value={draft.copy_text}
+                      onChange={(e) => setDraft((d) => ({ ...d, copy_text: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="legenda">Legenda</Label>
+                    <Textarea
+                      id="legenda"
+                      rows={3}
+                      value={draft.legenda}
+                      onChange={(e) => setDraft((d) => ({ ...d, legenda: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="roteiro">Roteiro</Label>
+                    <Textarea
+                      id="roteiro"
+                      rows={3}
+                      value={draft.roteiro}
+                      onChange={(e) => setDraft((d) => ({ ...d, roteiro: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="direcao">Direção de Arte</Label>
+                    <Textarea
+                      id="direcao"
+                      rows={2}
+                      value={draft.direcao_arte}
+                      onChange={(e) => setDraft((d) => ({ ...d, direcao_arte: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cta">CTA</Label>
+                    <Input
+                      id="cta"
+                      value={draft.cta}
+                      onChange={(e) => setDraft((d) => ({ ...d, cta: e.target.value }))}
+                    />
+                  </div>
+                  {card.checklist.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Checklist</Label>
+                      <ul className="space-y-2">
+                        {card.checklist.map((item) => (
+                          <li key={item.id} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={item.done}
+                              onChange={() => toggleChecklist(item.id)}
+                              className="rounded border-border"
+                            />
+                            <span
+                              className={item.done ? "text-muted-foreground line-through" : ""}
+                            >
+                              {item.label}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {previewCtx && (
+                    <div className="rounded-xl border border-border p-3">
+                      <Label className="mb-2 block">Preview</Label>
+                      <MediaPreview context={previewCtx} />
+                    </div>
+                  )}
                 <Button
                   onClick={() => {
-                    if (!draft.pilar_id) {
-                      toast.error("Selecione um pilar editorial.");
-                      return;
-                    }
                     saveMut.mutate();
                   }}
                   disabled={saveMut.isPending}
                 >
                   Salvar alterações
                 </Button>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="arquivos">
-                <CardMediaUpload cardId={cardId} capaUrl={card.capa_url} onUploaded={invalidate} />
-              </TabsContent>
+                <TabsContent value="arquivos">
+                  <CardMediaUpload cardId={cardId} capaUrl={card.capa_url} onUploaded={invalidate} />
+                </TabsContent>
 
-              <TabsContent value="timeline">
-                <CardTimeline entries={detailQ.data?.events ?? []} />
-              </TabsContent>
+                <TabsContent value="timeline">
+                  <CardTimeline entries={detailQ.data?.events ?? []} />
+                </TabsContent>
 
-              <TabsContent value="comentarios" className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="comment">Novo comentário</Label>
-                  <Textarea
-                    id="comment"
-                    rows={3}
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="Escreva um comentário…"
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => commentMut.mutate()}
-                    disabled={!comment.trim() || commentMut.isPending}
-                  >
-                    <MessageSquare className="mr-1.5 h-4 w-4" />
-                    Comentar
-                  </Button>
-                </div>
-                <div className="border-t border-border pt-4">
-                  <h4 className="mb-3 text-sm font-medium">Histórico</h4>
-                  <CardTimeline
-                    entries={(detailQ.data?.events ?? []).filter(
-                      (e) => e.eventType === "commented" || e.eventType === "updated",
-                    )}
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        )}
-      </SheetContent>
+                <TabsContent value="comentarios" className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="comment">Novo comentário</Label>
+                    <Textarea
+                      id="comment"
+                      rows={3}
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      placeholder="Escreva um comentário…"
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => commentMut.mutate()}
+                      disabled={!comment.trim() || commentMut.isPending}
+                    >
+                      <MessageSquare className="mr-1.5 h-4 w-4" />
+                      Comentar
+                    </Button>
+                  </div>
+                  <div className="border-t border-border pt-4">
+                    <h4 className="mb-3 text-sm font-medium">Histórico</h4>
+                    <CardTimeline
+                      entries={(detailQ.data?.events ?? []).filter(
+                        (e) => e.eventType === "commented" || e.eventType === "updated",
+                      )}
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <ApprovalConfirmDialog
         open={archiveOpen}
         onOpenChange={setArchiveOpen}
@@ -476,6 +513,6 @@ export function CardDetailDrawer({
         loading={archiveMut.isPending}
         destructive
       />
-    </Sheet>
+    </>
   );
 }

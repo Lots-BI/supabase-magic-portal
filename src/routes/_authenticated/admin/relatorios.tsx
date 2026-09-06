@@ -1,8 +1,4 @@
-// Lots BI · Central de Relatórios
-// Hub do módulo de relatórios. NÃO reimplementa dashboards — apenas organiza
-// o acesso ao executivo e aos relatórios individuais por cliente, reutilizando
-// vw_overview_cliente, vw_clientes_ativos e helpers de src/lib/metrics.
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { Suspense, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +7,7 @@ import { StatCard } from "@/components/lots/StatCard";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { PeriodToggle, type PeriodDays } from "@/components/lots/PeriodToggle";
 import { DeltaPill } from "@/components/lots/DeltaPill";
-import { adminTitle, BRAND_NAME, brandTitle } from "@/lib/brand";
+import { adminTitle, BRAND_NAME } from "@/lib/brand";
 import {
   PLATFORM_LABEL,
   aggregateByCliente,
@@ -29,19 +25,23 @@ import { VW_CLIENTES_ATIVOS_SELECT } from "@/lib/db-selects";
 import { slugify } from "@/lib/slug";
 import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import {
-  ArrowUpRight,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   DollarSign,
   Target,
-  Activity,
-  Eye,
-  FileBarChart,
-  LayoutDashboard,
   UserCheck,
   Search,
+  ArrowDown,
+  ArrowUp,
+  ChevronsUpDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// ---------------- Queries ----------------
 
 type ClienteAtivo = {
   cliente: string;
@@ -78,7 +78,7 @@ const overviewQuery = (days: PeriodDays) =>
     },
   });
 
-// ---------------- Route ----------------
+type SortKey = "cliente" | "spend" | "conversions" | "cpa" | "ctr" | "sessions" | "delta" | "sync";
 
 export const Route = createFileRoute("/_authenticated/admin/relatorios")({
   head: () => ({ meta: [{ title: adminTitle("Relatórios") }] }),
@@ -99,29 +99,11 @@ function RelatoriosHub() {
   return (
     <div className="space-y-7">
       <PageHeader
-        eyebrow="Central de relatórios"
-        title={`Relatórios ${BRAND_NAME}`}
-        description="Acesso unificado ao relatório executivo da agência e aos relatórios individuais por cliente."
+        eyebrow="Dados"
+        title="Relatórios"
+        description={`Comparativo por cliente no período — portfólio ${BRAND_NAME}.`}
         actions={<PeriodToggle value={days} onChange={setDays} />}
       />
-
-      {/* Atalhos de relatório */}
-      <section className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <ShortcutCard
-          to="/admin"
-          icon={LayoutDashboard}
-          eyebrow="Visão consolidada"
-          title="Relatório executivo da agência"
-          description="KPIs do portfólio inteiro, mix de investimento, top clientes e ingestão por plataforma."
-        />
-        <ShortcutCard
-          to="/dashboard"
-          icon={FileBarChart}
-          eyebrow="Visão pessoal"
-          title={brandTitle("Sua conta")}
-          description="Hub de dashboards por plataforma que o cliente vê ao entrar na conta."
-        />
-      </section>
 
       <Suspense fallback={<DashboardSkeleton kpiCount={4} />}>
         <HubBody days={days} />
@@ -130,53 +112,22 @@ function RelatoriosHub() {
   );
 }
 
-function ShortcutCard({
-  to,
-  icon: Icon,
-  eyebrow,
-  title,
-  description,
-}: {
-  to: string;
-  icon: typeof LayoutDashboard;
-  eyebrow: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Link
-      to={to}
-      className="lots-surface group relative flex items-start gap-4 p-5 transition-all hover:-translate-y-px hover:shadow-[var(--shadow-md)]"
-    >
-      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary-600 dark:text-primary-300">
-        <Icon className="h-5 w-5" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-300">
-          {eyebrow}
-        </p>
-        <h3 className="mt-0.5 font-display text-[15px] font-semibold text-foreground">{title}</h3>
-        <p className="mt-1 text-[12.5px] text-muted-foreground">{description}</p>
-      </div>
-      <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-    </Link>
-  );
-}
-
 function HubBody({ days }: { days: PeriodDays }) {
   const { data: ativos } = useSuspenseQuery(clientesAtivosQuery);
   const { data: overview } = useSuspenseQuery(overviewQuery(days));
+  const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("spend");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const period = useMemo(() => periodRange(days), [days]);
   const current = overview.filter((r) => r.data >= period.from && r.data <= period.to);
   const previous = overview.filter((r) => r.data >= period.prevFrom && r.data <= period.prevTo);
   const cT = sumOverview(current);
   const pT = sumOverview(previous);
-  const ctr = deriveCtr(cT.impressions, cT.clicks);
   const cpa = deriveCpa(cT.spend, cT.conversions);
 
-  const agregados = aggregateByCliente(current).sort((a, b) => b.totals.spend - a.totals.spend);
+  const agregados = aggregateByCliente(current);
   const prevByCliente = useMemo(() => {
     const m = new Map<string, ReturnType<typeof sumOverview>>();
     for (const c of aggregateByCliente(previous)) m.set(c.cliente, c.totals);
@@ -189,7 +140,6 @@ function HubBody({ days }: { days: PeriodDays }) {
     return m;
   }, [ativos]);
 
-  // União: clientes com dado no período + clientes ativos sem dado no recorte
   const todos = useMemo(() => {
     const seen = new Set(agregados.map((a) => a.cliente));
     const sem = ativos
@@ -203,21 +153,63 @@ function HubBody({ days }: { days: PeriodDays }) {
     return [...agregados, ...sem];
   }, [agregados, ativos]);
 
-  const filtered = q
-    ? todos.filter((c) => c.cliente.toLowerCase().includes(q.toLowerCase()))
-    : todos;
+  const rows = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    const filtered = needle ? todos.filter((c) => c.cliente.toLowerCase().includes(needle)) : todos;
+
+    const decorated = filtered.map((c) => {
+      const prev = prevByCliente.get(c.cliente);
+      const spendDelta = prev ? pctDelta(c.totals.spend, prev.spend) : null;
+      const ativo = ativosByName.get(c.cliente);
+      return { ...c, spendDelta, ativo };
+    });
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    return decorated.sort((a, b) => {
+      switch (sortKey) {
+        case "cliente":
+          return a.cliente.localeCompare(b.cliente, "pt-BR") * dir;
+        case "spend":
+          return (a.totals.spend - b.totals.spend) * dir;
+        case "conversions":
+          return (a.totals.conversions - b.totals.conversions) * dir;
+        case "cpa":
+          return (a.cpa - b.cpa) * dir;
+        case "ctr":
+          return (a.ctr - b.ctr) * dir;
+        case "sessions":
+          return (a.totals.sessions - b.totals.sessions) * dir;
+        case "delta":
+          return ((a.spendDelta ?? -Infinity) - (b.spendDelta ?? -Infinity)) * dir;
+        case "sync": {
+          const ta = a.ativo?.ultima_data_recebida ?? "";
+          const tb = b.ativo?.ultima_data_recebida ?? "";
+          return ta.localeCompare(tb) * dir;
+        }
+        default:
+          return 0;
+      }
+    });
+  }, [todos, q, sortKey, sortDir, prevByCliente, ativosByName]);
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setSortKey(key);
+    setSortDir(key === "cliente" ? "asc" : "desc");
+  }
 
   return (
     <div className="space-y-7">
-      {/* KPIs do portfólio no período */}
       <section className="grid grid-cols-1 gap-3 min-[375px]:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Investimento total"
+          label="Investimento"
           value={formatMetric("spend", cT.spend)}
           icon={DollarSign}
           delta={pctDelta(cT.spend, pT.spend)}
           description={METRIC_META.spend.description}
-          hint={`Meta ${formatMetric("spend", cT.meta_spend)} · Google ${formatMetric("spend", cT.google_spend)}`}
         />
         <StatCard
           label="Conversões"
@@ -225,15 +217,13 @@ function HubBody({ days }: { days: PeriodDays }) {
           icon={Target}
           delta={pctDelta(cT.conversions, pT.conversions)}
           description={METRIC_META.conversions.description}
-          hint={cpa > 0 ? `CPA ${formatMetric("spend", cpa)}` : undefined}
         />
         <StatCard
-          label="Sessões GA4"
-          value={formatMetric("sessions", cT.sessions)}
-          icon={Activity}
-          delta={pctDelta(cT.sessions, pT.sessions)}
-          description={METRIC_META.sessions.description}
-          hint={cT.impressions > 0 ? `CTR ${ctr.toFixed(2)}%` : undefined}
+          label="CPA"
+          value={cpa > 0 ? formatMetric("spend", cpa) : "—"}
+          icon={Target}
+          description={METRIC_META.conversions.description}
+          positiveIsGood={false}
         />
         <StatCard
           label="Clientes com dado"
@@ -243,11 +233,10 @@ function HubBody({ days }: { days: PeriodDays }) {
         />
       </section>
 
-      {/* Lista de relatórios por cliente */}
       <SectionCard
-        eyebrow="Relatórios individuais"
-        title="Por cliente"
-        description="Cada linha abre o relatório completo do cliente, com KPIs, evolução e detalhe por plataforma."
+        eyebrow="Portfólio"
+        title="Comparativo por cliente"
+        description="Clique na linha para abrir o relatório do cliente."
         bodyClassName="px-0 py-0"
       >
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
@@ -259,95 +248,169 @@ function HubBody({ days }: { days: PeriodDays }) {
             className="h-7 w-full bg-transparent text-[13px] outline-none placeholder:text-muted-foreground"
           />
           <span className="shrink-0 text-[11px] text-muted-foreground">
-            {filtered.length} {filtered.length === 1 ? "cliente" : "clientes"}
+            {rows.length} {rows.length === 1 ? "cliente" : "clientes"}
           </span>
         </div>
 
-        {filtered.length === 0 ? (
+        {rows.length === 0 ? (
           <p className="px-5 py-10 text-center text-sm text-muted-foreground">
-            Nenhum cliente encontrado.
+            Nenhum cliente no período.
           </p>
         ) : (
-          <ul className="divide-y divide-border">
-            {filtered.map((c) => {
-              const prev = prevByCliente.get(c.cliente);
-              const spendDelta = prev ? pctDelta(c.totals.spend, prev.spend) : null;
-              const ativo = ativosByName.get(c.cliente);
-              return (
-                <li key={c.cliente} className="group">
-                  <Link
-                    to="/cliente/$cliente"
-                    params={{ cliente: slugify(c.cliente) }}
-                    className="flex flex-col gap-3 px-4 py-3.5 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:gap-4 sm:px-5"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-2">
-                        <p className="truncate text-[13.5px] font-semibold text-foreground">
-                          {c.cliente}
-                        </p>
-                        {ativo?.ultima_data_recebida && (
-                          <span className="shrink-0 text-[10.5px] text-muted-foreground">
-                            · última métrica {fmtRelDay(ativo.ultima_data_recebida)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1 flex flex-wrap gap-1">
-                        {(ativo?.plataformas_ativas ?? []).slice(0, 5).map((p) => (
-                          <span
-                            key={p}
-                            className="inline-flex items-center rounded-md border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
-                          >
-                            {PLATFORM_LABEL[p as keyof typeof PLATFORM_LABEL] ?? p}
-                          </span>
-                        ))}
-                        {(!ativo || (ativo.plataformas_ativas ?? []).length === 0) && (
-                          <span className="text-[11px] text-muted-foreground">
-                            Sem ingestão registrada
-                          </span>
-                        )}
-                      </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <SortHead
+                  label="Cliente"
+                  active={sortKey === "cliente"}
+                  dir={sortDir}
+                  onClick={() => toggleSort("cliente")}
+                />
+                <SortHead
+                  label="Spend"
+                  active={sortKey === "spend"}
+                  dir={sortDir}
+                  onClick={() => toggleSort("spend")}
+                  align="right"
+                />
+                <SortHead
+                  label="Conv."
+                  active={sortKey === "conversions"}
+                  dir={sortDir}
+                  onClick={() => toggleSort("conversions")}
+                  align="right"
+                />
+                <SortHead
+                  label="CPA"
+                  active={sortKey === "cpa"}
+                  dir={sortDir}
+                  onClick={() => toggleSort("cpa")}
+                  align="right"
+                />
+                <SortHead
+                  label="CTR"
+                  active={sortKey === "ctr"}
+                  dir={sortDir}
+                  onClick={() => toggleSort("ctr")}
+                  align="right"
+                />
+                <SortHead
+                  label="Sessões"
+                  active={sortKey === "sessions"}
+                  dir={sortDir}
+                  onClick={() => toggleSort("sessions")}
+                  align="right"
+                />
+                <TableHead className="hidden xl:table-cell">Plataformas</TableHead>
+                <SortHead
+                  label="Δ spend"
+                  active={sortKey === "delta"}
+                  dir={sortDir}
+                  onClick={() => toggleSort("delta")}
+                />
+                <SortHead
+                  label="Sync"
+                  active={sortKey === "sync"}
+                  dir={sortDir}
+                  onClick={() => toggleSort("sync")}
+                />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((c) => (
+                <TableRow
+                  key={c.cliente}
+                  className="cursor-pointer"
+                  tabIndex={0}
+                  onClick={() =>
+                    void navigate({
+                      to: "/cliente/$cliente",
+                      params: { cliente: slugify(c.cliente) },
+                    })
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      void navigate({
+                        to: "/cliente/$cliente",
+                        params: { cliente: slugify(c.cliente) },
+                      });
+                    }
+                  }}
+                >
+                  <TableCell className="font-medium text-foreground">{c.cliente}</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatMetric("spend", c.totals.spend)}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatMetric("conversions", c.totals.conversions)}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {c.cpa > 0 ? formatMetric("spend", c.cpa) : "—"}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {c.totals.impressions > 0 ? `${c.ctr.toFixed(1)}%` : "—"}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatMetric("sessions", c.totals.sessions)}
+                  </TableCell>
+                  <TableCell className="hidden xl:table-cell">
+                    <div className="flex flex-wrap gap-1">
+                      {(c.ativo?.plataformas_ativas ?? []).slice(0, 4).map((p) => (
+                        <span
+                          key={p}
+                          className="inline-flex items-center rounded-md border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
+                        >
+                          {PLATFORM_LABEL[p as keyof typeof PLATFORM_LABEL] ?? p}
+                        </span>
+                      ))}
                     </div>
-
-                    <div className="flex items-center justify-between gap-3 sm:contents">
-                      <div className="text-left sm:hidden">
-                        <p className="font-display text-[13px] font-semibold tabular-nums text-foreground">
-                          {formatMetric("spend", c.totals.spend)}
-                        </p>
-                        <p className="text-[10.5px] text-muted-foreground">
-                          {formatMetric("conversions", c.totals.conversions)} conv.
-                        </p>
-                      </div>
-
-                      <DeltaPill delta={spendDelta} size="sm" className="sm:hidden" />
-                    </div>
-
-                    <div className="hidden text-right sm:block">
-                      <p className="font-display text-[14px] font-semibold tabular-nums text-foreground">
-                        {formatMetric("spend", c.totals.spend)}
-                      </p>
-                      <p className="mt-0.5 text-[10.5px] text-muted-foreground">
-                        {formatMetric("conversions", c.totals.conversions)} conv.
-                      </p>
-                    </div>
-
-                    <div className="hidden w-20 justify-end sm:flex">
-                      <DeltaPill delta={spendDelta} size="sm" />
-                    </div>
-
-                    <ArrowUpRight
-                      className={cn(
-                        "h-4 w-4 shrink-0 text-muted-foreground transition-all",
-                        "group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground",
-                      )}
-                    />
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+                  </TableCell>
+                  <TableCell>
+                    <DeltaPill delta={c.spendDelta} size="sm" />
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-[12px] text-muted-foreground">
+                    {c.ativo?.ultima_data_recebida ? fmtRelDay(c.ativo.ultima_data_recebida) : "—"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </SectionCard>
     </div>
+  );
+}
+
+function SortHead({
+  label,
+  active,
+  dir,
+  onClick,
+  align,
+}: {
+  label: string;
+  active: boolean;
+  dir: "asc" | "desc";
+  onClick: () => void;
+  align?: "right";
+}) {
+  const Icon = !active ? ChevronsUpDown : dir === "asc" ? ArrowUp : ArrowDown;
+  return (
+    <TableHead className={align === "right" ? "text-right" : undefined}>
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(
+          "inline-flex items-center gap-1 font-medium",
+          align === "right" && "ml-auto",
+          active ? "text-foreground" : "text-muted-foreground",
+        )}
+      >
+        {label}
+        <Icon className="h-3 w-3" />
+      </button>
+    </TableHead>
   );
 }
 

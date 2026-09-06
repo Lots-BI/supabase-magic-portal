@@ -12,6 +12,10 @@ export const CONTENT_CARD_EVENT_TYPES = [
   "attachment_added",
   "attachment_removed",
   "checklist_changed",
+  "publish_queued",
+  "publish_succeeded",
+  "publish_failed",
+  "material_submitted",
 ] as const;
 
 export type ContentCardEventType = (typeof CONTENT_CARD_EVENT_TYPES)[number];

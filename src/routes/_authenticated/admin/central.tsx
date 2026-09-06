@@ -257,6 +257,13 @@ function CentralContent() {
 
   return (
     <div className="space-y-8 pb-10">
+      <div
+        role="status"
+        className="rounded-lg border border-dashed border-border bg-muted/40 px-4 py-2.5 text-[12.5px] text-muted-foreground"
+      >
+        Módulo arquivado — fora da navegação e da busca. A rota permanece disponível para
+        reativação.
+      </div>
       <PageHeader
         eyebrow="Agency OS"
         title="Central"

@@ -63,6 +63,13 @@ function ClientWorkspaceContent() {
 
   return (
     <div className="space-y-8 pb-10">
+      <div
+        role="status"
+        className="rounded-lg border border-dashed border-border bg-muted/40 px-4 py-2.5 text-[12.5px] text-muted-foreground"
+      >
+        Módulo arquivado — fora da navegação e da busca. A rota permanece disponível para
+        reativação.
+      </div>
       <Link
         to="/admin/central"
         className="lots-focus inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground"

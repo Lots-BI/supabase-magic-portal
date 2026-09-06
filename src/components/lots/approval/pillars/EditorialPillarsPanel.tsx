@@ -48,10 +48,12 @@ export function EditorialPillarsPanel({
   cadastroClienteId,
   readOnly = false,
   clientMode = false,
+  ready = true,
 }: {
   cadastroClienteId?: number;
   readOnly?: boolean;
   clientMode?: boolean;
+  ready?: boolean;
 }) {
   const qc = useQueryClient();
   const staffListFn = useServerFn(listEditorialPillarsFn);
@@ -72,16 +74,18 @@ export function EditorialPillarsPanel({
   const pillarsQ = useQuery({
     queryKey: ["editorial-pillars", scopeKey, !readOnly],
     queryFn: () => {
-      if (portalScope) {
+      if (portalScope?.mode === "slug_context") {
         return scopedListFn({ data: { scope: portalScope.scopeInput } });
       }
-      return clientMode
-        ? clientListFn()
-        : staffListFn({
-            data: { cadastro_cliente_id: cadastroClienteId!, include_archived: !readOnly },
-          });
+      if (portalScope?.mode === "client_access" || clientMode) {
+        return clientListFn();
+      }
+      return staffListFn({
+        data: { cadastro_cliente_id: cadastroClienteId!, include_archived: !readOnly },
+      });
     },
-    enabled: !!portalScope || clientMode || !!cadastroClienteId,
+    enabled: ready && (!!portalScope || clientMode || !!cadastroClienteId),
+    retry: 1,
   });
 
   const pillars = useMemo(() => pillarsQ.data ?? [], [pillarsQ.data]);
@@ -169,7 +173,12 @@ export function EditorialPillarsPanel({
   }
 
   if (pillarsQ.isError) {
-    return <p className="text-sm text-destructive">Não foi possível carregar os pilares.</p>;
+    return (
+      <p className="text-sm text-destructive">
+        Não foi possível carregar os pilares.
+        {pillarsQ.error instanceof Error ? ` ${pillarsQ.error.message}` : ""}
+      </p>
+    );
   }
 
   return (

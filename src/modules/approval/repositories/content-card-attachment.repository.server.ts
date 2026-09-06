@@ -18,6 +18,20 @@ export const contentCardAttachmentRepository = {
     return (data ?? []).map(mapContentCardAttachmentRow);
   },
 
+  async listByCardIds(
+    supabase: SupabaseClient,
+    cardIds: string[],
+  ): Promise<ContentCardAttachment[]> {
+    if (cardIds.length === 0) return [];
+    const { data, error } = await supabase
+      .from(TABLE)
+      .select("*")
+      .in("card_id", cardIds)
+      .order("ordem", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map(mapContentCardAttachmentRow);
+  },
+
   async insert(
     supabase: SupabaseClient,
     row: ContentCardAttachmentInsert,

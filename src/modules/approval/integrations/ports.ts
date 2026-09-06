@@ -14,11 +14,13 @@ export type PublishResult = {
   url?: string;
 };
 
-/** Port para publicação externa (redes sociais, CMS). Sem implementação na Fase 0. */
 export interface ContentPublisherPort {
-  publish(request: PublishRequest): Promise<PublishResult>;
-  unpublish(cardId: string, target: PublishTarget): Promise<void>;
-  getPublishedState(cardId: string): Promise<Partial<Record<PublishTarget, PublishResult>>>;
+  publishNow(cardId: string): Promise<PublishResult>;
+  schedule(cardId: string, scheduledAt: string): Promise<void>;
+  cancel(cardId: string): Promise<void>;
+  getStatus(
+    cardId: string,
+  ): Promise<{ publish_status: string; externalId?: string; error?: string }>;
 }
 
 export type WorkflowAutomationTrigger =
@@ -34,7 +36,6 @@ export type WorkflowAutomationPayload = {
   metadata?: Record<string, unknown>;
 };
 
-/** Port para automações (n8n, webhooks, notificações). Sem implementação na Fase 0. */
 export interface WorkflowAutomationPort {
   emit(payload: WorkflowAutomationPayload): Promise<void>;
 }

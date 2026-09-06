@@ -2,7 +2,8 @@ import type { ContentCard } from "@/modules/approval/types/content-card";
 import { cn } from "@/lib/utils";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { formatCardSchedule, responsavelLabel } from "./kanban-meta";
+import { formatCardSchedule, publishConfirmationLabel, responsavelLabel } from "./kanban-meta";
+import type { PillarSummary } from "../shared/PillarBadge";
 
 export function KanbanCard({
   card,
@@ -67,6 +68,17 @@ export function KanbanCard({
           <p className="text-[11px] text-muted-foreground">
             {formatCardSchedule(card.data_publicacao, card.hora_publicacao)}
           </p>
+          {publishConfirmationLabel(card) ? (
+            <p
+              className={
+                card.publish_status === "failed"
+                  ? "text-[11px] text-destructive"
+                  : "text-[11px] text-muted-foreground"
+              }
+            >
+              {publishConfirmationLabel(card)}
+            </p>
+          ) : null}
         </div>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-border pt-2 text-[11px] text-muted-foreground">

@@ -1,7 +1,7 @@
 import { slugify } from "@/lib/slug";
 import type { ClientAccessScope } from "@/modules/approval/internal/client-access.server";
 import { assertClientPortalAccess } from "@/modules/approval/internal/client-access.server";
-import { assertStaffAccess } from "@/modules/approval/internal/staff-auth.server";
+import { isStaffMember } from "@/modules/approval/internal/staff-auth.server";
 import type { ClientScopeInput } from "../scope-input";
 
 type AuthCtx = {
@@ -10,7 +10,30 @@ type AuthCtx = {
   claims?: { email?: string | null };
 };
 
-/** Resolve ClientScopeInput → ClientAccessScope (mesma forma usada pelo Approval). */
+async function loadCadastroBySlug(
+  ctx: AuthCtx,
+  slug: string,
+): Promise<{ id: number; nome: string }> {
+  const { data: cad, error } = await ctx.supabase
+    .from("cadastro_clientes")
+    .select("id, nome_cliente, slug")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!cad?.id) {
+    throw new Error("Cliente não encontrado.");
+  }
+
+  return { id: Number(cad.id), nome: String(cad.nome_cliente) };
+}
+
+/**
+ * Resolve o escopo do portal.
+ * - client_access: vínculo real do usuário (portal do cliente).
+ * - slug_context: preview da agência OU cliente abrindo a URL /cliente/:slug
+ *   (neste caso o slug precisa pertencer ao vínculo do usuário).
+ */
 export async function resolvePortalScope(
   ctx: AuthCtx,
   input: ClientScopeInput,
@@ -19,19 +42,23 @@ export async function resolvePortalScope(
     return assertClientPortalAccess(ctx);
   }
 
-  await assertStaffAccess(ctx);
+  const slug = slugify(input.slug);
+  const cad = await loadCadastroBySlug(ctx, slug);
 
-  const { data: cad, error } = await ctx.supabase
-    .from("cadastro_clientes")
-    .select("id, nome_cliente, slug")
-    .eq("slug", slugify(input.slug))
-    .maybeSingle();
+  if (await isStaffMember(ctx)) {
+    return {
+      cadastroClienteIds: [cad.id],
+      clientNames: [cad.nome],
+    };
+  }
 
-  if (error) throw new Error(error.message);
-  if (!cad?.id) throw new Error("Cliente não encontrado para o slug informado");
+  const own = await assertClientPortalAccess(ctx);
+  if (!own.cadastroClienteIds.includes(cad.id)) {
+    throw new Error("Você não tem acesso a estes conteúdos.");
+  }
 
   return {
-    cadastroClienteIds: [Number(cad.id)],
-    clientNames: [String(cad.nome_cliente)],
+    cadastroClienteIds: [cad.id],
+    clientNames: [cad.nome],
   };
 }

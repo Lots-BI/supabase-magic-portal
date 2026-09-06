@@ -1,46 +1,35 @@
-import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Upload, Trash2, Loader2 } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 import {
   deleteCardMedia,
   listCardMedia,
-  uploadCardMedia,
+  createCardMediaUploadUrl,
+  confirmCardMediaUpload,
 } from "@/modules/approval/cards/cards.server";
+import { formatBytes } from "@/modules/approval/services/material-upload";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { MediaAsset } from "@/lib/media-preview";
-
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      resolve(result.split(",")[1] ?? "");
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-const ACCEPT = "image/*,video/*,application/pdf,audio/*,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt";
+import { MaterialUploadQueue } from "./MaterialUploadQueue";
 
 export function CardMediaUpload({
   cardId,
   capaUrl,
+  mediaRole,
   onUploaded,
 }: {
   cardId: string;
   capaUrl?: string | null;
+  mediaRole?: "preview" | "attachment" | "cliente_material" | "final";
   onUploaded?: () => void;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const qc = useQueryClient();
-  const uploadFn = useServerFn(uploadCardMedia);
+  const createUrlFn = useServerFn(createCardMediaUploadUrl);
+  const confirmFn = useServerFn(confirmCardMediaUpload);
   const deleteFn = useServerFn(deleteCardMedia);
   const listFn = useServerFn(listCardMedia);
-  const [uploading, setUploading] = useState(false);
 
   const mediaQ = useQuery({
     queryKey: ["content-card-media", cardId],
@@ -48,71 +37,51 @@ export function CardMediaUpload({
     enabled: !!cardId,
   });
 
-  const media = (mediaQ.data?.media ?? []) as MediaAsset[];
+  const media = ((mediaQ.data?.media ?? []) as MediaAsset[]).filter((item) =>
+    mediaRole ? item.mediaRole === mediaRole : item.mediaRole !== "cliente_material",
+  );
+
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["content-card-media", cardId] });
+    qc.invalidateQueries({ queryKey: ["content-card", cardId] });
+    onUploaded?.();
+  };
 
   const deleteMut = useMutation({
     mutationFn: (attachmentId: string) => deleteFn({ data: { cardId, attachmentId } }),
     onSuccess: () => {
       toast.success("Arquivo removido.");
-      qc.invalidateQueries({ queryKey: ["content-card-media", cardId] });
-      qc.invalidateQueries({ queryKey: ["content-card", cardId] });
-      onUploaded?.();
+      refresh();
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const handleFiles = async (files: FileList | null) => {
-    if (!files?.length) return;
-    setUploading(true);
-    try {
-      for (const file of Array.from(files)) {
-        const base64 = await fileToBase64(file);
-        await uploadFn({
-          data: {
-            cardId,
-            fileName: file.name,
-            mimeType: file.type || "application/octet-stream",
-            base64,
-          },
-        });
-      }
-      toast.success(files.length > 1 ? `${files.length} arquivos enviados.` : "Arquivo enviado.");
-      qc.invalidateQueries({ queryKey: ["content-card-media", cardId] });
-      qc.invalidateQueries({ queryKey: ["content-card", cardId] });
-      onUploaded?.();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Falha no upload");
-    } finally {
-      setUploading(false);
-    }
-  };
-
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        <input
-          ref={inputRef}
-          type="file"
-          accept={ACCEPT}
-          multiple
-          className="hidden"
-          onChange={(e) => void handleFiles(e.target.files)}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={uploading}
-          onClick={() => inputRef.current?.click()}
-        >
-          {uploading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Upload className="mr-2 h-4 w-4" />
-          )}
-          Enviar arquivo
-        </Button>
-      </div>
+      <MaterialUploadQueue
+        label={mediaRole === "final" ? "Enviar peça final" : "Enviar arquivo"}
+        createTicket={(file) =>
+          createUrlFn({
+            data: {
+              cardId,
+              fileName: file.name,
+              mimeType: file.type || "",
+              fileSize: file.size,
+              ...(mediaRole ? { mediaRole } : {}),
+            },
+          })
+        }
+        confirm={(input) =>
+          confirmFn({
+            data: {
+              cardId,
+              ...input,
+              ...(mediaRole ? { mediaRole } : {}),
+            },
+          })
+        }
+        onDone={refresh}
+      />
       {media.length > 0 && (
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {media.map((m) => (
@@ -125,15 +94,28 @@ export function CardMediaUpload({
               ) : (
                 <img src={m.url} alt="" className="aspect-square w-full object-cover" />
               )}
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute right-1 top-1 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
-                onClick={() => deleteMut.mutate(m.id)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-background/80 p-1 text-[10px]">
+                <span className="truncate">{m.fileName ?? "arquivo"}</span>
+                {m.fileSize ? <span>{formatBytes(m.fileSize)}</span> : null}
+              </div>
+              <div className="absolute right-1 top-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                {m.downloadUrl && (
+                  <Button type="button" variant="secondary" size="icon" className="h-7 w-7" asChild>
+                    <a href={m.downloadUrl} download={m.fileName ?? undefined}>
+                      <Download className="h-3.5 w-3.5" />
+                    </a>
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => deleteMut.mutate(m.id)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </li>
           ))}
         </ul>

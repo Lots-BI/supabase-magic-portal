@@ -20,5 +20,7 @@ describe("permissions matrix", () => {
     expect(roleCan("cliente", "request_changes")).toBe(true);
     expect(roleCan("cliente", "edit")).toBe(false);
     expect(roleCan("cliente", "move")).toBe(false);
+    expect(roleCan("cliente", "upload_material")).toBe(true);
+    expect(roleCan("cliente", "upload_final")).toBe(false);
   });
 });

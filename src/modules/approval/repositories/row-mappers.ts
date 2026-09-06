@@ -30,6 +30,8 @@ export function mapContentCardRow(row: ContentCardRow): ContentCard {
     cta: row.cta != null ? String(row.cta) : null,
     plataforma: String(row.plataforma ?? "instagram"),
     formato: row.formato != null ? String(row.formato) : null,
+    linha_editorial: row.linha_editorial != null ? String(row.linha_editorial) : null,
+    tema: row.tema != null ? String(row.tema) : null,
     capa_url: row.capa_url != null ? String(row.capa_url) : null,
     status: row.status as ContentCard["status"],
     checklist: asChecklist(row.checklist),
@@ -43,6 +45,16 @@ export function mapContentCardRow(row: ContentCardRow): ContentCard {
     kanban_ordem: Number(row.kanban_ordem ?? 0),
     published_at: row.published_at != null ? String(row.published_at) : null,
     archived_at: row.archived_at != null ? String(row.archived_at) : null,
+    publish_status: (row.publish_status as ContentCard["publish_status"]) ?? "none",
+    scheduled_publish_at:
+      row.scheduled_publish_at != null ? String(row.scheduled_publish_at) : null,
+    publish_target: row.publish_target != null ? String(row.publish_target) : null,
+    external_post_id: row.external_post_id != null ? String(row.external_post_id) : null,
+    publish_container_id:
+      row.publish_container_id != null ? String(row.publish_container_id) : null,
+    publish_error: row.publish_error != null ? String(row.publish_error) : null,
+    publish_attempted_at:
+      row.publish_attempted_at != null ? String(row.publish_attempted_at) : null,
     ai_metadata: (row.ai_metadata as Record<string, unknown>) ?? {},
     integration_metadata: (row.integration_metadata as Record<string, unknown>) ?? {},
     legacy_post_id: row.legacy_post_id != null ? String(row.legacy_post_id) : null,

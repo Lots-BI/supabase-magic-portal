@@ -18,8 +18,8 @@ import { listClientes } from "@/lib/admin.functions";
 import { OpsDashboardPanel } from "@/components/lots/approval/dashboard/OpsDashboardPanel";
 import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 
-export const Route = createFileRoute("/_authenticated/admin/aprovacoes/dashboard")({
-  head: () => ({ meta: [{ title: adminTitle("Dashboard — Aprovações") }] }),
+export const Route = createFileRoute("/_authenticated/admin/aprovacoes_/dashboard")({
+  head: () => ({ meta: [{ title: adminTitle("Dashboard — Conteúdos") }] }),
   component: AprovacoesDashboardPage,
 });
 

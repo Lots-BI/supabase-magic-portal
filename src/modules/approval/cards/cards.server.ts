@@ -7,7 +7,6 @@ import {
   getActorEmail,
   isStaffMember,
 } from "../internal/staff-auth.server";
-import { getKanbanBoardForClient, getCardDetail } from "../internal/card-query.server";
 import {
   createContentCard,
   updateContentCard,
@@ -15,11 +14,19 @@ import {
   archiveContentCard,
   duplicateContentCard,
   addCardComment,
+  requestFinalApproval,
+  schedulePublish,
+  markPublishNowQueued,
+  markMaterialsDownloaded,
+  refreshCardChecklist,
 } from "../internal/card-lifecycle.server";
+import { getKanbanBoardForClient, getCardDetail, listMaterialInbox } from "../internal/card-query.server";
 import {
   uploadCardAttachment,
   deleteCardAttachment,
   listCardAttachmentsWithUrls,
+  createDirectUploadTicket,
+  confirmDirectUpload,
 } from "../internal/attachment-lifecycle.server";
 import { deleteContentCard } from "../internal/library-lifecycle.server";
 import { editorialPillarRepository } from "../repositories/editorial-pillar.repository.server";
@@ -158,6 +165,45 @@ export const commentCard = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const createCardMediaUploadUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        cardId: z.string().uuid(),
+        fileName: z.string().trim().min(1).max(200),
+        mimeType: z.string().trim().max(120).default(""),
+        fileSize: z.number().int().positive(),
+        mediaRole: z.enum(["preview", "attachment", "cliente_material", "final"]).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const actor = await actorFromContext(context);
+    return createDirectUploadTicket(context.supabase, actor, data);
+  });
+
+export const confirmCardMediaUpload = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        cardId: z.string().uuid(),
+        path: z.string().min(8).max(500),
+        fileName: z.string().trim().min(1).max(200),
+        mimeType: z.string().trim().max(120).default(""),
+        fileSize: z.number().int().positive(),
+        mediaRole: z.enum(["preview", "attachment", "cliente_material", "final"]).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const actor = await actorFromContext(context);
+    const result = await confirmDirectUpload(context.supabase, actor, data);
+    await refreshCardChecklist(context.supabase, data.cardId);
+    return result;
+  });
+
 export const uploadCardMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
@@ -168,12 +214,103 @@ export const uploadCardMedia = createServerFn({ method: "POST" })
         mimeType: z.string().trim().min(3).max(100),
         base64: z.string().min(1),
         ordem: z.number().int().min(0).optional(),
+        mediaRole: z.enum(["preview", "attachment", "cliente_material", "final"]).optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     const actor = await actorFromContext(context);
-    return uploadCardAttachment(context.supabase, actor, data);
+    const result = await uploadCardAttachment(context.supabase, actor, data);
+    await refreshCardChecklist(context.supabase, data.cardId);
+    return result;
+  });
+
+export const requestFinalApprovalFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        scheduled_at: z
+          .string()
+          .min(10)
+          .refine((s) => !Number.isNaN(Date.parse(s)), "Data de agendamento inválida")
+          .optional(),
+        data_publicacao: z.string().optional(),
+        hora_publicacao: z.string().nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const actor = await actorFromContext(context);
+    return requestFinalApproval(context.supabase, actor, data.id, {
+      scheduledAt: data.scheduled_at,
+      dataPublicacao: data.data_publicacao,
+      horaPublicacao: data.hora_publicacao,
+    });
+  });
+
+export const listMaterialInboxFn = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ cadastro_cliente_id: z.number().int().positive() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertStaffAccess(context);
+    return listMaterialInbox(context.supabase, data.cadastro_cliente_id);
+  });
+
+export const markMaterialsDownloadedFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const actor = await actorFromContext(context);
+    return markMaterialsDownloaded(context.supabase, actor, data.id);
+  });
+
+export const schedulePublishFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        card_id: z.string().uuid(),
+        scheduled_at: z.string().datetime(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const actor = await actorFromContext(context);
+    return schedulePublish(context.supabase, actor, data);
+  });
+
+export const publishNowFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ card_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const actor = await actorFromContext(context);
+    const { getPublisher } = await import("../integrations/get-publisher.server");
+    await markPublishNowQueued(context.supabase, actor, data.card_id);
+    const publisher = getPublisher();
+    try {
+      await publisher.publishNow(data.card_id);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Falha ao publicar";
+      await updateContentCard(context.supabase, actor, data.card_id, {
+        publish_status: "failed",
+        publish_error: msg,
+        publish_attempted_at: new Date().toISOString(),
+      });
+      throw e;
+    }
+    return getCardDetail(context.supabase, data.card_id);
+  });
+
+export const runPublishDueTickFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertStaffAccess(context);
+    const { runDuePublishes } = await import("../jobs/publish-due.server");
+    return runDuePublishes(context.supabase);
   });
 
 export const deleteCardMedia = createServerFn({ method: "POST" })

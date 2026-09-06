@@ -23,6 +23,10 @@ const EVENT_LABELS: Record<ContentCardEventType, string> = {
   attachment_added: "adicionou anexo",
   attachment_removed: "removeu anexo",
   checklist_changed: "alterou checklist",
+  publish_queued: "agendou publicação",
+  publish_succeeded: "publicou no Instagram",
+  publish_failed: "falhou ao publicar",
+  material_submitted: "enviou material",
 };
 
 export function eventLabel(eventType: ContentCardEventType): string {

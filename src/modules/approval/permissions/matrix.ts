@@ -14,6 +14,10 @@ export const PERMISSION_MATRIX: Record<ApprovalRole, ReadonlySet<CardAction>> = 
     "delete",
     "manage_pillars",
     "manage_stories",
+    "edit_roteiro",
+    "upload_material",
+    "upload_final",
+    "schedule_publish",
   ]),
   social_media: new Set([
     "view",
@@ -23,8 +27,19 @@ export const PERMISSION_MATRIX: Record<ApprovalRole, ReadonlySet<CardAction>> = 
     "comment",
     "manage_pillars",
     "manage_stories",
+    "edit_roteiro",
+    "upload_material",
+    "upload_final",
+    "schedule_publish",
   ]),
-  cliente: new Set(["view", "comment", "approve", "request_changes"]),
+  cliente: new Set([
+    "view",
+    "comment",
+    "approve",
+    "request_changes",
+    "edit_roteiro",
+    "upload_material",
+  ]),
 };
 
 export function roleCan(role: ApprovalRole, action: CardAction): boolean {

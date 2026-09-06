@@ -14,4 +14,8 @@ export type CardAction =
   | "archive"
   | "delete"
   | "manage_pillars"
-  | "manage_stories";
+  | "manage_stories"
+  | "edit_roteiro"
+  | "upload_material"
+  | "upload_final"
+  | "schedule_publish";

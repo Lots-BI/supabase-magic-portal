@@ -93,7 +93,14 @@ export const dashboardRepository = {
       .from(TABLE)
       .select("id", { count: "exact", head: true })
       .lt("data_publicacao", today)
-      .in("status", ["producao", "edicao", "aguardando_aprovacao", "aprovado"]);
+      .in("status", [
+        "roteiro",
+        "aguardando_aprovacao",
+        "aguardando_material",
+        "producao",
+        "aguardando_aprovacao_final",
+        "agendado",
+      ]);
     if (scope?.cadastroClienteId != null) {
       q = q.eq("cadastro_cliente_id", scope.cadastroClienteId);
     }

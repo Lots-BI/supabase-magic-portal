@@ -19,10 +19,18 @@ import { storyPlanRowRepository } from "@/modules/approval/repositories/story-pl
 import { groupCardsByDate } from "@/modules/approval/services/group-cards-by-date";
 import { librarySearchSchema } from "@/modules/approval/library/validators/library";
 import { resolveClientPortalRole } from "@/modules/approval/internal/client-access.server";
+import { isStaffMember } from "@/modules/approval/internal/staff-auth.server";
 import { clientScopeInputSchema } from "./scope-input";
 import { resolvePortalScope } from "./server/resolve-portal-scope.server";
+import type { ContentCard } from "@/modules/approval/types/content-card";
 
 const withScope = z.object({ scope: clientScopeInputSchema });
+
+/** Rascunhos em `roteiro` ficam só na agência até "Enviar para aprovação". */
+function excludeDraftRoteiro(cards: ContentCard[], mode: "client_access" | "slug_context") {
+  if (mode !== "client_access") return cards;
+  return cards.filter((c) => c.status !== "roteiro");
+}
 
 export const checkScopedPortalAccessFn = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -30,7 +38,10 @@ export const checkScopedPortalAccessFn = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     if (data.mode === "slug_context") {
       await resolvePortalScope(context, data);
-      return { role: "slug_context" as const };
+      if (await isStaffMember(context)) {
+        return { role: "slug_context" as const };
+      }
+      return { role: "cliente" as const };
     }
     const role = await resolveClientPortalRole(context);
     return { role };
@@ -41,7 +52,14 @@ export const getScopedKanbanBoardFn = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => withScope.parse(d))
   .handler(async ({ data, context }) => {
     const scope = await resolvePortalScope(context, data.scope);
-    return getClientKanbanBoard(context.supabase, scope);
+    const board = await getClientKanbanBoard(context.supabase, scope);
+    if (data.scope.mode !== "client_access") return board;
+    return {
+      ...board,
+      columns: board.columns.map((col) =>
+        col.status === "roteiro" ? { ...col, cards: [] } : col,
+      ),
+    };
   });
 
 export const getScopedContentCardFn = createServerFn({ method: "GET" })
@@ -51,6 +69,9 @@ export const getScopedContentCardFn = createServerFn({ method: "GET" })
     const scope = await resolvePortalScope(context, data.scope);
     const detail = await getClientCardDetail(context.supabase, data.id, scope);
     if (!detail) throw new Error("Card não encontrado");
+    if (data.scope.mode === "client_access" && detail.card.status === "roteiro") {
+      throw new Error("Card não encontrado");
+    }
     return detail;
   });
 
@@ -79,12 +100,13 @@ export const getScopedCalendarCardsFn = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const scope = await resolvePortalScope(context, data.scope);
     const { from, to } = calendarRepository.resolveRange(data.view, data.anchor);
-    const cards = await calendarRepository.listForCadastroClienteIdsByDateRange(
+    const raw = await calendarRepository.listForCadastroClienteIdsByDateRange(
       context.supabase,
       scope.cadastroClienteIds,
       from,
       to,
     );
+    const cards = excludeDraftRoteiro(raw, data.scope.mode);
     return {
       view: data.view,
       anchor: data.anchor,

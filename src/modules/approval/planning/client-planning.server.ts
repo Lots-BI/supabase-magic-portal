@@ -31,12 +31,14 @@ export const getClientCalendarCards = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     const scope = await assertClientPortalAccess(context);
     const { from, to } = calendarRepository.resolveRange(data.view, data.anchor);
-    const cards = await calendarRepository.listForCadastroClienteIdsByDateRange(
+    const raw = await calendarRepository.listForCadastroClienteIdsByDateRange(
       context.supabase,
       scope.cadastroClienteIds,
       from,
       to,
     );
+    // Rascunhos (roteiro) só aparecem após a agência enviar para aprovação.
+    const cards = raw.filter((c) => c.status !== "roteiro");
     return {
       view: data.view,
       anchor: data.anchor,

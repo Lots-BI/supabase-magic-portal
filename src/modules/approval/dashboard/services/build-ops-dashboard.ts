@@ -5,13 +5,21 @@ import type { StageAverageMs, WorkflowMetricsFramework } from "../types/dashboar
 
 const STAGE_LABELS: Record<string, string> = {
   "start->producao": "Início → Produção",
-  "producao->edicao": "Produção → Edição",
-  "producao->aguardando_aprovacao": "Produção → Aguardando aprovação",
-  "producao->aprovado": "Produção → Aprovado",
-  "edicao->aguardando_aprovacao": "Edição → Aguardando aprovação",
-  "aguardando_aprovacao->aprovado": "Aprovação → Aprovado",
-  "aprovado->publicado": "Aprovado → Publicado",
+  "start->roteiro": "Início → Roteiro",
+  "roteiro->aguardando_aprovacao": "Roteiro → Aguardando aprovação",
+  "roteiro->aguardando_material": "Roteiro → Material (legado/atalho)",
+  "start->aguardando_aprovacao": "Início → Aguardando aprovação (legado)",
+  "aguardando_aprovacao->aguardando_material": "Aprovação roteiro → Material",
+  "aguardando_material->producao": "Material → Produção",
+  "producao->aguardando_aprovacao_final": "Produção → Aprovação final",
+  "aguardando_aprovacao_final->agendado": "Aprovação final → Agendado",
+  "agendado->publicado": "Agendado → Publicado",
   "publicado->arquivado": "Publicado → Arquivado",
+  // legado
+  "producao->edicao": "Produção → Edição (legado)",
+  "edicao->aguardando_aprovacao": "Edição → Aguardando aprovação (legado)",
+  "aguardando_aprovacao->aprovado": "Aprovação → Aprovado (legado)",
+  "aprovado->publicado": "Aprovado → Publicado (legado)",
 };
 
 function stageKey(d: StageDuration): string {
@@ -33,13 +41,16 @@ export function aggregateStageAverages(
   }
 
   const order: string[] = [
+    "start->roteiro",
+    "roteiro->aguardando_aprovacao",
+    "roteiro->aguardando_material",
+    "start->aguardando_aprovacao",
     "start->producao",
-    "producao->edicao",
-    "producao->aguardando_aprovacao",
-    "producao->aprovado",
-    "edicao->aguardando_aprovacao",
-    "aguardando_aprovacao->aprovado",
-    "aprovado->publicado",
+    "aguardando_aprovacao->aguardando_material",
+    "aguardando_material->producao",
+    "producao->aguardando_aprovacao_final",
+    "aguardando_aprovacao_final->agendado",
+    "agendado->publicado",
     "publicado->arquivado",
   ];
 

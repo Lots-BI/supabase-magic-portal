@@ -59,6 +59,7 @@ import { Route as AuthenticatedClienteClienteGa4RouteImport } from './routes/_au
 import { Route as AuthenticatedClienteClienteConexoesRouteImport } from './routes/_authenticated/cliente.$cliente.conexoes'
 import { Route as AuthenticatedClienteClienteBrandbookRouteImport } from './routes/_authenticated/cliente.$cliente.brandbook'
 import { Route as AuthenticatedClienteClienteAprovacoesRouteImport } from './routes/_authenticated/cliente.$cliente.aprovacoes'
+import { Route as AuthenticatedAprovacoesRoteiroCardIdRouteImport } from './routes/_authenticated/aprovacoes_.roteiro.$cardId'
 import { Route as AuthenticatedAdminUsuariosNovoRouteImport } from './routes/_authenticated/admin/usuarios.novo'
 import { Route as AuthenticatedAdminUsuariosUserIdRouteImport } from './routes/_authenticated/admin/usuarios.$userId'
 import { Route as AuthenticatedAdminTutorialSplatRouteImport } from './routes/_authenticated/admin/tutorial/$'
@@ -72,10 +73,13 @@ import { Route as AuthenticatedAdminConexoesHealthRouteImport } from './routes/_
 import { Route as AuthenticatedAdminConexoesConnectionIdRouteImport } from './routes/_authenticated/admin/conexoes.$connectionId'
 import { Route as AuthenticatedAdminClientesNovoRouteImport } from './routes/_authenticated/admin/clientes.novo'
 import { Route as AuthenticatedAdminClientesIdRouteImport } from './routes/_authenticated/admin/clientes.$id'
-import { Route as AuthenticatedAdminAprovacoesDashboardRouteImport } from './routes/_authenticated/admin/aprovacoes.dashboard'
+import { Route as AuthenticatedAdminAprovacoesDashboardRouteImport } from './routes/_authenticated/admin/aprovacoes_.dashboard'
 import { Route as AuthenticatedClienteClientePlanoEstrategicoIndexRouteImport } from './routes/_authenticated/cliente.$cliente.plano-estrategico.index'
 import { Route as AuthenticatedClienteClientePlanoEstrategicoPlanoIdRouteImport } from './routes/_authenticated/cliente.$cliente.plano-estrategico.$planoId'
 import { Route as AuthenticatedAdminCentralClientesIdRouteImport } from './routes/_authenticated/admin/central/clientes.$id'
+import { Route as AuthenticatedAdminAprovacoesRoteiroCardIdRouteImport } from './routes/_authenticated/admin/aprovacoes_.roteiro.$cardId'
+import { Route as AuthenticatedAdminAprovacoesProducaoCardIdRouteImport } from './routes/_authenticated/admin/aprovacoes_.producao.$cardId'
+import { Route as AuthenticatedAdminAprovacoesAgendarCardIdRouteImport } from './routes/_authenticated/admin/aprovacoes_.agendar.$cardId'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
@@ -361,6 +365,12 @@ const AuthenticatedClienteClienteAprovacoesRoute =
     path: '/aprovacoes',
     getParentRoute: () => AuthenticatedClienteClienteRoute,
   } as any)
+const AuthenticatedAprovacoesRoteiroCardIdRoute =
+  AuthenticatedAprovacoesRoteiroCardIdRouteImport.update({
+    id: '/aprovacoes_/roteiro/$cardId',
+    path: '/aprovacoes/roteiro/$cardId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminUsuariosNovoRoute =
   AuthenticatedAdminUsuariosNovoRouteImport.update({
     id: '/usuarios/novo',
@@ -441,9 +451,9 @@ const AuthenticatedAdminClientesIdRoute =
   } as any)
 const AuthenticatedAdminAprovacoesDashboardRoute =
   AuthenticatedAdminAprovacoesDashboardRouteImport.update({
-    id: '/dashboard',
-    path: '/dashboard',
-    getParentRoute: () => AuthenticatedAdminAprovacoesRoute,
+    id: '/aprovacoes_/dashboard',
+    path: '/aprovacoes/dashboard',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedClienteClientePlanoEstrategicoIndexRoute =
   AuthenticatedClienteClientePlanoEstrategicoIndexRouteImport.update({
@@ -463,6 +473,24 @@ const AuthenticatedAdminCentralClientesIdRoute =
     path: '/clientes/$id',
     getParentRoute: () => AuthenticatedAdminCentralRoute,
   } as any)
+const AuthenticatedAdminAprovacoesRoteiroCardIdRoute =
+  AuthenticatedAdminAprovacoesRoteiroCardIdRouteImport.update({
+    id: '/aprovacoes_/roteiro/$cardId',
+    path: '/aprovacoes/roteiro/$cardId',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminAprovacoesProducaoCardIdRoute =
+  AuthenticatedAdminAprovacoesProducaoCardIdRouteImport.update({
+    id: '/aprovacoes_/producao/$cardId',
+    path: '/aprovacoes/producao/$cardId',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminAprovacoesAgendarCardIdRoute =
+  AuthenticatedAdminAprovacoesAgendarCardIdRouteImport.update({
+    id: '/aprovacoes_/agendar/$cardId',
+    path: '/aprovacoes/agendar/$cardId',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -480,7 +508,7 @@ export interface FileRoutesByFullPath {
   '/admin/tutorial': typeof AuthenticatedAdminTutorialRouteRouteWithChildren
   '/account/security': typeof AuthenticatedAccountSecurityRoute
   '/admin/ai-workspace': typeof AuthenticatedAdminAiWorkspaceRoute
-  '/admin/aprovacoes': typeof AuthenticatedAdminAprovacoesRouteWithChildren
+  '/admin/aprovacoes': typeof AuthenticatedAdminAprovacoesRoute
   '/admin/brandbook': typeof AuthenticatedAdminBrandbookRoute
   '/admin/branding': typeof AuthenticatedAdminBrandingRoute
   '/admin/central': typeof AuthenticatedAdminCentralRouteWithChildren
@@ -510,6 +538,7 @@ export interface FileRoutesByFullPath {
   '/admin/tutorial/$': typeof AuthenticatedAdminTutorialSplatRoute
   '/admin/usuarios/$userId': typeof AuthenticatedAdminUsuariosUserIdRoute
   '/admin/usuarios/novo': typeof AuthenticatedAdminUsuariosNovoRoute
+  '/aprovacoes/roteiro/$cardId': typeof AuthenticatedAprovacoesRoteiroCardIdRoute
   '/cliente/$cliente/aprovacoes': typeof AuthenticatedClienteClienteAprovacoesRoute
   '/cliente/$cliente/brandbook': typeof AuthenticatedClienteClienteBrandbookRoute
   '/cliente/$cliente/conexoes': typeof AuthenticatedClienteClienteConexoesRoute
@@ -528,6 +557,9 @@ export interface FileRoutesByFullPath {
   '/admin/tutorial/': typeof AuthenticatedAdminTutorialIndexRoute
   '/admin/usuarios/': typeof AuthenticatedAdminUsuariosIndexRoute
   '/cliente/$cliente/': typeof AuthenticatedClienteClienteIndexRoute
+  '/admin/aprovacoes/agendar/$cardId': typeof AuthenticatedAdminAprovacoesAgendarCardIdRoute
+  '/admin/aprovacoes/producao/$cardId': typeof AuthenticatedAdminAprovacoesProducaoCardIdRoute
+  '/admin/aprovacoes/roteiro/$cardId': typeof AuthenticatedAdminAprovacoesRoteiroCardIdRoute
   '/admin/central/clientes/$id': typeof AuthenticatedAdminCentralClientesIdRoute
   '/cliente/$cliente/plano-estrategico/$planoId': typeof AuthenticatedClienteClientePlanoEstrategicoPlanoIdRoute
   '/cliente/$cliente/plano-estrategico/': typeof AuthenticatedClienteClientePlanoEstrategicoIndexRoute
@@ -543,7 +575,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthIndexRoute
   '/account/security': typeof AuthenticatedAccountSecurityRoute
   '/admin/ai-workspace': typeof AuthenticatedAdminAiWorkspaceRoute
-  '/admin/aprovacoes': typeof AuthenticatedAdminAprovacoesRouteWithChildren
+  '/admin/aprovacoes': typeof AuthenticatedAdminAprovacoesRoute
   '/admin/brandbook': typeof AuthenticatedAdminBrandbookRoute
   '/admin/branding': typeof AuthenticatedAdminBrandingRoute
   '/admin/central': typeof AuthenticatedAdminCentralRouteWithChildren
@@ -571,6 +603,7 @@ export interface FileRoutesByTo {
   '/admin/tutorial/$': typeof AuthenticatedAdminTutorialSplatRoute
   '/admin/usuarios/$userId': typeof AuthenticatedAdminUsuariosUserIdRoute
   '/admin/usuarios/novo': typeof AuthenticatedAdminUsuariosNovoRoute
+  '/aprovacoes/roteiro/$cardId': typeof AuthenticatedAprovacoesRoteiroCardIdRoute
   '/cliente/$cliente/aprovacoes': typeof AuthenticatedClienteClienteAprovacoesRoute
   '/cliente/$cliente/brandbook': typeof AuthenticatedClienteClienteBrandbookRoute
   '/cliente/$cliente/conexoes': typeof AuthenticatedClienteClienteConexoesRoute
@@ -588,6 +621,9 @@ export interface FileRoutesByTo {
   '/admin/tutorial': typeof AuthenticatedAdminTutorialIndexRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosIndexRoute
   '/cliente/$cliente': typeof AuthenticatedClienteClienteIndexRoute
+  '/admin/aprovacoes/agendar/$cardId': typeof AuthenticatedAdminAprovacoesAgendarCardIdRoute
+  '/admin/aprovacoes/producao/$cardId': typeof AuthenticatedAdminAprovacoesProducaoCardIdRoute
+  '/admin/aprovacoes/roteiro/$cardId': typeof AuthenticatedAdminAprovacoesRoteiroCardIdRoute
   '/admin/central/clientes/$id': typeof AuthenticatedAdminCentralClientesIdRoute
   '/cliente/$cliente/plano-estrategico/$planoId': typeof AuthenticatedClienteClientePlanoEstrategicoPlanoIdRoute
   '/cliente/$cliente/plano-estrategico': typeof AuthenticatedClienteClientePlanoEstrategicoIndexRoute
@@ -610,7 +646,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tutorial': typeof AuthenticatedAdminTutorialRouteRouteWithChildren
   '/_authenticated/account/security': typeof AuthenticatedAccountSecurityRoute
   '/_authenticated/admin/ai-workspace': typeof AuthenticatedAdminAiWorkspaceRoute
-  '/_authenticated/admin/aprovacoes': typeof AuthenticatedAdminAprovacoesRouteWithChildren
+  '/_authenticated/admin/aprovacoes': typeof AuthenticatedAdminAprovacoesRoute
   '/_authenticated/admin/brandbook': typeof AuthenticatedAdminBrandbookRoute
   '/_authenticated/admin/branding': typeof AuthenticatedAdminBrandingRoute
   '/_authenticated/admin/central': typeof AuthenticatedAdminCentralRouteWithChildren
@@ -626,7 +662,7 @@ export interface FileRoutesById {
   '/oauth/tiktok/callback': typeof OauthTiktokCallbackRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/tutorial/': typeof AuthenticatedTutorialIndexRoute
-  '/_authenticated/admin/aprovacoes/dashboard': typeof AuthenticatedAdminAprovacoesDashboardRoute
+  '/_authenticated/admin/aprovacoes_/dashboard': typeof AuthenticatedAdminAprovacoesDashboardRoute
   '/_authenticated/admin/clientes/$id': typeof AuthenticatedAdminClientesIdRoute
   '/_authenticated/admin/clientes/novo': typeof AuthenticatedAdminClientesNovoRoute
   '/_authenticated/admin/conexoes/$connectionId': typeof AuthenticatedAdminConexoesConnectionIdRoute
@@ -640,6 +676,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tutorial/$': typeof AuthenticatedAdminTutorialSplatRoute
   '/_authenticated/admin/usuarios/$userId': typeof AuthenticatedAdminUsuariosUserIdRoute
   '/_authenticated/admin/usuarios/novo': typeof AuthenticatedAdminUsuariosNovoRoute
+  '/_authenticated/aprovacoes_/roteiro/$cardId': typeof AuthenticatedAprovacoesRoteiroCardIdRoute
   '/_authenticated/cliente/$cliente/aprovacoes': typeof AuthenticatedClienteClienteAprovacoesRoute
   '/_authenticated/cliente/$cliente/brandbook': typeof AuthenticatedClienteClienteBrandbookRoute
   '/_authenticated/cliente/$cliente/conexoes': typeof AuthenticatedClienteClienteConexoesRoute
@@ -658,6 +695,9 @@ export interface FileRoutesById {
   '/_authenticated/admin/tutorial/': typeof AuthenticatedAdminTutorialIndexRoute
   '/_authenticated/admin/usuarios/': typeof AuthenticatedAdminUsuariosIndexRoute
   '/_authenticated/cliente/$cliente/': typeof AuthenticatedClienteClienteIndexRoute
+  '/_authenticated/admin/aprovacoes_/agendar/$cardId': typeof AuthenticatedAdminAprovacoesAgendarCardIdRoute
+  '/_authenticated/admin/aprovacoes_/producao/$cardId': typeof AuthenticatedAdminAprovacoesProducaoCardIdRoute
+  '/_authenticated/admin/aprovacoes_/roteiro/$cardId': typeof AuthenticatedAdminAprovacoesRoteiroCardIdRoute
   '/_authenticated/admin/central/clientes/$id': typeof AuthenticatedAdminCentralClientesIdRoute
   '/_authenticated/cliente/$cliente/plano-estrategico/$planoId': typeof AuthenticatedClienteClientePlanoEstrategicoPlanoIdRoute
   '/_authenticated/cliente/$cliente/plano-estrategico/': typeof AuthenticatedClienteClientePlanoEstrategicoIndexRoute
@@ -710,6 +750,7 @@ export interface FileRouteTypes {
     | '/admin/tutorial/$'
     | '/admin/usuarios/$userId'
     | '/admin/usuarios/novo'
+    | '/aprovacoes/roteiro/$cardId'
     | '/cliente/$cliente/aprovacoes'
     | '/cliente/$cliente/brandbook'
     | '/cliente/$cliente/conexoes'
@@ -728,6 +769,9 @@ export interface FileRouteTypes {
     | '/admin/tutorial/'
     | '/admin/usuarios/'
     | '/cliente/$cliente/'
+    | '/admin/aprovacoes/agendar/$cardId'
+    | '/admin/aprovacoes/producao/$cardId'
+    | '/admin/aprovacoes/roteiro/$cardId'
     | '/admin/central/clientes/$id'
     | '/cliente/$cliente/plano-estrategico/$planoId'
     | '/cliente/$cliente/plano-estrategico/'
@@ -771,6 +815,7 @@ export interface FileRouteTypes {
     | '/admin/tutorial/$'
     | '/admin/usuarios/$userId'
     | '/admin/usuarios/novo'
+    | '/aprovacoes/roteiro/$cardId'
     | '/cliente/$cliente/aprovacoes'
     | '/cliente/$cliente/brandbook'
     | '/cliente/$cliente/conexoes'
@@ -788,6 +833,9 @@ export interface FileRouteTypes {
     | '/admin/tutorial'
     | '/admin/usuarios'
     | '/cliente/$cliente'
+    | '/admin/aprovacoes/agendar/$cardId'
+    | '/admin/aprovacoes/producao/$cardId'
+    | '/admin/aprovacoes/roteiro/$cardId'
     | '/admin/central/clientes/$id'
     | '/cliente/$cliente/plano-estrategico/$planoId'
     | '/cliente/$cliente/plano-estrategico'
@@ -825,7 +873,7 @@ export interface FileRouteTypes {
     | '/oauth/tiktok/callback'
     | '/_authenticated/admin/'
     | '/_authenticated/tutorial/'
-    | '/_authenticated/admin/aprovacoes/dashboard'
+    | '/_authenticated/admin/aprovacoes_/dashboard'
     | '/_authenticated/admin/clientes/$id'
     | '/_authenticated/admin/clientes/novo'
     | '/_authenticated/admin/conexoes/$connectionId'
@@ -839,6 +887,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tutorial/$'
     | '/_authenticated/admin/usuarios/$userId'
     | '/_authenticated/admin/usuarios/novo'
+    | '/_authenticated/aprovacoes_/roteiro/$cardId'
     | '/_authenticated/cliente/$cliente/aprovacoes'
     | '/_authenticated/cliente/$cliente/brandbook'
     | '/_authenticated/cliente/$cliente/conexoes'
@@ -857,6 +906,9 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tutorial/'
     | '/_authenticated/admin/usuarios/'
     | '/_authenticated/cliente/$cliente/'
+    | '/_authenticated/admin/aprovacoes_/agendar/$cardId'
+    | '/_authenticated/admin/aprovacoes_/producao/$cardId'
+    | '/_authenticated/admin/aprovacoes_/roteiro/$cardId'
     | '/_authenticated/admin/central/clientes/$id'
     | '/_authenticated/cliente/$cliente/plano-estrategico/$planoId'
     | '/_authenticated/cliente/$cliente/plano-estrategico/'
@@ -1223,6 +1275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClienteClienteAprovacoesRouteImport
       parentRoute: typeof AuthenticatedClienteClienteRoute
     }
+    '/_authenticated/aprovacoes_/roteiro/$cardId': {
+      id: '/_authenticated/aprovacoes_/roteiro/$cardId'
+      path: '/aprovacoes/roteiro/$cardId'
+      fullPath: '/aprovacoes/roteiro/$cardId'
+      preLoaderRoute: typeof AuthenticatedAprovacoesRoteiroCardIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/usuarios/novo': {
       id: '/_authenticated/admin/usuarios/novo'
       path: '/usuarios/novo'
@@ -1314,12 +1373,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClientesIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/admin/aprovacoes/dashboard': {
-      id: '/_authenticated/admin/aprovacoes/dashboard'
-      path: '/dashboard'
+    '/_authenticated/admin/aprovacoes_/dashboard': {
+      id: '/_authenticated/admin/aprovacoes_/dashboard'
+      path: '/aprovacoes/dashboard'
       fullPath: '/admin/aprovacoes/dashboard'
       preLoaderRoute: typeof AuthenticatedAdminAprovacoesDashboardRouteImport
-      parentRoute: typeof AuthenticatedAdminAprovacoesRoute
+      parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/cliente/$cliente/plano-estrategico/': {
       id: '/_authenticated/cliente/$cliente/plano-estrategico/'
@@ -1341,6 +1400,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/central/clientes/$id'
       preLoaderRoute: typeof AuthenticatedAdminCentralClientesIdRouteImport
       parentRoute: typeof AuthenticatedAdminCentralRoute
+    }
+    '/_authenticated/admin/aprovacoes_/roteiro/$cardId': {
+      id: '/_authenticated/admin/aprovacoes_/roteiro/$cardId'
+      path: '/aprovacoes/roteiro/$cardId'
+      fullPath: '/admin/aprovacoes/roteiro/$cardId'
+      preLoaderRoute: typeof AuthenticatedAdminAprovacoesRoteiroCardIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/aprovacoes_/producao/$cardId': {
+      id: '/_authenticated/admin/aprovacoes_/producao/$cardId'
+      path: '/aprovacoes/producao/$cardId'
+      fullPath: '/admin/aprovacoes/producao/$cardId'
+      preLoaderRoute: typeof AuthenticatedAdminAprovacoesProducaoCardIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/aprovacoes_/agendar/$cardId': {
+      id: '/_authenticated/admin/aprovacoes_/agendar/$cardId'
+      path: '/aprovacoes/agendar/$cardId'
+      fullPath: '/admin/aprovacoes/agendar/$cardId'
+      preLoaderRoute: typeof AuthenticatedAdminAprovacoesAgendarCardIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
     }
   }
 }
@@ -1379,21 +1459,6 @@ const AuthenticatedAdminTutorialRouteRouteWithChildren =
     AuthenticatedAdminTutorialRouteRouteChildren,
   )
 
-interface AuthenticatedAdminAprovacoesRouteChildren {
-  AuthenticatedAdminAprovacoesDashboardRoute: typeof AuthenticatedAdminAprovacoesDashboardRoute
-}
-
-const AuthenticatedAdminAprovacoesRouteChildren: AuthenticatedAdminAprovacoesRouteChildren =
-  {
-    AuthenticatedAdminAprovacoesDashboardRoute:
-      AuthenticatedAdminAprovacoesDashboardRoute,
-  }
-
-const AuthenticatedAdminAprovacoesRouteWithChildren =
-  AuthenticatedAdminAprovacoesRoute._addFileChildren(
-    AuthenticatedAdminAprovacoesRouteChildren,
-  )
-
 interface AuthenticatedAdminCentralRouteChildren {
   AuthenticatedAdminCentralClientesIdRoute: typeof AuthenticatedAdminCentralClientesIdRoute
 }
@@ -1429,7 +1494,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminKnowledgeRouteRoute: typeof AuthenticatedAdminKnowledgeRouteRouteWithChildren
   AuthenticatedAdminTutorialRouteRoute: typeof AuthenticatedAdminTutorialRouteRouteWithChildren
   AuthenticatedAdminAiWorkspaceRoute: typeof AuthenticatedAdminAiWorkspaceRoute
-  AuthenticatedAdminAprovacoesRoute: typeof AuthenticatedAdminAprovacoesRouteWithChildren
+  AuthenticatedAdminAprovacoesRoute: typeof AuthenticatedAdminAprovacoesRoute
   AuthenticatedAdminBrandbookRoute: typeof AuthenticatedAdminBrandbookRoute
   AuthenticatedAdminBrandingRoute: typeof AuthenticatedAdminBrandingRoute
   AuthenticatedAdminCentralRoute: typeof AuthenticatedAdminCentralRouteWithChildren
@@ -1439,6 +1504,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminRelatoriosRoute: typeof AuthenticatedAdminRelatoriosRoute
   AuthenticatedAdminServicosRoute: typeof AuthenticatedAdminServicosRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminAprovacoesDashboardRoute: typeof AuthenticatedAdminAprovacoesDashboardRoute
   AuthenticatedAdminClientesIdRoute: typeof AuthenticatedAdminClientesIdRoute
   AuthenticatedAdminClientesNovoRoute: typeof AuthenticatedAdminClientesNovoRoute
   AuthenticatedAdminConexoesConnectionIdRoute: typeof AuthenticatedAdminConexoesConnectionIdRoute
@@ -1452,6 +1518,9 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminClientesIndexRoute: typeof AuthenticatedAdminClientesIndexRoute
   AuthenticatedAdminConexoesIndexRoute: typeof AuthenticatedAdminConexoesIndexRoute
   AuthenticatedAdminUsuariosIndexRoute: typeof AuthenticatedAdminUsuariosIndexRoute
+  AuthenticatedAdminAprovacoesAgendarCardIdRoute: typeof AuthenticatedAdminAprovacoesAgendarCardIdRoute
+  AuthenticatedAdminAprovacoesProducaoCardIdRoute: typeof AuthenticatedAdminAprovacoesProducaoCardIdRoute
+  AuthenticatedAdminAprovacoesRoteiroCardIdRoute: typeof AuthenticatedAdminAprovacoesRoteiroCardIdRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
@@ -1461,8 +1530,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminTutorialRouteRoute:
       AuthenticatedAdminTutorialRouteRouteWithChildren,
     AuthenticatedAdminAiWorkspaceRoute: AuthenticatedAdminAiWorkspaceRoute,
-    AuthenticatedAdminAprovacoesRoute:
-      AuthenticatedAdminAprovacoesRouteWithChildren,
+    AuthenticatedAdminAprovacoesRoute: AuthenticatedAdminAprovacoesRoute,
     AuthenticatedAdminBrandbookRoute: AuthenticatedAdminBrandbookRoute,
     AuthenticatedAdminBrandingRoute: AuthenticatedAdminBrandingRoute,
     AuthenticatedAdminCentralRoute: AuthenticatedAdminCentralRouteWithChildren,
@@ -1473,6 +1541,8 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminRelatoriosRoute: AuthenticatedAdminRelatoriosRoute,
     AuthenticatedAdminServicosRoute: AuthenticatedAdminServicosRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+    AuthenticatedAdminAprovacoesDashboardRoute:
+      AuthenticatedAdminAprovacoesDashboardRoute,
     AuthenticatedAdminClientesIdRoute: AuthenticatedAdminClientesIdRoute,
     AuthenticatedAdminClientesNovoRoute: AuthenticatedAdminClientesNovoRoute,
     AuthenticatedAdminConexoesConnectionIdRoute:
@@ -1492,6 +1562,12 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminClientesIndexRoute: AuthenticatedAdminClientesIndexRoute,
     AuthenticatedAdminConexoesIndexRoute: AuthenticatedAdminConexoesIndexRoute,
     AuthenticatedAdminUsuariosIndexRoute: AuthenticatedAdminUsuariosIndexRoute,
+    AuthenticatedAdminAprovacoesAgendarCardIdRoute:
+      AuthenticatedAdminAprovacoesAgendarCardIdRoute,
+    AuthenticatedAdminAprovacoesProducaoCardIdRoute:
+      AuthenticatedAdminAprovacoesProducaoCardIdRoute,
+    AuthenticatedAdminAprovacoesRoteiroCardIdRoute:
+      AuthenticatedAdminAprovacoesRoteiroCardIdRoute,
   }
 
 const AuthenticatedAdminRouteRouteWithChildren =
@@ -1590,6 +1666,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSobreRoute: typeof AuthenticatedSobreRoute
   AuthenticatedAccountSecurityRoute: typeof AuthenticatedAccountSecurityRoute
   AuthenticatedClienteClienteRoute: typeof AuthenticatedClienteClienteRouteWithChildren
+  AuthenticatedAprovacoesRoteiroCardIdRoute: typeof AuthenticatedAprovacoesRoteiroCardIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -1603,6 +1680,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountSecurityRoute: AuthenticatedAccountSecurityRoute,
   AuthenticatedClienteClienteRoute:
     AuthenticatedClienteClienteRouteWithChildren,
+  AuthenticatedAprovacoesRoteiroCardIdRoute:
+    AuthenticatedAprovacoesRoteiroCardIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

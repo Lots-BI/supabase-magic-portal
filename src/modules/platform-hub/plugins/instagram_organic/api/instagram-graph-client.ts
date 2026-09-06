@@ -127,4 +127,74 @@ export class InstagramGraphClient {
     }
     return body;
   }
+
+  async createMediaContainer(
+    accessToken: string,
+    igUserId: string,
+    params: Record<string, string>,
+  ): Promise<{ id: string }> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${igUserId}/media`;
+    const response = await this.config.httpClient.request(url, {
+      method: "POST",
+      searchParams: { access_token: accessToken, ...params },
+    });
+    const body = await response.json<{ id?: string; error?: { message?: string } }>();
+    if (body.error?.message) throw new Error(body.error.message);
+    if (!body.id) throw new Error("Graph não retornou creation_id");
+    return { id: body.id };
+  }
+
+  async getContainerStatus(
+    accessToken: string,
+    containerId: string,
+  ): Promise<{ status_code?: string }> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${containerId}`;
+    const response = await this.config.httpClient.request(url, {
+      searchParams: {
+        access_token: accessToken,
+        fields: "status_code",
+      },
+    });
+    const body = await response.json<{
+      status_code?: string;
+      error?: { message?: string };
+    }>();
+    if (body.error?.message) throw new Error(body.error.message);
+    return { status_code: body.status_code };
+  }
+
+  async getMediaPermalink(
+    accessToken: string,
+    mediaId: string,
+  ): Promise<string | undefined> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${mediaId}`;
+    const response = await this.config.httpClient.request(url, {
+      searchParams: {
+        access_token: accessToken,
+        fields: "permalink",
+      },
+    });
+    const body = await response.json<{ permalink?: string; error?: { message?: string } }>();
+    if (body.error?.message) return undefined;
+    return body.permalink;
+  }
+
+  async publishMedia(
+    accessToken: string,
+    igUserId: string,
+    creationId: string,
+  ): Promise<{ id: string }> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${igUserId}/media_publish`;
+    const response = await this.config.httpClient.request(url, {
+      method: "POST",
+      searchParams: {
+        access_token: accessToken,
+        creation_id: creationId,
+      },
+    });
+    const body = await response.json<{ id?: string; error?: { message?: string } }>();
+    if (body.error?.message) throw new Error(body.error.message);
+    if (!body.id) throw new Error("Graph não retornou media id");
+    return { id: body.id };
+  }
 }

@@ -4,7 +4,7 @@ import { ClientScopeProvider } from "@/modules/client/context";
 import { ClientApprovalWorkspace } from "@/modules/client/components/ClientApprovalWorkspace";
 
 export const Route = createFileRoute("/_authenticated/aprovacoes")({
-  head: () => ({ meta: [{ title: brandTitle("Aprovações") }] }),
+  head: () => ({ meta: [{ title: brandTitle("Conteúdos") }] }),
   component: AprovacoesClientePage,
   errorComponent: ({ error }) => (
     <div className="lots-surface p-4 text-sm text-danger">Erro: {error.message}</div>

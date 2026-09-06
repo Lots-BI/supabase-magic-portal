@@ -9,7 +9,7 @@ import { clienteRefQuery } from "./cliente.$cliente";
 
 export const Route = createFileRoute("/_authenticated/cliente/$cliente/aprovacoes")({
   head: ({ params }) => ({
-    meta: [{ title: brandTitle(`Aprovações — ${params.cliente}`) }],
+    meta: [{ title: brandTitle(`Conteúdos — ${params.cliente}`) }],
   }),
   component: ClienteAprovacoesPage,
   errorComponent: ({ error }) => (

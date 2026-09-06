@@ -232,6 +232,7 @@ describe("MetaOAuthService", () => {
 
     expect(url).toContain("client_id=app-id");
     expect(url).toContain("ads_read");
+    expect(url).toContain("auth_type=rerequest");
   });
 
   it("exchange code persiste token no vault", async () => {

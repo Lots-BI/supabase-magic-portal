@@ -11,7 +11,7 @@ import { NotificationCenter } from "@/components/lots/NotificationCenter";
 import { PlatformNewsAnnouncer } from "@/components/lots/platform-news/PlatformNewsAnnouncer";
 import { useClientNavAccount } from "@/components/lots/dashboards-nav";
 import { BRAND_NAME } from "@/lib/brand";
-import { FEATURE_PLANO_ESTRATEGICO_NAV } from "@/lib/feature-flags";
+import { FEATURE_ADMIN_CENTRAL_NAV, FEATURE_PLANO_ESTRATEGICO_NAV } from "@/lib/feature-flags";
 import { isPlatformOwnerEmail } from "@/lib/platform-owner";
 import "@/modules/os-bootstrap";
 import {
@@ -124,19 +124,36 @@ function AuthenticatedLayout() {
 
   const adminGroups: NavGroup[] = [
     {
-      label: "Operações",
+      label: "Dados",
       items: [
-        { to: "/admin/central", label: "Central", icon: Building2, prefixMatch: false },
-        { to: "/admin", label: "Visão geral", icon: LayoutDashboard },
+        { to: "/admin", label: "Visão geral", icon: LayoutDashboard, prefixMatch: false },
         { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
-        { to: "/admin/aprovacoes", label: "Aprovações", icon: ClipboardCheck },
-        { to: "/admin/brandbook", label: "Diretrizes da Marca", icon: SwatchBook },
         ...(FEATURE_PLANO_ESTRATEGICO_NAV
           ? [{ to: "/admin/plano-estrategico", label: "Plano Estratégico", icon: Compass }]
           : []),
+      ],
+    },
+    {
+      label: "Social",
+      items: [
+        { to: "/admin/aprovacoes", label: "Conteúdos", icon: ClipboardCheck },
+        { to: "/admin/brandbook", label: "Diretrizes da Marca", icon: SwatchBook },
+      ],
+    },
+    {
+      label: "Perfis",
+      items: [
         { to: "/admin/clientes", label: "Clientes", icon: Users },
         { to: "/admin/usuarios", label: "Usuários", icon: UserCircle2 },
         { to: "/admin/servicos", label: "Serviços", icon: Briefcase },
+      ],
+    },
+    {
+      label: "Plataforma",
+      items: [
+        { to: "/admin/conexoes", label: "Conexões", icon: Plug, prefixMatch: false },
+        { to: "/admin/branding", label: "Branding", icon: Palette },
+        { to: "/novidades", label: "Novidades", icon: Sparkles },
       ],
     },
     {
@@ -147,23 +164,25 @@ function AuthenticatedLayout() {
       ],
     },
     {
-      label: "Plataforma",
-      items: [
-        { to: "/admin/conexoes", label: "Conexões", icon: Plug, prefixMatch: false },
-        { to: "/admin/branding", label: "Branding", icon: Palette },
-      ],
-    },
-    {
       label: "Ajuda",
       items: [
         ...(isOwner
           ? [{ to: "/admin/ai-workspace", label: "AI Workspace", icon: BrainCircuit }]
           : []),
         { to: "/admin/tutorial", label: "Tutorial", icon: GraduationCap },
-        { to: "/novidades", label: "Novidades", icon: Sparkles },
         { to: "/admin/knowledge", label: "Knowledge Center", icon: BookOpen },
       ],
     },
+    ...(FEATURE_ADMIN_CENTRAL_NAV
+      ? [
+          {
+            label: "Arquivo",
+            items: [
+              { to: "/admin/central", label: "Central", icon: Building2, prefixMatch: false },
+            ],
+          } as NavGroup,
+        ]
+      : []),
   ];
 
   const clientGroups: NavGroup[] = [
@@ -180,8 +199,8 @@ function AuthenticatedLayout() {
       label: "Social",
       items: [
         {
-          to: diretrizesSlug ? `/cliente/${diretrizesSlug}/aprovacoes` : "/aprovacoes",
-          label: "Aprovações",
+          to: "/aprovacoes",
+          label: "Conteúdos",
           icon: ClipboardCheck,
         },
         ...(diretrizesSlug

@@ -20,16 +20,16 @@ describe("computeStageDurations", () => {
         actor_id: null,
         actor_email: null,
         event_type: "approved",
-        payload: {},
+        payload: { status_para: "aguardando_material" },
         created_at: "2026-07-01T12:00:00.000Z",
       },
     ];
     const durations = computeStageDurations(events);
     expect(durations).toHaveLength(2);
     expect(durations[0].fromStatus).toBe("start");
-    expect(durations[0].toStatus).toBe("producao");
-    expect(durations[1].fromStatus).toBe("producao");
-    expect(durations[1].toStatus).toBe("aprovado");
+    expect(durations[0].toStatus).toBe("roteiro");
+    expect(durations[1].fromStatus).toBe("roteiro");
+    expect(durations[1].toStatus).toBe("aguardando_material");
     expect(durations[1].durationMs).toBe(2 * 60 * 60 * 1000);
     expect(averageStageDurationMs(durations)).toBe(1 * 60 * 60 * 1000);
   });

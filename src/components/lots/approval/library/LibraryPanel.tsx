@@ -41,10 +41,12 @@ export function LibraryPanel({
   cadastroClienteId,
   readOnly = false,
   clientMode = false,
+  ready = true,
 }: {
   cadastroClienteId?: number;
   readOnly?: boolean;
   clientMode?: boolean;
+  ready?: boolean;
 }) {
   const qc = useQueryClient();
   const staffSearchFn = useServerFn(searchLibraryFn);
@@ -110,13 +112,18 @@ export function LibraryPanel({
         limit: PAGE_SIZE,
         offset: page * PAGE_SIZE,
       };
-      if (portalScope) {
+      if (portalScope?.mode === "slug_context") {
         const { cadastro_cliente_id: _c, ...rest } = payload;
         return scopedSearchFn({ data: { scope: portalScope.scopeInput, ...rest } });
       }
-      return clientMode ? clientSearchFn({ data: payload }) : staffSearchFn({ data: payload });
+      if (portalScope?.mode === "client_access" || clientMode) {
+        const { cadastro_cliente_id: _c, ...rest } = payload;
+        return clientSearchFn({ data: rest });
+      }
+      return staffSearchFn({ data: payload });
     },
-    enabled: !!portalScope || clientMode || !!cadastroClienteId,
+    enabled: ready && (!!portalScope || clientMode || !!cadastroClienteId),
+    retry: 1,
   });
 
   const pillarsQ = useQuery({
@@ -125,18 +132,19 @@ export function LibraryPanel({
       pillarsFn({
         data: { cadastro_cliente_id: cadastroClienteId!, include_archived: false },
       }),
-    enabled: !clientMode && !portalScope && !!cadastroClienteId,
+    enabled: ready && !clientMode && !portalScope && !!cadastroClienteId,
   });
 
   const clientPillarsQ = useQuery({
     queryKey: ["editorial-pillars", scopeKey],
     queryFn: () => {
-      if (portalScope) {
+      if (portalScope?.mode === "slug_context") {
         return scopedPillarsFn({ data: { scope: portalScope.scopeInput } });
       }
       return clientPillarsFn();
     },
-    enabled: !!portalScope || clientMode,
+    enabled: ready && (!!portalScope || clientMode),
+    retry: 1,
   });
 
   const pillarMap = useMemo(
@@ -257,7 +265,10 @@ export function LibraryPanel({
       {searchQ.isLoading && <ApprovalPanelSkeleton rows={6} />}
 
       {searchQ.isError && (
-        <p className="text-sm text-destructive">Não foi possível carregar a biblioteca.</p>
+        <p className="text-sm text-destructive">
+          Não foi possível carregar a biblioteca.
+          {searchQ.error instanceof Error ? ` ${searchQ.error.message}` : ""}
+        </p>
       )}
 
       {searchQ.data && searchQ.data.items.length === 0 && (

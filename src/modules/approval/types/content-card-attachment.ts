@@ -1,7 +1,7 @@
 export const ATTACHMENT_KINDS = ["image", "video", "pdf", "document", "audio"] as const;
 export type AttachmentKind = (typeof ATTACHMENT_KINDS)[number];
 
-export const MEDIA_ROLES = ["preview", "attachment"] as const;
+export const MEDIA_ROLES = ["preview", "attachment", "cliente_material", "final"] as const;
 export type MediaRole = (typeof MEDIA_ROLES)[number];
 
 export type ContentCardAttachment = {

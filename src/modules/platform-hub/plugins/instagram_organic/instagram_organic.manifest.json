@@ -4,7 +4,11 @@
   "kind": "platform",
   "label": "Instagram",
   "category": "organic",
-  "capabilities": ["instagram_organic:metrics:collect", "instagram_organic:profile:collect"],
+  "capabilities": [
+    "instagram_organic:metrics:collect",
+    "instagram_organic:profile:collect",
+    "instagram_organic:content:publish"
+  ],
   "metrics": [
     { "key": "views", "format": "int", "official": true },
     { "key": "reach", "format": "int", "official": true },
@@ -18,6 +22,7 @@
     "type": "oauth2_meta",
     "scopes": [
       "instagram_basic",
+      "instagram_content_publish",
       "instagram_manage_insights",
       "pages_read_engagement",
       "pages_show_list",
@@ -29,7 +34,7 @@
     "supported": ["make_passive", "official_api"]
   },
   "publisher": {
-    "supported": false
+    "supported": true
   },
   "identity": {
     "types": ["instagram", "page"],

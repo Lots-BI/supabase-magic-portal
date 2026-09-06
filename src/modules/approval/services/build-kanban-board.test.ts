@@ -16,6 +16,8 @@ function card(partial: Partial<ContentCard> & Pick<ContentCard, "id" | "status">
     cta: null,
     plataforma: "instagram",
     formato: null,
+    linha_editorial: null,
+    tema: null,
     capa_url: null,
     checklist: [],
     localizacao: null,
@@ -28,6 +30,13 @@ function card(partial: Partial<ContentCard> & Pick<ContentCard, "id" | "status">
     kanban_ordem: 0,
     published_at: null,
     archived_at: null,
+    publish_status: "none",
+    scheduled_publish_at: null,
+    publish_target: null,
+    external_post_id: null,
+    publish_container_id: null,
+    publish_error: null,
+    publish_attempted_at: null,
     ai_metadata: {},
     integration_metadata: {},
     legacy_post_id: null,
@@ -43,11 +52,22 @@ describe("buildKanbanBoard", () => {
     const board = buildKanbanBoard([
       card({ id: "a", status: "producao", kanban_ordem: 2, titulo: "B" }),
       card({ id: "b", status: "producao", kanban_ordem: 1, titulo: "A" }),
-      card({ id: "c", status: "edicao", kanban_ordem: 0, titulo: "C" }),
+      card({ id: "c", status: "aguardando_aprovacao", kanban_ordem: 0, titulo: "C" }),
       card({ id: "d", status: "arquivado", kanban_ordem: 0, titulo: "Hidden" }),
+      card({ id: "e", status: "edicao", kanban_ordem: 0, titulo: "Legacy" }),
     ]);
     const producao = board.columns.find((c) => c.status === "producao")!;
     expect(producao.cards.map((c) => c.id)).toEqual(["b", "a"]);
-    expect(board.columns.find((c) => c.status === "edicao")!.cards).toHaveLength(1);
+    expect(board.columns.find((c) => c.status === "aguardando_aprovacao")!.cards).toHaveLength(1);
+    expect(board.columns.some((c) => c.status === "edicao")).toBe(false);
+    expect(board.columns.map((c) => c.status)).toEqual([
+      "roteiro",
+      "aguardando_aprovacao",
+      "aguardando_material",
+      "producao",
+      "aguardando_aprovacao_final",
+      "agendado",
+      "publicado",
+    ]);
   });
 });

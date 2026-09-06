@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { ContentCard } from "@/modules/approval/types/content-card";
+import type { ContentCard, ContentCardStatus } from "@/modules/approval/types/content-card";
 import type { CalendarView } from "@/modules/approval/services/calendar-date-utils";
 import {
   buildMonthDays,
@@ -17,7 +17,7 @@ import { getCalendarCards } from "@/modules/approval/planning/calendar.server";
 import { getClientCalendarCards } from "@/modules/approval/planning/client-planning.server";
 import { getScopedCalendarCardsFn } from "@/modules/client/scoped-portal.functions";
 import { useOptionalClientScope } from "@/modules/client/context";
-import { KANBAN_COLUMN_META } from "../kanban/kanban-meta";
+import { KANBAN_COLUMN_META, publishConfirmationLabel } from "../kanban/kanban-meta";
 import type { PillarSummary } from "../shared/PillarBadge";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
 
@@ -26,15 +26,20 @@ export function ApprovalCalendar({
   estrategiaId,
   pillarMap,
   onOpenCard,
+  onCreateDay,
   readOnly = false,
   clientMode = false,
+  ready = true,
 }: {
   cadastroClienteId?: number;
   estrategiaId?: string;
   pillarMap: Record<string, PillarSummary>;
-  onOpenCard: (id: string) => void;
+  onOpenCard: (id: string, status?: ContentCardStatus) => void;
+  onCreateDay?: (isoDate: string) => void;
   readOnly?: boolean;
   clientMode?: boolean;
+  /** Quando false (portal cliente sem acesso), não dispara a query. */
+  ready?: boolean;
 }) {
   const staffFn = useServerFn(getCalendarCards);
   const clientFn = useServerFn(getClientCalendarCards);
@@ -49,24 +54,27 @@ export function ApprovalCalendar({
   const calendarQ = useQuery({
     queryKey: ["approval", "calendar", scopeKey, estrategiaId ?? null, view, anchor],
     queryFn: () => {
-      if (portalScope) {
+      // client_access: fns planas (sem nested scope). slug_context: scoped.
+      if (portalScope?.mode === "slug_context") {
         return scopedFn({
           data: { scope: portalScope.scopeInput, view, anchor },
         });
       }
-      return clientMode
-        ? clientFn({ data: { view, anchor } })
-        : staffFn({
-            data: {
-              cadastro_cliente_id: cadastroClienteId!,
-              view,
-              anchor,
-              estrategia_id: estrategiaId,
-            },
-          });
+      if (portalScope?.mode === "client_access" || clientMode) {
+        return clientFn({ data: { view, anchor } });
+      }
+      return staffFn({
+        data: {
+          cadastro_cliente_id: cadastroClienteId!,
+          view,
+          anchor,
+          estrategia_id: estrategiaId,
+        },
+      });
     },
-    enabled: !!portalScope || clientMode || !!cadastroClienteId,
+    enabled: ready && (!!portalScope || clientMode || !!cadastroClienteId),
     staleTime: 30_000,
+    retry: 1,
   });
 
   const byDay = useMemo(() => {
@@ -138,11 +146,20 @@ export function ApprovalCalendar({
       {calendarQ.isLoading && <ApprovalPanelSkeleton rows={8} />}
 
       {calendarQ.isError && (
-        <p className="text-sm text-destructive">Não foi possível carregar o calendário.</p>
+        <p className="text-sm text-destructive">
+          Não foi possível carregar o calendário.
+          {calendarQ.error instanceof Error ? ` ${calendarQ.error.message}` : ""}
+        </p>
       )}
 
       {calendarQ.data && view === "month" && (
-        <MonthGrid cursor={cursor} byDay={byDay} pillarMap={pillarMap} onOpenCard={onOpenCard} />
+        <MonthGrid
+          cursor={cursor}
+          byDay={byDay}
+          pillarMap={pillarMap}
+          onOpenCard={onOpenCard}
+          onCreateDay={readOnly ? undefined : onCreateDay}
+        />
       )}
 
       {calendarQ.data && view === "week" && (
@@ -155,6 +172,7 @@ export function ApprovalCalendar({
           cards={byDay.get(anchor) ?? []}
           pillarMap={pillarMap}
           onOpenCard={onOpenCard}
+          onCreateDay={readOnly ? undefined : onCreateDay}
         />
       )}
 
@@ -174,12 +192,13 @@ function CalendarCardChip({
 }) {
   const pillar = card.pilar_id ? pillarMap[card.pilar_id] : null;
   const statusMeta = KANBAN_COLUMN_META[card.status];
+  const publishHint = publishConfirmationLabel(card);
   return (
     <button
       type="button"
       onClick={onOpen}
       className="flex w-full items-center gap-1.5 truncate rounded border border-border bg-card px-1.5 py-0.5 text-left text-[10.5px] font-medium transition-transform hover:-translate-y-px"
-      title={card.titulo}
+      title={publishHint ? `${card.titulo} — ${publishHint}` : card.titulo}
     >
       {pillar && (
         <span
@@ -190,6 +209,11 @@ function CalendarCardChip({
       )}
       <span className="truncate">
         {statusMeta.emoji} {card.titulo}
+        {card.publish_status === "published"
+          ? " ✓"
+          : card.publish_status === "failed"
+            ? " ⚠"
+            : ""}
       </span>
     </button>
   );
@@ -200,11 +224,13 @@ function MonthGrid({
   byDay,
   pillarMap,
   onOpenCard,
+  onCreateDay,
 }: {
   cursor: Date;
   byDay: Map<string, ContentCard[]>;
   pillarMap: Record<string, PillarSummary>;
-  onOpenCard: (id: string) => void;
+  onOpenCard: (id: string, status?: ContentCardStatus) => void;
+  onCreateDay?: (isoDate: string) => void;
 }) {
   const days = useMemo(() => buildMonthDays(cursor), [cursor]);
   const todayIso = isoDay(new Date());
@@ -228,27 +254,39 @@ function MonthGrid({
           <div
             key={idx}
             className={cn(
-              "min-h-[100px] border-b border-r border-border p-1.5 last:border-r-0",
+              "group/day relative min-h-[100px] border-b border-r border-border p-1.5 last:border-r-0",
               !inMonth && "bg-muted/20",
               inMonth && "bg-background",
             )}
           >
-            <span
-              className={cn(
-                "inline-flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[11px] font-semibold tabular-nums",
-                !inMonth && "text-muted-foreground/50",
-                isToday && "bg-primary text-primary-foreground",
-              )}
-            >
-              {d.getDate()}
-            </span>
+            <div className="flex items-center justify-between gap-1">
+              <span
+                className={cn(
+                  "inline-flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-[11px] font-semibold tabular-nums",
+                  !inMonth && "text-muted-foreground/50",
+                  isToday && "bg-primary text-primary-foreground",
+                )}
+              >
+                {d.getDate()}
+              </span>
+              {onCreateDay && inMonth ? (
+                <button
+                  type="button"
+                  aria-label={`Criar conteúdo em ${iso}`}
+                  onClick={() => onCreateDay(iso)}
+                  className="rounded px-1 text-[11px] font-semibold text-muted-foreground opacity-0 transition-opacity hover:bg-muted hover:text-foreground group-hover/day:opacity-100"
+                >
+                  +
+                </button>
+              ) : null}
+            </div>
             <div className="mt-1 space-y-1">
               {posts.slice(0, 3).map((card) => (
                 <CalendarCardChip
                   key={card.id}
                   card={card}
                   pillarMap={pillarMap}
-                  onOpen={() => onOpenCard(card.id)}
+                  onOpen={() => onOpenCard(card.id, card.status)}
                 />
               ))}
               {posts.length > 3 && (
@@ -271,7 +309,7 @@ function WeekGrid({
   cursor: Date;
   byDay: Map<string, ContentCard[]>;
   pillarMap: Record<string, PillarSummary>;
-  onOpenCard: (id: string) => void;
+  onOpenCard: (id: string, status?: ContentCardStatus) => void;
 }) {
   const days = useMemo(() => buildWeekDays(cursor), [cursor]);
   return (
@@ -291,7 +329,7 @@ function WeekGrid({
                   key={card.id}
                   card={card}
                   pillarMap={pillarMap}
-                  onOpen={() => onOpenCard(card.id)}
+                  onOpen={() => onOpenCard(card.id, card.status)}
                 />
               ))}
             </div>
@@ -307,47 +345,64 @@ function DayList({
   cards,
   pillarMap,
   onOpenCard,
+  onCreateDay,
 }: {
   iso: string;
   cards: ContentCard[];
   pillarMap: Record<string, PillarSummary>;
-  onOpenCard: (id: string) => void;
+  onOpenCard: (id: string, status?: ContentCardStatus) => void;
+  onCreateDay?: (isoDate: string) => void;
 }) {
-  if (cards.length === 0) {
-    return (
-      <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-        Nenhum conteúdo em {iso}.
-      </p>
-    );
-  }
   return (
-    <ul className="space-y-2">
-      {cards.map((card) => {
-        const pillar = card.pilar_id ? pillarMap[card.pilar_id] : null;
-        return (
-          <li key={card.id}>
-            <button
-              type="button"
-              onClick={() => onOpenCard(card.id)}
-              className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left hover:shadow-sm"
-            >
-              {pillar && (
-                <span
-                  className="h-8 w-1 shrink-0 rounded-full"
-                  style={{ backgroundColor: pillar.cor }}
-                />
-              )}
-              <div className="min-w-0">
-                <p className="font-medium">{card.titulo}</p>
-                <p className="text-xs text-muted-foreground">
-                  {KANBAN_COLUMN_META[card.status].emoji} {card.plataforma}
-                  {card.hora_publicacao ? ` · ${card.hora_publicacao.slice(0, 5)}` : ""}
-                </p>
-              </div>
-            </button>
-          </li>
-        );
-      })}
-    </ul>
+    <div className="space-y-3">
+      {onCreateDay ? (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => onCreateDay(iso)}
+            className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium hover:bg-muted"
+          >
+            + Criar conteúdo
+          </button>
+        </div>
+      ) : null}
+      {cards.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+          Nenhum conteúdo em {iso}.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {cards.map((card) => {
+            const pillar = card.pilar_id ? pillarMap[card.pilar_id] : null;
+            return (
+              <li key={card.id}>
+                <button
+                  type="button"
+                  onClick={() => onOpenCard(card.id, card.status)}
+                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-3 text-left hover:shadow-sm"
+                >
+                  {pillar && (
+                    <span
+                      className="h-8 w-1 shrink-0 rounded-full"
+                      style={{ backgroundColor: pillar.cor }}
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <p className="font-medium">{card.titulo}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {KANBAN_COLUMN_META[card.status].emoji} {card.plataforma}
+                      {card.hora_publicacao ? ` · ${card.hora_publicacao.slice(0, 5)}` : ""}
+                      {publishConfirmationLabel(card)
+                        ? ` · ${publishConfirmationLabel(card)}`
+                        : ""}
+                    </p>
+                  </div>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 }

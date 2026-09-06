@@ -22,14 +22,19 @@ describe("build-ops-dashboard", () => {
         "a",
         [
           event({ id: "1", event_type: "created", created_at: "2026-07-01T10:00:00.000Z" }),
-          event({ id: "2", event_type: "approved", created_at: "2026-07-01T12:00:00.000Z" }),
+          event({
+            id: "2",
+            event_type: "approved",
+            created_at: "2026-07-01T12:00:00.000Z",
+            payload: { status_para: "aguardando_material" },
+          }),
         ],
       ],
     ]);
     const avgs = aggregateStageAverages(map);
-    const prodToAprov = avgs.find((a) => a.stageKey === "producao->aprovado");
-    expect(prodToAprov?.averageMs).toBe(2 * 60 * 60 * 1000);
-    expect(prodToAprov?.sampleSize).toBe(1);
+    const stage = avgs.find((a) => a.stageKey === "roteiro->aguardando_material");
+    expect(stage?.averageMs).toBe(2 * 60 * 60 * 1000);
+    expect(stage?.sampleSize).toBe(1);
   });
 
   it("formatDurationMs renders hours", () => {
