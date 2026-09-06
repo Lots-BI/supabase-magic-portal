@@ -27,6 +27,7 @@ A novidade mais recente aparece destacada no topo.
 
 ## Exemplo recente (set/2026)
 
+- **Conteúdos:** aprove o roteiro e envie as mídias no mesmo passo; a peça final já vem com data e hora e, ao aprovar, o Instagram recebe o post nesse horário.
 - **Meta Ads — Resultados:** o dashboard Meta Ads mostra a coluna Resultados do Gerenciador (venda, lead, etc.). Use **Puxar métricas** se algum dia estiver vazio.
 - **Conexões:** conecte Instagram e Meta Ads você mesmo em **Conexões**.
 - **Publicações Instagram:** métricas por post com miniaturas (capítulo **Publicações Instagram**).

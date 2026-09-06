@@ -21,6 +21,35 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-09-06-conteudos-aprovacao-instagram",
+    date: "2026-09-06",
+    title: "Conteúdos: aprovar roteiro, enviar mídias e publicar no Instagram",
+    summary:
+      "A aba Conteúdos agora fecha o ciclo editorial: você aprova o roteiro e envia as mídias gravadas no mesmo passo; depois aprova a peça final já com data e hora. No horário combinado, o post vai para o Instagram da sua marca.",
+    bullets: [
+      "Um único **Aprovar** no roteiro — anexe as mídias gravadas antes de confirmar.",
+      "A peça final chega com data e hora (Brasília). Ao aprovar, ela fica agendada.",
+      "O Instagram recebe o post nesse horário. Em **Publicados** você acompanha o que já saiu.",
+    ],
+    audience: "client",
+    tags: ["Conteúdos", "Instagram", "Novidade"],
+  },
+  {
+    id: "2026-09-06-conteudos-publish-admin",
+    date: "2026-09-06",
+    title: "Conteúdos: calendário, materiais e publicação Instagram no horário",
+    summary:
+      "Workflow editorial completo no admin: calendário e roteiro, biblioteca de originais do cliente, produção da peça final e publicação no Instagram via Graph no horário de Brasília.",
+    bullets: [
+      "Abas **Calendário**, **Fila**, **Materiais**, **Publicados** e **Pilares**.",
+      "Baixe os originais em Materiais para ir a **Em produção**; a peça final é só do admin.",
+      "Após a aprovação do cliente, o Lots agenda internamente e o job publica no Instagram.",
+      "Em Conexões, **Refazer login** no Instagram do cliente para autorizar publicar (instagram_content_publish).",
+    ],
+    audience: "admin",
+    tags: ["Conteúdos", "Instagram", "Platform Hub"],
+  },
+  {
     id: "2026-09-05-meta-ads-resultados",
     date: "2026-09-05",
     title: "Meta Ads agora mostra Resultados das campanhas",

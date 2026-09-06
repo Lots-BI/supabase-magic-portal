@@ -3,7 +3,7 @@ title: Changelog
 description: Histórico de mudanças relevantes do Lots BI (produto, dados e infraestrutura).
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-07-07
+last_review: 2026-09-06
 ---
 
 # Changelog
@@ -20,6 +20,14 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 ## [Não lançado]
 
 ### Adicionado
+
+- **Conteúdos: workflow editorial + publicação Instagram (2026-09-06):** calendário e
+  roteiro → cliente aprova e envia originais → Materiais → produção da peça final →
+  aprovação já com horário de Brasília → job publica via Graph (token da Página +
+  `instagram_content_publish`). Instagram não agenda nativamente. Novidades em
+  `/novidades` (`2026-09-06-conteudos-aprovacao-instagram` e
+  `2026-09-06-conteudos-publish-admin`). Migration `43` libera `service_role` para
+  gravar `publicado` após o Graph.
 
 - **Meta Ads: Resultados das campanhas (2026-09-05):** o coletor oficial pede `actions`
   (e `conversions` quando a API aceita) na Marketing Insights API e grava `results`
