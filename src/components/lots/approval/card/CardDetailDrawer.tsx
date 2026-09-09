@@ -43,6 +43,7 @@ import { Copy, Archive, MessageSquare } from "lucide-react";
 import { PillarBadge } from "../shared/PillarBadge";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
 import { ApprovalConfirmDialog } from "../shared/ApprovalConfirmDialog";
+import { BrDateTimeFields, horaToDbValue } from "../shared/BrDateTimeFields";
 
 export function CardDetailDrawer({
   cardId,
@@ -125,8 +126,12 @@ export function CardDetailDrawer({
   }, [detailQ.data?.pillar, pillarsQ.data, draft.pilar_id]);
 
   const saveMut = useMutation({
-    mutationFn: () =>
-      updateFn({
+    mutationFn: () => {
+      const hora = horaToDbValue(draft.hora_publicacao);
+      if (hora === false) {
+        return Promise.reject(new Error("Informe um horário válido (HH:mm)."));
+      }
+      return updateFn({
         data: {
           id: cardId,
           titulo: draft.titulo,
@@ -138,9 +143,10 @@ export function CardDetailDrawer({
           observacoes: draft.observacoes || null,
           pilar_id: draft.pilar_id || null,
           data_publicacao: draft.data_publicacao,
-          hora_publicacao: draft.hora_publicacao || null,
+          hora_publicacao: hora,
         },
-      }),
+      });
+    },
     onSuccess: () => {
       toast.success("Card atualizado.");
       invalidate();
@@ -238,8 +244,7 @@ export function CardDetailDrawer({
             <DialogDescription className="text-left">
               {card && (
                 <span className="inline-flex items-center gap-2">
-                  {statusMeta?.emoji}{" "}
-                  {KANBAN_COLUMNS.find((c) => c.status === card.status)?.label}
+                  {statusMeta?.emoji} {KANBAN_COLUMNS.find((c) => c.status === card.status)?.label}
                 </span>
               )}
             </DialogDescription>
@@ -313,30 +318,14 @@ export function CardDetailDrawer({
 
                 <TabsContent value="conteudo" className="space-y-4">
                   {selectedPillar && <PillarBadge pillar={selectedPillar} />}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="data-pub">Data publicação</Label>
-                      <Input
-                        id="data-pub"
-                        type="date"
-                        value={draft.data_publicacao}
-                        onChange={(e) =>
-                          setDraft((d) => ({ ...d, data_publicacao: e.target.value }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="hora-pub">Hora</Label>
-                      <Input
-                        id="hora-pub"
-                        type="time"
-                        value={draft.hora_publicacao}
-                        onChange={(e) =>
-                          setDraft((d) => ({ ...d, hora_publicacao: e.target.value }))
-                        }
-                      />
-                    </div>
-                  </div>
+                  <BrDateTimeFields
+                    date={draft.data_publicacao}
+                    time={draft.hora_publicacao}
+                    disabled={card.status === "arquivado"}
+                    requiredDate
+                    onDateChange={(iso) => setDraft((d) => ({ ...d, data_publicacao: iso }))}
+                    onTimeChange={(hhmm) => setDraft((d) => ({ ...d, hora_publicacao: hhmm }))}
+                  />
                   <div className="space-y-2">
                     <Label htmlFor="titulo">Título</Label>
                     <Input
@@ -435,9 +424,7 @@ export function CardDetailDrawer({
                               onChange={() => toggleChecklist(item.id)}
                               className="rounded border-border"
                             />
-                            <span
-                              className={item.done ? "text-muted-foreground line-through" : ""}
-                            >
+                            <span className={item.done ? "text-muted-foreground line-through" : ""}>
                               {item.label}
                             </span>
                           </li>
@@ -451,18 +438,22 @@ export function CardDetailDrawer({
                       <MediaPreview context={previewCtx} />
                     </div>
                   )}
-                <Button
-                  onClick={() => {
-                    saveMut.mutate();
-                  }}
-                  disabled={saveMut.isPending}
-                >
-                  Salvar alterações
-                </Button>
+                  <Button
+                    onClick={() => {
+                      saveMut.mutate();
+                    }}
+                    disabled={saveMut.isPending}
+                  >
+                    Salvar alterações
+                  </Button>
                 </TabsContent>
 
                 <TabsContent value="arquivos">
-                  <CardMediaUpload cardId={cardId} capaUrl={card.capa_url} onUploaded={invalidate} />
+                  <CardMediaUpload
+                    cardId={cardId}
+                    capaUrl={card.capa_url}
+                    onUploaded={invalidate}
+                  />
                 </TabsContent>
 
                 <TabsContent value="timeline">

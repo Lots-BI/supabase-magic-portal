@@ -4,13 +4,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { Color } from "@tiptap/extension-color";
+import { TextStyle } from "@tiptap/extension-text-style";
+import TextAlign from "@tiptap/extension-text-align";
+import Underline from "@tiptap/extension-underline";
 import { toast } from "sonner";
 import { ArrowLeft, RotateCcw, Send } from "lucide-react";
-import {
-  getContentCard,
-  moveCard,
-  updateCard,
-} from "@/modules/approval/cards/cards.server";
+import { getContentCard, moveCard, updateCard } from "@/modules/approval/cards/cards.server";
 import {
   clientRequestChangesFn,
   getClientContentCard,
@@ -24,7 +24,10 @@ import {
 import { KANBAN_COLUMNS } from "@/modules/approval/workflow/column-config";
 import { KANBAN_COLUMN_META, formatCardSchedule } from "../kanban/kanban-meta";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
+import { BrDateTimeFields, horaToDbValue } from "../shared/BrDateTimeFields";
+import { RoteiroToolbar } from "./RoteiroToolbar";
 import { PageHeader } from "@/components/lots/PageHeader";
+import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +37,15 @@ import { adminConteudosCalendarHref } from "@/modules/approval/services/admin-co
 type CardDetailPayload = { card: ContentCard };
 
 const SAVE_DEBOUNCE_MS = 800;
+const SCHEDULE_DEBOUNCE_MS = 500;
+
+const ROTEIRO_EXTENSIONS = [
+  StarterKit,
+  Underline,
+  TextStyle,
+  Color,
+  TextAlign.configure({ types: ["heading", "paragraph"] }),
+];
 
 export function RoteiroEditor({
   cardId,
@@ -52,7 +64,10 @@ export function RoteiroEditor({
   const changesFn = useServerFn(clientRequestChangesFn);
 
   const [changeNote, setChangeNote] = useState("");
+  const [dataPub, setDataPub] = useState("");
+  const [horaPub, setHoraPub] = useState("");
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initializedRef = useRef(false);
 
   const queryKey = mode === "admin" ? ["content-card", cardId] : ["client-content-card", cardId];
@@ -72,6 +87,10 @@ export function RoteiroEditor({
     qc.invalidateQueries({ queryKey });
   }, [qc, queryKey]);
 
+  const invalidateBoards = useCallback(() => {
+    qc.invalidateQueries({ queryKey: ["approval"] });
+  }, [qc]);
+
   const scheduleSave = useCallback(
     (html: string) => {
       if (mode !== "admin") return;
@@ -85,10 +104,27 @@ export function RoteiroEditor({
     [mode, cardId, updateFn, invalidate],
   );
 
+  const persistSchedule = useCallback(
+    (date: string, time: string) => {
+      if (mode !== "admin") return;
+      if (!date) return;
+      const hora = horaToDbValue(time);
+      if (hora === false) return;
+      updateFn({ data: { id: cardId, data_publicacao: date, hora_publicacao: hora } })
+        .then(() => {
+          invalidate();
+          invalidateBoards();
+        })
+        .catch((e: Error) => toast.error(e.message));
+    },
+    [mode, cardId, updateFn, invalidate, invalidateBoards],
+  );
+
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: ROTEIRO_EXTENSIONS,
     content: card?.roteiro ?? "",
     editable: mode === "admin",
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class:
@@ -109,9 +145,16 @@ export function RoteiroEditor({
     initializedRef.current = false;
   }, [cardId]);
 
+  useEffect(() => {
+    if (!card) return;
+    setDataPub(card.data_publicacao);
+    setHoraPub(card.hora_publicacao?.slice(0, 5) ?? "");
+  }, [card?.id, card?.data_publicacao, card?.hora_publicacao]);
+
   useEffect(
     () => () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      if (scheduleTimeoutRef.current) clearTimeout(scheduleTimeoutRef.current);
     },
     [],
   );
@@ -126,11 +169,29 @@ export function RoteiroEditor({
       if (!html || html === "<p></p>") {
         throw new Error("Escreva o roteiro antes de enviar para aprovação.");
       }
+      if (!dataPub) {
+        throw new Error("Informe a data de publicação.");
+      }
+      const hora = horaToDbValue(horaPub);
+      if (hora === false) {
+        throw new Error("Informe um horário válido (HH:mm).");
+      }
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
         saveTimeoutRef.current = null;
       }
-      await updateFn({ data: { id: cardId, roteiro: html } });
+      if (scheduleTimeoutRef.current) {
+        clearTimeout(scheduleTimeoutRef.current);
+        scheduleTimeoutRef.current = null;
+      }
+      await updateFn({
+        data: {
+          id: cardId,
+          roteiro: html,
+          data_publicacao: dataPub,
+          hora_publicacao: hora,
+        },
+      });
       await moveFn({
         data: {
           id: cardId,
@@ -142,6 +203,7 @@ export function RoteiroEditor({
     onSuccess: () => {
       toast.success("Enviado para aprovação do cliente.");
       invalidate();
+      invalidateBoards();
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -166,9 +228,9 @@ export function RoteiroEditor({
       : card?.formato;
 
   const showStaffCta = mode === "admin" && card?.status === "roteiro";
-  const showStaffWaiting =
-    mode === "admin" && card?.status === "aguardando_aprovacao";
+  const showStaffWaiting = mode === "admin" && card?.status === "aguardando_aprovacao";
   const showClientCta = mode === "client" && card?.status === "aguardando_aprovacao";
+  const canEditSchedule = mode === "admin" && card?.status !== "arquivado";
 
   if (detailQ.isLoading) {
     return (
@@ -202,7 +264,7 @@ export function RoteiroEditor({
       <PageHeader
         eyebrow="Conteúdos"
         title={card.titulo}
-        description={`No calendário em ${formatCardSchedule(card.data_publicacao, card.hora_publicacao)}`}
+        description={`No calendário em ${formatCardSchedule(dataPub || card.data_publicacao, horaPub || card.hora_publicacao)}`}
         actions={
           <Button variant="outline" asChild>
             <Link {...backLink}>
@@ -216,7 +278,7 @@ export function RoteiroEditor({
       <div className="flex flex-wrap gap-2">
         <Badge variant="secondary">{card.cliente_nome}</Badge>
         <Badge variant="outline">
-          {formatCardSchedule(card.data_publicacao, card.hora_publicacao)}
+          {formatCardSchedule(dataPub || card.data_publicacao, horaPub || card.hora_publicacao)}
         </Badge>
         {formatoLabel && <Badge variant="outline">{formatoLabel}</Badge>}
         {card.linha_editorial && <Badge variant="outline">{card.linha_editorial}</Badge>}
@@ -226,12 +288,39 @@ export function RoteiroEditor({
         </Badge>
       </div>
 
+      {mode === "admin" && (
+        <SectionCard
+          title="Data e horário de publicação"
+          description="Pode alterar a qualquer momento, inclusive antes da aprovação do cliente. Salva automaticamente."
+        >
+          <BrDateTimeFields
+            date={dataPub}
+            time={horaPub}
+            disabled={!canEditSchedule}
+            requiredDate
+            onDateChange={(iso) => {
+              setDataPub(iso);
+              persistSchedule(iso, horaPub);
+            }}
+            onTimeChange={(hhmm) => {
+              setHoraPub(hhmm);
+              if (scheduleTimeoutRef.current) clearTimeout(scheduleTimeoutRef.current);
+              scheduleTimeoutRef.current = setTimeout(
+                () => persistSchedule(dataPub, hhmm),
+                SCHEDULE_DEBOUNCE_MS,
+              );
+            }}
+          />
+        </SectionCard>
+      )}
+
       <div
         className={cn(
           "overflow-hidden rounded-xl border border-border bg-card",
           mode === "client" && "bg-muted/20",
         )}
       >
+        {editor && mode === "admin" ? <RoteiroToolbar editor={editor} /> : null}
         {editor ? (
           <EditorContent editor={editor} />
         ) : (
@@ -254,7 +343,8 @@ export function RoteiroEditor({
 
       {showStaffWaiting && (
         <p className="text-sm text-muted-foreground">
-          Aguardando o cliente aprovar o roteiro e enviar as mídias gravadas.
+          Aguardando o cliente aprovar o roteiro e enviar as mídias gravadas. Data, horário e texto
+          ainda podem ser editados.
         </p>
       )}
 

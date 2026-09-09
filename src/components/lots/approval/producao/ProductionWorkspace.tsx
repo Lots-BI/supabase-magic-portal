@@ -20,7 +20,7 @@ import type { ChecklistItem, ContentCard } from "@/modules/approval/types/conten
 import { CardMediaUpload } from "../card/CardMediaUpload";
 import { SocialPreviewPanel } from "../preview/SocialPreviewPanel";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
-import { BrDateTimeFields } from "../shared/BrDateTimeFields";
+import { BrDateTimeFields, horaToDbValue, isValidTime24h } from "../shared/BrDateTimeFields";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,7 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
   const [dataPub, setDataPub] = useState("");
   const [horaPub, setHoraPub] = useState("16:00");
   const legendaTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const detailQ = useQuery({
     queryKey: ["content-card", cardId],
@@ -59,7 +60,9 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
   const mediaQ = useQuery({
     queryKey: ["content-card-media", cardId],
     queryFn: async (): Promise<CardMediaPayload> =>
-      (await listMediaFn({ data: { cardId, capaUrl: detailQ.data?.card.capa_url ?? null } })) as CardMediaPayload,
+      (await listMediaFn({
+        data: { cardId, capaUrl: detailQ.data?.card.capa_url ?? null },
+      })) as CardMediaPayload,
     enabled: !!cardId && !!detailQ.data?.card,
   });
 
@@ -76,6 +79,7 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
   useEffect(
     () => () => {
       if (legendaTimeoutRef.current) clearTimeout(legendaTimeoutRef.current);
+      if (scheduleTimeoutRef.current) clearTimeout(scheduleTimeoutRef.current);
     },
     [],
   );
@@ -83,6 +87,7 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
   const invalidate = useCallback(() => {
     qc.invalidateQueries({ queryKey: ["content-card", cardId] });
     qc.invalidateQueries({ queryKey: ["content-card-media", cardId] });
+    qc.invalidateQueries({ queryKey: ["approval"] });
   }, [qc, cardId]);
 
   const saveLegenda = useCallback(
@@ -99,6 +104,18 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
     legendaTimeoutRef.current = setTimeout(() => saveLegenda(value), LEGENDA_DEBOUNCE_MS);
   };
 
+  const saveSchedule = useCallback(
+    (date: string, time: string) => {
+      if (!date) return;
+      const hora = horaToDbValue(time);
+      if (hora === false) return;
+      updateFn({ data: { id: cardId, data_publicacao: date, hora_publicacao: hora } })
+        .then(() => invalidate())
+        .catch((e: Error) => toast.error(e.message));
+    },
+    [cardId, updateFn, invalidate],
+  );
+
   const togglePreviewOk = (itemId: string) => {
     if (!card || itemId !== "preview_ok") return;
     const checklist = card.checklist.map((item: ChecklistItem) =>
@@ -114,6 +131,12 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
 
   const requestApprovalMut = useMutation({
     mutationFn: () => {
+      if (!dataPub) {
+        return Promise.reject(new Error("Informe a data de publicação."));
+      }
+      if (!isValidTime24h(horaPub)) {
+        return Promise.reject(new Error("Informe um horário válido (HH:mm)."));
+      }
       return requestApprovalFn({
         data: {
           id: cardId,
@@ -263,7 +286,13 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
                     {m.fileSize ? ` · ${formatBytes(m.fileSize)}` : ""}
                   </span>
                   {m.downloadUrl && (
-                    <Button type="button" variant="outline" size="sm" className="h-8 shrink-0" asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 shrink-0"
+                      asChild
+                    >
                       <a href={m.downloadUrl} download={m.fileName ?? undefined}>
                         <Download className="mr-1 h-3.5 w-3.5" />
                         Baixar
@@ -295,14 +324,21 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
 
       <SectionCard
         title="Agendamento"
-        description="A aprovação do cliente agenda no Lots nesta data e hora. O Instagram só recebe o post nesse momento."
+        description="Altere a qualquer momento. A aprovação do cliente agenda no Lots nesta data e hora. O Instagram só recebe o post nesse momento."
       >
         <BrDateTimeFields
           date={dataPub}
           time={horaPub}
-          onDateChange={setDataPub}
-          onTimeChange={setHoraPub}
           requiredDate
+          onDateChange={(iso) => {
+            setDataPub(iso);
+            saveSchedule(iso, horaPub);
+          }}
+          onTimeChange={(hhmm) => {
+            setHoraPub(hhmm);
+            if (scheduleTimeoutRef.current) clearTimeout(scheduleTimeoutRef.current);
+            scheduleTimeoutRef.current = setTimeout(() => saveSchedule(dataPub, hhmm), 500);
+          }}
         />
       </SectionCard>
 

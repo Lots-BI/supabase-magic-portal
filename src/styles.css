@@ -690,3 +690,14 @@
   background: var(--card);
   overflow-x: auto;
 }
+
+/* Roteiro (Tiptap): alinhamento, cor e sublinhado visíveis no admin e no cliente */
+.tiptap u,
+.roteiro-html u {
+  text-decoration: underline;
+}
+
+.tiptap [style*="text-align"],
+.roteiro-html [style*="text-align"] {
+  display: block;
+}

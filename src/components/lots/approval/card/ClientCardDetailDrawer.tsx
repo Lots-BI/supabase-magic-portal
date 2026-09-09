@@ -264,7 +264,7 @@ export function ClientCardDetailDrawer({
                 </p>
                 {!awaitingFinal && (card.roteiro || card.copy_text) ? (
                   <div
-                    className="max-h-40 overflow-y-auto rounded-lg border border-border bg-background p-3 text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert"
+                    className="roteiro-html max-h-40 overflow-y-auto rounded-lg border border-border bg-background p-3 text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert"
                     dangerouslySetInnerHTML={{
                       __html: card.roteiro || card.copy_text || "",
                     }}

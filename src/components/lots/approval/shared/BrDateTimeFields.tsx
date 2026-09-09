@@ -24,6 +24,14 @@ export function isValidTime24h(value: string): boolean {
   return h >= 0 && h <= 23 && m >= 0 && m <= 59;
 }
 
+/** `HH:mm` → `HH:mm:ss` para persistir. `null` se vazio; `false` se ainda incompleto/inválido. */
+export function horaToDbValue(hhmm: string): string | null | false {
+  const t = hhmm.trim();
+  if (!t) return null;
+  if (!isValidTime24h(t)) return false;
+  return `${t}:00`;
+}
+
 /** Data + hora em formato brasileiro (dd/mm/aaaa + 24h). Valores internos: YYYY-MM-DD e HH:mm. */
 export function BrDateTimeFields({
   date,
@@ -33,6 +41,7 @@ export function BrDateTimeFields({
   dateId = "data-br",
   timeId = "hora-br",
   requiredDate = false,
+  disabled = false,
 }: {
   date: string;
   time: string;
@@ -41,6 +50,7 @@ export function BrDateTimeFields({
   dateId?: string;
   timeId?: string;
   requiredDate?: boolean;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const selected = date ? parseIsoDay(date) : undefined;
@@ -55,6 +65,7 @@ export function BrDateTimeFields({
               id={dateId}
               type="button"
               variant="outline"
+              disabled={disabled}
               className={cn(
                 "h-11 w-full justify-start px-3 text-left font-normal",
                 !date && "text-muted-foreground",
@@ -92,6 +103,7 @@ export function BrDateTimeFields({
           autoComplete="off"
           placeholder="16:00"
           value={time}
+          disabled={disabled}
           onChange={(e) => onTimeChange(maskTime24h(e.target.value))}
           className="h-11 tabular-nums"
           aria-describedby={`${timeId}-hint`}
