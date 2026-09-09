@@ -232,7 +232,9 @@ export function ClientCardDetailDrawer({
                 <span className="text-muted-foreground">
                   · {formatCardSchedule(card.data_publicacao, card.hora_publicacao)}
                 </span>
-                {(card.status === "roteiro" || card.status === "aguardando_aprovacao") && (
+                {(card.status === "roteiro" ||
+                  card.status === "alteracoes_roteiro" ||
+                  card.status === "aguardando_aprovacao") && (
                   <Button variant="link" className="h-auto p-0 text-xs" asChild>
                     <Link to="/aprovacoes/roteiro/$cardId" params={{ cardId }}>
                       Abrir roteiro
@@ -252,6 +254,18 @@ export function ClientCardDetailDrawer({
 
         {card && (
           <>
+            {(card.status === "alteracoes_roteiro" || card.status === "alteracoes_design") && (
+              <div className="shrink-0 border-b border-border bg-[color:var(--cw-col-alteracoes)]/12 px-6 py-4">
+                <p className="text-sm font-medium text-foreground">Pedido enviado à agência</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  A Lots recebeu suas alterações
+                  {card.status === "alteracoes_roteiro"
+                    ? " de calendário e roteiro"
+                    : " de design e vídeo"}
+                  . Quando o ajuste estiver pronto, o conteúdo volta para a sua aprovação.
+                </p>
+              </div>
+            )}
             {canAct && (
               <div className="shrink-0 space-y-4 border-b border-border bg-muted/40 px-6 py-4">
                 <p className="text-sm font-medium text-foreground">

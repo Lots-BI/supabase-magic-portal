@@ -82,8 +82,14 @@ function invalidateApprovalViews(
 }
 
 function workspacePathForStatus(_cardId: string, status: ContentCardStatus): string | null {
-  if (status === "roteiro" || status === "aguardando_aprovacao") return "roteiro";
-  if (status === "producao") return "producao";
+  if (
+    status === "roteiro" ||
+    status === "alteracoes_roteiro" ||
+    status === "aguardando_aprovacao"
+  ) {
+    return "roteiro";
+  }
+  if (status === "producao" || status === "alteracoes_design") return "producao";
   if (status === "agendado" || status === "aguardando_aprovacao_final" || status === "publicado") {
     return "agendar";
   }
@@ -315,9 +321,7 @@ function AprovacoesAdminPage() {
           {selectedCliente && (tab === "kanban" || tab === "calendar") ? (
             <Button
               onClick={() =>
-                tab === "calendar"
-                  ? setCalendarCreateDate(isoDay(new Date()))
-                  : setCreateOpen(true)
+                tab === "calendar" ? setCalendarCreateDate(isoDay(new Date())) : setCreateOpen(true)
               }
             >
               <Plus className="mr-2 h-4 w-4" />

@@ -9,7 +9,13 @@ describe("eventTypeForTransition", () => {
     );
     expect(eventTypeForTransition("aguardando_aprovacao", "aguardando_material")).toBe("approved");
     expect(eventTypeForTransition("aguardando_aprovacao_final", "agendado")).toBe("approved");
+    expect(eventTypeForTransition("aguardando_aprovacao", "alteracoes_roteiro")).toBe(
+      "changes_requested",
+    );
     expect(eventTypeForTransition("aguardando_aprovacao", "roteiro")).toBe("changes_requested");
+    expect(eventTypeForTransition("aguardando_aprovacao_final", "alteracoes_design")).toBe(
+      "changes_requested",
+    );
     expect(eventTypeForTransition("aguardando_aprovacao_final", "producao")).toBe(
       "changes_requested",
     );

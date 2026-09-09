@@ -61,6 +61,7 @@ const POST_ROTEIRO_STATUSES = new Set([
   "aguardando_material",
   "producao",
   "aguardando_aprovacao_final",
+  "alteracoes_design",
   "agendado",
   "publicado",
 ]);

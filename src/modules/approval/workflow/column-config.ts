@@ -16,6 +16,11 @@ export const KANBAN_COLUMNS: KanbanColumnConfig[] = [
     colorToken: "--cw-col-aguardando",
   },
   {
+    status: "alteracoes_roteiro",
+    label: "Alterações Calendário + Roteiro",
+    colorToken: "--cw-col-alteracoes",
+  },
+  {
     status: "aguardando_material",
     label: "Material recebido",
     colorToken: "--cw-col-aguardando",
@@ -25,6 +30,11 @@ export const KANBAN_COLUMNS: KanbanColumnConfig[] = [
     status: "aguardando_aprovacao_final",
     label: "Aprovar publicação",
     colorToken: "--cw-col-aprovado",
+  },
+  {
+    status: "alteracoes_design",
+    label: "Alterações Design + Vídeo",
+    colorToken: "--cw-col-alteracoes",
   },
   { status: "agendado", label: "Agendado", colorToken: "--cw-col-aprovado" },
   { status: "publicado", label: "Publicado", colorToken: "--cw-col-publicado" },

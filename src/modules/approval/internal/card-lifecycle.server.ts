@@ -197,7 +197,7 @@ export async function requestFinalApproval(
   assertAction(actor.role, "move");
   const existing = await contentCardRepository.findById(supabase, cardId);
   if (!existing) throw new Error("Card não encontrado");
-  if (existing.status !== "producao") {
+  if (existing.status !== "producao" && existing.status !== "alteracoes_design") {
     throw new Error("Só é possível pedir aprovação da publicação a partir de Em produção.");
   }
   const attachments = await contentCardAttachmentRepository.listByCardId(supabase, cardId);
@@ -208,8 +208,7 @@ export async function requestFinalApproval(
   const dataPublicacao = options?.dataPublicacao ?? existing.data_publicacao;
   const horaPublicacao =
     options?.horaPublicacao !== undefined ? options.horaPublicacao : existing.hora_publicacao;
-  const when =
-    options?.scheduledAt || combineBrazilSchedule(dataPublicacao, horaPublicacao);
+  const when = options?.scheduledAt || combineBrazilSchedule(dataPublicacao, horaPublicacao);
   await contentCardRepository.update(supabase, cardId, {
     data_publicacao: dataPublicacao,
     hora_publicacao: horaPublicacao,

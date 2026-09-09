@@ -43,6 +43,12 @@ export function OpsDashboardPanel({ cadastroClienteId }: { cadastroClienteId?: n
           icon={Clock}
           emphasis={data.awaitingApproval > 0 ? "hero" : "default"}
         />
+        <StatCard
+          label="Pedidos de alteração"
+          value={data.changesRequested}
+          icon={Clock}
+          emphasis={data.changesRequested > 0 ? "hero" : "default"}
+        />
         <StatCard label="Publicados (semana)" value={data.publishedThisWeek} icon={CheckCircle2} />
         <StatCard
           label="Atrasados"

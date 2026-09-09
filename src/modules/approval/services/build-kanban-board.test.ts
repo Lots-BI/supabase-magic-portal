@@ -63,9 +63,11 @@ describe("buildKanbanBoard", () => {
     expect(board.columns.map((c) => c.status)).toEqual([
       "roteiro",
       "aguardando_aprovacao",
+      "alteracoes_roteiro",
       "aguardando_material",
       "producao",
       "aguardando_aprovacao_final",
+      "alteracoes_design",
       "agendado",
       "publicado",
     ]);

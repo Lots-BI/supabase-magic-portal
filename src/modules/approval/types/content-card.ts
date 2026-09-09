@@ -3,9 +3,11 @@
 export const CONTENT_CARD_STATUSES = [
   "roteiro",
   "aguardando_aprovacao",
+  "alteracoes_roteiro",
   "aguardando_material",
   "producao",
   "aguardando_aprovacao_final",
+  "alteracoes_design",
   "agendado",
   "publicado",
   "arquivado",
@@ -19,9 +21,11 @@ export type ContentCardStatus = (typeof CONTENT_CARD_STATUSES)[number];
 export const KANBAN_ACTIVE_STATUSES: ContentCardStatus[] = [
   "roteiro",
   "aguardando_aprovacao",
+  "alteracoes_roteiro",
   "aguardando_material",
   "producao",
   "aguardando_aprovacao_final",
+  "alteracoes_design",
   "agendado",
   "publicado",
 ];

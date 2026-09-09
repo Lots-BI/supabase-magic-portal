@@ -35,6 +35,8 @@ export function KanbanCard({
 
   const className = cn(
     "group w-full rounded-xl border border-border bg-card p-3 text-left shadow-sm transition-shadow hover:shadow-md",
+    (card.status === "alteracoes_roteiro" || card.status === "alteracoes_design") &&
+      "border-[color:var(--cw-col-alteracoes)]/60",
     draggable.isDragging && "opacity-60 shadow-lg ring-2 ring-primary/30",
   );
 
@@ -68,6 +70,11 @@ export function KanbanCard({
           <p className="text-[11px] text-muted-foreground">
             {formatCardSchedule(card.data_publicacao, card.hora_publicacao)}
           </p>
+          {(card.status === "alteracoes_roteiro" || card.status === "alteracoes_design") && (
+            <p className="text-[11px] font-medium text-[color:var(--cw-col-alteracoes)]">
+              Pedido de alteração do cliente
+            </p>
+          )}
           {publishConfirmationLabel(card) ? (
             <p
               className={

@@ -99,13 +99,15 @@ export async function clientRequestChanges(
   }
 
   if (card.status === "aguardando_aprovacao") {
-    const updated = await contentCardRepository.update(supabase, card.id, {
-      status: "roteiro",
+    const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const updated = await contentCardRepository.update(getSupabaseAdmin(), card.id, {
+      status: "alteracoes_roteiro",
     });
     await appendClientEvent(supabase, card.id, actor, "changes_requested", {
       mensagem: input.mensagem.trim(),
+      kind: "roteiro",
       status_de: card.status,
-      status_para: "roteiro",
+      status_para: "alteracoes_roteiro",
     });
     return updated;
   }
@@ -114,14 +116,16 @@ export async function clientRequestChanges(
     const checklist = card.checklist.map((c) =>
       c.id === "preview_ok" ? { ...c, done: false } : c,
     );
-    const updated = await contentCardRepository.update(supabase, card.id, {
-      status: "producao",
+    const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const updated = await contentCardRepository.update(getSupabaseAdmin(), card.id, {
+      status: "alteracoes_design",
       checklist,
     });
     await appendClientEvent(supabase, card.id, actor, "changes_requested", {
       mensagem: input.mensagem.trim(),
+      kind: "peca",
       status_de: card.status,
-      status_para: "producao",
+      status_para: "alteracoes_design",
     });
     return updated;
   }

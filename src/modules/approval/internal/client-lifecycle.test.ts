@@ -119,14 +119,14 @@ describe("client-lifecycle", () => {
     );
   });
 
-  it("request changes moves to roteiro", async () => {
+  it("request changes moves roteiro to alteracoes_roteiro", async () => {
     vi.mocked(contentCardRepository.findById).mockResolvedValue({
       ...baseCard,
       status: "aguardando_aprovacao",
     } as never);
     vi.mocked(contentCardRepository.update).mockResolvedValue({
       ...baseCard,
-      status: "roteiro",
+      status: "alteracoes_roteiro",
     } as never);
 
     await clientRequestChanges(supabase, actor, {
@@ -134,13 +134,41 @@ describe("client-lifecycle", () => {
       mensagem: "Ajustar CTA",
     });
     expect(contentCardRepository.update).toHaveBeenCalledWith(
-      supabase,
+      adminClient,
       "c1",
-      expect.objectContaining({ status: "roteiro" }),
+      expect.objectContaining({ status: "alteracoes_roteiro" }),
     );
     expect(contentCardEventRepository.append).toHaveBeenCalledWith(
       supabase,
-      expect.objectContaining({ event_type: "changes_requested" }),
+      expect.objectContaining({
+        event_type: "changes_requested",
+        payload: expect.objectContaining({
+          mensagem: "Ajustar CTA",
+          status_para: "alteracoes_roteiro",
+        }),
+      }),
+    );
+  });
+
+  it("request changes on final piece moves to alteracoes_design via admin", async () => {
+    vi.mocked(contentCardRepository.findById).mockResolvedValue({
+      ...baseCard,
+      status: "aguardando_aprovacao_final",
+      checklist: [{ id: "preview_ok", label: "Preview", done: true }],
+    } as never);
+    vi.mocked(contentCardRepository.update).mockResolvedValue({
+      ...baseCard,
+      status: "alteracoes_design",
+    } as never);
+
+    await clientRequestChanges(supabase, actor, {
+      card_id: "c1",
+      mensagem: "Trocar o corte do vídeo",
+    });
+    expect(contentCardRepository.update).toHaveBeenCalledWith(
+      adminClient,
+      "c1",
+      expect.objectContaining({ status: "alteracoes_design" }),
     );
   });
 });

@@ -22,9 +22,15 @@ import {
   type ContentFormato,
 } from "@/modules/approval/types/content-card";
 import { KANBAN_COLUMNS } from "@/modules/approval/workflow/column-config";
+import { isRoteiroWorkspaceStatus } from "@/modules/approval/workflow/status-machine";
+import {
+  latestUnansweredChangeRequest,
+  type TimelineEntry,
+} from "@/modules/approval/services/build-card-timeline";
 import { KANBAN_COLUMN_META, formatCardSchedule } from "../kanban/kanban-meta";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
 import { BrDateTimeFields, horaToDbValue } from "../shared/BrDateTimeFields";
+import { ChangeRequestBanner } from "../shared/ChangeRequestBanner";
 import { RoteiroToolbar } from "./RoteiroToolbar";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { SectionCard } from "@/components/lots/SectionCard";
@@ -34,7 +40,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { adminConteudosCalendarHref } from "@/modules/approval/services/admin-conteudos-href";
 
-type CardDetailPayload = { card: ContentCard };
+type CardDetailPayload = { card: ContentCard; events?: TimelineEntry[] };
 
 const SAVE_DEBOUNCE_MS = 800;
 const SCHEDULE_DEBOUNCE_MS = 500;
@@ -162,8 +168,8 @@ export function RoteiroEditor({
   const sendApprovalMut = useMutation({
     mutationFn: async () => {
       if (!card) return;
-      if (card.status !== "roteiro") {
-        throw new Error("Só é possível enviar conteúdos em Roteiro.");
+      if (!isRoteiroWorkspaceStatus(card.status)) {
+        throw new Error("Só é possível enviar conteúdos em Roteiro ou em Alterações.");
       }
       const html = editor?.getHTML()?.trim() ?? "";
       if (!html || html === "<p></p>") {
@@ -227,10 +233,11 @@ export function RoteiroEditor({
       ? FORMAT_LABEL[card.formato as ContentFormato]
       : card?.formato;
 
-  const showStaffCta = mode === "admin" && card?.status === "roteiro";
+  const showStaffCta = mode === "admin" && card ? isRoteiroWorkspaceStatus(card.status) : false;
   const showStaffWaiting = mode === "admin" && card?.status === "aguardando_aprovacao";
   const showClientCta = mode === "client" && card?.status === "aguardando_aprovacao";
   const canEditSchedule = mode === "admin" && card?.status !== "arquivado";
+  const changeRequest = latestUnansweredChangeRequest(detailQ.data?.events ?? []);
 
   if (detailQ.isLoading) {
     return (
@@ -287,6 +294,8 @@ export function RoteiroEditor({
           {statusMeta?.emoji} {statusLabel}
         </Badge>
       </div>
+
+      {changeRequest && <ChangeRequestBanner entry={changeRequest} />}
 
       {mode === "admin" && (
         <SectionCard

@@ -27,6 +27,9 @@ export async function getOpsDashboard(
   const publishedCount = countByStatusValue(byStatus, "publicado");
   const archivedCount = countByStatusValue(byStatus, "arquivado");
   const awaitingApproval = countByStatusValue(byStatus, "aguardando_aprovacao");
+  const changesRequested =
+    countByStatusValue(byStatus, "alteracoes_roteiro") +
+    countByStatusValue(byStatus, "alteracoes_design");
 
   const cardIds = await dashboardRepository.listCardIdsForMetrics(supabase, scope);
   const rawEvents = await dashboardRepository.listEventsForCardIds(supabase, cardIds);
@@ -50,6 +53,7 @@ export async function getOpsDashboard(
     overdueCount,
     publishedThisWeek,
     awaitingApproval,
+    changesRequested,
     stageAverages,
     metricsFramework: WORKFLOW_METRICS_FRAMEWORK,
   };

@@ -56,3 +56,15 @@ export function formatTimelineSentence(entry: TimelineEntry): string {
   const who = entry.actorEmail?.split("@")[0] ?? "Alguém";
   return `${who} ${eventLabel(entry.eventType)}`;
 }
+
+/** Último pedido de alteração ainda sem reenvio/aprovação da agência. */
+export function latestUnansweredChangeRequest(entries: TimelineEntry[]): TimelineEntry | null {
+  let latest: TimelineEntry | null = null;
+  for (const entry of entries) {
+    if (entry.eventType === "changes_requested") latest = entry;
+    if (entry.eventType === "approval_requested" || entry.eventType === "approved") {
+      latest = null;
+    }
+  }
+  return latest;
+}

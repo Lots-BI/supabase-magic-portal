@@ -53,6 +53,7 @@ export type OpsDashboardData = {
   overdueCount: number;
   publishedThisWeek: number;
   awaitingApproval: number;
+  changesRequested: number;
   stageAverages: StageAverageMs[];
   metricsFramework: WorkflowMetricsFramework;
 };

@@ -17,6 +17,11 @@ export const KANBAN_COLUMN_META: Record<ContentCardStatus, KanbanColumnMeta> = {
     dotClass: "bg-[color:var(--cw-col-aguardando)]",
     headerClass: "border-[color:var(--cw-col-aguardando)]/30 bg-[color:var(--cw-col-aguardando)]/8",
   },
+  alteracoes_roteiro: {
+    emoji: "✏️",
+    dotClass: "bg-[color:var(--cw-col-alteracoes)]",
+    headerClass: "border-[color:var(--cw-col-alteracoes)]/30 bg-[color:var(--cw-col-alteracoes)]/8",
+  },
   aguardando_material: {
     emoji: "📎",
     dotClass: "bg-[color:var(--cw-col-aguardando)]",
@@ -31,6 +36,11 @@ export const KANBAN_COLUMN_META: Record<ContentCardStatus, KanbanColumnMeta> = {
     emoji: "🟣",
     dotClass: "bg-[color:var(--cw-col-aprovado)]",
     headerClass: "border-[color:var(--cw-col-aprovado)]/30 bg-[color:var(--cw-col-aprovado)]/8",
+  },
+  alteracoes_design: {
+    emoji: "🎬",
+    dotClass: "bg-[color:var(--cw-col-alteracoes)]",
+    headerClass: "border-[color:var(--cw-col-alteracoes)]/30 bg-[color:var(--cw-col-alteracoes)]/8",
   },
   agendado: {
     emoji: "📅",
@@ -60,9 +70,7 @@ export const KANBAN_COLUMN_META: Record<ContentCardStatus, KanbanColumnMeta> = {
 };
 
 export function formatCardSchedule(data: string, hora: string | null): string {
-  const day = data.includes("-")
-    ? data.replace(/^(\d{4})-(\d{2})-(\d{2}).*$/, "$3/$2/$1")
-    : data;
+  const day = data.includes("-") ? data.replace(/^(\d{4})-(\d{2})-(\d{2}).*$/, "$3/$2/$1") : data;
   if (!hora) return day;
   return `${day} · ${hora.slice(0, 5)}`;
 }
@@ -79,12 +87,17 @@ export function publishConfirmationLabel(card: {
 }): string | null {
   if (card.publish_status === "published") return "Publicado no Instagram";
   if (card.publish_status === "failed") {
-    return card.publish_error ? `Falha na publicação: ${card.publish_error}` : "Falha na publicação";
+    return card.publish_error
+      ? `Falha na publicação: ${card.publish_error}`
+      : "Falha na publicação";
   }
   if (card.publish_status === "publishing" || card.publish_status === "queued") {
     return "Confirmando publicação…";
   }
-  if (card.status === "agendado" && (card.publish_status === "scheduled" || card.publish_status === "none")) {
+  if (
+    card.status === "agendado" &&
+    (card.publish_status === "scheduled" || card.publish_status === "none")
+  ) {
     return "Agendado no Lots — publica no horário";
   }
   return null;

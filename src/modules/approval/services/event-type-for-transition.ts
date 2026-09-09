@@ -7,17 +7,14 @@ export function eventTypeForTransition(
 ): ContentCardEventType {
   if (to === "arquivado") return "archived";
   if (to === "publicado") return "published";
-  if (
-    (to === "aguardando_aprovacao" || to === "aguardando_aprovacao_final") &&
-    from !== to
-  ) {
+  if ((to === "aguardando_aprovacao" || to === "aguardando_aprovacao_final") && from !== to) {
     return "approval_requested";
   }
   if (from === "aguardando_aprovacao" && to === "aguardando_material") return "approved";
   if (from === "aguardando_aprovacao_final" && to === "agendado") return "approved";
   if (
-    (from === "aguardando_aprovacao" && to === "roteiro") ||
-    (from === "aguardando_aprovacao_final" && to === "producao")
+    (from === "aguardando_aprovacao" && (to === "roteiro" || to === "alteracoes_roteiro")) ||
+    (from === "aguardando_aprovacao_final" && (to === "producao" || to === "alteracoes_design"))
   ) {
     return "changes_requested";
   }

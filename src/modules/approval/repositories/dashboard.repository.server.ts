@@ -99,6 +99,8 @@ export const dashboardRepository = {
         "aguardando_material",
         "producao",
         "aguardando_aprovacao_final",
+        "alteracoes_roteiro",
+        "alteracoes_design",
         "agendado",
       ]);
     if (scope?.cadastroClienteId != null) {

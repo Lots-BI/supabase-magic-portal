@@ -17,10 +17,15 @@ import {
 } from "@/modules/approval/services/build-next-production-step";
 import { assetsForPublishPreview, buildPreviewContext, type MediaAsset } from "@/lib/media-preview";
 import type { ChecklistItem, ContentCard } from "@/modules/approval/types/content-card";
+import {
+  latestUnansweredChangeRequest,
+  type TimelineEntry,
+} from "@/modules/approval/services/build-card-timeline";
 import { CardMediaUpload } from "../card/CardMediaUpload";
 import { SocialPreviewPanel } from "../preview/SocialPreviewPanel";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
 import { BrDateTimeFields, horaToDbValue, isValidTime24h } from "../shared/BrDateTimeFields";
+import { ChangeRequestBanner } from "../shared/ChangeRequestBanner";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";
@@ -34,6 +39,7 @@ const LEGENDA_DEBOUNCE_MS = 800;
 type CardDetailPayload = {
   card: ContentCard;
   attachments?: MediaAsset[];
+  events?: TimelineEntry[];
 };
 
 type CardMediaPayload = { media: MediaAsset[] };
@@ -195,6 +201,7 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
   }
 
   const backLink = adminConteudosCalendarHref(card.cadastro_cliente_id);
+  const changeRequest = latestUnansweredChangeRequest(detailQ.data?.events ?? []);
 
   return (
     <div className="space-y-6">
@@ -211,6 +218,8 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
           </Button>
         }
       />
+
+      {changeRequest && <ChangeRequestBanner entry={changeRequest} />}
 
       {nextStep && (
         <SectionCard title="Próximo passo" eyebrow="Produção">

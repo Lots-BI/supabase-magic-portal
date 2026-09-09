@@ -25,8 +25,9 @@ export function ApprovalAgencyQueue({
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Aguardando aprovação" value={data.awaitingApproval} icon={Clock} />
+        <StatCard label="Pedidos de alteração" value={data.changesRequested} icon={Layers} />
         <StatCard label="Atrasados" value={data.overdueCount} icon={CalendarClock} />
         <StatCard label="Cards no pipeline" value={data.totalCards} icon={Layers} />
       </section>
