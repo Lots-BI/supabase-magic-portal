@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, CalendarClock, ExternalLink, Zap } from "lucide-react";
+import { ArrowLeft, Archive, CalendarClock, ExternalLink, Zap } from "lucide-react";
 import {
+  archiveCard,
   getContentCard,
   publishNowFn,
   schedulePublishFn,
 } from "@/modules/approval/cards/cards.server";
 import { FEATURE_META_CONTENT_PUBLISH } from "@/lib/feature-flags";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
+import { ApprovalConfirmDialog } from "../shared/ApprovalConfirmDialog";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";
@@ -48,14 +50,17 @@ function instagramPostUrl(
 }
 
 export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backTo: string }) {
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const getFn = useServerFn(getContentCard);
   const publishNowServerFn = useServerFn(publishNowFn);
   const scheduleServerFn = useServerFn(schedulePublishFn);
+  const archiveFn = useServerFn(archiveCard);
 
   const [mode, setMode] = useState<PublishMode>("schedule");
   const [scheduledAt, setScheduledAt] = useState("");
   const [scopeError, setScopeError] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
 
   const detailQ = useQuery({
     queryKey: ["content-card", cardId],
@@ -99,6 +104,22 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
       invalidate();
     },
     onError: handlePublishError,
+  });
+
+  const archiveMut = useMutation({
+    mutationFn: () => archiveFn({ data: { id: cardId } }),
+    onSuccess: () => {
+      toast.success("Conteúdo arquivado.");
+      setArchiveOpen(false);
+      void qc.invalidateQueries({ queryKey: ["approval"] });
+      const cadastroId = detailQ.data?.card?.cadastro_cliente_id;
+      if (cadastroId) {
+        void navigate(adminConteudosCalendarHref(cadastroId));
+      } else {
+        void navigate({ to: backTo });
+      }
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const handleSubmit = () => {
@@ -146,12 +167,20 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
         title={card.titulo}
         description="Agendar ou publicar agora"
         actions={
-          <Button variant="outline" asChild>
-            <Link {...backLink}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar ao calendário
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {card.status !== "arquivado" ? (
+              <Button type="button" variant="outline" onClick={() => setArchiveOpen(true)}>
+                <Archive className="mr-2 h-4 w-4" />
+                Arquivar
+              </Button>
+            ) : null}
+            <Button variant="outline" asChild>
+              <Link {...backLink}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Voltar ao calendário
+              </Link>
+            </Button>
+          </div>
         }
       />
 
@@ -296,6 +325,16 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
           )}
         </dl>
       </SectionCard>
+
+      <ApprovalConfirmDialog
+        open={archiveOpen}
+        onOpenChange={setArchiveOpen}
+        title="Arquivar conteúdo?"
+        description="O card sai do Kanban e da fila de publicação. Você encontra na Biblioteca, como arquivado."
+        confirmLabel="Arquivar"
+        onConfirm={() => archiveMut.mutate()}
+        loading={archiveMut.isPending}
+      />
     </div>
   );
 }

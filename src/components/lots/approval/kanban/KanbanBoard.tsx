@@ -21,6 +21,7 @@ export const KanbanBoardView = memo(function KanbanBoardView({
   thumbMap,
   onMoveCard,
   onOpenCard,
+  onArchiveCard,
   showCliente,
   readOnly = false,
 }: {
@@ -29,6 +30,7 @@ export const KanbanBoardView = memo(function KanbanBoardView({
   thumbMap: Record<string, string | null>;
   onMoveCard?: (input: { id: string; status: ContentCardStatus; kanban_ordem: number }) => void;
   onOpenCard: (id: string) => void;
+  onArchiveCard?: (id: string) => void;
   showCliente?: boolean;
   readOnly?: boolean;
 }) {
@@ -46,6 +48,7 @@ export const KanbanBoardView = memo(function KanbanBoardView({
           pillarMap={pillarMap}
           thumbMap={thumbMap}
           onOpenCard={onOpenCard}
+          onArchiveCard={onArchiveCard}
           showCliente={showCliente}
           readOnly={readOnly}
         />

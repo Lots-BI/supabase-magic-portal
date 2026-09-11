@@ -18,6 +18,7 @@ async function claimDueCard(
       publish_attempted_at: nowIso,
     })
     .eq("id", cardId)
+    .neq("status", "arquivado")
     .or(
       `publish_status.eq.scheduled,publish_status.eq.queued,and(publish_status.eq.publishing,publish_attempted_at.lte.${staleIso})`,
     )
@@ -47,6 +48,7 @@ export async function runDuePublishes(
     .from("content_cards")
     .select("id")
     .lte("scheduled_publish_at", nowIso)
+    .neq("status", "arquivado")
     .or(
       `publish_status.eq.scheduled,publish_status.eq.queued,and(publish_status.eq.publishing,publish_attempted_at.lte.${staleIso})`,
     )

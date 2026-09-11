@@ -13,6 +13,7 @@ export function KanbanColumn({
   pillarMap,
   thumbMap,
   onOpenCard,
+  onArchiveCard,
   showCliente,
   readOnly = false,
 }: {
@@ -22,6 +23,7 @@ export function KanbanColumn({
   pillarMap: Record<string, PillarSummary>;
   thumbMap: Record<string, string | null>;
   onOpenCard: (id: string) => void;
+  onArchiveCard?: (id: string) => void;
   showCliente?: boolean;
   readOnly?: boolean;
 }) {
@@ -58,6 +60,7 @@ export function KanbanColumn({
             pillar={card.pilar_id ? pillarMap[card.pilar_id] : null}
             thumbnailUrl={thumbMap[card.id] ?? card.capa_url}
             onOpen={() => onOpenCard(card.id)}
+            onArchive={onArchiveCard ? () => onArchiveCard(card.id) : undefined}
             showCliente={showCliente}
             readOnly={readOnly}
           />

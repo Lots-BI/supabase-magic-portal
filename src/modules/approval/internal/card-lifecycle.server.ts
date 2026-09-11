@@ -15,6 +15,7 @@ import {
 } from "../services/build-next-production-step";
 import { FEATURE_META_CONTENT_PUBLISH } from "@/lib/feature-flags";
 import { combineBrazilSchedule, shouldRefreshSchedule } from "../services/brazil-schedule";
+import { publishPatchOnArchive } from "../services/workflow-rules";
 
 export type LifecycleActor = {
   userId: string;
@@ -152,8 +153,9 @@ export async function moveContentCard(
   if (input.status === "publicado" && !existing.published_at) {
     patch.published_at = new Date().toISOString();
   }
-  if (input.status === "arquivado" && !existing.archived_at) {
-    patch.archived_at = new Date().toISOString();
+  if (input.status === "arquivado") {
+    if (!existing.archived_at) patch.archived_at = new Date().toISOString();
+    Object.assign(patch, publishPatchOnArchive(existing.publish_status));
   }
 
   const card = await contentCardRepository.update(supabase, input.id, patch);

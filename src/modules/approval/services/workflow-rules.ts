@@ -9,3 +9,17 @@ export function isLibraryStatus(status: ContentCardStatus): boolean {
 export function isHardDeleteForbidden(status: ContentCardStatus): boolean {
   return status === "publicado" || status === "arquivado";
 }
+
+/** Ao arquivar, cancela fila de publicação — senão o job ainda posta o card. */
+export function publishPatchOnArchive(publishStatus: string): {
+  publish_status?: "none";
+  scheduled_publish_at?: null;
+  publish_error?: null;
+} {
+  if (publishStatus === "published") return {};
+  return {
+    publish_status: "none",
+    scheduled_publish_at: null,
+    publish_error: null,
+  };
+}

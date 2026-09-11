@@ -13,6 +13,7 @@ import { listClientes } from "@/lib/admin.functions";
 import {
   getKanbanBoard,
   moveCard,
+  archiveCard,
   listEditorialPillars,
   runPublishDueTickFn,
 } from "@/modules/approval/cards/cards.server";
@@ -28,6 +29,7 @@ import { ApprovalEmptyState } from "@/components/lots/approval/shared/ApprovalEm
 import { ApprovalPanelSkeleton } from "@/components/lots/approval/shared/ApprovalPanelSkeleton";
 import { ClienteCombobox } from "@/components/lots/approval/shared/ClienteCombobox";
 import { ApprovalAgencyQueue } from "@/components/lots/approval/shared/ApprovalAgencyQueue";
+import { ApprovalConfirmDialog } from "@/components/lots/approval/shared/ApprovalConfirmDialog";
 import { ClipboardList } from "lucide-react";
 import type { ContentCardStatus } from "@/modules/approval/types/content-card";
 import { isoDay } from "@/modules/approval/services/calendar-date-utils";
@@ -109,6 +111,7 @@ function AprovacoesAdminPage() {
   const listClientesFn = useServerFn(listClientes);
   const boardFn = useServerFn(getKanbanBoard);
   const moveFn = useServerFn(moveCard);
+  const archiveFn = useServerFn(archiveCard);
   const pillarsFn = useServerFn(listEditorialPillars);
   const publishTickFn = useServerFn(runPublishDueTickFn);
   const restoredRef = useRef(false);
@@ -116,6 +119,7 @@ function AprovacoesAdminPage() {
   const clienteId = search.cliente;
   const [tab, setTab] = useState<ApprovalTab>(search.tab ?? "calendar");
   const [openCardId, setOpenCardId] = useState<string | null>(null);
+  const [archiveCardId, setArchiveCardId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [calendarCreateDate, setCalendarCreateDate] = useState<string | null>(null);
   const statusByCardRef = useRef<Record<string, ContentCardStatus>>({});
@@ -290,6 +294,16 @@ function AprovacoesAdminPage() {
     },
   });
 
+  const archiveMut = useMutation({
+    mutationFn: (id: string) => archiveFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Conteúdo arquivado.");
+      setArchiveCardId(null);
+      if (clienteId) invalidateApprovalViews(qc, clienteId);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const onCardMutated = () => {
     if (selectedCliente) invalidateApprovalViews(qc, selectedCliente.id, openCardId ?? undefined);
   };
@@ -357,6 +371,7 @@ function AprovacoesAdminPage() {
             thumbMap={thumbMap}
             onMoveCard={(input) => moveMut.mutate(input)}
             onOpenCard={openCard}
+            onArchiveCard={setArchiveCardId}
           />
         </Suspense>
       )}
@@ -399,6 +414,20 @@ function AprovacoesAdminPage() {
           onMutated={onCardMutated}
         />
       )}
+
+      <ApprovalConfirmDialog
+        open={!!archiveCardId}
+        onOpenChange={(open) => {
+          if (!open) setArchiveCardId(null);
+        }}
+        title="Arquivar conteúdo?"
+        description="O card sai do Kanban e da fila de publicação. Você encontra na Biblioteca, como arquivado."
+        confirmLabel="Arquivar"
+        onConfirm={() => {
+          if (archiveCardId) archiveMut.mutate(archiveCardId);
+        }}
+        loading={archiveMut.isPending}
+      />
 
       {createOpen && selectedCliente && (
         <CardCreateSheet

@@ -2,6 +2,7 @@ import type { ContentCard } from "@/modules/approval/types/content-card";
 import { cn } from "@/lib/utils";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { Archive } from "lucide-react";
 import { formatCardSchedule, publishConfirmationLabel, responsavelLabel } from "./kanban-meta";
 import type { PillarSummary } from "../shared/PillarBadge";
 
@@ -10,6 +11,7 @@ export function KanbanCard({
   pillar,
   thumbnailUrl,
   onOpen,
+  onArchive,
   showCliente,
   readOnly = false,
 }: {
@@ -17,6 +19,7 @@ export function KanbanCard({
   pillar?: PillarSummary | null;
   thumbnailUrl?: string | null;
   onOpen: () => void;
+  onArchive?: () => void;
   showCliente?: boolean;
   readOnly?: boolean;
 }) {
@@ -34,7 +37,7 @@ export function KanbanCard({
     : undefined;
 
   const className = cn(
-    "group w-full rounded-xl border border-border bg-card p-3 text-left shadow-sm transition-shadow hover:shadow-md",
+    "group relative w-full rounded-xl border border-border bg-card p-3 text-left shadow-sm transition-shadow hover:shadow-md",
     (card.status === "alteracoes_roteiro" || card.status === "alteracoes_design") &&
       "border-[color:var(--cw-col-alteracoes)]/60",
     draggable.isDragging && "opacity-60 shadow-lg ring-2 ring-primary/30",
@@ -57,7 +60,12 @@ export function KanbanCard({
           </div>
         )}
         <div className="min-w-0 flex-1 space-y-1">
-          <p className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
+          <p
+            className={cn(
+              "line-clamp-2 text-sm font-medium leading-snug text-foreground",
+              onArchive && "pr-6",
+            )}
+          >
             {card.titulo}
           </p>
           {showCliente && (
@@ -104,6 +112,24 @@ export function KanbanCard({
     </>
   );
 
+  const archiveButton =
+    onArchive && card.status !== "arquivado" ? (
+      <button
+        type="button"
+        aria-label="Arquivar conteúdo"
+        title="Arquivar"
+        className="absolute right-2 top-2 z-10 rounded-md border border-border bg-card p-1 text-muted-foreground opacity-100 shadow-sm hover:bg-muted hover:text-foreground md:opacity-0 md:group-hover:opacity-100"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          onArchive();
+        }}
+      >
+        <Archive className="h-3.5 w-3.5" />
+      </button>
+    ) : null;
+
   if (readOnly) {
     return (
       <button type="button" onClick={onOpen} className={className}>
@@ -113,20 +139,25 @@ export function KanbanCard({
   }
 
   return (
-    <button
+    <div
       ref={draggable.setNodeRef}
-      type="button"
       style={style}
+      className={className}
       {...draggable.listeners}
       {...draggable.attributes}
-      onClick={(e) => {
-        if (draggable.isDragging) return;
-        e.stopPropagation();
-        onOpen();
-      }}
-      className={className}
     >
-      {body}
-    </button>
+      {archiveButton}
+      <button
+        type="button"
+        onClick={(e) => {
+          if (draggable.isDragging) return;
+          e.stopPropagation();
+          onOpen();
+        }}
+        className="w-full text-left"
+      >
+        {body}
+      </button>
+    </div>
   );
 }
