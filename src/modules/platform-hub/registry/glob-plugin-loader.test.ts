@@ -8,6 +8,7 @@ const EXPECTED_CATALOG = [
   { key: "ga4", label: "GA4" },
   { key: "google_ads", label: "Google Ads" },
   { key: "google_business", label: "Google Business" },
+  { key: "instagram_organic", label: "Instagram" },
   { key: "meta_ads", label: "Meta" },
   { key: "tiktok", label: "TikTok" },
   { key: "youtube", label: "YouTube" },

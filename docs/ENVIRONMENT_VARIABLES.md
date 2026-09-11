@@ -132,7 +132,10 @@ Um único par OAuth cobre os quatro plugins Google.
 | Variável | Obrigatório | Descrição | Onde é usada | Exemplo | Ambiente | Como obter |
 | -------- | ----------- | --------- | ------------ | ------- | -------- | ---------- |
 | `META_APP_ID` | condicional | App ID do Meta for Developers | `hub-oauth.factory.ts`, `create-registration-credential-access.ts` | `1234567890123456` | dev, staging, prod | [Meta for Developers](https://developers.facebook.com/) → App → **Settings → Basic** → App ID |
-| `META_APP_SECRET` | condicional | App Secret | idem | `a1b2c3d4e5f6...` | dev, staging, prod | Mesmo app → **App Secret** (Show) |
+| `META_APP_SECRET` | condicional | App Secret | idem + HMAC do webhook CRM | `a1b2c3d4e5f6...` | dev, staging, prod | Mesmo app → **App Secret** (Show) |
+| `META_WEBHOOK_VERIFY_TOKEN` | condicional | Token do desafio GET do webhook | `server/routes/api/webhooks/meta.get.ts` | string aleatória | staging, prod | Você escolhe; o mesmo valor no App Dashboard |
+| `META_REQUEST_IG_MESSAGES_SCOPE` | não | `1` pede Direct no OAuth Instagram | `instagram-organic-oauth.config.ts` | `1` | staging/prod após App Review | Default omitido = não pede |
+| `META_REQUEST_LEADS_SCOPE` | não | `1` pede `leads_retrieval` no OAuth Meta Ads | `meta-oauth.config.ts` | `1` | staging/prod após App Review | Default omitido = não pede |
 
 **Redirect URI no Meta:** `{APP_URL}/oauth/meta/callback` · Produto: Facebook Login + Marketing API
 

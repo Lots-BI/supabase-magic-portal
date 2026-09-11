@@ -7,6 +7,17 @@ export const META_OAUTH_DEFAULT_SCOPES = [
   "instagram_basic",
 ] as const;
 
+export const META_LEADS_RETRIEVAL_SCOPE = "leads_retrieval";
+
+/** Lead Ads: opt-in após App Review — META_REQUEST_LEADS_SCOPE=1 */
+export function metaAdsOauthScopes(): readonly string[] {
+  const scopes: string[] = [...META_OAUTH_DEFAULT_SCOPES];
+  if (process.env.META_REQUEST_LEADS_SCOPE?.trim() === "1") {
+    scopes.push(META_LEADS_RETRIEVAL_SCOPE);
+  }
+  return scopes;
+}
+
 export interface MetaOAuthConfigV1 {
   clientId: string;
   clientSecret: string;

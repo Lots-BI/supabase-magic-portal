@@ -12,6 +12,7 @@ import { INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/p
 import { instagramOrganicOauthScopes } from "@/modules/platform-hub/plugins/instagram_organic/oauth/instagram-organic-oauth.config";
 import { MetaOAuthService } from "@/modules/platform-hub/plugins/meta_ads/oauth/meta-oauth.service";
 import { META_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/meta_ads/meta-credential-keys";
+import { metaAdsOauthScopes } from "@/modules/platform-hub/plugins/meta_ads/oauth/meta-oauth.config";
 import { TikTokOAuthService } from "@/modules/platform-hub/plugins/tiktok/oauth/tiktok-oauth.service";
 import { TIKTOK_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/tiktok/tiktok-credential-keys";
 import { YouTubeOAuthService } from "@/modules/platform-hub/plugins/youtube/oauth/youtube-oauth.service";
@@ -119,7 +120,11 @@ export function createHubOAuthHandle(
 ): HubOAuthHandle {
   switch (pluginKey) {
     case "meta_ads": {
-      const oauth = new MetaOAuthService(metaOAuthConfig(), httpClient, credentialAccess);
+      const oauth = new MetaOAuthService(
+        { ...metaOAuthConfig(), defaultScopes: metaAdsOauthScopes() },
+        httpClient,
+        credentialAccess,
+      );
       return {
         pluginKey,
         credentialKey: META_OAUTH_CREDENTIAL_KEY,

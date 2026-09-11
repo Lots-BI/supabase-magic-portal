@@ -6,6 +6,8 @@ import type {
   InstagramMediaRowV1,
   InstagramInsightsResponseV1,
   InstagramAccountInsightsResponseV1,
+  InstagramCommentListResponseV1,
+  InstagramCommentV1,
 } from "./instagram-api.types";
 import {
   insightMetricsCoreForProductType,
@@ -309,4 +311,120 @@ export class InstagramGraphClient {
     if (!body.id) throw new Error("Graph não retornou media id");
     return { id: body.id };
   }
+
+  async listMediaComments(
+    accessToken: string,
+    mediaId: string,
+    maxPages = 5,
+  ): Promise<{ items: InstagramCommentV1[]; unsupported: boolean }> {
+    const fields = "id,text,timestamp,username,from,hidden,parent_id";
+    const url = `${graphBaseUrl(this.graphVersion)}/${mediaId}/comments`;
+    try {
+      const { items } = await paginateCursorPages({
+        maxPages,
+        fetchPage: async (after) => {
+          const response = await this.config.httpClient.request(url, {
+            searchParams: {
+              access_token: accessToken,
+              fields,
+              limit: "50",
+              after,
+            },
+          });
+          const body = await response.json<InstagramCommentListResponseV1>();
+          if (body.error?.message) throw new Error(body.error.message);
+          return {
+            data: body.data ?? [],
+            nextCursor: body.paging?.cursors?.after,
+          };
+        },
+      });
+      return { items, unsupported: false };
+    } catch (error) {
+      if (isUnsupportedInsightError(error) || isCommentsPermissionError(error)) {
+        return { items: [], unsupported: true };
+      }
+      throw error;
+    }
+  }
+
+  async listCommentReplies(
+    accessToken: string,
+    commentId: string,
+    maxPages = 3,
+  ): Promise<InstagramCommentV1[]> {
+    const fields = "id,text,timestamp,username,from,hidden,parent_id";
+    const url = `${graphBaseUrl(this.graphVersion)}/${commentId}/replies`;
+    const { items } = await paginateCursorPages({
+      maxPages,
+      fetchPage: async (after) => {
+        const response = await this.config.httpClient.request(url, {
+          searchParams: {
+            access_token: accessToken,
+            fields,
+            limit: "50",
+            after,
+          },
+        });
+        const body = await response.json<InstagramCommentListResponseV1>();
+        if (body.error?.message) {
+          if (isCommentsPermissionError(body.error.message)) return { data: [] };
+          throw new Error(body.error.message);
+        }
+        return {
+          data: (body.data ?? []).map((row) => ({ ...row, parent_id: row.parent_id ?? commentId })),
+          nextCursor: body.paging?.cursors?.after,
+        };
+      },
+    });
+    return items;
+  }
+
+  async replyToComment(
+    accessToken: string,
+    commentId: string,
+    message: string,
+  ): Promise<{ id: string }> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${commentId}/replies`;
+    const response = await this.config.httpClient.request(url, {
+      method: "POST",
+      searchParams: {
+        access_token: accessToken,
+        message,
+      },
+    });
+    const body = await response.json<{ id?: string; error?: { message?: string } }>();
+    if (body.error?.message) throw new Error(body.error.message);
+    if (!body.id) throw new Error("Graph não retornou id da resposta");
+    return { id: body.id };
+  }
+
+  async sendDirectMessage(
+    accessToken: string,
+    igUserId: string,
+    recipientIgsid: string,
+    message: string,
+  ): Promise<{ id: string }> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${igUserId}/messages`;
+    const response = await this.config.httpClient.request(url, {
+      method: "POST",
+      searchParams: {
+        access_token: accessToken,
+        recipient: JSON.stringify({ id: recipientIgsid }),
+        message: JSON.stringify({ text: message }),
+      },
+    });
+    const body = await response.json<{ message_id?: string; id?: string; error?: { message?: string } }>();
+    if (body.error?.message) throw new Error(body.error.message);
+    const id = body.message_id ?? body.id;
+    if (!id) throw new Error("Graph não retornou id da mensagem");
+    return { id };
+  }
+}
+
+function isCommentsPermissionError(error: unknown): boolean {
+  const text = typeof error === "string" ? error : error instanceof Error ? error.message : String(error);
+  return /(#10)\b|(#200)\b|instagram_manage_comments|permission|not authorized|oauth exception/i.test(
+    text,
+  );
 }

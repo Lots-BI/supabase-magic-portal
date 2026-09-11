@@ -15,6 +15,7 @@ import { FEATURE_ADMIN_CENTRAL_NAV, FEATURE_PLANO_ESTRATEGICO_NAV } from "@/lib/
 import { isPlatformOwnerEmail } from "@/lib/platform-owner";
 import "@/modules/os-bootstrap";
 import {
+  Contact2,
   LayoutDashboard,
   Users,
   Briefcase,
@@ -127,6 +128,7 @@ function AuthenticatedLayout() {
       label: "Dados",
       items: [
         { to: "/admin", label: "Visão geral", icon: LayoutDashboard, prefixMatch: false },
+        { to: "/admin/crm", label: "CRM", icon: Contact2 },
         { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
         ...(FEATURE_PLANO_ESTRATEGICO_NAV
           ? [{ to: "/admin/plano-estrategico", label: "Plano Estratégico", icon: Compass }]
@@ -192,6 +194,11 @@ function AuthenticatedLayout() {
         clientDashboards,
         ...(diretrizesSlug
           ? [
+              {
+                to: `/cliente/${diretrizesSlug}/crm`,
+                label: "CRM",
+                icon: Contact2,
+              },
               {
                 to: `/cliente/${diretrizesSlug}/relatorio`,
                 label: "Relatório",

@@ -61,6 +61,8 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `58_meta_ads_messaging_metrics.sql`       | `vw_meta_ads_diario`: `messaging_conversations_started`, `messaging_first_replies`, `page_engagements` no **fim**. WhatsApp do Gerenciador. |
 | `59_ig_media_link_content_cards.sql`      | Liga publicações IG a `content_cards`. |
 | `60_dashboard_prefer_hub_rpc.sql`         | RPC `dashboard_prefer_hub_long` + `dashboard_coverage`: dashboards filtram cliente+data nas tabelas base (sem varrer o portfólio nas views diárias). |
+| `61_crm_people_graph.sql`                 | CRM de audiência: pessoas, identidades, sinais, stats, notas, cobertura. View `vw_crm_people_list`. |
+| `62_crm_inbox.sql`                        | Dono, merge (`merged_into_id`), recibos de webhook Meta, view com `last_kind`. |
 
 > Conteúdos (38–45) e demais arquivos em `supabase/migrations-official/` seguem a mesma
 > numeração. Lista completa no diretório. **Não existe `04`.** A tentativa
