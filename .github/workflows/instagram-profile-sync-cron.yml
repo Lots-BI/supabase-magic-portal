@@ -1,0 +1,35 @@
+# Sync diário — perfil Instagram (conta/dia)
+# Secrets: APP_URL + CRON_SECRET (os mesmos do cron de publicações Instagram)
+
+name: Instagram profile sync (daily)
+
+on:
+  schedule:
+    # 03:25 UTC = 00:25 America/Sao_Paulo
+    - cron: "25 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: instagram-profile-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Trigger /api/cron/instagram-profile-sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Call cron endpoint
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "APP_URL e CRON_SECRET devem estar configurados nos secrets do repositório."
+            exit 1
+          fi
+          curl -fsS --retry 2 --retry-delay 10 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${APP_URL%/}/api/cron/instagram-profile-sync"

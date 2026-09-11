@@ -74,10 +74,16 @@ function PlatformResolved({
           <div className="flex flex-wrap items-center gap-2">
             <PeriodPicker value={periodInput} onChange={setPeriodInput} />
             {def.key === "instagram" && ref.cadastroId != null && (
-              <InstagramProfileSyncButton cadastroClienteId={ref.cadastroId} />
+              <MetricsSyncButton
+                queryKey="instagram"
+                syncFn={() => syncInstagramProfileFn({ data: { cadastroClienteId: ref.cadastroId! } })}
+              />
             )}
             {def.key === "meta_ads" && ref.cadastroId != null && (
-              <MetaAdsCampaignsSyncButton cadastroClienteId={ref.cadastroId} />
+              <MetricsSyncButton
+                queryKey="meta_ads"
+                syncFn={() => syncMetaAdsCampaignsFn({ data: { cadastroClienteId: ref.cadastroId! } })}
+              />
             )}
           </div>
         }
@@ -87,63 +93,36 @@ function PlatformResolved({
   );
 }
 
-function InstagramProfileSyncButton({ cadastroClienteId }: { cadastroClienteId: number }) {
+function MetricsSyncButton({
+  queryKey,
+  syncFn,
+}: {
+  queryKey: string;
+  syncFn: () => Promise<{
+    ok: boolean;
+    error?: string;
+    daysFilled?: number;
+    daysRequested?: number;
+  }>;
+}) {
   const queryClient = useQueryClient();
 
   const syncMutation = useMutation({
-    mutationFn: () => syncInstagramProfileFn({ data: { cadastroClienteId } }),
+    mutationFn: syncFn,
     onSuccess: (result) => {
       if (!result.ok) {
         toast.error(result.error ?? "Não foi possível puxar métricas");
         return;
       }
-      if (result.daysFilled === 0) {
-        toast.success("Nenhum dia novo — dados já atualizados");
-      } else {
-        toast.success(
-          `${result.daysFilled} dia(s) preenchido(s) de ${result.daysRequested} faltante(s)`,
-        );
-      }
-      queryClient.invalidateQueries({ queryKey: ["platform-rows", "instagram"] });
-    },
-    onError: (error) => toast.error(error.message),
-  });
-
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      disabled={syncMutation.isPending}
-      onClick={() => syncMutation.mutate()}
-    >
-      <RefreshCw
-        className={syncMutation.isPending ? "h-4 w-4 animate-spin" : "h-4 w-4"}
-        aria-hidden
-      />
-      Puxar métricas
-    </Button>
-  );
-}
-
-function MetaAdsCampaignsSyncButton({ cadastroClienteId }: { cadastroClienteId: number }) {
-  const queryClient = useQueryClient();
-
-  const syncMutation = useMutation({
-    mutationFn: () => syncMetaAdsCampaignsFn({ data: { cadastroClienteId } }),
-    onSuccess: (result) => {
-      if (!result.ok) {
-        toast.error(result.error ?? "Não foi possível puxar métricas");
-        return;
+      if (result.error) {
+        toast.warning(result.error);
       }
       if (result.daysFilled === 0) {
         toast.success("Nenhum dia novo — dados já atualizados");
       } else {
-        toast.success(
-          `${result.daysFilled} dia(s) preenchido(s) de ${result.daysRequested} faltante(s)`,
-        );
+        toast.success(`${result.daysFilled} dia(s) atualizado(s)`);
       }
-      queryClient.invalidateQueries({ queryKey: ["platform-rows", "meta_ads"] });
+      queryClient.invalidateQueries({ queryKey: ["platform-rows", queryKey] });
     },
     onError: (error) => toast.error(error.message),
   });

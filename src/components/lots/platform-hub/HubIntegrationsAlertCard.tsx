@@ -31,7 +31,8 @@ export function HubIntegrationsAlertCard() {
     (alerts?.unhealthy.length ?? 0) > 0 ||
     (alerts?.degraded.length ?? 0) > 0 ||
     (alerts?.staleSync.length ?? 0) > 0 ||
-    (alerts?.lowCoverage.length ?? 0) > 0;
+    (alerts?.lowCoverage.length ?? 0) > 0 ||
+    Boolean(summary?.ingestLagging);
 
   return (
     <SectionCard
@@ -91,6 +92,16 @@ export function HubIntegrationsAlertCard() {
             <AlertRow
               icon={Clock}
               label={`${alerts!.staleSync.length} sync atrasada(s)`}
+              href="/admin/conexoes"
+            />
+          )}
+          {summary?.ingestLagging && (
+            <AlertRow
+              icon={Clock}
+              label={`Hub sem dia recente: ${summary.ingestLag
+                .filter((row) => row.lagging)
+                .map((row) => row.plataforma)
+                .join(", ")}`}
               href="/admin/conexoes"
             />
           )}

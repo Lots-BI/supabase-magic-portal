@@ -143,7 +143,8 @@ export const METRIC_META: Record<CommonMetric, MetricMeta> = {
   conversions: {
     label: "Conversões",
     short: "Conv.",
-    description: "Ações de conversão atribuídas no período.",
+    description:
+      "Resultados de campanha paga (Meta) + conversões GA4 no período. Pixel Meta continua no dashboard da plataforma.",
     format: "int",
     positiveIsGood: true,
     tone: "success",
@@ -307,11 +308,20 @@ export interface OverviewRow {
   ga4_conversions: number | null;
   instagram_reach: number | null;
   instagram_interactions: number | null;
+  /** Colunas novas no fim da view (migration 57). */
+  meta_results?: number | null;
+  meta_conversions?: number | null;
+  google_conversions?: number | null;
 }
 
 /** Colunas mínimas de vw_overview_cliente — evita select("*"). */
 export const OVERVIEW_CLIENTE_SELECT =
-  "data,cliente,meta_spend,google_spend,total_impressions,total_clicks,ga4_sessions,ga4_conversions,instagram_reach,instagram_interactions";
+  "data,cliente,meta_spend,google_spend,total_impressions,total_clicks,ga4_sessions,ga4_conversions,instagram_reach,instagram_interactions,meta_results,meta_conversions,google_conversions";
+
+/** KPI consolidado: resultados Meta (objetivo) + Google Ads + GA4. Não soma pixel Meta. */
+export function overviewConversions(row: OverviewRow): number {
+  return (row.meta_results ?? 0) + (row.google_conversions ?? 0) + (row.ga4_conversions ?? 0);
+}
 
 export interface Totals {
   spend: number;
@@ -353,7 +363,7 @@ export function sumOverview(rows: OverviewRow[]): Totals {
       acc.impressions += r.total_impressions ?? 0;
       acc.clicks += r.total_clicks ?? 0;
       acc.sessions += r.ga4_sessions ?? 0;
-      acc.conversions += r.ga4_conversions ?? 0;
+      acc.conversions += overviewConversions(r);
       acc.engagement += r.instagram_interactions ?? 0;
       return acc;
     },
@@ -425,7 +435,7 @@ export function dailyFromOverview(rows: OverviewRow[], period: PeriodRange): Dai
     cur.meta_spend += r.meta_spend ?? 0;
     cur.google_spend += r.google_spend ?? 0;
     cur.spend = cur.meta_spend + cur.google_spend;
-    cur.conversions += r.ga4_conversions ?? 0;
+    cur.conversions += overviewConversions(r);
     cur.sessions += r.ga4_sessions ?? 0;
     cur.clicks += r.total_clicks ?? 0;
     cur.impressions += r.total_impressions ?? 0;

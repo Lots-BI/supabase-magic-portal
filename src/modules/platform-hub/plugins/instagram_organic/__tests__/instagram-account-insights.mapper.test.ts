@@ -27,6 +27,7 @@ describe("instagram-account-insights.mapper", () => {
         { metricKey: "profile_links_taps", value: 3, date: "2026-01-15" },
       ]),
     );
+    expect(rows.find((r) => r.metricKey === "views")).toBeUndefined();
   });
 
   it("ignores unknown metrics and missing/invalid total_value", () => {
@@ -42,7 +43,14 @@ describe("instagram-account-insights.mapper", () => {
       "2026-01-16",
     );
 
-    expect(rows).toEqual([{ metricKey: "reach", value: 10, date: "2026-01-16" }]);
+    expect(rows.find((r) => r.metricKey === "reach")).toEqual({
+      metricKey: "reach",
+      value: 10,
+      date: "2026-01-16",
+    });
+    expect(rows.find((r) => r.metricKey === "follower_count")).toBeUndefined();
+    expect(rows.find((r) => r.metricKey === "views")).toBeUndefined();
+    expect(rows.find((r) => r.metricKey === "likes")).toBeUndefined();
   });
 
   it("returns an empty array when there is no data", () => {

@@ -53,6 +53,7 @@ describe("MetaGraphClient", () => {
     });
 
     expect(requestedFields[0]).toContain("conversions");
+    expect(requestedFields[0]).toContain("inline_link_clicks");
     expect(requestedFields[1]).toBe(META_INSIGHTS_FIELDS_ACTIONS);
     expect(result.insights[0]?.actions?.[0]?.value).toBe("2");
   });

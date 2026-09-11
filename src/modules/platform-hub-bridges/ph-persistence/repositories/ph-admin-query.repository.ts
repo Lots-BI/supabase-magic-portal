@@ -24,6 +24,12 @@ export interface PhConnectionAdminRowV1 {
   updatedAt: string;
 }
 
+export interface HubIngestPlatformLagV1 {
+  plataforma: string;
+  maxDate: string | null;
+  lagging: boolean;
+}
+
 export interface PhConnectionsOverviewV1 {
   total: number;
   healthy: number;
@@ -33,6 +39,8 @@ export interface PhConnectionsOverviewV1 {
   makePassive: number;
   officialApi: number;
   withError: number;
+  ingestLag: HubIngestPlatformLagV1[];
+  ingestLagging: boolean;
 }
 
 export class PhAdminQueryRepository {
@@ -89,10 +97,15 @@ export class PhAdminQueryRepository {
   async getOverview(): Promise<PhConnectionsOverviewV1> {
     const { data, error } = await this.supabase
       .from("ph_connections")
-      .select("health_status,active_provider_type,last_error,status");
+      .select("health_status,active_provider_type,last_error,status,plugin_key");
     if (error) throw new Error(`ph_connections overview failed: ${error.message}`);
 
     const rows = data ?? [];
+    const ingestLag = await this.listIngestLag(
+      rows
+        .filter((r) => r.status === "active" && r.active_provider_type === "official_api")
+        .map((r) => String(r.plugin_key)),
+    );
     return {
       total: rows.length,
       healthy: rows.filter((r) => r.health_status === "healthy").length,
@@ -102,7 +115,39 @@ export class PhAdminQueryRepository {
       makePassive: rows.filter((r) => r.active_provider_type === "make_passive").length,
       officialApi: rows.filter((r) => r.active_provider_type === "official_api").length,
       withError: rows.filter((r) => r.last_error).length,
+      ingestLag,
+      ingestLagging: ingestLag.some((row) => row.lagging),
     };
+  }
+
+  private async listIngestLag(pluginKeys: string[]): Promise<HubIngestPlatformLagV1[]> {
+    const { addDaysToDateStr, todayInSaoPaulo } = await import(
+      "@/modules/platform-hub/plugins/instagram_organic/api/date-utils"
+    );
+    const cutoff = addDaysToDateStr(todayInSaoPaulo(), -2);
+    const wanted = new Set(pluginKeys);
+    const catalog: Array<{ pluginKey: string; label: string; match: string }> = [
+      { pluginKey: "meta_ads", label: "Meta Ads", match: "meta ads" },
+      { pluginKey: "instagram_organic", label: "Instagram", match: "instagram" },
+    ];
+    const out: HubIngestPlatformLagV1[] = [];
+    for (const item of catalog) {
+      if (!wanted.has(item.pluginKey)) continue;
+      const { data, error } = await this.supabase
+        .from("base_metricas_hub")
+        .select("data")
+        .ilike("plataforma", item.match)
+        .order("data", { ascending: false })
+        .limit(1);
+      if (error) throw new Error(`hub ingest lag failed: ${error.message}`);
+      const maxDate = data?.[0]?.data != null ? String(data[0].data) : null;
+      out.push({
+        plataforma: item.label,
+        maxDate,
+        lagging: !maxDate || maxDate < cutoff,
+      });
+    }
+    return out;
   }
 
   async updateAdminFields(

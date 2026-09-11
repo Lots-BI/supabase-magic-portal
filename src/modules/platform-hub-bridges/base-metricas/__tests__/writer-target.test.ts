@@ -33,7 +33,7 @@ describe("writer-target.config", () => {
 describe("SupabaseBaseMetricasWriter — HUB target", () => {
   it("grava via insert port quando habilitado", async () => {
     const insertPort: BaseMetricasInsertPort = {
-      insertRows: vi.fn(async (rows) => ({ inserted: rows.length })),
+      writeRows: vi.fn(async (rows) => ({ written: rows.length })),
     };
 
     const writer = createSupabaseBaseMetricasWriter({
@@ -54,7 +54,7 @@ describe("SupabaseBaseMetricasWriter — HUB target", () => {
     });
 
     expect(result.rowsWritten).toBe(1);
-    expect(insertPort.insertRows).toHaveBeenCalled();
+    expect(insertPort.writeRows).toHaveBeenCalled();
     expect(writer.target).toBe("HUB");
   });
 });

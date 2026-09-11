@@ -8,6 +8,9 @@ last_review: 2026-06-26
 
 # Segurança
 
+Varredura de isolamento multi-tenant (somente leitura, protocolo):
+[Plano de varredura de segurança](../reports/security-scan-plan.md).
+
 ---
 
 ## Princípio: defesa em profundidade
@@ -104,6 +107,7 @@ Ver [roadmap](../11-roadmap/roadmap.md) Fase 2.
 
 ## Referências
 
+- [Plano de varredura de segurança](../reports/security-scan-plan.md)
 - [Autenticação](./auth.md)
 - [ADR-0005](../02-architecture/adr/0005-server-functions-anon-vs-service-role.md)
 - [ADR-0003](../02-architecture/adr/0003-views-security-definer.md)

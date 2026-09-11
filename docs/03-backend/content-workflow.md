@@ -19,6 +19,13 @@ Módulo: `src/modules/approval/`
 `modules/client/` (`ClientScopeProvider` + `scoped-portal.functions.ts`). O módulo Approval permanece
 inalterado; a adaptação resolve `ClientAccessScope` e delega aos services existentes.
 
+**Agenda Instagram:** o Graph **não** agenda nativamente. Cards em `agendado` saem pelo job
+`GET /api/cron/conteudos-publish-due` (GitHub Actions a cada 5 min). `MetaInstagramPublisher.schedule`
+é no-op de propósito.
+
+**Notificações de aprovação:** tabela `app_notifications` (RLS por `user_id`). Novidades do produto
+ainda podem usar `localStorage` (`src/lib/notifications.ts`).
+
 ---
 
 ## Fluxo obrigatório

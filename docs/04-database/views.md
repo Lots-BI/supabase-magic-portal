@@ -22,19 +22,18 @@ são versões anteriores das mesmas views).
 
 ```mermaid
 flowchart TD
-    BM["base_metricas (long)"] --> N["vw_metricas_normalizadas"]
-    N --> GADS["vw_google_ads_diario"]
-    N --> GA4["vw_ga4_diario"]
-    N --> GBP["vw_google_business_diario"]
+    BM["base_metricas_make"] --> VM["vw_metricas prefer_hub"]
+    HUB["base_metricas_hub"] --> VM
+    VM --> N["vw_metricas_normalizadas"]
     N --> OV["vw_overview_cliente"]
     N --> AT["vw_clientes_ativos"]
-    HUBIG["base_metricas_hub (Instagram)"] --> PH["vw_instagram_normalizada_prefer_hub"]
+    HUBIG["base_metricas_hub Instagram"] --> PH["vw_instagram_normalizada_prefer_hub"]
     BM --> PH
     PH --> IG["vw_instagram_diario"]
-    HUBMETA["base_metricas_hub (Meta Ads)"] --> PHM["vw_meta_ads_normalizada_prefer_hub"]
+    HUBMETA["base_metricas_hub Meta Ads"] --> PHM["vw_meta_ads_normalizada_prefer_hub"]
     BM --> PHM
-    PHM --> META
-    CAD["cadastro_clientes (+ serviços + acessos)"] --> ADM["vw_clientes_admin"]
+    PHM --> META["vw_meta_ads_diario"]
+    CAD["cadastro_clientes"] --> ADM["vw_clientes_admin"]
 ```
 
 ---
@@ -100,7 +99,15 @@ preencher gaps no Hub sem exigir cutover de nenhuma outra plataforma. Ver
 ## `vw_overview_cliente` (consolidado)
 
 Uma linha por `data × cliente` com os números cross-plataforma usados nos dashboards de visão
-geral:
+geral. Lê `vw_metricas_normalizadas` → `vw_metricas` (prefer_hub por dia desde a migration 54).
+Sem isso, `security_invoker` + RLS no Make sem policy devolviam `[]` no JWT admin.
+
+| Coluna                                      | Origem               |
+| ------------------------------------------- | -------------------- |
+| `meta_spend`, `google_spend`                | spend por plataforma |
+| `total_impressions`, `total_clicks`         | meta + google        |
+| `ga4_sessions`, `ga4_conversions`           | GA4                  |
+| `instagram_reach`, `instagram_interactions` | Instagram            |
 
 | Coluna                                      | Origem               |
 | ------------------------------------------- | -------------------- |

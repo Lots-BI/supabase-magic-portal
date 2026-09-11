@@ -1,9 +1,14 @@
 import type { MetricRowV1 } from "../../../../../../contracts/ingest/profiles/metrics-timeseries.v1";
 import type { Ga4ReportRowV1 } from "./ga4-api.types";
 
+/** Ordem = request do Ga4Client. Nomes = Make (`activeusers`, …). */
 const METRIC_MAP = [
-  { key: "users", index: 0 },
+  { key: "activeusers", index: 0 },
   { key: "sessions", index: 1 },
+  { key: "engagedsessions", index: 2 },
+  { key: "screenpageviews", index: 3 },
+  { key: "eventcount", index: 4 },
+  { key: "conversions", index: 5 },
 ] as const;
 
 function formatGa4Date(raw: string | undefined): string | null {

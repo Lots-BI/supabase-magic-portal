@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { IgMediaRow } from "@/modules/instagram-posts/types";
-import { formatProductTypeLabel, pickDisplayMetrics } from "./format-metrics";
+import { formatMetricValue, formatProductTypeLabel, pickDisplayMetrics } from "./format-metrics";
 import { getInstagramPostThumbUrlFn } from "@/modules/instagram-posts/instagram-posts.server";
 
 export function InstagramPostCard({
@@ -79,7 +79,7 @@ export function InstagramPostCard({
               key={metric.key}
               className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-medium text-foreground"
             >
-              {metric.label}: {metric.value.toLocaleString("pt-BR")}
+              {metric.label}: {formatMetricValue(metric.key, metric.value)}
             </span>
           ))}
         </div>

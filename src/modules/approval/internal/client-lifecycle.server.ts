@@ -17,13 +17,49 @@ async function appendClientEvent(
   eventType: Parameters<typeof contentCardEventRepository.append>[1]["event_type"],
   payload: Record<string, unknown>,
 ) {
-  return contentCardEventRepository.append(supabase, {
+  const event = await contentCardEventRepository.append(supabase, {
     card_id: cardId,
     actor_id: actor.userId,
     actor_email: actor.email,
     event_type: eventType,
     payload,
   });
+
+  if (eventType === "approved" || eventType === "changes_requested") {
+    const card = await contentCardRepository.findById(supabase, cardId);
+    if (card) {
+      const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { insertAppNotifications } = await import(
+        "@/modules/notifications/insert-app-notifications.server"
+      );
+      const recipients = new Set<string>();
+      if (card.responsavel_user_id) recipients.add(card.responsavel_user_id);
+      if (card.created_by) recipients.add(card.created_by);
+      recipients.delete(actor.userId);
+      const kind = eventType === "approved" ? "aprovacao" : "reprovacao";
+      const title =
+        eventType === "approved"
+          ? `Aprovação: ${card.titulo}`
+          : `Alteração pedida: ${card.titulo}`;
+      try {
+        await insertAppNotifications(
+          getSupabaseAdmin(),
+          [...recipients].map((userId) => ({
+            userId,
+            kind,
+            title,
+            body: typeof payload.mensagem === "string" ? payload.mensagem : undefined,
+            href: `/admin/aprovacoes?cliente=${card.cadastro_cliente_id}&card=${card.id}`,
+            payload: { cardId: card.id, eventType },
+          })),
+        );
+      } catch {
+        // Notificação não pode reverter aprovação já gravada.
+      }
+    }
+  }
+
+  return event;
 }
 
 export async function clientApproveCard(

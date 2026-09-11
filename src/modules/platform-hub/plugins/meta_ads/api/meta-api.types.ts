@@ -17,6 +17,8 @@ export interface MetaInsightRowV1 {
   reach?: string;
   clicks?: string;
   spend?: string;
+  inline_link_clicks?: string;
+  unique_clicks?: string;
   /** Todas as ações atribuídas (cliques, leads, compras, mensagens…). */
   actions?: MetaActionValueV1[];
   /** Subconjunto de conversões da Insights API (pixel / API / CRM). */

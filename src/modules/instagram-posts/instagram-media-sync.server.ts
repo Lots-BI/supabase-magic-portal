@@ -6,15 +6,7 @@ import {
   isIgMediaSyncEnvelope,
 } from "@/modules/platform-hub-bridges/ig-media/accept-ig-media-envelope";
 import { INSTAGRAM_ORGANIC_METRICS_CAPABILITY } from "@/modules/platform-hub/plugins/instagram_organic/instagram_organic.capabilities";
-
-export type InstagramMediaSyncResult = {
-  connectionId: string;
-  cadastroId: number | null;
-  label: string | null;
-  ok: boolean;
-  mediaCount?: number;
-  error?: string;
-};
+import { syncAllActivePluginConnections } from "@/modules/platform-hub-bridges/ph-persistence/sync-all-active-connections";
 
 export async function syncInstagramMediaConnection(
   supabase: SupabaseClient,
@@ -47,54 +39,11 @@ export async function syncInstagramMediaConnection(
   }
 
   const writeResult = await acceptIgMediaEnvelope(supabase, envelope);
-  const mediaCount = writeResult?.mediaUpserted ?? 0;
-  if (mediaCount === 0) {
-    return {
-      ok: false,
-      error:
-        "Nenhuma publicação veio da Meta. Confira se o Instagram Business está conectado e tente de novo.",
-    };
-  }
-  return { ok: true, mediaCount };
+  return { ok: true, mediaCount: writeResult?.mediaUpserted ?? 0 };
 }
 
-export async function syncAllInstagramMediaConnections(
-  supabase: SupabaseClient,
-): Promise<{ total: number; succeeded: number; failed: number; results: InstagramMediaSyncResult[] }> {
-  const { data: connections, error } = await supabase
-    .from("ph_connections")
-    .select("id, cadastro_id, label")
-    .eq("plugin_key", "instagram_organic")
-    .eq("status", "active");
-
-  if (error) throw new Error(error.message);
-
-  const results: InstagramMediaSyncResult[] = [];
-
-  for (const connection of connections ?? []) {
-    const base = {
-      connectionId: connection.id,
-      cadastroId: connection.cadastro_id as number | null,
-      label: connection.label as string | null,
-    };
-
-    try {
-      const sync = await syncInstagramMediaConnection(supabase, connection.id);
-      results.push({ ...base, ...sync });
-    } catch (err) {
-      results.push({
-        ...base,
-        ok: false,
-        error: err instanceof Error ? err.message : String(err),
-      });
-    }
-  }
-
-  const succeeded = results.filter((r) => r.ok).length;
-  return {
-    total: results.length,
-    succeeded,
-    failed: results.length - succeeded,
-    results,
-  };
+export async function syncAllInstagramMediaConnections(supabase: SupabaseClient) {
+  return syncAllActivePluginConnections(supabase, "instagram_organic", (connectionId) =>
+    syncInstagramMediaConnection(supabase, connectionId),
+  );
 }

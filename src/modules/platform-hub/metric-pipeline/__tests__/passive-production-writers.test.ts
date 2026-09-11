@@ -47,12 +47,14 @@ describe("Passive Production — Writers", () => {
 
   it("Google Ads spend — armazena micros como Make", () => {
     expect(toBaseMetricasStorageValue("Google Ads", "spend", 2.5)).toBe(2_500_000);
+    expect(toBaseMetricasStorageValue("Google Ads", "spend", 25.5)).toBe(25_500_000);
+    expect(toBaseMetricasStorageValue("Google Ads", "spend", 25.5) / 1_000_000).toBe(25.5);
     expect(toBaseMetricasStorageValue("Meta Ads", "spend", 2.5)).toBe(2.5);
   });
 
   it("SupabaseWriter isolado — insert via port mock", async () => {
     const insertPort: BaseMetricasInsertPort = {
-      insertRows: vi.fn(async (rows) => ({ inserted: rows.length })),
+      writeRows: vi.fn(async (rows) => ({ written: rows.length })),
     };
 
     const writer = new SupabaseBaseMetricasWriter({ enabled: true, insertPort });
@@ -60,7 +62,7 @@ describe("Passive Production — Writers", () => {
 
     expect(result.writerKey).toBe("base_metricas_supabase:hub");
     expect(result.rowsWritten).toBe(1);
-    expect(insertPort.insertRows).toHaveBeenCalledWith([
+    expect(insertPort.writeRows).toHaveBeenCalledWith([
       {
         data: "2026-07-01",
         cliente: "acme_corp",
@@ -74,20 +76,27 @@ describe("Passive Production — Writers", () => {
 
   it("SupabaseWriter desligado por padrão (feature flag)", async () => {
     const insertPort: BaseMetricasInsertPort = {
-      insertRows: vi.fn(async () => ({ inserted: 0 })),
+      writeRows: vi.fn(async () => ({ written: 0 })),
     };
     const writer = new SupabaseBaseMetricasWriter({ enabled: false, insertPort });
     const result = await writer.write(sampleBatch());
 
     expect(result.rowsWritten).toBe(0);
     expect(result.rowsSkipped).toBe(1);
-    expect(insertPort.insertRows).not.toHaveBeenCalled();
+    expect(insertPort.writeRows).not.toHaveBeenCalled();
+  });
+
+  it("MemoryWriter não conta skip em dobro quando o cliente falta", async () => {
+    const writer = new InMemoryBaseMetricasWriter();
+    const result = await writer.write(sampleBatch({ canonicalClientName: "" }));
+    expect(result.rowsWritten).toBe(0);
+    expect(result.rowsSkipped).toBe(1);
   });
 
   it("Dual Writer — memory + supabase", async () => {
     const memory = new InMemoryBaseMetricasWriter();
     const insertPort: BaseMetricasInsertPort = {
-      insertRows: vi.fn(async (rows) => ({ inserted: rows.length })),
+      writeRows: vi.fn(async (rows) => ({ written: rows.length })),
     };
     const supabase = new SupabaseBaseMetricasWriter({ enabled: true, insertPort });
     const pipeline = new MetricPipeline([memory, supabase], new InMemoryWriteAuditRepository());
@@ -168,5 +177,81 @@ describe("Passive Production — Writers", () => {
     delete process.env.PLATFORM_HUB_SUPABASE_WRITER;
     expect(isSupabaseWriterEnabled()).toBe(false);
     process.env.PLATFORM_HUB_SUPABASE_WRITER = prev;
+  });
+
+  it("MemoryWriter replace-by-day — spend 10 depois 12 vira uma linha 12", async () => {
+    const writer = new InMemoryBaseMetricasWriter();
+    await writer.write(
+      sampleBatch({
+        rows: [{ metricKey: "spend", value: 10, date: "2026-07-01", campaign: "A" }],
+      }),
+    );
+    await writer.write(
+      sampleBatch({
+        rows: [{ metricKey: "spend", value: 12, date: "2026-07-01", campaign: "A" }],
+      }),
+    );
+
+    expect(writer.snapshot()).toEqual([
+      {
+        cliente: "acme_corp",
+        plataforma: "Meta Ads",
+        metrica: "spend",
+        valor: 12,
+        data: "2026-07-01",
+        campanha: "A",
+      },
+    ]);
+  });
+
+  it("MemoryWriter replace-by-day — campanha que some some do dia", async () => {
+    const writer = new InMemoryBaseMetricasWriter();
+    await writer.write(
+      sampleBatch({
+        rows: [
+          { metricKey: "spend", value: 10, date: "2026-07-01", campaign: "A" },
+          { metricKey: "spend", value: 4, date: "2026-07-01", campaign: "B" },
+        ],
+      }),
+    );
+    await writer.write(
+      sampleBatch({
+        rows: [{ metricKey: "spend", value: 4, date: "2026-07-01", campaign: "B" }],
+      }),
+    );
+
+    expect(writer.snapshot().map((row) => row.campanha)).toEqual(["B"]);
+  });
+
+  it("MemoryWriter replace-by-day — outra plataforma e outra data ficam", async () => {
+    const writer = new InMemoryBaseMetricasWriter();
+    await writer.write(
+      sampleBatch({
+        platformLabel: "Instagram",
+        rows: [{ metricKey: "reach", value: 100, date: "2026-07-01" }],
+      }),
+    );
+    await writer.write(
+      sampleBatch({
+        rows: [
+          { metricKey: "spend", value: 10, date: "2026-07-01" },
+          { metricKey: "spend", value: 5, date: "2026-07-02" },
+        ],
+      }),
+    );
+    await writer.write(
+      sampleBatch({
+        rows: [{ metricKey: "spend", value: 12, date: "2026-07-01" }],
+      }),
+    );
+
+    const snap = writer.snapshot();
+    expect(snap.find((row) => row.plataforma === "Instagram")?.valor).toBe(100);
+    expect(
+      snap.find((row) => row.plataforma === "Meta Ads" && row.data === "2026-07-02")?.valor,
+    ).toBe(5);
+    expect(
+      snap.find((row) => row.plataforma === "Meta Ads" && row.data === "2026-07-01")?.valor,
+    ).toBe(12);
   });
 });

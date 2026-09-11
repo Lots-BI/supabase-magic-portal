@@ -37,6 +37,12 @@ jobs:
       - name: Test
         run: npm run test
 
+      - name: Check migrations-official
+        run: node scripts/check-migrations-official.mjs
+        env:
+          OFFICIAL_SUPABASE_URL: ${{ secrets.OFFICIAL_SUPABASE_URL }}
+          OFFICIAL_SERVICE_ROLE_KEY: ${{ secrets.OFFICIAL_SERVICE_ROLE_KEY }}
+
       - name: Build
         run: npm run build
         env:

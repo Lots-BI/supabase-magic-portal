@@ -3,6 +3,13 @@ import type { MetaActionValueV1, MetaInsightRowV1 } from "./meta-api.types";
 
 const DELIVERY_FIELDS = ["impressions", "reach", "clicks", "spend"] as const;
 
+const ACTION_METRIC_TYPES: Record<string, readonly string[]> = {
+  link_clicks: ["link_click"],
+  landing_page_views: ["landing_page_view", "omni_landing_page_view"],
+  video_views: ["video_view"],
+  post_engagements: ["post_engagement"],
+};
+
 /**
  * Resultados "de negócio" — equivalentes à coluna Resultados do Gerenciador
  * para campanhas de venda/lead/mensagem. Landing page e clique ficam de
@@ -213,6 +220,36 @@ export function pickResultsValue(
   return pickConversionLikeResults(insight, byType);
 }
 
+function enumerateIsoDays(from: string, to: string): string[] {
+  const days: string[] = [];
+  let cursor = from;
+  while (cursor <= to) {
+    days.push(cursor);
+    const [y, m, d] = cursor.split("-").map(Number);
+    cursor = new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
+  }
+  return days;
+}
+
+/**
+ * Dias sem entrega a API omite. Gravamos 0 em results/conversions para o
+ * gap-finder não pedir o mesmo intervalo de novo (e o "Puxar métricas" não
+ * falhar com "não devolveu campanhas").
+ */
+export function markerRowsForUncoveredDates(
+  window: { from: string; to: string },
+  coveredDates: Iterable<string>,
+): MetricRowV1[] {
+  const covered = new Set(coveredDates);
+  const rows: MetricRowV1[] = [];
+  for (const date of enumerateIsoDays(window.from, window.to)) {
+    if (covered.has(date)) continue;
+    rows.push({ metricKey: "results", value: 0, date, campaign: "" });
+    rows.push({ metricKey: "conversions", value: 0, date, campaign: "" });
+  }
+  return rows;
+}
+
 /** Converte linhas Insights (wide) → long format compatível com Make / base_metricas. */
 export function mapMetaInsightsToMetricRows(
   insights: readonly MetaInsightRowV1[],
@@ -223,11 +260,38 @@ export function mapMetaInsightsToMetricRows(
   for (const insight of insights) {
     const date = insight.date_start;
     const campaign = insight.campaign_name ?? insight.campaign_id;
+    const byType = actionsByType(insight);
 
     for (const metricKey of DELIVERY_FIELDS) {
       const value = parseMetricValue(insight[metricKey]);
       if (value === null) continue;
       rows.push({ metricKey, value, date, campaign });
+    }
+
+    const inlineLink = parseMetricValue(insight.inline_link_clicks);
+    rows.push({
+      metricKey: "inline_link_clicks",
+      value: inlineLink ?? firstPositive(byType, ACTION_METRIC_TYPES.link_clicks),
+      date,
+      campaign,
+    });
+    const uniqueClicks = parseMetricValue(insight.unique_clicks);
+    if (uniqueClicks !== null) {
+      rows.push({
+        metricKey: "unique_clicks",
+        value: uniqueClicks,
+        date,
+        campaign,
+      });
+    }
+
+    for (const [metricKey, types] of Object.entries(ACTION_METRIC_TYPES)) {
+      rows.push({
+        metricKey,
+        value: firstPositive(byType, types),
+        date,
+        campaign,
+      });
     }
 
     // Sempre grava (inclusive 0) para o gap-finder saber que o dia já foi coletado

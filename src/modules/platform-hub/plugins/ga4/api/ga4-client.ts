@@ -69,7 +69,14 @@ export class Ga4Client {
             body: JSON.stringify({
               dateRanges: [{ startDate: input.window.from, endDate: input.window.to }],
               dimensions: [{ name: "date" }],
-              metrics: [{ name: "activeUsers" }, { name: "sessions" }],
+              metrics: [
+                { name: "activeUsers" },
+                { name: "sessions" },
+                { name: "engagedSessions" },
+                { name: "screenPageViews" },
+                { name: "eventCount" },
+                { name: "conversions" },
+              ],
               pageToken,
             }),
           });

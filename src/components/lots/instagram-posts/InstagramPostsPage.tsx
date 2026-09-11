@@ -20,9 +20,9 @@ import {
 import { InstagramPostCard } from "./InstagramPostCard";
 import {
   engagementRate,
+  formatMetricValue,
   formatProductTypeLabel,
   metricLabel,
-  pickDisplayMetrics,
 } from "./format-metrics";
 
 const PRODUCT_FILTERS = [
@@ -71,7 +71,11 @@ export function InstagramPostsPage({
         toast.error(result.error ?? "Não foi possível puxar métricas");
         return;
       }
-      toast.success(`${result.mediaCount ?? 0} publicações atualizadas`);
+      toast.success(
+        (result.mediaCount ?? 0) === 0
+          ? "Nenhuma publicação na conta — conexão ok"
+          : `${result.mediaCount} publicações atualizadas`,
+      );
       queryClient.invalidateQueries({ queryKey: ["instagram-posts", cadastroClienteId] });
     },
     onError: (error) => toast.error(error.message),
@@ -120,18 +124,35 @@ export function InstagramPostsPage({
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
         <KpiCard label="Publicações" value={String(posts.length)} />
         <KpiCard
-          label="Views (soma)"
+          label="Visualizações"
           value={sumMetric(posts, "views").toLocaleString("pt-BR")}
         />
         <KpiCard
-          label="Interações (soma)"
+          label="Alcance (soma)"
+          value={sumMetric(posts, "reach").toLocaleString("pt-BR")}
+        />
+        <KpiCard
+          label="Interações"
           value={sumMetric(posts, "total_interactions").toLocaleString("pt-BR")}
         />
-        <KpiCard label="Engajamento médio" value={`${avgEngagement.toFixed(1)}%`} />
+        <KpiCard label="Curtidas" value={sumMetric(posts, "likes").toLocaleString("pt-BR")} />
+        <KpiCard label="Salvos" value={sumMetric(posts, "saves").toLocaleString("pt-BR")} />
+        <KpiCard
+          label="Compartilhamentos"
+          value={sumMetric(posts, "shares").toLocaleString("pt-BR")}
+        />
+        <KpiCard
+          label="Comentários"
+          value={sumMetric(posts, "comments").toLocaleString("pt-BR")}
+        />
       </div>
+      <p className="text-[11px] text-muted-foreground">
+        Alcance somado entre publicações pode contar a mesma pessoa mais de uma vez. Engajamento
+        médio: {avgEngagement.toFixed(1)}%.
+      </p>
 
       <div className="flex flex-wrap gap-2">
         {PRODUCT_FILTERS.map((filter) => (
@@ -226,7 +247,7 @@ function PostDetailDialog({
               <div key={key} className="rounded-lg border border-border p-2">
                 <p className="text-[10px] uppercase text-muted-foreground">{metricLabel(key)}</p>
                 <p className="text-lg font-semibold tabular-nums">
-                  {Number(value).toLocaleString("pt-BR")}
+                  {formatMetricValue(key, Number(value))}
                 </p>
               </div>
             ))}

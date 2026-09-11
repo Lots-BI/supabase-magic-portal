@@ -1,18 +1,7 @@
-import { createError, defineEventHandler, getRequestHeader } from "h3";
+import { defineEventHandler } from "h3";
 import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
 import { runDuePublishes } from "@/modules/approval/jobs/publish-due.server";
-
-function assertCronAuth(event: { headers: Headers }): void {
-  const secret = process.env.CRON_SECRET?.trim();
-  if (!secret) {
-    throw createError({ statusCode: 503, statusMessage: "CRON_SECRET não configurado" });
-  }
-
-  const auth = getRequestHeader(event, "authorization");
-  if (auth !== `Bearer ${secret}`) {
-    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
-  }
-}
+import { assertCronAuth } from "../../../lib/cron-auth";
 
 /** Cron frequente — publica cards aprovados cujo horário já chegou. */
 export default defineEventHandler(async (event) => {

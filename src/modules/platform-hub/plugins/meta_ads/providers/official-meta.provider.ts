@@ -9,7 +9,11 @@ import { METRIC_BATCH_CONTRACT_VERSION } from "../../../../../../contracts/inges
 import type { CredentialAccessPort } from "../../_internal/oauth/credential-access.port";
 import type { HttpClientPort } from "../../_internal/http/http-client.port";
 import { MetaGraphClient } from "../api/meta-graph-client";
-import { countDistinctCampaigns, mapMetaInsightsToMetricRows } from "../api/meta-insights.mapper";
+import {
+  countDistinctCampaigns,
+  mapMetaInsightsToMetricRows,
+  markerRowsForUncoveredDates,
+} from "../api/meta-insights.mapper";
 import { META_OAUTH_CREDENTIAL_KEY } from "../meta-credential-keys";
 import {
   createMetaCollectTelemetry,
@@ -94,7 +98,12 @@ export function createOfficialMetaProvider(config: OfficialMetaProviderConfig): 
           // Insights já vieram; sem objective só contamos conversão de negócio.
         }
 
-        const rows = mapMetaInsightsToMetricRows(insights, { campaignObjectives });
+        const mapped = mapMetaInsightsToMetricRows(insights, { campaignObjectives });
+        const coveredDates = insights.map((row) => row.date_start).filter(Boolean);
+        const rows = [
+          ...mapped,
+          ...markerRowsForUncoveredDates(window, coveredDates),
+        ];
         timer.finish({
           campaignsCount: countDistinctCampaigns(insights),
           metricsCount: rows.length,

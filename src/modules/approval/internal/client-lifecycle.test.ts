@@ -29,6 +29,10 @@ vi.mock("@/integrations/supabase/client.server", () => ({
   getSupabaseAdmin: vi.fn(() => adminClient),
 }));
 
+vi.mock("@/modules/notifications/insert-app-notifications.server", () => ({
+  insertAppNotifications: vi.fn(async () => undefined),
+}));
+
 import { contentCardRepository } from "../repositories/content-card.repository.server";
 import { contentCardEventRepository } from "../repositories/content-card-event.repository.server";
 import { contentCardAttachmentRepository } from "../repositories/content-card-attachment.repository.server";

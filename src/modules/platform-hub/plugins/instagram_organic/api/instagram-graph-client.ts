@@ -1,4 +1,5 @@
 import type { HttpClientPort } from "../../_internal/http/http-client.port";
+import { HttpClientError } from "../../_internal/http/http-client.port";
 import { paginateCursorPages } from "../../_internal/http/paginate-cursor";
 import type {
   InstagramMediaListResponseV1,
@@ -6,8 +7,14 @@ import type {
   InstagramInsightsResponseV1,
   InstagramAccountInsightsResponseV1,
 } from "./instagram-api.types";
-import { insightMetricsForProductType } from "./instagram-insights.mapper";
-import { ACCOUNT_INSIGHTS_METRICS_PARAM } from "./instagram-account-insights.mapper";
+import {
+  insightMetricsCoreForProductType,
+  insightMetricsForProductType,
+} from "./instagram-insights.mapper";
+import {
+  ACCOUNT_INSIGHTS_CORE_METRICS_PARAM,
+  ACCOUNT_INSIGHTS_METRICS_PARAM,
+} from "./instagram-account-insights.mapper";
 import { spDayBoundsUnixSeconds } from "./date-utils";
 
 export interface InstagramGraphClientConfig {
@@ -21,6 +28,21 @@ function graphBaseUrl(version: string): string {
 
 const MEDIA_FIELDS =
   "id,caption,media_type,media_product_type,media_url,thumbnail_url,permalink,timestamp,like_count,comments_count";
+
+function isUnsupportedInsightError(error: unknown): boolean {
+  if (!(error instanceof HttpClientError)) return false;
+  if (error.status !== 400 && error.status !== 403) return false;
+  const text = `${error.message}\n${error.body ?? ""}`.toLowerCase();
+  return (
+    text.includes("(#100)") ||
+    text.includes("(#10)") ||
+    text.includes('"code":100') ||
+    text.includes('"code":10') ||
+    text.includes("invalid metric") ||
+    text.includes("nonexisting field") ||
+    text.includes("does not support")
+  );
+}
 
 export class InstagramGraphClient {
   private readonly graphVersion: string;
@@ -75,23 +97,43 @@ export class InstagramGraphClient {
     mediaId: string,
     productType: string,
   ): Promise<InstagramInsightsResponseV1> {
-    const metrics = insightMetricsForProductType(productType);
-    const url = `${graphBaseUrl(this.graphVersion)}/${mediaId}/insights`;
-    const response = await this.config.httpClient.request(url, {
-      searchParams: {
-        access_token: accessToken,
-        metric: metrics.join(","),
-      },
-    });
-    const body = await response.json<InstagramInsightsResponseV1>();
-    if (body.error?.message) {
-      // Story com poucos viewers ou métrica incompatível — retorna vazio
-      if (body.error.code === 10 || body.error.code === 100) {
-        return { data: [] };
-      }
-      throw new Error(body.error.message);
+    const full = insightMetricsForProductType(productType);
+    const core = insightMetricsCoreForProductType(productType);
+    const first = await this.requestMediaInsights(accessToken, mediaId, full);
+    if (first.unsupported && full.join(",") !== core.join(",")) {
+      const retry = await this.requestMediaInsights(accessToken, mediaId, core);
+      return retry.body;
     }
-    return body;
+    return first.body;
+  }
+
+  private async requestMediaInsights(
+    accessToken: string,
+    mediaId: string,
+    metrics: readonly string[],
+  ): Promise<{ body: InstagramInsightsResponseV1; unsupported: boolean }> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${mediaId}/insights`;
+    try {
+      const response = await this.config.httpClient.request(url, {
+        searchParams: {
+          access_token: accessToken,
+          metric: metrics.join(","),
+        },
+      });
+      const body = await response.json<InstagramInsightsResponseV1>();
+      if (body.error?.message) {
+        if (body.error.code === 10 || body.error.code === 100) {
+          return { body: { data: [] }, unsupported: true };
+        }
+        throw new Error(body.error.message);
+      }
+      return { body, unsupported: false };
+    } catch (error) {
+      if (isUnsupportedInsightError(error)) {
+        return { body: { data: [] }, unsupported: true };
+      }
+      throw error;
+    }
   }
 
   /**
@@ -105,27 +147,57 @@ export class InstagramGraphClient {
     igUserId: string,
     date: string,
   ): Promise<InstagramAccountInsightsResponseV1> {
+    const first = await this.requestAccountInsightsForDay(
+      accessToken,
+      igUserId,
+      date,
+      ACCOUNT_INSIGHTS_METRICS_PARAM,
+    );
+    if (first.unsupported) {
+      const retry = await this.requestAccountInsightsForDay(
+        accessToken,
+        igUserId,
+        date,
+        ACCOUNT_INSIGHTS_CORE_METRICS_PARAM,
+      );
+      return retry.body;
+    }
+    return first.body;
+  }
+
+  private async requestAccountInsightsForDay(
+    accessToken: string,
+    igUserId: string,
+    date: string,
+    metric: string,
+  ): Promise<{ body: InstagramAccountInsightsResponseV1; unsupported: boolean }> {
     const { sinceUnix, untilUnix } = spDayBoundsUnixSeconds(date);
     const url = `${graphBaseUrl(this.graphVersion)}/${igUserId}/insights`;
-    const response = await this.config.httpClient.request(url, {
-      searchParams: {
-        access_token: accessToken,
-        metric: ACCOUNT_INSIGHTS_METRICS_PARAM,
-        period: "day",
-        metric_type: "total_value",
-        since: String(sinceUnix),
-        until: String(untilUnix),
-      },
-    });
-    const body = await response.json<InstagramAccountInsightsResponseV1>();
-    if (body.error?.message) {
-      // Dia sem dados suficientes para estimar métricas — trata como vazio.
-      if (body.error.code === 10 || body.error.code === 100) {
-        return { data: [] };
+    try {
+      const response = await this.config.httpClient.request(url, {
+        searchParams: {
+          access_token: accessToken,
+          metric,
+          period: "day",
+          metric_type: "total_value",
+          since: String(sinceUnix),
+          until: String(untilUnix),
+        },
+      });
+      const body = await response.json<InstagramAccountInsightsResponseV1>();
+      if (body.error?.message) {
+        if (body.error.code === 10 || body.error.code === 100) {
+          return { body: { data: [] }, unsupported: true };
+        }
+        throw new Error(body.error.message);
       }
-      throw new Error(body.error.message);
+      return { body, unsupported: false };
+    } catch (error) {
+      if (isUnsupportedInsightError(error)) {
+        return { body: { data: [] }, unsupported: true };
+      }
+      throw error;
     }
-    return body;
   }
 
   async listManagedPages(accessToken: string): Promise<
