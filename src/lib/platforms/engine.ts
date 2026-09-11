@@ -97,7 +97,8 @@ export function byCampaign(def: PlatformDef, rows: Row[], period: Period): Campa
   const groups = new Map<string, Row[]>();
   for (const r of rows) {
     if (r.data < period.from || r.data > period.to) continue;
-    const name = String(r[def.campaignField] ?? "—") || "—";
+    const name = String(r[def.campaignField] ?? "").trim();
+    if (!name) continue;
     const arr = groups.get(name) ?? [];
     arr.push(r);
     groups.set(name, arr);

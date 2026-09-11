@@ -1,7 +1,7 @@
 import type { IgMediaMetrics } from "@/modules/instagram-posts/types";
 import type { InstagramMediaRowV1, InstagramInsightsResponseV1 } from "./instagram-api.types";
 
-const FEED_METRICS = [
+const FEED_CORE_METRICS = [
   "views",
   "reach",
   "likes",
@@ -11,7 +11,9 @@ const FEED_METRICS = [
   "total_interactions",
 ] as const;
 
-const REELS_METRICS = [
+const FEED_EXTRA_METRICS = ["follows", "profile_visits"] as const;
+
+const REELS_CORE_METRICS = [
   "views",
   "reach",
   "likes",
@@ -21,6 +23,8 @@ const REELS_METRICS = [
   "total_interactions",
   "ig_reels_avg_watch_time",
 ] as const;
+
+const REELS_EXTRA_METRICS = ["follows", "profile_visits"] as const;
 
 const STORY_METRICS = [
   "views",
@@ -32,11 +36,25 @@ const STORY_METRICS = [
   "link_clicks",
 ] as const;
 
+function concatMetrics(
+  core: readonly string[],
+  extra: readonly string[],
+): readonly string[] {
+  return [...core, ...extra];
+}
+
+export function insightMetricsCoreForProductType(productType: string): readonly string[] {
+  const normalized = productType.toUpperCase();
+  if (normalized === "REELS") return REELS_CORE_METRICS;
+  if (normalized === "STORY") return STORY_METRICS;
+  return FEED_CORE_METRICS;
+}
+
 export function insightMetricsForProductType(productType: string): readonly string[] {
   const normalized = productType.toUpperCase();
-  if (normalized === "REELS") return REELS_METRICS;
+  if (normalized === "REELS") return concatMetrics(REELS_CORE_METRICS, REELS_EXTRA_METRICS);
   if (normalized === "STORY") return STORY_METRICS;
-  return FEED_METRICS;
+  return concatMetrics(FEED_CORE_METRICS, FEED_EXTRA_METRICS);
 }
 
 function parseInsightValue(raw: number | undefined): number | undefined {

@@ -7,6 +7,8 @@
 >
 > Fluxo: Cursor → Commit → GitHub → CI → Deploy → Portal Lots BI
 >
+> **Plano de ingestão (esta branch `feat/hub-ingest-plan`):** [docs/13-execution/AGENT-PLAN.md](./docs/13-execution/AGENT-PLAN.md)
+>
 > **Transição interna:** Lovable e Horizons estão sendo desacoplados (ADR-0012).
 > Implemente **sempre** neste repo — não no editor Lovable.
 >

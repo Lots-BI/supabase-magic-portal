@@ -33,8 +33,11 @@ import {
  */
 export const META_ADS_LOOKBACK_DAYS = 89;
 
-/** Cap por execução — evita chamadas excessivas/timeout em um único clique. */
-export const META_ADS_MAX_DAYS_PER_RUN = 30;
+/** Cap por execução — um range Insights cobre o lookback em poucas chamadas. */
+export const META_ADS_MAX_DAYS_PER_RUN = 89;
+
+/** Reconsulta os últimos dias: Insights atrasam e zeros de ontem não podem ficar eternos. */
+const META_ADS_REFRESH_DAYS = 3;
 
 const META_ADS_PLATFORM_LABEL = "Meta Ads";
 const META_ADS_METRICS_CAPABILITY = META_ADS_CAPABILITIES[0];
@@ -58,14 +61,39 @@ async function fetchExistingMetaAdsDates(
 
   const { data: hubRows, error: hubError } = await supabase
     .from("base_metricas_hub")
-    .select("data")
+    .select("data, metrica")
     .eq("cliente", canonicalClientName)
     .ilike("plataforma", "meta ads")
-    .in("metrica", ["results", "conversions"])
     .gte("data", from)
     .lte("data", to);
   if (hubError) throw new Error(hubError.message);
-  for (const row of hubRows ?? []) dates.add(String((row as { data: string }).data));
+
+  const byDate = new Map<string, Set<string>>();
+  for (const row of hubRows ?? []) {
+    const date = String((row as { data: string }).data);
+    const metric = String((row as { metrica: string }).metrica).toLowerCase();
+    const set = byDate.get(date) ?? new Set<string>();
+    set.add(metric);
+    byDate.set(date, set);
+  }
+
+  for (const [date, metrics] of byDate) {
+    const hasContract = metrics.has("results") || metrics.has("conversions");
+    if (!hasContract) continue;
+    const hasDelivery =
+      metrics.has("spend") ||
+      metrics.has("impressions") ||
+      metrics.has("clicks") ||
+      metrics.has("reach");
+    const hasClickBreakdown =
+      metrics.has("inline_link_clicks") ||
+      metrics.has("link_clicks") ||
+      metrics.has("video_views");
+    // Marcadores de dia sem entrega (só 0 em results/conversions) contam como
+    // preenchidos. Dias com entrega no contrato antigo são refeitos para puxar
+    // cliques no link / visualizações de vídeo.
+    if (!hasDelivery || hasClickBreakdown) dates.add(date);
+  }
 
   // Make nunca gravou results/conversions — dias só no Make continuam "faltantes"
   // para o Hub preencher o contrato novo (prefer_hub substitui o dia inteiro).
@@ -115,13 +143,16 @@ export async function syncMetaAdsCampaignsConnection(
   const identities = await stack.identityService.list(id);
   const existingDates = await fetchExistingMetaAdsDates(supabase, canonicalClientName, from, to);
   const missing = listMissingDates(from, to, existingDates);
+  const refreshFrom = addDaysToDateStr(to, -(META_ADS_REFRESH_DAYS - 1));
+  const refreshDays = listMissingDates(refreshFrom, to, new Set());
+  const toFetch = [...new Set([...missing, ...refreshDays])].sort();
 
-  if (missing.length === 0) {
+  if (toFetch.length === 0) {
     return { ok: true, daysFilled: 0, daysRequested: 0, from, to };
   }
 
   // Prioriza os dias mais recentes; o restante é preenchido em próximos cliques.
-  const capped = missing.slice(Math.max(0, missing.length - META_ADS_MAX_DAYS_PER_RUN));
+  const capped = toFetch.slice(Math.max(0, toFetch.length - META_ADS_MAX_DAYS_PER_RUN));
   const ranges = groupIntoContiguousRanges(capped);
 
   const provider = stack.registry.getPlugin("meta_ads").adapter.getProvider("official_api");
@@ -150,11 +181,11 @@ export async function syncMetaAdsCampaignsConnection(
     }
   }
 
-  if (daysFilled === 0 && missing.length > 0) {
+  if (daysFilled === 0 && toFetch.length > 0) {
     return {
       ok: false,
       daysFilled: 0,
-      daysRequested: missing.length,
+      daysRequested: toFetch.length,
       from,
       to,
       error:
@@ -167,7 +198,7 @@ export async function syncMetaAdsCampaignsConnection(
   return {
     ok: true,
     daysFilled,
-    daysRequested: missing.length,
+    daysRequested: toFetch.length,
     from,
     to,
     error: errors.length > 0 ? errors.join("; ") : undefined,

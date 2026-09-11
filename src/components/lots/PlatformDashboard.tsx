@@ -125,6 +125,7 @@ function PlatformDashboardBody({ def, cliente, period }: Props) {
       ) : (
         <>
           <HeroCards def={def} agg={agg} />
+          <ExtraMetricCards def={def} agg={agg} />
           <KpiCards def={def} agg={agg} />
           <ChartsSection def={def} agg={agg} />
           <ComparisonBlock def={def} agg={agg} period={period} />
@@ -164,6 +165,37 @@ function HeroCards({ def, agg }: { def: PlatformDef; agg: ReturnType<typeof aggr
             emphasis={i === 0 ? "hero" : "default"}
             description={metricDescription(m.key, m.description)}
             className={i === 0 ? "lg:col-span-2" : undefined}
+          />
+        );
+      })}
+    </section>
+  );
+}
+
+function ExtraMetricCards({
+  def,
+  agg,
+}: {
+  def: PlatformDef;
+  agg: ReturnType<typeof aggregatePeriod>;
+}) {
+  const extras = def.metrics.filter((m) => !def.heroMetrics.includes(m.key));
+  if (extras.length === 0) return null;
+  return (
+    <section className="relative isolate grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      {extras.map((m) => {
+        const cur = agg.current[m.key] ?? 0;
+        const prev = agg.previous[m.key] ?? 0;
+        return (
+          <StatCard
+            key={m.key}
+            label={m.label}
+            value={formatValue(m.format, cur)}
+            icon={m.icon}
+            delta={pctDelta(cur, prev)}
+            positiveIsGood={m.positiveIsGood ?? true}
+            emphasis="compact"
+            description={metricDescription(m.key, m.description)}
           />
         );
       })}
@@ -337,9 +369,10 @@ function CampaignRanking({
   if (agg.campaigns.length === 0) return null;
   // Ordenação default: por primeira métrica hero (geralmente spend).
   const sortKey = def.heroMetrics[0];
-  const ranked = [...agg.campaigns].sort(
-    (a, b) => (b.totals[sortKey] ?? 0) - (a.totals[sortKey] ?? 0),
-  );
+  const ranked = [...agg.campaigns]
+    .filter((c) => c.campanha.trim().length > 0)
+    .sort((a, b) => (b.totals[sortKey] ?? 0) - (a.totals[sortKey] ?? 0));
+  if (ranked.length === 0) return null;
   const cols = def.metrics.filter((m) => def.heroMetrics.includes(m.key));
   const kpiCols = def.kpis.slice(0, 3);
   return (

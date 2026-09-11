@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapMetaInsightsToMetricRows, pickResultsValue } from "../api/meta-insights.mapper";
+import { mapMetaInsightsToMetricRows, markerRowsForUncoveredDates, pickResultsValue } from "../api/meta-insights.mapper";
 import type { MetaInsightRowV1 } from "../api/meta-api.types";
 
 const base: MetaInsightRowV1 = {
@@ -19,7 +19,10 @@ describe("mapMetaInsightsToMetricRows", () => {
     expect(rows.find((r) => r.metricKey === "spend")?.value).toBe(25.5);
     expect(rows.find((r) => r.metricKey === "conversions")?.value).toBe(0);
     expect(rows.find((r) => r.metricKey === "results")?.value).toBe(0);
-    expect(rows).toHaveLength(6);
+    expect(rows.find((r) => r.metricKey === "inline_link_clicks")?.value).toBe(0);
+    expect(rows.find((r) => r.metricKey === "video_views")?.value).toBe(0);
+    expect(rows.find((r) => r.metricKey === "unique_clicks")).toBeUndefined();
+    expect(rows).toHaveLength(11);
   });
 
   it("soma o campo conversions da Insights API", () => {
@@ -118,5 +121,39 @@ describe("mapMetaInsightsToMetricRows", () => {
         "OUTCOME_TRAFFIC",
       ),
     ).toBe(18);
+  });
+
+  it("extrai cliques no link, LPV e visualizações de vídeo das actions", () => {
+    const rows = mapMetaInsightsToMetricRows([
+      {
+        ...base,
+        inline_link_clicks: "12",
+        unique_clicks: "9",
+        actions: [
+          { action_type: "link_click", value: "12" },
+          { action_type: "landing_page_view", value: "7" },
+          { action_type: "video_view", value: "40" },
+          { action_type: "post_engagement", value: "15" },
+        ],
+      },
+    ]);
+    expect(rows.find((r) => r.metricKey === "inline_link_clicks")?.value).toBe(12);
+    expect(rows.find((r) => r.metricKey === "unique_clicks")?.value).toBe(9);
+    expect(rows.find((r) => r.metricKey === "link_clicks")?.value).toBe(12);
+    expect(rows.find((r) => r.metricKey === "landing_page_views")?.value).toBe(7);
+    expect(rows.find((r) => r.metricKey === "video_views")?.value).toBe(40);
+    expect(rows.find((r) => r.metricKey === "post_engagements")?.value).toBe(15);
+  });
+});
+
+describe("markerRowsForUncoveredDates", () => {
+  it("marca dias sem insight para o gap-finder não repetir o intervalo", () => {
+    const rows = markerRowsForUncoveredDates(
+      { from: "2026-09-01", to: "2026-09-03" },
+      ["2026-09-02"],
+    );
+    expect(rows.filter((r) => r.date === "2026-09-01")).toHaveLength(2);
+    expect(rows.filter((r) => r.date === "2026-09-02")).toHaveLength(0);
+    expect(rows.find((r) => r.metricKey === "results" && r.date === "2026-09-03")?.value).toBe(0);
   });
 });

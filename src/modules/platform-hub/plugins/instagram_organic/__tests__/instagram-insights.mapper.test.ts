@@ -4,7 +4,10 @@ import { insightMetricsForProductType, mapInsightsToMetrics } from "../api/insta
 describe("instagram-insights.mapper", () => {
   it("selects metrics by product type", () => {
     expect(insightMetricsForProductType("REELS")).toContain("ig_reels_avg_watch_time");
+    expect(insightMetricsForProductType("REELS")).toContain("follows");
     expect(insightMetricsForProductType("STORY")).toContain("replies");
+    expect(insightMetricsForProductType("FEED")).toContain("profile_visits");
+    expect(insightMetricsForProductType("CAROUSEL")).toContain("follows");
   });
 
   it("maps insights and media counts", () => {

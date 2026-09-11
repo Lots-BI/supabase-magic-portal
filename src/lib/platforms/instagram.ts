@@ -2,7 +2,8 @@
 // Lots BI · Instagram — PlatformDef.
 // View: public.vw_instagram_diario
 // Colunas: data, cliente, reach, interactions, accounts_engaged, likes,
-//          comments, saves, shares, profile_links_taps, engagement_rate.
+//          comments, saves, shares, profile_links_taps, engagement_rate,
+//          views, replies, website_clicks, follows.
 //
 // Decisão importante: a estratégia de agregação de reach e accounts_engaged
 // é DECLARADA aqui (não embutida no engine). Hoje usamos MAX como melhor
@@ -20,6 +21,9 @@ import {
   ExternalLink,
   Activity,
   TrendingUp,
+  Eye,
+  MousePointerClick,
+  UserPlus,
 } from "lucide-react";
 import type { PlatformDef } from "./types";
 import * as f from "./formulas";
@@ -30,17 +34,17 @@ export const instagramDef: PlatformDef = {
   icon: Instagram,
   view: "vw_instagram_diario",
   description:
-    "Performance orgânica do perfil — alcance, engajamento e ações realizadas pelo público.",
+    "Performance orgânica do perfil — visualizações, alcance, engajamento e ações realizadas pelo público.",
   questions: [
+    "Quantas visualizações o perfil teve?",
     "Quantas pessoas únicas eu alcancei?",
     "Quantas contas se engajaram comigo?",
     "Qual a taxa de engajamento sobre o alcance?",
-    "Como evoluíram likes, comentários e salvamentos?",
-    "Quantas pessoas tocaram nos links do perfil?",
+    "Como evoluíram likes, comentários, salvamentos e respostas?",
+    "Quantas pessoas tocaram nos links do perfil ou no site?",
     "Como tudo evoluiu vs o período anterior?",
   ],
   metrics: [
-    // Métricas não-acumulativas — estratégia EXPLÍCITA, fácil de revisar.
     {
       key: "reach",
       column: "reach",
@@ -49,7 +53,19 @@ export const instagramDef: PlatformDef = {
       aggregation: { kind: "max" },
       icon: Users,
       positiveIsGood: true,
-      description: "Contas únicas alcançadas. Estratégia: MAX no período (revisável).",
+      description:
+        "Contas únicas alcançadas. No período usamos o maior dia (não dá para somar alcance). O Instagram Insights no intervalo deduplica e pode ser maior.",
+    },
+    {
+      key: "views",
+      column: "views",
+      label: "Visualizações",
+      format: "int",
+      aggregation: { kind: "sum" },
+      icon: Eye,
+      positiveIsGood: true,
+      description:
+        "Visualizações do conteúdo do perfil no dia (métrica views da Graph API; substituiu impressions).",
     },
     {
       key: "accounts_engaged",
@@ -61,7 +77,6 @@ export const instagramDef: PlatformDef = {
       positiveIsGood: true,
       description: "Contas únicas que interagiram. Estratégia: MAX no período (revisável).",
     },
-    // Acumulativas — SUM.
     {
       key: "interactions",
       column: "interactions",
@@ -70,7 +85,7 @@ export const instagramDef: PlatformDef = {
       aggregation: { kind: "sum" },
       icon: Activity,
       positiveIsGood: true,
-      description: "Total de interações (somatório diário).",
+      description: "Total de interações (somatório diário de total_interactions).",
     },
     {
       key: "likes",
@@ -109,6 +124,16 @@ export const instagramDef: PlatformDef = {
       positiveIsGood: true,
     },
     {
+      key: "replies",
+      column: "replies",
+      label: "Respostas",
+      format: "int",
+      aggregation: { kind: "sum" },
+      icon: MessageCircle,
+      positiveIsGood: true,
+      description: "Respostas a stories e DMs contabilizadas nos insights de conta.",
+    },
+    {
       key: "profile_links_taps",
       column: "profile_links_taps",
       label: "Toques no link",
@@ -117,8 +142,30 @@ export const instagramDef: PlatformDef = {
       icon: ExternalLink,
       positiveIsGood: true,
     },
+    {
+      key: "website_clicks",
+      column: "website_clicks",
+      label: "Cliques no site",
+      format: "int",
+      aggregation: { kind: "sum" },
+      icon: MousePointerClick,
+      positiveIsGood: true,
+      description: "Cliques no botão/link do site no perfil.",
+    },
+    {
+      key: "follows",
+      column: "follows",
+      label: "Seguir / deixar de seguir",
+      short: "Seguir",
+      format: "int",
+      aggregation: { kind: "sum" },
+      icon: UserPlus,
+      positiveIsGood: true,
+      description:
+        "follows_and_unfollows da Graph API — contas que seguiram ou deixaram de seguir no dia.",
+    },
   ],
-  heroMetrics: ["reach", "accounts_engaged", "interactions", "profile_links_taps"],
+  heroMetrics: ["reach", "views", "accounts_engaged", "interactions"],
   kpis: [
     {
       key: "engagement_rate",
@@ -126,7 +173,15 @@ export const instagramDef: PlatformDef = {
       format: "percent",
       positiveIsGood: true,
       compute: (t) => f.engagementRate(t.interactions, t.reach),
-      description: "Interactions ÷ Reach × 100.",
+      description: "Interações ÷ alcance × 100.",
+    },
+    {
+      key: "views_per_reach",
+      label: "Visualizações por alcance",
+      format: "decimal",
+      positiveIsGood: true,
+      compute: (t) => f.frequency(t.views, t.reach),
+      description: "Visualizações ÷ alcance do período.",
     },
     {
       key: "media_diaria_interacoes",
@@ -142,12 +197,13 @@ export const instagramDef: PlatformDef = {
     {
       key: "evolucao-alcance",
       kind: "area",
-      title: "Alcance e contas engajadas",
-      description: "Métricas únicas reportadas pelo Instagram, por dia.",
+      title: "Alcance, visualizações e contas engajadas",
+      description: "Métricas de cobertura do perfil, por dia.",
       yMetric: "reach",
       series: [
         { metric: "reach", label: "Alcance", tone: "primary" },
-        { metric: "accounts_engaged", label: "Contas engajadas", tone: "secondary" },
+        { metric: "views", label: "Visualizações", tone: "secondary" },
+        { metric: "accounts_engaged", label: "Contas engajadas", tone: "success" },
       ],
       height: 260,
     },
@@ -155,7 +211,7 @@ export const instagramDef: PlatformDef = {
       key: "evolucao-interacoes",
       kind: "area",
       title: "Interações",
-      description: "Curtidas, comentários, salvamentos e compartilhamentos.",
+      description: "Curtidas, comentários, salvamentos, compartilhamentos e respostas.",
       yMetric: "interactions",
       series: [
         { metric: "likes", label: "Curtidas", tone: "primary" },
@@ -164,6 +220,18 @@ export const instagramDef: PlatformDef = {
         { metric: "shares", label: "Compartilhamentos", tone: "neutral" },
       ],
       height: 240,
+    },
+    {
+      key: "evolucao-cliques",
+      kind: "area",
+      title: "Cliques no perfil",
+      description: "Toques no link do perfil e cliques no site.",
+      yMetric: "profile_links_taps",
+      series: [
+        { metric: "profile_links_taps", label: "Toques no link", tone: "primary" },
+        { metric: "website_clicks", label: "Cliques no site", tone: "secondary" },
+      ],
+      height: 220,
     },
   ],
 };

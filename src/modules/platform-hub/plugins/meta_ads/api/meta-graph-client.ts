@@ -29,11 +29,21 @@ export const META_INSIGHTS_FIELDS_ACTIONS =
 /** `conversions` é campo oficial, mas algumas contas/versões recusam o field. */
 export const META_INSIGHTS_FIELDS_WITH_CONVERSIONS = `${META_INSIGHTS_FIELDS_ACTIONS},conversions`;
 
+/** Cliques no link / únicos — o Gerenciador usa estes, não o `clicks` genérico. */
+export const META_INSIGHTS_FIELDS_FULL = `${META_INSIGHTS_FIELDS_WITH_CONVERSIONS},inline_link_clicks,unique_clicks`;
+
 export function shouldRetryInsightsWithoutConversions(error: unknown): boolean {
   if (!(error instanceof HttpClientError)) return false;
   if (error.status !== 400) return false;
   const text = `${error.message}\n${error.body ?? ""}`.toLowerCase();
   return text.includes("conversions");
+}
+
+export function shouldRetryInsightsWithoutClickBreakdown(error: unknown): boolean {
+  if (!(error instanceof HttpClientError)) return false;
+  if (error.status !== 400) return false;
+  const text = `${error.message}\n${error.body ?? ""}`.toLowerCase();
+  return text.includes("inline_link_clicks") || text.includes("unique_clicks");
 }
 
 function normalizeAdAccountId(externalId: string): string {
@@ -72,7 +82,7 @@ export class MetaGraphClient {
     const baseUrl = `${graphBaseUrl(this.graphVersion)}/${accountId}/insights`;
     let rateLimitHit = false;
 
-    let fields = META_INSIGHTS_FIELDS_WITH_CONVERSIONS;
+    let fields = META_INSIGHTS_FIELDS_FULL;
 
     const fetchInsightsPage = async (after?: string) => {
       const response = await this.config.httpClient.request(baseUrl, {
@@ -100,6 +110,28 @@ export class MetaGraphClient {
         try {
           return await fetchInsightsPage(after);
         } catch (error) {
+          if (!after && shouldRetryInsightsWithoutClickBreakdown(error)) {
+            fields = META_INSIGHTS_FIELDS_WITH_CONVERSIONS;
+            try {
+              return await fetchInsightsPage(after);
+            } catch (clickRetryError) {
+              if (shouldRetryInsightsWithoutConversions(clickRetryError)) {
+                fields = META_INSIGHTS_FIELDS_ACTIONS;
+                try {
+                  return await fetchInsightsPage(after);
+                } catch (retryError) {
+                  if (retryError instanceof RateLimitHttpError) {
+                    rateLimitHit = true;
+                  }
+                  throwMetaHttpError(retryError);
+                }
+              }
+              if (clickRetryError instanceof RateLimitHttpError) {
+                rateLimitHit = true;
+              }
+              throwMetaHttpError(clickRetryError);
+            }
+          }
           if (!after && shouldRetryInsightsWithoutConversions(error)) {
             fields = META_INSIGHTS_FIELDS_ACTIONS;
             try {

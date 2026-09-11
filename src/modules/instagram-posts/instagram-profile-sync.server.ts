@@ -21,8 +21,11 @@ import { groupIntoContiguousRanges, listMissingDates } from "./instagram-profile
 /** Meta expõe Insights de conta por ~90 dias (documentação oficial). */
 export const INSTAGRAM_PROFILE_LOOKBACK_DAYS = 89;
 
-/** Cap por execução — evita chamadas excessivas/timeout em um único clique. */
+/** Cap por execução — 1 chamada Graph por dia de perfil. */
 export const INSTAGRAM_PROFILE_MAX_DAYS_PER_RUN = 30;
+
+/** Reconsulta recente para inserir views/replies sem reprocessar 90 dias. */
+const INSTAGRAM_PROFILE_REFRESH_DAYS = 14;
 
 const INSTAGRAM_PLATFORM_LABEL = "Instagram";
 
@@ -45,33 +48,24 @@ async function fetchExistingInstagramDates(
 
   const { data: hubRows, error: hubError } = await supabase
     .from("base_metricas_hub")
-    .select("data")
+    .select("data, metrica")
     .eq("cliente", canonicalClientName)
     .ilike("plataforma", "instagram")
     .gte("data", from)
     .lte("data", to);
   if (hubError) throw new Error(hubError.message);
-  for (const row of hubRows ?? []) dates.add(String((row as { data: string }).data));
 
-  const { data: aliasRows, error: aliasError } = await supabase
-    .from("cliente_aliases")
-    .select("alias_metricas")
-    .eq("nome_canonico", canonicalClientName);
-  if (aliasError) throw new Error(aliasError.message);
-  const aliases = [
-    canonicalClientName,
-    ...(aliasRows ?? []).map((row) => String((row as { alias_metricas: string }).alias_metricas)),
-  ];
-
-  const { data: makeRows, error: makeError } = await supabase
-    .from("base_metricas_make")
-    .select("data")
-    .in("cliente", aliases)
-    .ilike("plataforma", "instagram")
-    .gte("data", from)
-    .lte("data", to);
-  if (makeError) throw new Error(makeError.message);
-  for (const row of makeRows ?? []) dates.add(String((row as { data: string }).data));
+  const byDate = new Map<string, Set<string>>();
+  for (const row of hubRows ?? []) {
+    const date = String((row as { data: string }).data);
+    const metric = String((row as { metrica: string }).metrica).toLowerCase();
+    const set = byDate.get(date) ?? new Set<string>();
+    set.add(metric);
+    byDate.set(date, set);
+  }
+  for (const [date, metrics] of byDate) {
+    if (metrics.size > 0) dates.add(date);
+  }
 
   return dates;
 }
@@ -106,13 +100,16 @@ export async function syncInstagramProfileConnection(
   const identities = await stack.identityService.list(id);
   const existingDates = await fetchExistingInstagramDates(supabase, canonicalClientName, from, to);
   const missing = listMissingDates(from, to, existingDates);
+  const refreshFrom = addDaysToDateStr(to, -(INSTAGRAM_PROFILE_REFRESH_DAYS - 1));
+  const refreshDays = listMissingDates(refreshFrom, to, new Set());
+  const toFetch = [...new Set([...missing, ...refreshDays])].sort();
 
-  if (missing.length === 0) {
+  if (toFetch.length === 0) {
     return { ok: true, daysFilled: 0, daysRequested: 0, from, to };
   }
 
   // Prioriza os dias mais recentes; o restante é preenchido em próximos cliques.
-  const capped = missing.slice(Math.max(0, missing.length - INSTAGRAM_PROFILE_MAX_DAYS_PER_RUN));
+  const capped = toFetch.slice(Math.max(0, toFetch.length - INSTAGRAM_PROFILE_MAX_DAYS_PER_RUN));
   const ranges = groupIntoContiguousRanges(capped);
 
   const provider = stack.registry
@@ -143,11 +140,11 @@ export async function syncInstagramProfileConnection(
     }
   }
 
-  if (daysFilled === 0 && missing.length > 0) {
+  if (daysFilled === 0 && toFetch.length > 0) {
     return {
       ok: false,
       daysFilled: 0,
-      daysRequested: missing.length,
+      daysRequested: toFetch.length,
       from,
       to,
       error:
@@ -160,7 +157,7 @@ export async function syncInstagramProfileConnection(
   return {
     ok: true,
     daysFilled,
-    daysRequested: missing.length,
+    daysRequested: toFetch.length,
     from,
     to,
     error: errors.length > 0 ? errors.join("; ") : undefined,
