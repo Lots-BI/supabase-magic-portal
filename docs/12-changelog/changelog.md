@@ -21,6 +21,13 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Adicionado
 
+- **CRM de audiência (2026-09-11):** aba CRM em Dados (acima de Relatórios) no admin e no
+  portal do cliente. Grafo de pessoas a partir de comentários Instagram oficiais,
+  jornada, inbox (responder agora / em risco), ranking de posts que trazem gente de volta,
+  merge de identidades, CSV só com fatos reais, webhook Meta. Migrations 61–62.
+  Scope `instagram_manage_comments` (Relogin). Direct/Lead Ads/WhatsApp live após App Review.
+  Doc: [crm.md](../06-dashboards/crm.md). Novidades `2026-09-11-crm-audiencia`.
+
 - **Dashboards mais rápidos (2026-09-11):** leitura via RPC `dashboard_prefer_hub_long`
   (cliente + data no banco). Hub de contas e barra de sync deixam de sondar as views
   diárias. Migration 60.

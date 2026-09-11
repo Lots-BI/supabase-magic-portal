@@ -183,6 +183,11 @@ Plano: [content-workflow-implementation-plan.md](../03-backend/content-workflow-
 - Detalhe: [current-pipeline-hub.md](../07-integrations/current-pipeline-hub.md) ·
   [AGENT-PLAN](../13-execution/AGENT-PLAN.md).
 
+### CRM de audiência
+
+- ✅ v1 comentários Instagram + inbox/ranking/merge/export — [crm.md](../06-dashboards/crm.md).
+- ✨ Direct / Lead Ads / WhatsApp live — App Review; plano em [crm-phase-2.md](../06-dashboards/crm-phase-2.md).
+
 ---
 
 ## Fase 1 — Fundações de dados (alta prioridade)

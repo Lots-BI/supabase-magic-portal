@@ -17,6 +17,7 @@ import { YouTubeOAuthService } from "../../youtube/oauth/youtube-oauth.service";
 import { YOUTUBE_OAUTH_CREDENTIAL_KEY } from "../../youtube/youtube-credential-keys";
 import { INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY } from "../../instagram_organic/instagram-credential-keys";
 import { instagramOrganicOauthScopes } from "../../instagram_organic/oauth/instagram-organic-oauth.config";
+import { metaAdsOauthScopes } from "../../meta_ads/oauth/meta-oauth.config";
 
 function googleOAuthEnv() {
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID?.trim();
@@ -52,7 +53,7 @@ export function createRegistrationCredentialAccess(
     case "meta_ads": {
       const env = metaOAuthEnv();
       if (!env) return base;
-      const oauth = new MetaOAuthService(env, http, base);
+      const oauth = new MetaOAuthService({ ...env, defaultScopes: metaAdsOauthScopes() }, http, base);
       return createRefreshingCredentialAccess(vault, {
         credentialKey: META_OAUTH_CREDENTIAL_KEY,
         refreshAccessToken: (id) => oauth.refreshAccessToken(id),

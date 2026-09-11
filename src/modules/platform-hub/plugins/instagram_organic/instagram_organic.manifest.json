@@ -7,7 +7,8 @@
   "capabilities": [
     "instagram_organic:metrics:collect",
     "instagram_organic:profile:collect",
-    "instagram_organic:content:publish"
+    "instagram_organic:content:publish",
+    "instagram_organic:crm:comments"
   ],
   "metrics": [
     { "key": "views", "format": "int", "official": true },
@@ -23,6 +24,7 @@
     "scopes": [
       "instagram_basic",
       "instagram_content_publish",
+      "instagram_manage_comments",
       "instagram_manage_insights",
       "pages_read_engagement",
       "pages_show_list",

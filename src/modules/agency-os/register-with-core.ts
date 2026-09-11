@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import {
+  Contact2,
   BarChart3,
   BookOpen,
   Building2,
@@ -73,6 +74,14 @@ const NAVIGATION_ROUTES: ModuleRouteDef[] = [
         } satisfies ModuleRouteDef,
       ]
     : []),
+  {
+    id: "crm",
+    label: "CRM",
+    href: "/admin/crm",
+    icon: Contact2,
+    adminOnly: true,
+    keywords: ["audiência", "comentários", "leads", "pessoas", "retenção"],
+  },
   {
     id: "relatorios",
     label: "Relatórios",

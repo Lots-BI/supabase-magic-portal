@@ -33,6 +33,7 @@ import { Route as AuthenticatedAdminRelatoriosRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminPlanoEstrategicoRouteImport } from './routes/_authenticated/admin/plano-estrategico'
 import { Route as AuthenticatedAdminEditorialRouteImport } from './routes/_authenticated/admin/editorial'
 import { Route as AuthenticatedAdminDebugRouteImport } from './routes/_authenticated/admin/debug'
+import { Route as AuthenticatedAdminCrmRouteImport } from './routes/_authenticated/admin/crm'
 import { Route as AuthenticatedAdminCentralRouteImport } from './routes/_authenticated/admin/central'
 import { Route as AuthenticatedAdminBrandingRouteImport } from './routes/_authenticated/admin/branding'
 import { Route as AuthenticatedAdminBrandbookRouteImport } from './routes/_authenticated/admin/brandbook'
@@ -57,6 +58,7 @@ import { Route as AuthenticatedClienteClienteInstagramRouteImport } from './rout
 import { Route as AuthenticatedClienteClienteGoogleBusinessRouteImport } from './routes/_authenticated/cliente.$cliente.google-business'
 import { Route as AuthenticatedClienteClienteGoogleAdsRouteImport } from './routes/_authenticated/cliente.$cliente.google-ads'
 import { Route as AuthenticatedClienteClienteGa4RouteImport } from './routes/_authenticated/cliente.$cliente.ga4'
+import { Route as AuthenticatedClienteClienteCrmRouteImport } from './routes/_authenticated/cliente.$cliente.crm'
 import { Route as AuthenticatedClienteClienteConexoesRouteImport } from './routes/_authenticated/cliente.$cliente.conexoes'
 import { Route as AuthenticatedClienteClienteBrandbookRouteImport } from './routes/_authenticated/cliente.$cliente.brandbook'
 import { Route as AuthenticatedClienteClienteAprovacoesRouteImport } from './routes/_authenticated/cliente.$cliente.aprovacoes'
@@ -210,6 +212,11 @@ const AuthenticatedAdminDebugRoute = AuthenticatedAdminDebugRouteImport.update({
   path: '/debug',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminCrmRoute = AuthenticatedAdminCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
 const AuthenticatedAdminCentralRoute =
   AuthenticatedAdminCentralRouteImport.update({
     id: '/central',
@@ -352,6 +359,12 @@ const AuthenticatedClienteClienteGa4Route =
   AuthenticatedClienteClienteGa4RouteImport.update({
     id: '/ga4',
     path: '/ga4',
+    getParentRoute: () => AuthenticatedClienteClienteRoute,
+  } as any)
+const AuthenticatedClienteClienteCrmRoute =
+  AuthenticatedClienteClienteCrmRouteImport.update({
+    id: '/crm',
+    path: '/crm',
     getParentRoute: () => AuthenticatedClienteClienteRoute,
   } as any)
 const AuthenticatedClienteClienteConexoesRoute =
@@ -519,6 +532,7 @@ export interface FileRoutesByFullPath {
   '/admin/brandbook': typeof AuthenticatedAdminBrandbookRoute
   '/admin/branding': typeof AuthenticatedAdminBrandingRoute
   '/admin/central': typeof AuthenticatedAdminCentralRouteWithChildren
+  '/admin/crm': typeof AuthenticatedAdminCrmRoute
   '/admin/debug': typeof AuthenticatedAdminDebugRouteWithChildren
   '/admin/editorial': typeof AuthenticatedAdminEditorialRoute
   '/admin/plano-estrategico': typeof AuthenticatedAdminPlanoEstrategicoRoute
@@ -549,6 +563,7 @@ export interface FileRoutesByFullPath {
   '/cliente/$cliente/aprovacoes': typeof AuthenticatedClienteClienteAprovacoesRoute
   '/cliente/$cliente/brandbook': typeof AuthenticatedClienteClienteBrandbookRoute
   '/cliente/$cliente/conexoes': typeof AuthenticatedClienteClienteConexoesRoute
+  '/cliente/$cliente/crm': typeof AuthenticatedClienteClienteCrmRoute
   '/cliente/$cliente/ga4': typeof AuthenticatedClienteClienteGa4Route
   '/cliente/$cliente/google-ads': typeof AuthenticatedClienteClienteGoogleAdsRoute
   '/cliente/$cliente/google-business': typeof AuthenticatedClienteClienteGoogleBusinessRoute
@@ -587,6 +602,7 @@ export interface FileRoutesByTo {
   '/admin/brandbook': typeof AuthenticatedAdminBrandbookRoute
   '/admin/branding': typeof AuthenticatedAdminBrandingRoute
   '/admin/central': typeof AuthenticatedAdminCentralRouteWithChildren
+  '/admin/crm': typeof AuthenticatedAdminCrmRoute
   '/admin/editorial': typeof AuthenticatedAdminEditorialRoute
   '/admin/plano-estrategico': typeof AuthenticatedAdminPlanoEstrategicoRoute
   '/admin/relatorios': typeof AuthenticatedAdminRelatoriosRoute
@@ -615,6 +631,7 @@ export interface FileRoutesByTo {
   '/cliente/$cliente/aprovacoes': typeof AuthenticatedClienteClienteAprovacoesRoute
   '/cliente/$cliente/brandbook': typeof AuthenticatedClienteClienteBrandbookRoute
   '/cliente/$cliente/conexoes': typeof AuthenticatedClienteClienteConexoesRoute
+  '/cliente/$cliente/crm': typeof AuthenticatedClienteClienteCrmRoute
   '/cliente/$cliente/ga4': typeof AuthenticatedClienteClienteGa4Route
   '/cliente/$cliente/google-ads': typeof AuthenticatedClienteClienteGoogleAdsRoute
   '/cliente/$cliente/google-business': typeof AuthenticatedClienteClienteGoogleBusinessRoute
@@ -659,6 +676,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/brandbook': typeof AuthenticatedAdminBrandbookRoute
   '/_authenticated/admin/branding': typeof AuthenticatedAdminBrandingRoute
   '/_authenticated/admin/central': typeof AuthenticatedAdminCentralRouteWithChildren
+  '/_authenticated/admin/crm': typeof AuthenticatedAdminCrmRoute
   '/_authenticated/admin/debug': typeof AuthenticatedAdminDebugRouteWithChildren
   '/_authenticated/admin/editorial': typeof AuthenticatedAdminEditorialRoute
   '/_authenticated/admin/plano-estrategico': typeof AuthenticatedAdminPlanoEstrategicoRoute
@@ -689,6 +707,7 @@ export interface FileRoutesById {
   '/_authenticated/cliente/$cliente/aprovacoes': typeof AuthenticatedClienteClienteAprovacoesRoute
   '/_authenticated/cliente/$cliente/brandbook': typeof AuthenticatedClienteClienteBrandbookRoute
   '/_authenticated/cliente/$cliente/conexoes': typeof AuthenticatedClienteClienteConexoesRoute
+  '/_authenticated/cliente/$cliente/crm': typeof AuthenticatedClienteClienteCrmRoute
   '/_authenticated/cliente/$cliente/ga4': typeof AuthenticatedClienteClienteGa4Route
   '/_authenticated/cliente/$cliente/google-ads': typeof AuthenticatedClienteClienteGoogleAdsRoute
   '/_authenticated/cliente/$cliente/google-business': typeof AuthenticatedClienteClienteGoogleBusinessRoute
@@ -734,6 +753,7 @@ export interface FileRouteTypes {
     | '/admin/brandbook'
     | '/admin/branding'
     | '/admin/central'
+    | '/admin/crm'
     | '/admin/debug'
     | '/admin/editorial'
     | '/admin/plano-estrategico'
@@ -764,6 +784,7 @@ export interface FileRouteTypes {
     | '/cliente/$cliente/aprovacoes'
     | '/cliente/$cliente/brandbook'
     | '/cliente/$cliente/conexoes'
+    | '/cliente/$cliente/crm'
     | '/cliente/$cliente/ga4'
     | '/cliente/$cliente/google-ads'
     | '/cliente/$cliente/google-business'
@@ -802,6 +823,7 @@ export interface FileRouteTypes {
     | '/admin/brandbook'
     | '/admin/branding'
     | '/admin/central'
+    | '/admin/crm'
     | '/admin/editorial'
     | '/admin/plano-estrategico'
     | '/admin/relatorios'
@@ -830,6 +852,7 @@ export interface FileRouteTypes {
     | '/cliente/$cliente/aprovacoes'
     | '/cliente/$cliente/brandbook'
     | '/cliente/$cliente/conexoes'
+    | '/cliente/$cliente/crm'
     | '/cliente/$cliente/ga4'
     | '/cliente/$cliente/google-ads'
     | '/cliente/$cliente/google-business'
@@ -873,6 +896,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/brandbook'
     | '/_authenticated/admin/branding'
     | '/_authenticated/admin/central'
+    | '/_authenticated/admin/crm'
     | '/_authenticated/admin/debug'
     | '/_authenticated/admin/editorial'
     | '/_authenticated/admin/plano-estrategico'
@@ -903,6 +927,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cliente/$cliente/aprovacoes'
     | '/_authenticated/cliente/$cliente/brandbook'
     | '/_authenticated/cliente/$cliente/conexoes'
+    | '/_authenticated/cliente/$cliente/crm'
     | '/_authenticated/cliente/$cliente/ga4'
     | '/_authenticated/cliente/$cliente/google-ads'
     | '/_authenticated/cliente/$cliente/google-business'
@@ -1106,6 +1131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDebugRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/crm': {
+      id: '/_authenticated/admin/crm'
+      path: '/crm'
+      fullPath: '/admin/crm'
+      preLoaderRoute: typeof AuthenticatedAdminCrmRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/central': {
       id: '/_authenticated/admin/central'
       path: '/central'
@@ -1272,6 +1304,13 @@ declare module '@tanstack/react-router' {
       path: '/ga4'
       fullPath: '/cliente/$cliente/ga4'
       preLoaderRoute: typeof AuthenticatedClienteClienteGa4RouteImport
+      parentRoute: typeof AuthenticatedClienteClienteRoute
+    }
+    '/_authenticated/cliente/$cliente/crm': {
+      id: '/_authenticated/cliente/$cliente/crm'
+      path: '/crm'
+      fullPath: '/cliente/$cliente/crm'
+      preLoaderRoute: typeof AuthenticatedClienteClienteCrmRouteImport
       parentRoute: typeof AuthenticatedClienteClienteRoute
     }
     '/_authenticated/cliente/$cliente/conexoes': {
@@ -1518,6 +1557,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminBrandbookRoute: typeof AuthenticatedAdminBrandbookRoute
   AuthenticatedAdminBrandingRoute: typeof AuthenticatedAdminBrandingRoute
   AuthenticatedAdminCentralRoute: typeof AuthenticatedAdminCentralRouteWithChildren
+  AuthenticatedAdminCrmRoute: typeof AuthenticatedAdminCrmRoute
   AuthenticatedAdminDebugRoute: typeof AuthenticatedAdminDebugRouteWithChildren
   AuthenticatedAdminEditorialRoute: typeof AuthenticatedAdminEditorialRoute
   AuthenticatedAdminPlanoEstrategicoRoute: typeof AuthenticatedAdminPlanoEstrategicoRoute
@@ -1554,6 +1594,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminBrandbookRoute: AuthenticatedAdminBrandbookRoute,
     AuthenticatedAdminBrandingRoute: AuthenticatedAdminBrandingRoute,
     AuthenticatedAdminCentralRoute: AuthenticatedAdminCentralRouteWithChildren,
+    AuthenticatedAdminCrmRoute: AuthenticatedAdminCrmRoute,
     AuthenticatedAdminDebugRoute: AuthenticatedAdminDebugRouteWithChildren,
     AuthenticatedAdminEditorialRoute: AuthenticatedAdminEditorialRoute,
     AuthenticatedAdminPlanoEstrategicoRoute:
@@ -1633,6 +1674,7 @@ interface AuthenticatedClienteClienteRouteChildren {
   AuthenticatedClienteClienteAprovacoesRoute: typeof AuthenticatedClienteClienteAprovacoesRoute
   AuthenticatedClienteClienteBrandbookRoute: typeof AuthenticatedClienteClienteBrandbookRoute
   AuthenticatedClienteClienteConexoesRoute: typeof AuthenticatedClienteClienteConexoesRoute
+  AuthenticatedClienteClienteCrmRoute: typeof AuthenticatedClienteClienteCrmRoute
   AuthenticatedClienteClienteGa4Route: typeof AuthenticatedClienteClienteGa4Route
   AuthenticatedClienteClienteGoogleAdsRoute: typeof AuthenticatedClienteClienteGoogleAdsRoute
   AuthenticatedClienteClienteGoogleBusinessRoute: typeof AuthenticatedClienteClienteGoogleBusinessRoute
@@ -1653,6 +1695,7 @@ const AuthenticatedClienteClienteRouteChildren: AuthenticatedClienteClienteRoute
       AuthenticatedClienteClienteBrandbookRoute,
     AuthenticatedClienteClienteConexoesRoute:
       AuthenticatedClienteClienteConexoesRoute,
+    AuthenticatedClienteClienteCrmRoute: AuthenticatedClienteClienteCrmRoute,
     AuthenticatedClienteClienteGa4Route: AuthenticatedClienteClienteGa4Route,
     AuthenticatedClienteClienteGoogleAdsRoute:
       AuthenticatedClienteClienteGoogleAdsRoute,

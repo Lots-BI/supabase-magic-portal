@@ -1288,6 +1288,656 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_collector_state: {
+        Row: {
+          cadastro_cliente_id: number
+          collector_key: string
+          detail: string | null
+          status: Database["public"]["Enums"]["crm_collector_status"]
+          updated_at: string
+        }
+        Insert: {
+          cadastro_cliente_id: number
+          collector_key: string
+          detail?: string | null
+          status: Database["public"]["Enums"]["crm_collector_status"]
+          updated_at?: string
+        }
+        Update: {
+          cadastro_cliente_id?: number
+          collector_key?: string
+          detail?: string | null
+          status?: Database["public"]["Enums"]["crm_collector_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_collector_state_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "cadastro_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_collector_state_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_agency_client_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_collector_state_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_admin"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_field_facts: {
+        Row: {
+          cadastro_cliente_id: number
+          collected_at: string
+          field: Database["public"]["Enums"]["crm_field_key"]
+          id: string
+          person_id: string
+          source: string
+          value: string
+        }
+        Insert: {
+          cadastro_cliente_id: number
+          collected_at?: string
+          field: Database["public"]["Enums"]["crm_field_key"]
+          id?: string
+          person_id: string
+          source: string
+          value: string
+        }
+        Update: {
+          cadastro_cliente_id?: number
+          collected_at?: string
+          field?: Database["public"]["Enums"]["crm_field_key"]
+          id?: string
+          person_id?: string
+          source?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_field_facts_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "cadastro_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_field_facts_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_agency_client_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_field_facts_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_admin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_field_facts_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "crm_people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_field_facts_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "vw_crm_people_list"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_identities: {
+        Row: {
+          cadastro_cliente_id: number
+          confidence: number
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["crm_identity_kind"]
+          person_id: string
+          source: string | null
+          value: string
+        }
+        Insert: {
+          cadastro_cliente_id: number
+          confidence?: number
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["crm_identity_kind"]
+          person_id: string
+          source?: string | null
+          value: string
+        }
+        Update: {
+          cadastro_cliente_id?: number
+          confidence?: number
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["crm_identity_kind"]
+          person_id?: string
+          source?: string | null
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_identities_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "cadastro_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_identities_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_agency_client_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_identities_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_admin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_identities_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "crm_people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_identities_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "vw_crm_people_list"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_ingest_cursors: {
+        Row: {
+          cadastro_cliente_id: number
+          comments_fetched: number
+          connection_id: string | null
+          cursor_value: string | null
+          id: string
+          ig_media_id: string | null
+          last_error: string | null
+          last_ran_at: string | null
+        }
+        Insert: {
+          cadastro_cliente_id: number
+          comments_fetched?: number
+          connection_id?: string | null
+          cursor_value?: string | null
+          id?: string
+          ig_media_id?: string | null
+          last_error?: string | null
+          last_ran_at?: string | null
+        }
+        Update: {
+          cadastro_cliente_id?: number
+          comments_fetched?: number
+          connection_id?: string | null
+          cursor_value?: string | null
+          id?: string
+          ig_media_id?: string | null
+          last_error?: string | null
+          last_ran_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_ingest_cursors_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "cadastro_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_ingest_cursors_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_agency_client_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_ingest_cursors_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_admin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_ingest_cursors_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "ph_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_people: {
+        Row: {
+          cadastro_cliente_id: number
+          created_at: string
+          display_name: string
+          first_signal_at: string | null
+          id: string
+          ignored_at: string | null
+          is_vip: boolean
+          last_signal_at: string | null
+          merged_into_id: string | null
+          owner_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          cadastro_cliente_id: number
+          created_at?: string
+          display_name: string
+          first_signal_at?: string | null
+          id?: string
+          ignored_at?: string | null
+          is_vip?: boolean
+          last_signal_at?: string | null
+          merged_into_id?: string | null
+          owner_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cadastro_cliente_id?: number
+          created_at?: string
+          display_name?: string
+          first_signal_at?: string | null
+          id?: string
+          ignored_at?: string | null
+          is_vip?: boolean
+          last_signal_at?: string | null
+          merged_into_id?: string | null
+          owner_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_people_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "cadastro_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_people_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_agency_client_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_people_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_admin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_people_merged_into_id_fkey"
+            columns: ["merged_into_id"]
+            isOneToOne: false
+            referencedRelation: "crm_people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_people_merged_into_id_fkey"
+            columns: ["merged_into_id"]
+            isOneToOne: false
+            referencedRelation: "vw_crm_people_list"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_person_notes: {
+        Row: {
+          author_user_id: string | null
+          body: string
+          cadastro_cliente_id: number
+          created_at: string
+          id: string
+          person_id: string
+        }
+        Insert: {
+          author_user_id?: string | null
+          body: string
+          cadastro_cliente_id: number
+          created_at?: string
+          id?: string
+          person_id: string
+        }
+        Update: {
+          author_user_id?: string | null
+          body?: string
+          cadastro_cliente_id?: number
+          created_at?: string
+          id?: string
+          person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_person_notes_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "cadastro_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_person_notes_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_agency_client_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_person_notes_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_admin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_person_notes_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "crm_people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_person_notes_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "vw_crm_people_list"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_person_stats: {
+        Row: {
+          active_weeks: number
+          cadastro_cliente_id: number
+          card_distinct: number
+          churn_state: Database["public"]["Enums"]["crm_churn_state"]
+          computed_at: string
+          first_signal_at: string | null
+          heat_score: number
+          intent_score: number
+          kind_counts: Json
+          last_signal_at: string | null
+          media_distinct: number
+          person_id: string
+          pii_completeness: number
+          pillar_affinity: Json
+          place_counts: Json
+          recency_days: number
+          signal_count: number
+          streak_weeks: number
+          tenure_days: number
+        }
+        Insert: {
+          active_weeks?: number
+          cadastro_cliente_id: number
+          card_distinct?: number
+          churn_state?: Database["public"]["Enums"]["crm_churn_state"]
+          computed_at?: string
+          first_signal_at?: string | null
+          heat_score?: number
+          intent_score?: number
+          kind_counts?: Json
+          last_signal_at?: string | null
+          media_distinct?: number
+          person_id: string
+          pii_completeness?: number
+          pillar_affinity?: Json
+          place_counts?: Json
+          recency_days?: number
+          signal_count?: number
+          streak_weeks?: number
+          tenure_days?: number
+        }
+        Update: {
+          active_weeks?: number
+          cadastro_cliente_id?: number
+          card_distinct?: number
+          churn_state?: Database["public"]["Enums"]["crm_churn_state"]
+          computed_at?: string
+          first_signal_at?: string | null
+          heat_score?: number
+          intent_score?: number
+          kind_counts?: Json
+          last_signal_at?: string | null
+          media_distinct?: number
+          person_id?: string
+          pii_completeness?: number
+          pillar_affinity?: Json
+          place_counts?: Json
+          recency_days?: number
+          signal_count?: number
+          streak_weeks?: number
+          tenure_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_person_stats_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "cadastro_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_person_stats_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_agency_client_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_person_stats_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_admin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_person_stats_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: true
+            referencedRelation: "crm_people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_person_stats_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: true
+            referencedRelation: "vw_crm_people_list"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_signals: {
+        Row: {
+          body: string | null
+          cadastro_cliente_id: number
+          campaign_key: string | null
+          content_card_id: string | null
+          created_at: string
+          external_id: string
+          id: string
+          ig_media_id: string | null
+          kind: Database["public"]["Enums"]["crm_signal_kind"]
+          occurred_at: string
+          payload: Json
+          person_id: string
+          place: Database["public"]["Enums"]["crm_signal_place"]
+          source: string
+        }
+        Insert: {
+          body?: string | null
+          cadastro_cliente_id: number
+          campaign_key?: string | null
+          content_card_id?: string | null
+          created_at?: string
+          external_id: string
+          id?: string
+          ig_media_id?: string | null
+          kind: Database["public"]["Enums"]["crm_signal_kind"]
+          occurred_at: string
+          payload?: Json
+          person_id: string
+          place?: Database["public"]["Enums"]["crm_signal_place"]
+          source: string
+        }
+        Update: {
+          body?: string | null
+          cadastro_cliente_id?: number
+          campaign_key?: string | null
+          content_card_id?: string | null
+          created_at?: string
+          external_id?: string
+          id?: string
+          ig_media_id?: string | null
+          kind?: Database["public"]["Enums"]["crm_signal_kind"]
+          occurred_at?: string
+          payload?: Json
+          person_id?: string
+          place?: Database["public"]["Enums"]["crm_signal_place"]
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_signals_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "cadastro_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_signals_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_agency_client_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_signals_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_admin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_signals_content_card_id_fkey"
+            columns: ["content_card_id"]
+            isOneToOne: false
+            referencedRelation: "content_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_signals_content_card_id_fkey"
+            columns: ["content_card_id"]
+            isOneToOne: false
+            referencedRelation: "vw_content_workflow_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_signals_ig_media_id_fkey"
+            columns: ["ig_media_id"]
+            isOneToOne: false
+            referencedRelation: "ig_media"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_signals_ig_media_id_fkey"
+            columns: ["ig_media_id"]
+            isOneToOne: false
+            referencedRelation: "vw_ig_media_dashboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_signals_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "crm_people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_signals_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "vw_crm_people_list"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_webhook_receipts: {
+        Row: {
+          cadastro_cliente_id: number | null
+          external_id: string
+          field: string | null
+          id: string
+          provider: string
+          received_at: string
+        }
+        Insert: {
+          cadastro_cliente_id?: number | null
+          external_id: string
+          field?: string | null
+          id?: string
+          provider: string
+          received_at?: string
+        }
+        Update: {
+          cadastro_cliente_id?: number | null
+          external_id?: string
+          field?: string | null
+          id?: string
+          provider?: string
+          received_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_webhook_receipts_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "cadastro_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_webhook_receipts_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_agency_client_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_webhook_receipts_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_admin"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       editorial_pillars: {
         Row: {
           ativo: boolean
@@ -3519,6 +4169,75 @@ export type Database = {
           },
         ]
       }
+      vw_crm_people_list: {
+        Row: {
+          active_weeks: number | null
+          cadastro_cliente_id: number | null
+          card_distinct: number | null
+          churn_state: Database["public"]["Enums"]["crm_churn_state"] | null
+          cliente_nome: string | null
+          cliente_slug: string | null
+          display_name: string | null
+          first_signal_at: string | null
+          heat_score: number | null
+          id: string | null
+          ig_username: string | null
+          ignored_at: string | null
+          intent_score: number | null
+          is_vip: boolean | null
+          kind_counts: Json | null
+          last_kind: string | null
+          last_signal_at: string | null
+          media_distinct: number | null
+          merged_into_id: string | null
+          owner_nome: string | null
+          owner_user_id: string | null
+          pii_completeness: number | null
+          pillar_affinity: Json | null
+          place_counts: Json | null
+          recency_days: number | null
+          signal_count: number | null
+          streak_weeks: number | null
+          tenure_days: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_people_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "cadastro_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_people_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_agency_client_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_people_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_admin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_people_merged_into_id_fkey"
+            columns: ["merged_into_id"]
+            isOneToOne: false
+            referencedRelation: "crm_people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_people_merged_into_id_fkey"
+            columns: ["merged_into_id"]
+            isOneToOne: false
+            referencedRelation: "vw_crm_people_list"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vw_estrategia_editorial_stats: {
         Row: {
           estrategia_id: string | null
@@ -3779,18 +4498,6 @@ export type Database = {
           cliente_nome: string
         }[]
       }
-      ensure_owner_admin_for_user: {
-        Args: { _user_id: string }
-        Returns: undefined
-      }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      is_platform_owner: { Args: { _user_id: string }; Returns: boolean }
       dashboard_coverage: {
         Args: { p_cliente: string; p_from: string }
         Returns: {
@@ -3813,6 +4520,18 @@ export type Database = {
           valor: number
         }[]
       }
+      ensure_owner_admin_for_user: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_platform_owner: { Args: { _user_id: string }; Returns: boolean }
       portfolio_clientes_ativos: {
         Args: never
         Returns: {
@@ -3830,13 +4549,13 @@ export type Database = {
           data: string
           ga4_conversions: number
           ga4_sessions: number
+          google_conversions: number
           google_spend: number
           instagram_interactions: number
           instagram_reach: number
           meta_conversions: number
           meta_results: number
           meta_spend: number
-          google_conversions: number
           total_clicks: number
           total_impressions: number
         }[]
@@ -3946,6 +4665,43 @@ export type Database = {
         | "agendado"
         | "alteracoes_roteiro"
         | "alteracoes_design"
+      crm_churn_state:
+        | "novo"
+        | "recorrente"
+        | "em_risco"
+        | "dormindo"
+        | "reativado"
+      crm_collector_status: "live" | "scope_missing" | "planned" | "impossible"
+      crm_field_key: "email" | "phone" | "address" | "full_name"
+      crm_identity_kind:
+        | "igsid"
+        | "ig_username"
+        | "email"
+        | "phone"
+        | "whatsapp"
+        | "messenger_psid"
+        | "leadgen"
+        | "gbp_reviewer"
+        | "yt_channel"
+      crm_signal_kind:
+        | "comment"
+        | "reply"
+        | "dm"
+        | "story_reply"
+        | "lead_form"
+        | "whatsapp"
+        | "review"
+        | "mention"
+        | "brand_reply"
+      crm_signal_place:
+        | "feed"
+        | "reels"
+        | "story"
+        | "ads"
+        | "whatsapp"
+        | "gbp"
+        | "youtube"
+        | "unknown"
       decisao_resultado_status: "pendente" | "positivo" | "negativo" | "neutro"
       hipotese_status: "aberta" | "em_teste" | "validada" | "invalidada"
       oportunidade_origem: "manual" | "regra" | "ia"
@@ -4245,6 +5001,47 @@ export const Constants = {
         "agendado",
         "alteracoes_roteiro",
         "alteracoes_design",
+      ],
+      crm_churn_state: [
+        "novo",
+        "recorrente",
+        "em_risco",
+        "dormindo",
+        "reativado",
+      ],
+      crm_collector_status: ["live", "scope_missing", "planned", "impossible"],
+      crm_field_key: ["email", "phone", "address", "full_name"],
+      crm_identity_kind: [
+        "igsid",
+        "ig_username",
+        "email",
+        "phone",
+        "whatsapp",
+        "messenger_psid",
+        "leadgen",
+        "gbp_reviewer",
+        "yt_channel",
+      ],
+      crm_signal_kind: [
+        "comment",
+        "reply",
+        "dm",
+        "story_reply",
+        "lead_form",
+        "whatsapp",
+        "review",
+        "mention",
+        "brand_reply",
+      ],
+      crm_signal_place: [
+        "feed",
+        "reels",
+        "story",
+        "ads",
+        "whatsapp",
+        "gbp",
+        "youtube",
+        "unknown",
       ],
       decisao_resultado_status: ["pendente", "positivo", "negativo", "neutro"],
       hipotese_status: ["aberta", "em_teste", "validada", "invalidada"],

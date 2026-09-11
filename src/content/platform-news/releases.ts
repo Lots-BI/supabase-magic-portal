@@ -21,6 +21,20 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-09-11-crm-audiencia",
+    date: "2026-09-11",
+    title: "CRM: quem comentou, voltou ou sumiu",
+    summary:
+      "A aba CRM mostra pessoas identificáveis da sua audiência — a partir dos comentários nas publicações. Sem e-mail inventado.",
+    bullets: [
+      "Menu **Dados** → **CRM** (acima de Relatório).",
+      "Listas **Responder agora** e **Em risco**, e quais posts trazem gente de volta.",
+      "E-mail e endereço só entram se um formulário de anúncio ou o WhatsApp entregar — a Graph não dá isso no comentário.",
+    ],
+    audience: "all",
+    tags: ["CRM", "Novidade"],
+  },
+  {
     id: "2026-09-11-relatorio-visual",
     date: "2026-09-11",
     title: "Relatório visual: o que aconteceu, em números e gráficos",

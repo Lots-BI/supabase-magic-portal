@@ -21,6 +21,7 @@ last_review: 2026-09-06
 3. Redirect URI: `{APP_URL}/oauth/meta/callback`
 4. App Dashboard → Casos de uso / Permissions:
    - `instagram_basic`
+   - `instagram_manage_comments` (CRM de audiência — comentadores; Relogin obrigatório)
    - `instagram_manage_insights`
    - `pages_read_engagement`
    - `pages_show_list`
@@ -38,7 +39,7 @@ O Instagram **não agenda** nativamente. O Lots guarda `scheduled_publish_at` (h
 1. Adicione as permissões no App Dashboard **antes** de pedir no OAuth.
 2. Em Conexões, **Refazer login** com a conta Meta da agência que gerencia o portfólio — token antigo não ganha escopo novo sozinho.
 3. O app usa o **token da Página** (`GET /me/accounts`) ligada ao Instagram do cliente, não só o token do usuário.
-4. `pages_manage_posts` libera o token da Página. Publicar no feed exige também `instagram_content_publish` no **mesmo** login. Token antigo não ganha permissão nova. Se o dialog quebrar com Invalid Scopes, o caso de uso ainda não está no app — use `META_REQUEST_IG_PUBLISH_SCOPE=0` só como escape.
+4. `pages_manage_posts` libera o token da Página. Publicar no feed exige também `instagram_content_publish` no **mesmo** login. Comentários no CRM exigem `instagram_manage_comments` no mesmo login. Direct: `META_REQUEST_IG_MESSAGES_SCOPE=1` após App Review. Lead Ads: `META_REQUEST_LEADS_SCOPE=1`. Token antigo não ganha permissão nova. Se o dialog quebrar com Invalid Scopes, o caso de uso ainda não está no app — use `META_REQUEST_IG_PUBLISH_SCOPE=0` ou `META_REQUEST_IG_COMMENTS_SCOPE=0` só como escape. Webhook: [meta-crm-webhooks.md](./meta-crm-webhooks.md).
 
 ## Lots BI
 

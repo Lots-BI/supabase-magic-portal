@@ -45,3 +45,19 @@ export interface InstagramAccountInsightsResponseV1 {
   }>;
   error?: { message: string; code?: number };
 }
+
+export interface InstagramCommentV1 {
+  id: string;
+  text?: string;
+  timestamp?: string;
+  username?: string;
+  hidden?: boolean;
+  parent_id?: string;
+  from?: { id?: string; username?: string };
+}
+
+export interface InstagramCommentListResponseV1 {
+  data?: InstagramCommentV1[];
+  paging?: { cursors?: { after?: string } };
+  error?: { message: string; code?: number };
+}
