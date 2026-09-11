@@ -272,6 +272,89 @@ function enumerateIsoDays(from: string, to: string): string[] {
   return days;
 }
 
+const MESSAGING_ATTRIBUTION_DAYS = 7;
+
+function isoDayNumber(date: string): number {
+  const [y, m, d] = date.split("-").map(Number);
+  return Date.UTC(y, m - 1, d) / 86_400_000;
+}
+
+function rowLookupKey(campaign: string, date: string, metricKey: string): string {
+  return `${campaign}\0${date}\0${metricKey}`;
+}
+
+/**
+ * `messaging_conversation_started_7d` credita a mesma conversa em vários dias
+ * de anúncio. O Gerenciador no período conta 1; somar o diário infla (Rodrigo:
+ * 1 em 09/09 + 1 em 10/09). Por campanha, junta dias a ≤7 de distância e deixa
+ * o resultado no dia da 1ª resposta — ou no último dia, se ninguém respondeu.
+ */
+export function collapseSevenDayMessagingAttribution(rows: MetricRowV1[]): MetricRowV1[] {
+  const index = new Map<string, MetricRowV1>();
+  const campaigns = new Set<string>();
+  for (const row of rows) {
+    const campaign = row.campaign ?? "";
+    campaigns.add(campaign);
+    if (
+      row.metricKey === "results" ||
+      row.metricKey === "messaging_conversations_started" ||
+      row.metricKey === "messaging_first_replies"
+    ) {
+      index.set(rowLookupKey(campaign, row.date, row.metricKey), row);
+    }
+  }
+
+  const valueOf = (campaign: string, date: string, metricKey: string): number =>
+    index.get(rowLookupKey(campaign, date, metricKey))?.value ?? 0;
+
+  const setValue = (campaign: string, date: string, metricKey: string, value: number) => {
+    const row = index.get(rowLookupKey(campaign, date, metricKey));
+    if (row) row.value = value;
+  };
+
+  for (const campaign of campaigns) {
+    const dates = [
+      ...new Set(rows.filter((row) => (row.campaign ?? "") === campaign).map((row) => row.date)),
+    ].sort();
+
+    const messagingDates = dates.filter((date) => {
+      const messaging = valueOf(campaign, date, "messaging_conversations_started");
+      const results = valueOf(campaign, date, "results");
+      return messaging > 0 && results === messaging;
+    });
+    if (messagingDates.length < 2) continue;
+
+    const clusters: string[][] = [];
+    let current: string[] = [messagingDates[0]];
+    for (let i = 1; i < messagingDates.length; i++) {
+      const date = messagingDates[i];
+      const prev = messagingDates[i - 1];
+      if (isoDayNumber(date) - isoDayNumber(prev) <= MESSAGING_ATTRIBUTION_DAYS) {
+        current.push(date);
+      } else {
+        clusters.push(current);
+        current = [date];
+      }
+    }
+    clusters.push(current);
+
+    for (const cluster of clusters) {
+      if (cluster.length < 2) continue;
+      const replyDates = cluster.filter(
+        (date) => valueOf(campaign, date, "messaging_first_replies") > 0,
+      );
+      const keep = new Set(replyDates.length > 0 ? replyDates : [cluster[cluster.length - 1]]);
+      for (const date of cluster) {
+        if (keep.has(date)) continue;
+        setValue(campaign, date, "messaging_conversations_started", 0);
+        setValue(campaign, date, "results", 0);
+      }
+    }
+  }
+
+  return rows;
+}
+
 /**
  * Dias sem entrega a API omite. Gravamos 0 em results/conversions para o
  * gap-finder não pedir o mesmo intervalo de novo (e o "Puxar métricas" não
@@ -351,7 +434,7 @@ export function mapMetaInsightsToMetricRows(
     });
   }
 
-  return rows;
+  return collapseSevenDayMessagingAttribution(rows);
 }
 
 export function countDistinctCampaigns(insights: readonly MetaInsightRowV1[]): number {

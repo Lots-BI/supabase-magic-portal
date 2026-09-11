@@ -187,6 +187,64 @@ describe("mapMetaInsightsToMetricRows", () => {
     expect(rows.find((r) => r.metricKey === "messaging_conversations_started")?.value).toBe(1);
     expect(rows.find((r) => r.metricKey === "results")?.value).toBe(1);
   });
+
+  it("não soma a mesma conversa WhatsApp em dois dias da janela de 7d", () => {
+    const rows = mapMetaInsightsToMetricRows([
+      {
+        ...base,
+        date_start: "2026-09-09",
+        date_stop: "2026-09-09",
+        actions: [{ action_type: "onsite_conversion.messaging_conversation_started_7d", value: "1" }],
+        results: [{ indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" }],
+      },
+      {
+        ...base,
+        date_start: "2026-09-10",
+        date_stop: "2026-09-10",
+        actions: [
+          { action_type: "onsite_conversion.messaging_conversation_started_7d", value: "1" },
+          { action_type: "onsite_conversion.messaging_first_reply", value: "1" },
+        ],
+        results: [{ indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" }],
+      },
+    ]);
+    const of = (date: string, key: string) =>
+      rows.find((r) => r.date === date && r.metricKey === key)?.value;
+    expect(of("2026-09-09", "results")).toBe(0);
+    expect(of("2026-09-09", "messaging_conversations_started")).toBe(0);
+    expect(of("2026-09-10", "results")).toBe(1);
+    expect(of("2026-09-10", "messaging_conversations_started")).toBe(1);
+    expect(
+      rows.filter((r) => r.metricKey === "results").reduce((sum, r) => sum + r.value, 0),
+    ).toBe(1);
+  });
+
+  it("mantém duas conversas com 1ª resposta em dias seguidos", () => {
+    const rows = mapMetaInsightsToMetricRows([
+      {
+        ...base,
+        date_start: "2026-09-09",
+        date_stop: "2026-09-09",
+        actions: [
+          { action_type: "onsite_conversion.messaging_conversation_started_7d", value: "1" },
+          { action_type: "onsite_conversion.messaging_first_reply", value: "1" },
+        ],
+        results: [{ indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" }],
+      },
+      {
+        ...base,
+        date_start: "2026-09-10",
+        date_stop: "2026-09-10",
+        actions: [
+          { action_type: "onsite_conversion.messaging_conversation_started_7d", value: "1" },
+          { action_type: "onsite_conversion.messaging_first_reply", value: "1" },
+        ],
+        results: [{ indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" }],
+      },
+    ]);
+    expect(rows.find((r) => r.date === "2026-09-09" && r.metricKey === "results")?.value).toBe(1);
+    expect(rows.find((r) => r.date === "2026-09-10" && r.metricKey === "results")?.value).toBe(1);
+  });
 });
 
 describe("markerRowsForUncoveredDates", () => {
