@@ -8,29 +8,26 @@
 @custom-variant dark (&:is(.dark *));
 
 /* =========================================================================
- * LOTS BI DESIGN SYSTEM
- * Brand: Lots BI · primary #A855F7 · secondary #60A5FA
- * Neutrals: #e2eeeb (mint) · #dfcbe4 (lilac)
- * Identity: clarity, growth, control, technology, sophistication.
- * Petal/organic cues live as gradient meshes + curve utilities, not as icons.
+ * LOTS BI DESIGN SYSTEM - ORGANIC PLATFORM
+ * Radically flat, seamless, and tactile. No glowing tech tropes.
  * ========================================================================= */
 
 @theme inline {
-  /* Radii — softly organic, never circular */
-  --radius: 0.75rem;
+  /* Radii — Hyper-smooth and structural */
+  --radius: 0.5rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 10px);
-  --radius-3xl: calc(var(--radius) + 18px);
+  --radius-xl: calc(var(--radius) + 8px);
+  --radius-2xl: calc(var(--radius) + 16px);
+  --radius-3xl: calc(var(--radius) + 24px); /* For physical petal shapes */
 
   /* Typography */
   --font-sans: "Epilogue Variable", "Epilogue", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Urbanist Variable", "Urbanist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Surfaces / tokens (resolve via :root / .dark) */
+  /* Surfaces / tokens */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -45,7 +42,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Brand scales */
+  /* Brand colors (kept your exact Hues, but mapping changes below) */
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-50: var(--primary-50);
@@ -72,26 +69,11 @@
   --color-secondary-800: var(--secondary-800);
   --color-secondary-900: var(--secondary-900);
 
-  /* Semantic */
   --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
   --color-danger: var(--danger);
-  --color-danger-foreground: var(--danger-foreground);
-  --color-destructive: var(--danger);
-  --color-destructive-foreground: var(--danger-foreground);
   --color-info: var(--info);
-  --color-info-foreground: var(--info-foreground);
-
-  /* Charts */
-  --color-chart-1: var(--primary-500);
-  --color-chart-2: var(--secondary-500);
-  --color-chart-3: var(--primary-300);
-  --color-chart-4: var(--secondary-700);
-  --color-chart-5: var(--accent-strong);
-
-  /* Sidebar */
+  
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -99,75 +81,64 @@
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-ring-offset-background: var(--background);
 }
 
 /* =========================================================================
- * LIGHT THEME — premium, luminous, corporate, with mint/lilac warmth
+ * LIGHT THEME — Earthy, warm, tactile like premium stationary
  * ========================================================================= */
 :root {
-  /* Primary — purple */
+  /* Retaining your exact brand steps */
   --primary-50: oklch(0.975 0.012 305);
   --primary-100: oklch(0.945 0.025 305);
   --primary-200: oklch(0.895 0.05 305);
   --primary-300: oklch(0.82 0.08 305);
   --primary-400: oklch(0.71 0.11 305);
-  --primary-500: oklch(0.62 0.24 303); /* #A855F7 anchor */
+  --primary-500: oklch(0.62 0.24 303); /* Anchor */
   --primary-600: oklch(0.52 0.14 302);
   --primary-700: oklch(0.435 0.125 300);
   --primary-800: oklch(0.345 0.1 298);
   --primary-900: oklch(0.255 0.072 296);
 
-  /* Secondary — cyan sky */
   --secondary-50: oklch(0.98 0.015 225);
   --secondary-100: oklch(0.955 0.03 225);
   --secondary-200: oklch(0.915 0.055 228);
   --secondary-300: oklch(0.86 0.08 228);
-  --secondary-400: oklch(0.78 0.14 238); /* #60A5FA anchor */
+  --secondary-400: oklch(0.78 0.14 238); /* Anchor */
   --secondary-500: oklch(0.72 0.16 240);
   --secondary-600: oklch(0.65 0.115 235);
   --secondary-700: oklch(0.54 0.11 238);
   --secondary-800: oklch(0.43 0.09 240);
   --secondary-900: oklch(0.3 0.06 240);
 
-  /* Mint + lilac neutrals (brand-tinted greys) */
-  --mint-50: oklch(0.985 0.006 170);
-  --mint-100: oklch(0.96 0.012 170); /* #e2eeeb */
-  --lilac-50: oklch(0.975 0.01 320);
-  --lilac-100: oklch(0.925 0.025 320); /* #dfcbe4 */
-
-  /* Surfaces — canvas vs card vs inset must stay clearly distinct */
-  --background: oklch(0.94 0.008 200);
-  --foreground: oklch(0.18 0.022 290);
-  --card: oklch(1 0 0);
+  /* SEAMLESS SURFACES */
+  --background: oklch(95.175% 0.00848 236.983); /* A very subtle warm sand/paper tone */
+  --foreground: oklch(0.2 0.01 90);
+  --card: oklch(100% 0.00011 271.152); /* Pure white to pop naturally against the warm background */
   --card-foreground: var(--foreground);
-  --popover: oklch(1 0 0);
+  --popover: oklch(100% 0.00011 271.152);
   --popover-foreground: var(--foreground);
-  --muted: oklch(0.915 0.01 230);
-  --muted-foreground: oklch(0.4 0.025 270);
-  --accent: oklch(0.93 0.02 305);
+  
+  /* We use muted colors for structure instead of sharp borders */
+  --muted: oklch(93.535% 0.02757 309.076);
+  --muted-foreground: oklch(0.45 0.01 90);
+  --accent: oklch(96.535% 0.01356 314.441);
   --accent-foreground: var(--primary-700);
-  --accent-strong: var(--lilac-100);
-  --border: oklch(0.82 0.016 270);
-  --input: oklch(0.78 0.016 270);
-  --ring: var(--primary-500);
+  --accent-strong: var(--primary-100);
+  
+  --border: transparent; /* Radical shift: Let background tones do the separating */
+  --input: oklch(0.9 0.01 90);
+  --ring: var(--primary-400);
 
   --primary: var(--primary-500);
-  --primary-foreground: oklch(0.985 0.005 305);
+  --primary-foreground: oklch(1 0 0);
   --secondary: var(--secondary-100);
   --secondary-foreground: var(--secondary-800);
 
   --success: oklch(0.64 0.14 155);
-  --success-foreground: oklch(0.985 0.005 155);
   --warning: oklch(0.79 0.14 78);
-  --warning-foreground: oklch(0.25 0.06 60);
   --danger: oklch(0.61 0.19 25);
-  --danger-foreground: oklch(0.985 0.005 25);
   --info: var(--secondary-500);
-  --info-foreground: oklch(0.985 0.005 230);
 
-  /* Content Workflow — Kanban column accents */
   --cw-col-producao: oklch(0.63 0.22 25);
   --cw-col-edicao: oklch(0.79 0.16 85);
   --cw-col-aguardando: oklch(0.58 0.18 250);
@@ -175,227 +146,226 @@
   --cw-col-publicado: oklch(0.52 0.02 260);
   --cw-col-alteracoes: oklch(0.75 0.15 55);
 
-  /* Sidebar — lighter than canvas, darker edge than cards */
-  --sidebar: oklch(0.975 0.006 200);
-  --sidebar-foreground: oklch(0.24 0.02 280);
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary-500);
-  --sidebar-primary-foreground: oklch(0.985 0.005 305);
-  --sidebar-accent: oklch(0.93 0.025 305);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: var(--muted);
   --sidebar-accent-foreground: var(--primary-800);
-  --sidebar-border: oklch(0.8 0.016 270);
-  --sidebar-ring: var(--primary-500);
+  --sidebar-border: transparent;
 
-  /* Elevation — enough to lift cards off the canvas */
-  --shadow-color: 270 30% 35%;
-  --shadow-xs: 0 1px 2px -1px color-mix(in oklab, var(--primary-900) 14%, transparent);
-  --shadow-sm:
-    0 1px 2px -1px color-mix(in oklab, var(--primary-900) 14%, transparent),
-    0 3px 8px -3px color-mix(in oklab, var(--primary-900) 10%, transparent);
-  --shadow-md:
-    0 6px 16px -4px color-mix(in oklab, var(--primary-900) 16%, transparent),
-    0 2px 6px -2px color-mix(in oklab, var(--primary-900) 10%, transparent);
-  --shadow-lg:
-    0 18px 40px -20px color-mix(in oklab, var(--primary-900) 26%, transparent),
-    0 6px 12px -6px color-mix(in oklab, var(--primary-900) 12%, transparent);
-  --shadow-glow: 0 12px 40px -16px color-mix(in oklab, var(--primary-500) 45%, transparent);
+  /* Shadows are stripped away entirely or kept incredibly soft */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none; /* Only for popovers/modals */
+  --shadow-lg: none;
 
-  /* Organic surface — petal-inspired mesh, used only on hero/marketing/empty */
-  --mesh-aurora:
-    radial-gradient(
-      ellipse 80% 60% at 0% 0%,
-      color-mix(in oklab, var(--primary-200) 70%, transparent) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 60% 50% at 100% 0%,
-      color-mix(in oklab, var(--secondary-200) 70%, transparent) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 90% 70% at 50% 100%,
-      color-mix(in oklab, var(--lilac-100) 80%, transparent) 0%,
-      transparent 65%
-    );
+  /* Organic easing - feels physical and weighty */
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --motion-slow: 400ms;
+  --ease-organic: cubic-bezier(0.25, 1, 0.4, 1);
 
-  --motion-fast: 140ms;
-  --motion-base: 220ms;
-  --motion-slow: 360ms;
-  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
-
-  /* Lockup "Lots" — cor do asset oficial; legível no sidebar claro */
   --lots-wordmark-text: #2c2e3b;
 }
 
 /* =========================================================================
- * DARK THEME — operations center, deep purple-night with brand glow
+ * DARK THEME — Deep ink, flat architecture, extreme legibility
  * ========================================================================= */
 .dark {
-  --background: oklch(0.125 0.018 285);
-  --foreground: oklch(0.97 0.01 290);
-  --card: oklch(0.2 0.024 285);
+  --background: oklch(0.18 0.005 260); /* Muted slate/ink, not deep glowing purple */
+  --foreground: oklch(0.96 0.005 260);
+  --card: oklch(0.21 0.005 260); /* Just slightly lighter than background */
   --card-foreground: var(--foreground);
-  --popover: oklch(0.22 0.026 285);
+  --popover: oklch(0.23 0.005 260);
   --popover-foreground: var(--foreground);
-  --muted: oklch(0.255 0.022 285);
-  --muted-foreground: oklch(0.78 0.018 280);
-  --accent: oklch(0.3 0.05 305);
-  --accent-foreground: oklch(0.95 0.025 305);
-  --accent-strong: oklch(0.36 0.06 305);
-  --border: oklch(0.42 0.03 285);
-  --input: oklch(0.4 0.03 285);
+  
+  --muted: oklch(0.24 0.005 260);
+  --muted-foreground: oklch(0.65 0.01 260);
+  --accent: oklch(0.25 0.005 260);
+  --accent-foreground: var(--primary-300);
+  --accent-strong: oklch(0.3 0.01 260);
+  
+  --border: transparent;
+  --input: oklch(0.26 0.01 260);
   --ring: var(--primary-400);
 
   --primary: var(--primary-400);
-  --primary-foreground: oklch(0.15 0.03 295);
-  --secondary: oklch(0.275 0.035 240);
-  --secondary-foreground: oklch(0.945 0.02 230);
+  --primary-foreground: oklch(0.15 0.01 260);
+  --secondary: var(--secondary-400);
+  --secondary-foreground: oklch(0.15 0.01 260);
 
-  --success: oklch(0.72 0.15 158);
-  --success-foreground: oklch(0.15 0.04 158);
-  --warning: oklch(0.83 0.14 80);
-  --warning-foreground: oklch(0.18 0.05 60);
-  --danger: oklch(0.7 0.19 25);
-  --danger-foreground: oklch(0.15 0.04 25);
-  --info: var(--secondary-400);
-  --info-foreground: oklch(0.15 0.04 230);
-
-  --lots-wordmark-text: oklch(0.88 0.015 280);
-
-  --sidebar: oklch(0.155 0.022 285);
-  --sidebar-foreground: oklch(0.9 0.012 285);
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary-400);
-  --sidebar-primary-foreground: oklch(0.15 0.03 295);
-  --sidebar-accent: oklch(0.28 0.045 305);
-  --sidebar-accent-foreground: oklch(0.96 0.02 305);
-  --sidebar-border: oklch(0.38 0.03 285);
-  --sidebar-ring: var(--primary-400);
+  --sidebar-primary-foreground: oklch(0.15 0.01 260);
+  --sidebar-accent: var(--muted);
+  --sidebar-accent-foreground: var(--primary-300);
+  --sidebar-border: transparent;
 
-  --shadow-xs: 0 1px 2px -1px oklch(0 0 0 / 0.45);
-  --shadow-sm: 0 1px 2px -1px oklch(0 0 0 / 0.45), 0 2px 6px -3px oklch(0 0 0 / 0.4);
-  --shadow-md: 0 6px 16px -6px oklch(0 0 0 / 0.55), 0 2px 4px -2px oklch(0 0 0 / 0.4);
-  --shadow-lg: 0 24px 48px -24px oklch(0 0 0 / 0.65), 0 8px 16px -8px oklch(0 0 0 / 0.45);
-  --shadow-glow: 0 18px 50px -18px color-mix(in oklab, var(--primary-400) 50%, transparent);
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: 0 8px 32px -8px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 16px 64px -16px rgb(0 0 0 / 0.5);
 
-  --mesh-aurora:
-    radial-gradient(
-      ellipse 80% 60% at 0% 0%,
-      color-mix(in oklab, var(--primary-700) 55%, transparent) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 60% 50% at 100% 0%,
-      color-mix(in oklab, var(--secondary-700) 55%, transparent) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 90% 70% at 50% 100%,
-      color-mix(in oklab, var(--primary-900) 75%, transparent) 0%,
-      transparent 65%
-    );
+  --lots-wordmark-text: oklch(0.96 0.005 260);
 }
 
 /* =========================================================================
  * Base reset + typography
  * ========================================================================= */
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
-
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-feature-settings: "ss01", "cv11", "kern";
   }
 
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-feature-settings: "kern", "liga", "calt";
     overflow-x: hidden;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  /* Relaxed the typography so it stops looking like an aggressive startup */
+  h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
-    font-weight: 600;
+    letter-spacing: 0; /* Removed negative tracking */
+    font-weight: 500; /* Dropped from 600 for a softer, editorial feel */
   }
 
   h1 {
-    letter-spacing: -0.03em;
+    font-weight: 600;
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--primary-500) 30%, transparent);
-    color: var(--foreground);
+    background: var(--primary-200);
+    color: var(--primary-900);
+  }
+  .dark ::selection {
+    background: var(--primary-800);
+    color: var(--primary-100);
   }
 
-  /* Refined scrollbars */
+  /* Completely stripped back scrollbars */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--muted-foreground) 40%, transparent);
+    background: var(--muted);
     border-radius: 999px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklab, var(--muted-foreground) 62%, transparent);
-    background-clip: padding-box;
-    border: 2px solid transparent;
+    background: var(--muted-foreground);
   }
 }
 
 /* =========================================================================
- * Lots BI utilities — petal/organic cues, glass restricted to overlays
+ * Lots BI utilities — Flat, Structural, Organic
  * ========================================================================= */
+
+/* Removed the glowing mesh. Replaced with a solid soft wash to ground the app. */
 @utility lots-aurora {
-  background-image: var(--mesh-aurora);
+  background-color: var(--background);
 }
 
+/* Radical shift: Flat cards, no borders, no shadows. Separated by tone. */
 @utility lots-surface {
   background-color: var(--card);
-  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
   min-width: 0;
   max-width: 100%;
   transition:
-    box-shadow var(--motion-base) var(--ease-out-soft),
-    border-color var(--motion-base) var(--ease-out-soft),
-    transform var(--motion-base) var(--ease-out-soft);
+    background-color var(--motion-base) var(--ease-organic),
+    transform var(--motion-base) var(--ease-organic);
 }
 
-/* Scroll horizontal elegante para tabelas e dados largos */
+/* For elements that *must* float (modals, popovers) */
+@utility lots-surface-raised {
+  background-color: var(--card);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--muted); /* The only place we use borders */
+}
+
+/* Physical interaction: Push in instead of float up */
+@utility lots-hoverable {
+  transition: all var(--motion-fast) var(--ease-organic);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-color: var(--accent);
+      transform: scale(0.99); /* Pushes into the page slightly */
+    }
+  }
+}
+
+/* 
+ * TRUE ORGANIC DESIGN 
+ * Instead of a gradient glow, the petal accent physically alters the shape 
+ * of the component, rounding one corner heavily to create a leaf/petal silhouette.
+ */
+@utility lots-petal-accent {
+  border-top-right-radius: var(--radius-3xl);
+  border-bottom-left-radius: var(--radius-lg);
+  border-top-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+}
+
+/* Killed frosted glass. Replaced with clean, opaque color-mixing */
+@utility lots-glass {
+  background-color: color-mix(in oklab, var(--card) 95%, transparent);
+}
+
+/* Solid branding block, no more gradients */
+@utility lots-gradient-primary {
+  background-color: var(--primary-500);
+  color: var(--primary-foreground);
+}
+
+/* Removed text gradient, it's terrible for reading data anyway */
+@utility lots-gradient-text {
+  color: var(--primary-600);
+}
+.dark .lots-gradient-text {
+  color: var(--primary-400);
+}
+
+@utility lots-row {
+  transition: background-color var(--motion-fast) var(--ease-organic);
+  border-bottom: 1px solid var(--muted); /* Soft dividers for rows only */
+  &:hover {
+    background-color: var(--muted);
+  }
+}
+
+@utility lots-focus {
+  outline: none;
+  &:focus-visible {
+    box-shadow:
+      0 0 0 2px var(--background),
+      0 0 0 4px var(--primary-400);
+  }
+}
+
 @utility lots-scroll-x {
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
+  scrollbar-width: none; /* Hide scrollbar for seamless look */
 }
 
-/* Tabela com scroll vertical e cabeçalho fixo */
 @utility lots-table-scroll {
   width: 100%;
   max-width: 100%;
   max-height: min(70dvh, 640px);
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
 }
 
 @utility lots-table-head-sticky {
@@ -403,253 +373,139 @@
   top: 0;
   z-index: 10;
   background-color: var(--card);
-  box-shadow: 0 1px 0 var(--border);
+  border-bottom: 2px solid var(--muted); /* Stronger separator for fixed headers */
 }
 
-/* Área segura iOS — padding inferior em barras fixas */
 @utility lots-safe-bottom {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
-@utility lots-surface-raised {
-  background-color: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
-}
-
-/* Hover lift used on interactive cards */
-@utility lots-hoverable {
-  transition:
-    box-shadow var(--motion-base) var(--ease-out-soft),
-    border-color var(--motion-base) var(--ease-out-soft),
-    transform var(--motion-base) var(--ease-out-soft);
-  @media (hover: hover) and (pointer: fine) {
-    &:hover {
-      border-color: color-mix(in oklab, var(--primary-500) 35%, var(--border));
-      box-shadow: var(--shadow-md);
-      transform: translateY(-1px);
-    }
-  }
-}
-
-/* Subtle petal corner accent — single curved gradient, conceptual not literal */
-@utility lots-petal-accent {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  &::before {
-    content: "";
-    position: absolute;
-    inset: auto -20% -40% auto;
-    width: 70%;
-    aspect-ratio: 1;
-    background: radial-gradient(
-      closest-side,
-      color-mix(in oklab, var(--primary-300) 55%, transparent),
-      transparent 70%
-    );
-    z-index: -1;
-    pointer-events: none;
-  }
-}
-
-/* Glass — restricted; use only on overlays/dropdowns/modals */
-@utility lots-glass {
-  background-color: color-mix(in oklab, var(--popover) 78%, transparent);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid var(--border);
-}
-
-/* Soft brand gradient — for hero KPIs only */
-@utility lots-gradient-primary {
-  background-image: linear-gradient(
-    135deg,
-    var(--primary-500) 0%,
-    var(--primary-700) 60%,
-    color-mix(in oklab, var(--secondary-500) 70%, var(--primary-700)) 100%
-  );
-  color: var(--primary-foreground);
-}
-
-@utility lots-gradient-text {
-  background-image: linear-gradient(135deg, var(--primary-600), var(--secondary-600));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Subtle row hover for tables */
-@utility lots-row {
-  transition: background-color var(--motion-fast) var(--ease-out-soft);
-  &:hover {
-    background-color: color-mix(in oklab, var(--primary-500) 10%, var(--muted));
-  }
-}
-
-/* Focus ring — branded */
-@utility lots-focus {
-  outline: none;
-  &:focus-visible {
-    box-shadow:
-      0 0 0 2px var(--background),
-      0 0 0 4px color-mix(in oklab, var(--primary-500) 60%, transparent);
-  }
-}
-
-/* Entry animations — used sparingly */
+/* Animations - Softened the curves */
 @keyframes lots-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes lots-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes lots-shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 @utility animate-lots-in {
-  animation: lots-fade-up var(--motion-slow) var(--ease-out-soft) both;
+  animation: lots-fade-up var(--motion-slow) var(--ease-organic) both;
 }
 @utility animate-lots-fade {
-  animation: lots-fade-in var(--motion-base) var(--ease-out-soft) both;
+  animation: lots-fade-in var(--motion-base) var(--ease-organic) both;
 }
 
-/* Skeleton shimmer — premium, brand-tinted */
 @utility lots-skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--muted) 0%,
-    color-mix(in oklab, var(--primary-200) 55%, var(--muted)) 50%,
-    var(--muted) 100%
-  );
-  background-size: 200% 100%;
-  animation: lots-shimmer 1.6s linear infinite;
+  background-color: var(--muted);
+  position: relative;
+  overflow: hidden;
   border-radius: var(--radius-md);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--card) 40%, transparent) 50%,
+      transparent 100%
+    );
+    animation: lots-shimmer 1.5s var(--ease-organic) infinite;
+  }
 }
 
-/* Knowledge Center — comfortable reading typography */
+/* =========================================================================
+ * Knowledge Center — Clean, editorial reading experience
+ * ========================================================================= */
 .knowledge-prose {
   color: var(--foreground);
-  font-size: 0.9375rem;
-  line-height: 1.75;
+  font-size: 1rem; /* Slightly larger for easier reading */
+  line-height: 1.8;
   max-width: 48rem;
+}
+
+.knowledge-prose h1, .knowledge-prose h2, .knowledge-prose h3, .knowledge-prose h4 {
+  color: var(--foreground);
 }
 
 .knowledge-prose h1 {
   font-family: var(--font-display);
   font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 500;
   line-height: 1.2;
-  margin: 0 0 1rem;
+  margin: 0 0 1.5rem;
 }
 
 .knowledge-prose h2 {
   font-family: var(--font-display);
-  font-size: 1.375rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  margin: 2.25rem 0 0.75rem;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid var(--border);
-  scroll-margin-top: 5rem;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 2.5rem 0 1rem;
 }
 
 .knowledge-prose h3 {
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  margin: 1.75rem 0 0.5rem;
-  scroll-margin-top: 5rem;
+  margin: 2rem 0 0.5rem;
 }
 
-.knowledge-prose h4 {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  margin: 1.25rem 0 0.35rem;
-}
-
-.knowledge-prose p {
-  margin: 0 0 1rem;
-}
+.knowledge-prose p { margin: 0 0 1.25rem; }
 
 .knowledge-prose a {
   color: var(--primary-600);
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: color var(--motion-fast) var(--ease-organic);
 }
+.dark .knowledge-prose a { color: var(--primary-400); }
+.knowledge-prose a:hover { color: var(--primary-800); }
+.dark .knowledge-prose a:hover { color: var(--primary-300); }
 
-.dark .knowledge-prose a {
-  color: var(--primary-300);
+.knowledge-prose ul, .knowledge-prose ol {
+  margin: 0 0 1.25rem;
+  padding-left: 1.5rem;
 }
-
-.knowledge-prose a:hover {
-  color: var(--primary-700);
-}
-
-.knowledge-prose ul,
-.knowledge-prose ol {
-  margin: 0 0 1rem;
-  padding-left: 1.35rem;
-}
-
-.knowledge-prose li {
-  margin: 0.25rem 0;
-}
+.knowledge-prose li { margin: 0.5rem 0; }
 
 .knowledge-prose blockquote {
-  margin: 1.25rem 0;
-  padding: 0.75rem 1rem;
-  border-left: 3px solid var(--primary-400);
-  background: color-mix(in oklab, var(--primary-50) 40%, var(--muted));
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  color: var(--muted-foreground);
-}
-
-.dark .knowledge-prose blockquote {
-  background: color-mix(in oklab, var(--primary-900) 25%, var(--muted));
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  background: var(--muted);
+  border-radius: var(--radius-lg);
+  color: var(--foreground);
+  font-style: italic;
 }
 
 .knowledge-prose hr {
-  margin: 2rem 0;
+  margin: 2.5rem 0;
   border: none;
-  border-top: 1px solid var(--border);
+  height: 1px;
+  background: var(--muted);
 }
 
 .knowledge-prose code {
   font-family: var(--font-mono);
-  font-size: 0.84em;
+  font-size: 0.85em;
   background: var(--muted);
-  padding: 0.15em 0.4em;
+  padding: 0.2em 0.4em;
   border-radius: var(--radius-sm);
 }
 
 .knowledge-prose pre {
-  margin: 1.25rem 0;
-  padding: 1rem 1.1rem;
+  margin: 1.5rem 0;
+  padding: 1.25rem;
   overflow-x: auto;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--muted) 70%, var(--card));
-  font-size: 0.8125rem;
+  background: var(--muted);
+  font-size: 0.85rem;
   line-height: 1.6;
 }
 
@@ -661,44 +517,35 @@
 
 .knowledge-prose table {
   width: 100%;
-  margin: 1.25rem 0;
+  margin: 1.5rem 0;
   border-collapse: collapse;
   font-size: 0.875rem;
 }
 
-.knowledge-prose th,
-.knowledge-prose td {
-  border: 1px solid var(--border);
-  padding: 0.5rem 0.75rem;
+.knowledge-prose th, .knowledge-prose td {
+  padding: 0.75rem 1rem;
   text-align: left;
+  border-bottom: 1px solid var(--muted);
 }
 
 .knowledge-prose th {
-  background: var(--muted);
   font-weight: 600;
+  color: var(--muted-foreground);
 }
 
 .knowledge-prose img {
   max-width: 100%;
   border-radius: var(--radius-lg);
+  margin: 1.5rem 0;
 }
 
 .knowledge-prose .mermaid-block {
   margin: 1.5rem 0;
-  padding: 1rem;
-  border: 1px solid var(--border);
+  padding: 1.5rem;
   border-radius: var(--radius-lg);
-  background: var(--card);
+  background: var(--muted);
   overflow-x: auto;
 }
 
-/* Roteiro (Tiptap): alinhamento, cor e sublinhado visíveis no admin e no cliente */
-.tiptap u,
-.roteiro-html u {
-  text-decoration: underline;
-}
-
-.tiptap [style*="text-align"],
-.roteiro-html [style*="text-align"] {
-  display: block;
-}
+.tiptap u, .roteiro-html u { text-decoration: underline; text-underline-offset: 2px; }
+.tiptap [style*="text-align"], .roteiro-html [style*="text-align"] { display: block; }
