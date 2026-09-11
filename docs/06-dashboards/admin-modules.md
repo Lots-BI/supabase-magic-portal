@@ -59,7 +59,10 @@ Funcionalidades:
 
 - Lista de clientes com última ingestão e plataformas ativas
 - Ranking por investimento / métricas
-- Links para dashboard individual do cliente
+- Clique na linha abre o **relatório visual** em `/cliente/{slug}/relatorio` (mesmo período)
+
+Relatório do cliente: canvas (heróis, pulso, tiles da marca). Plataforma sem coleta no
+recorte não aparece. Ver [operational-report.md](./operational-report.md).
 
 ---
 

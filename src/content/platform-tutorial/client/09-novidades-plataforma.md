@@ -27,6 +27,7 @@ A novidade mais recente aparece destacada no topo.
 
 ## Exemplo recente (set/2026)
 
+- **Relatório visual:** a aba **Relatório** mostra o que aconteceu no período em números e gráficos. Canal sem coleta nem aparece. Capítulo **Relatório**.
 - **Conteúdos:** aprove o roteiro e envie as mídias no mesmo passo; a peça final já vem com data e hora e, ao aprovar, o Instagram recebe o post nesse horário.
 - **Meta Ads — Resultados:** o dashboard Meta Ads mostra a coluna Resultados do Gerenciador (venda, lead, etc.). Use **Puxar métricas** se algum dia estiver vazio.
 - **Conexões:** conecte Instagram e Meta Ads você mesmo em **Conexões**.
@@ -42,5 +43,5 @@ Quando houver novidade nova, o sino do topo avisa. Se as notificações do naveg
 
 ## Próximo passo
 
-Volte ao **Dashboard**, explore **Plataformas de mídia** para métricas de anúncios e analytics,
-ou veja **Conexões** para conectar suas próprias contas de redes sociais.
+Abra o **Relatório** da sua marca para ver o período em um canvas, volte ao **Dashboard**,
+ou veja **Conexões** para conectar suas próprias contas.

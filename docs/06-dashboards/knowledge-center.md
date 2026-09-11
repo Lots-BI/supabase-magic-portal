@@ -83,7 +83,9 @@ fluxos visíveis ao usuário.
 
 Capítulos recentes (set/2026): admin `03-visao-geral`, `04-relatorios`, `10-diagnostico`,
 `07-clientes-integracoes`, `15-conexoes-instagram-publicacoes`; client `08-publicacoes-instagram`,
-`09-novidades-plataforma`.
+`09-novidades-plataforma`, `11-relatorio`.
+
+Doc do relatório visual: [operational-report.md](./operational-report.md).
 
 Docs de ingestão no KC: [current-pipeline-hub.md](../07-integrations/current-pipeline-hub.md).
 

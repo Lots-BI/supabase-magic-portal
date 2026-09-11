@@ -19,6 +19,8 @@ Os dashboards são agrupados em três famílias:
 
 Cada card leva ao dashboard daquela plataforma. Se você tem mais de uma marca, o card lista as contas — escolha a marca e entre.
 
+Há também o card **Relatório**: abre o resumo visual do período (números principais e gráficos). Canal sem coleta não aparece lá.
+
 Se um card não aparece, a agência ainda não conectou aquela plataforma ou ainda não há dados.
 
 ## Passo a passo
@@ -44,4 +46,4 @@ Se nenhum card aparecer:
 
 ## Próximo capítulo
 
-**Plano Estratégico** — objetivos e decisões acordadas.
+**Relatório** — o resumo visual do período da sua marca.

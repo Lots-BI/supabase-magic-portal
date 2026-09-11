@@ -64,19 +64,21 @@ function ClienteDashboardsResolved({
   const { data: platforms } = useSuspenseQuery(clientePlatformsQuery(queryName, cadastroId));
 
   return (
-    <DashboardsHub
-      title={nome}
-      description="Abra o dashboard de cada plataforma conectada a esta conta."
-      accounts={[
-        {
-          name: nome,
-          slug,
-          platforms,
-        },
-      ]}
-      syncQueryName={isAdmin ? queryName : undefined}
-      emptyTitle="Nenhuma plataforma com dados ainda"
-      emptyDescription="Conecte Instagram ou Meta Ads em Conexões — os dashboards aparecem aqui mesmo antes das primeiras métricas."
-    />
+    <div className="space-y-7">
+      <DashboardsHub
+        title={nome}
+        description="Abra o dashboard de cada plataforma conectada a esta conta."
+        accounts={[
+          {
+            name: nome,
+            slug,
+            platforms,
+          },
+        ]}
+        syncQueryName={isAdmin ? queryName : undefined}
+        emptyTitle="Nenhuma plataforma com dados ainda"
+        emptyDescription="Conecte Instagram ou Meta Ads em Conexões — os dashboards aparecem aqui mesmo antes das primeiras métricas."
+      />
+    </div>
   );
 }

@@ -6,7 +6,7 @@ import { StatCard } from "@/components/lots/StatCard";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { PeriodToggle, type PeriodDays } from "@/components/lots/PeriodToggle";
 import { DeltaPill } from "@/components/lots/DeltaPill";
-import { adminTitle, BRAND_NAME } from "@/lib/brand";
+import { adminTitle } from "@/lib/brand";
 import {
   PLATFORM_LABEL,
   aggregateByCliente,
@@ -67,7 +67,7 @@ function RelatoriosHub() {
       <PageHeader
         eyebrow="Dados"
         title="Relatórios"
-        description={`Comparativo por cliente no período — portfólio ${BRAND_NAME}.`}
+        description={`Resumo operacional por cliente — mídia, orgânico, site, publicações e conteúdos. Clique para abrir.`}
         actions={<PeriodToggle value={days} onChange={setDays} />}
       />
 
@@ -203,7 +203,7 @@ function HubBody({ days }: { days: PeriodDays }) {
       <SectionCard
         eyebrow="Portfólio"
         title="Comparativo por cliente"
-        description="Clique na linha para abrir o relatório do cliente."
+        description="Clique na linha para abrir o relatório operacional do cliente."
         bodyClassName="px-0 py-0"
       >
         <div className="flex items-center gap-2 border-b border-border px-4 py-3">
@@ -291,16 +291,22 @@ function HubBody({ days }: { days: PeriodDays }) {
                   tabIndex={0}
                   onClick={() =>
                     void navigate({
-                      to: "/cliente/$cliente",
+                      to: "/cliente/$cliente/relatorio",
                       params: { cliente: slugify(c.cliente) },
+                      search: {
+                        preset: days === 7 ? "last_7" : days === 90 ? "last_90" : "last_30",
+                      },
                     })
                   }
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
                       void navigate({
-                        to: "/cliente/$cliente",
+                        to: "/cliente/$cliente/relatorio",
                         params: { cliente: slugify(c.cliente) },
+                        search: {
+                          preset: days === 7 ? "last_7" : days === 90 ? "last_90" : "last_30",
+                        },
                       });
                     }
                   }}

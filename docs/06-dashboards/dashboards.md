@@ -48,7 +48,12 @@ Arquivo: `src/routes/_authenticated/cliente.$cliente.index.tsx`.
 - **Comparativos 7/30/90 dias** lado a lado.
 - Mix de investimento, resumo, insights e **detalhamento por plataforma** em abas.
 
-### 4. Dashboards por Plataforma — `/cliente/{slug}/{plataforma}`
+### 4. Relatório operacional — `/cliente/{slug}/relatorio`
+
+Canvas do período: cartaz, até 4 heróis, pulso, mix, tiles só das plataformas com coleta.
+Não é inventário. Ver [operational-report.md](./operational-report.md).
+
+### 5. Dashboards por Plataforma — `/cliente/{slug}/{plataforma}`
 
 Componente genérico `PlatformDashboard` (ver
 [Design System](../05-frontend/component-system.md)). Para cada plataforma com `PlatformDef`

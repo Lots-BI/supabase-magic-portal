@@ -4,7 +4,7 @@ description: Como manter /novidades atualizado após cada deploy com feature vis
 status: living
 owner: Engenharia Lots BI
 tags: [produto, clientes, changelog]
-last_review: 2026-09-02
+last_review: 2026-09-11
 ---
 
 # Novidades da plataforma

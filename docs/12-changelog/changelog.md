@@ -21,6 +21,13 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Adicionado
 
+- **Relatório operacional (2026-09-11):** `/cliente/{slug}/relatorio` passou a canvas visual
+  (heróis, pulso, mix, tiles da marca). Plataforma sem coleta no recorte **não** entra.
+  Publicações e Conteúdos só com peça no período. Engine em
+  `src/modules/operational-report/`. Doc:
+  [operational-report.md](../06-dashboards/operational-report.md). Novidades
+  `2026-09-11-relatorio-visual` (sino do cliente aponta para `/novidades`).
+
 - **Meta Ads: métricas do Gerenciador (2026-09-11):** dashboard mostra Valor gasto,
   Resultados, Conversas por mensagem iniciadas, cliques, vídeo, página de destino e
   engajamentos com os nomes do Ads Manager. Coletor grava WhatsApp/Messenger

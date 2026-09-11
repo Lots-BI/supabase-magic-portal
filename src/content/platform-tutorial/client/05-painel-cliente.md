@@ -13,6 +13,7 @@ Tela da sua marca com os **mesmos dashboards** do menu, já filtrados para esta 
 2. Escolha a plataforma (Instagram, Meta Ads, Google Ads, GA4…).
 3. Ou acesse `/cliente/nome-da-sua-marca` para ver os cards desta conta.
 4. `Ctrl+K` → digite o nome da marca ou da plataforma.
+5. Menu **Relatório** — resumo visual do período (só canais com dado).
 
 ## Estrutura da tela
 
@@ -39,4 +40,4 @@ Barra de status mostra **última sincronização** e plataformas ativas. Se desa
 
 ## Próximo capítulo
 
-**Plataformas de mídia** — como ler cada dashboard (Google, Meta, Instagram, GA4).
+**Relatório** — o resumo visual do período. Depois, **Plataformas de mídia** para ler cada dashboard.

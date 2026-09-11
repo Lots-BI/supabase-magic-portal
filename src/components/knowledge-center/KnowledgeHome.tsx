@@ -8,6 +8,7 @@ import {
   Star,
   Sparkles,
   Database,
+  FileBarChart,
   Wrench,
   Smartphone,
   Plug,
@@ -16,6 +17,12 @@ import { kcDocsBySlugsQuery } from "@/lib/knowledge-center/registry";
 import { getFavorites, getRecent } from "@/lib/knowledge-center/storage";
 
 const HIGHLIGHTS = [
+  {
+    slug: "06-dashboards/operational-report",
+    title: "Relatório operacional",
+    description: "Canvas visual por cliente. Plataforma sem coleta não aparece.",
+    icon: FileBarChart,
+  },
   {
     slug: "07-integrations/current-pipeline-hub",
     title: "Ingestão Hub (atual)",

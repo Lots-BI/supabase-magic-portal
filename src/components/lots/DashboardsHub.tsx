@@ -94,6 +94,25 @@ export function DashboardsHub({
       />
       {syncQueryName ? <SyncStatusBar queryName={syncQueryName} /> : null}
 
+      {accounts.length === 1 && accounts[0]?.slug ? (
+        <Link
+          to="/cliente/$cliente/relatorio"
+          params={{ cliente: accounts[0].slug }}
+          className="lots-surface lots-hoverable flex items-start justify-between gap-3 p-5 no-underline"
+        >
+          <div className="min-w-0">
+            <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary-600">
+              Relatório
+            </p>
+            <p className="mt-1 font-display text-base font-semibold">O que aconteceu no período</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Números principais e gráficos. Canal sem coleta neste recorte não aparece.
+            </p>
+          </div>
+          <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+        </Link>
+      ) : null}
+
       {sections.length === 0 ? (
         <div className="lots-surface">
           <EmptyState icon={LayoutDashboard} title={emptyTitle} description={emptyDescription} />

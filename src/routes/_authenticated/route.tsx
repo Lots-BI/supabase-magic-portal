@@ -190,6 +190,15 @@ function AuthenticatedLayout() {
       label: "Dados",
       items: [
         clientDashboards,
+        ...(diretrizesSlug
+          ? [
+              {
+                to: `/cliente/${diretrizesSlug}/relatorio`,
+                label: "Relatório",
+                icon: FileBarChart,
+              },
+            ]
+          : []),
         ...(FEATURE_PLANO_ESTRATEGICO_NAV
           ? [{ to: "/plano-estrategico", label: "Plano Estratégico", icon: Compass }]
           : []),

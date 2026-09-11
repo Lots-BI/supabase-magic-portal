@@ -21,6 +21,20 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-09-11-relatorio-visual",
+    date: "2026-09-11",
+    title: "Relatório visual: o que aconteceu, em números e gráficos",
+    summary:
+      "A aba Relatório da sua marca virou um canvas: uma frase do período, os números principais e gráficos. Canal sem coleta no recorte nem aparece.",
+    bullets: [
+      "Abra **Relatório** no menu (ou o card no hub de Dashboards) e escolha o período.",
+      "Só entram plataformas ativas — sem aba vazia de Google Ads, GA4, etc.",
+      "Publicações e Conteúdos aparecem só se houver peça no recorte.",
+    ],
+    audience: "all",
+    tags: ["Relatório", "Novidade"],
+  },
+  {
     id: "2026-09-11-hub-ingest-overview",
     date: "2026-09-11",
     title: "Métricas Meta/Instagram de noite e visão geral mais rápida",

@@ -1,69 +1,35 @@
 ---
-title: Relatórios — hub por cliente
-description: Atalhos executivos, ranking, busca e links para dashboards individuais.
+title: Relatórios — canvas visual por cliente
+description: Ranking do portfólio e relatório visual de cada conta no período.
 ---
 
 # Relatórios (`/admin/relatorios`)
 
-A **Central de Relatórios** organiza o acesso aos números sem duplicar os dashboards. Pense nela como **índice + ranking** do portfólio.
+A aba **Relatórios** é o índice do portfólio. Cada linha abre o **relatório visual** daquele cliente — o que aconteceu no recorte, em números principais e gráficos.
 
-## Estrutura da tela
+## Hub
 
-### 1. Atalhos no topo
+Período **7 / 30 / 90 dias**. KPIs de investimento, conversões, CPA e clientes com dado. Tabela ranqueável (spend, conversões, CTR, sessões, sync).
 
-Dois cards grandes:
+Clique na linha → `/cliente/{slug}/relatorio` com o mesmo recorte.
 
-| Atalho                         | Destino      | Quando usar                       |
-| ------------------------------ | ------------ | --------------------------------- |
-| Relatório executivo da agência | `/admin`     | Visão consolidada com gráficos    |
-| Sua conta (visão cliente)      | `/dashboard` | Ver exatamente o que o cliente vê |
+## Relatório do cliente
 
-### 2. Seletor de período
+Canvas, não inventário:
 
-Igual à Visão geral: **7 / 30 / 90 dias**. Todos os rankings abaixo respeitam o período.
+- Uma frase do período + selo (No ritmo / Estável / Atenção).
+- Até 4 números grandes vs o período anterior.
+- Pulso do período e mix de investimento quando Meta e Google existem.
+- Tile da marca **só** para plataforma com coleta no recorte.
+- Publicações e Conteúdos só se houver peça no período.
 
-### 3. KPIs resumidos
+O cliente abre o mesmo relatório em **Relatório** no menu e pelo card no hub de dashboards.
 
-Investimento total, conversões (resultados Meta + Google + GA4), CTR médio, clientes com dados no período.
+Doc técnica no Knowledge Center: **Relatório operacional** (`docs/06-dashboards/operational-report.md`).
 
-Os números desta aba usam o **mesmo RPC** da Visão geral (`getAdminPortfolioFn`). Período 7/30/90.
+## Passo a passo: reunião mensal
 
-### 4. Tabela / lista de clientes
-
-Para cada cliente ativo:
-
-- Nome e slug
-- Investimento no período
-- Conversões, cliques, impressões (conforme disponível)
-- CTR e CPA derivados
-- **Plataformas ativas** (badges)
-- **Última ingestão**
-- Link **Abrir relatório** → `/cliente/{slug}`
-
-### 5. Busca
-
-Campo de busca filtra por nome do cliente em tempo real — útil com dezenas de contas.
-
-## Passo a passo: preparar reunião mensal
-
-1. Defina período **30 dias**.
-2. Ordene mentalmente pelo investimento (a lista já vem ranqueada).
-3. Para cada cliente top 5, clique **Abrir relatório** e valide:
-   - Mix de plataformas
-   - Comparativo 7/30/90 no painel do cliente
-   - Insights automáticos na lateral
-4. Anote clientes com ingestão atrasada — Meta/IG: **Conexões** (Puxar ou last_sync). Google/GA4: Make ainda congelado em agosto/2026 até OAuth Hub.
-5. Use o atalho **Relatório executivo** para slide de abertura com totais.
-
-## Diferença vs Visão geral
-
-| Aspecto                       | Visão geral | Relatórios             |
-| ----------------------------- | ----------- | ---------------------- |
-| Gráficos temporais            | Sim         | Não (hub)              |
-| Lista por cliente             | Secundária  | **Foco principal**     |
-| Busca por nome                | Não         | Sim                    |
-| Link direto ao painel cliente | Parcial     | **Sim, em cada linha** |
-
-## Próximo capítulo
-
-**Aprovações** — fluxo completo de produção de conteúdo (Content Workflow).
+1. Período **30 dias** no hub.
+2. Ordene por investimento.
+3. Abra o relatório dos top clientes — confira o cartaz e os tiles ativos.
+4. Clientes com sync atrasado: **Conexões**.

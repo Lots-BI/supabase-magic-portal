@@ -26,8 +26,10 @@ Se você é da **equipe interna da agência**, use o tutorial em `/admin/tutoria
 | Aba                   | Rota                                               | Função                                           |
 | --------------------- | -------------------------------------------------- | ------------------------------------------------ |
 | **Dashboards**        | `/dashboard`                                       | Entrar no dashboard de cada plataforma           |
+| **Relatório**         | `/cliente/{sua-marca}/relatorio`                   | O que aconteceu no período — visual, sem análise |
 | **Plano Estratégico** | `/plano-estrategico`                               | Objetivos e estratégias acordados com a agência  |
 | **Aprovações**        | `/aprovacoes` ou `/cliente/{sua-marca}/aprovacoes` | Revisar e aprovar conteúdos                      |
+| **Novidades**         | `/novidades`                                       | O que mudou na plataforma                        |
 | **Tutorial**          | `/tutorial`                                        | Este guia                                        |
 
 Se você tem mais de uma marca, a agência configura o acesso — você só vê os dados autorizados.
@@ -52,14 +54,18 @@ Abre atalhos rápidos — rotas e glossário de métricas.
 
 ### Notificações
 
-Ícone de sino — avisos da sessão (ex.: conteúdo aguardando aprovação).
+Ícone de sino — avisos da sessão (conteúdo aguardando aprovação) e **novidades da plataforma**.
+Ao entrar, se houver entrega nova, o sino aponta para **Novidades**. Se o navegador já tiver
+permissão, também pode aparecer um aviso do sistema.
 
 ## Ordem de leitura sugerida
 
 1. **Dashboards** — escolher a plataforma e ler os números
-2. **Painel da sua marca** — detalhe por plataforma
-3. **Aprovações** — como aprovar posts
-4. **Plano Estratégico** — alinhamento de longo prazo
+2. **Relatório** — o resumo visual do período
+3. **Painel da sua marca** — detalhe por plataforma
+4. **Aprovações** — como aprovar posts
+5. **Plano Estratégico** — alinhamento de longo prazo
+6. **Novidades** — o que mudou no Lots BI
 
 ## Próximo capítulo
 

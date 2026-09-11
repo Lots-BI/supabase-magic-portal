@@ -49,6 +49,7 @@ import { Route as AuthenticatedAdminDebugIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminConexoesIndexRouteImport } from './routes/_authenticated/admin/conexoes.index'
 import { Route as AuthenticatedAdminClientesIndexRouteImport } from './routes/_authenticated/admin/clientes.index'
 import { Route as AuthenticatedClienteClienteTiktokRouteImport } from './routes/_authenticated/cliente.$cliente.tiktok'
+import { Route as AuthenticatedClienteClienteRelatorioRouteImport } from './routes/_authenticated/cliente.$cliente.relatorio'
 import { Route as AuthenticatedClienteClientePublicacoesRouteImport } from './routes/_authenticated/cliente.$cliente.publicacoes'
 import { Route as AuthenticatedClienteClientePlanoEstrategicoRouteImport } from './routes/_authenticated/cliente.$cliente.plano-estrategico'
 import { Route as AuthenticatedClienteClienteMetaAdsRouteImport } from './routes/_authenticated/cliente.$cliente.meta-ads'
@@ -305,6 +306,12 @@ const AuthenticatedClienteClienteTiktokRoute =
     path: '/tiktok',
     getParentRoute: () => AuthenticatedClienteClienteRoute,
   } as any)
+const AuthenticatedClienteClienteRelatorioRoute =
+  AuthenticatedClienteClienteRelatorioRouteImport.update({
+    id: '/relatorio',
+    path: '/relatorio',
+    getParentRoute: () => AuthenticatedClienteClienteRoute,
+  } as any)
 const AuthenticatedClienteClientePublicacoesRoute =
   AuthenticatedClienteClientePublicacoesRouteImport.update({
     id: '/publicacoes',
@@ -549,6 +556,7 @@ export interface FileRoutesByFullPath {
   '/cliente/$cliente/meta-ads': typeof AuthenticatedClienteClienteMetaAdsRoute
   '/cliente/$cliente/plano-estrategico': typeof AuthenticatedClienteClientePlanoEstrategicoRouteWithChildren
   '/cliente/$cliente/publicacoes': typeof AuthenticatedClienteClientePublicacoesRoute
+  '/cliente/$cliente/relatorio': typeof AuthenticatedClienteClienteRelatorioRoute
   '/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
   '/admin/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/admin/conexoes/': typeof AuthenticatedAdminConexoesIndexRoute
@@ -613,6 +621,7 @@ export interface FileRoutesByTo {
   '/cliente/$cliente/instagram': typeof AuthenticatedClienteClienteInstagramRoute
   '/cliente/$cliente/meta-ads': typeof AuthenticatedClienteClienteMetaAdsRoute
   '/cliente/$cliente/publicacoes': typeof AuthenticatedClienteClientePublicacoesRoute
+  '/cliente/$cliente/relatorio': typeof AuthenticatedClienteClienteRelatorioRoute
   '/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
   '/admin/clientes': typeof AuthenticatedAdminClientesIndexRoute
   '/admin/conexoes': typeof AuthenticatedAdminConexoesIndexRoute
@@ -687,6 +696,7 @@ export interface FileRoutesById {
   '/_authenticated/cliente/$cliente/meta-ads': typeof AuthenticatedClienteClienteMetaAdsRoute
   '/_authenticated/cliente/$cliente/plano-estrategico': typeof AuthenticatedClienteClientePlanoEstrategicoRouteWithChildren
   '/_authenticated/cliente/$cliente/publicacoes': typeof AuthenticatedClienteClientePublicacoesRoute
+  '/_authenticated/cliente/$cliente/relatorio': typeof AuthenticatedClienteClienteRelatorioRoute
   '/_authenticated/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
   '/_authenticated/admin/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/_authenticated/admin/conexoes/': typeof AuthenticatedAdminConexoesIndexRoute
@@ -761,6 +771,7 @@ export interface FileRouteTypes {
     | '/cliente/$cliente/meta-ads'
     | '/cliente/$cliente/plano-estrategico'
     | '/cliente/$cliente/publicacoes'
+    | '/cliente/$cliente/relatorio'
     | '/cliente/$cliente/tiktok'
     | '/admin/clientes/'
     | '/admin/conexoes/'
@@ -825,6 +836,7 @@ export interface FileRouteTypes {
     | '/cliente/$cliente/instagram'
     | '/cliente/$cliente/meta-ads'
     | '/cliente/$cliente/publicacoes'
+    | '/cliente/$cliente/relatorio'
     | '/cliente/$cliente/tiktok'
     | '/admin/clientes'
     | '/admin/conexoes'
@@ -898,6 +910,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cliente/$cliente/meta-ads'
     | '/_authenticated/cliente/$cliente/plano-estrategico'
     | '/_authenticated/cliente/$cliente/publicacoes'
+    | '/_authenticated/cliente/$cliente/relatorio'
     | '/_authenticated/cliente/$cliente/tiktok'
     | '/_authenticated/admin/clientes/'
     | '/_authenticated/admin/conexoes/'
@@ -1203,6 +1216,13 @@ declare module '@tanstack/react-router' {
       path: '/tiktok'
       fullPath: '/cliente/$cliente/tiktok'
       preLoaderRoute: typeof AuthenticatedClienteClienteTiktokRouteImport
+      parentRoute: typeof AuthenticatedClienteClienteRoute
+    }
+    '/_authenticated/cliente/$cliente/relatorio': {
+      id: '/_authenticated/cliente/$cliente/relatorio'
+      path: '/relatorio'
+      fullPath: '/cliente/$cliente/relatorio'
+      preLoaderRoute: typeof AuthenticatedClienteClienteRelatorioRouteImport
       parentRoute: typeof AuthenticatedClienteClienteRoute
     }
     '/_authenticated/cliente/$cliente/publicacoes': {
@@ -1620,6 +1640,7 @@ interface AuthenticatedClienteClienteRouteChildren {
   AuthenticatedClienteClienteMetaAdsRoute: typeof AuthenticatedClienteClienteMetaAdsRoute
   AuthenticatedClienteClientePlanoEstrategicoRoute: typeof AuthenticatedClienteClientePlanoEstrategicoRouteWithChildren
   AuthenticatedClienteClientePublicacoesRoute: typeof AuthenticatedClienteClientePublicacoesRoute
+  AuthenticatedClienteClienteRelatorioRoute: typeof AuthenticatedClienteClienteRelatorioRoute
   AuthenticatedClienteClienteTiktokRoute: typeof AuthenticatedClienteClienteTiktokRoute
   AuthenticatedClienteClienteIndexRoute: typeof AuthenticatedClienteClienteIndexRoute
 }
@@ -1645,6 +1666,8 @@ const AuthenticatedClienteClienteRouteChildren: AuthenticatedClienteClienteRoute
       AuthenticatedClienteClientePlanoEstrategicoRouteWithChildren,
     AuthenticatedClienteClientePublicacoesRoute:
       AuthenticatedClienteClientePublicacoesRoute,
+    AuthenticatedClienteClienteRelatorioRoute:
+      AuthenticatedClienteClienteRelatorioRoute,
     AuthenticatedClienteClienteTiktokRoute:
       AuthenticatedClienteClienteTiktokRoute,
     AuthenticatedClienteClienteIndexRoute:
