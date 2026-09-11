@@ -143,14 +143,17 @@ export async function syncInstagramProfileConnection(
     }
   }
 
-  if (daysFilled === 0 && errors.length > 0) {
+  if (daysFilled === 0 && missing.length > 0) {
     return {
       ok: false,
       daysFilled: 0,
       daysRequested: missing.length,
       from,
       to,
-      error: errors.join("; "),
+      error:
+        errors.length > 0
+          ? errors.join("; ")
+          : "O Instagram não devolveu métricas de perfil para o período. Confira a conexão em Conexões.",
     };
   }
 

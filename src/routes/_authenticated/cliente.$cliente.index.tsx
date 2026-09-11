@@ -9,7 +9,9 @@ export const Route = createFileRoute("/_authenticated/cliente/$cliente/")({
   loader: async ({ context, params }) => {
     const ref = await context.queryClient.ensureQueryData(clienteRefQuery(params.cliente));
     if (ref?.queryName) {
-      await context.queryClient.ensureQueryData(clientePlatformsQuery(ref.queryName));
+      await context.queryClient.ensureQueryData(
+        clientePlatformsQuery(ref.queryName, ref.cadastroId),
+      );
     }
   },
   component: ClienteDashboardsPage,
@@ -35,7 +37,14 @@ function ClienteDashboardsBody({ slug }: { slug: string }) {
     );
   }
 
-  return <ClienteDashboardsResolved slug={slug} queryName={ref.queryName} nome={ref.nome} />;
+  return (
+    <ClienteDashboardsResolved
+      slug={slug}
+      queryName={ref.queryName}
+      nome={ref.nome}
+      cadastroId={ref.cadastroId}
+    />
+  );
 }
 
 const authenticatedRoute = getRouteApi("/_authenticated");
@@ -44,13 +53,15 @@ function ClienteDashboardsResolved({
   slug,
   queryName,
   nome,
+  cadastroId,
 }: {
   slug: string;
   queryName: string;
   nome: string;
+  cadastroId: number | null;
 }) {
   const { isAdmin } = authenticatedRoute.useRouteContext();
-  const { data: platforms } = useSuspenseQuery(clientePlatformsQuery(queryName));
+  const { data: platforms } = useSuspenseQuery(clientePlatformsQuery(queryName, cadastroId));
 
   return (
     <DashboardsHub
@@ -65,7 +76,7 @@ function ClienteDashboardsResolved({
       ]}
       syncQueryName={isAdmin ? queryName : undefined}
       emptyTitle="Nenhuma plataforma com dados ainda"
-      emptyDescription="Quando Instagram, anúncios ou analytics começarem a enviar métricas, os dashboards aparecem aqui."
+      emptyDescription="Conecte Instagram ou Meta Ads em Conexões — os dashboards aparecem aqui mesmo antes das primeiras métricas."
     />
   );
 }

@@ -96,6 +96,46 @@ function ReadField({
   );
 }
 
+function CaptionBlock({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      toast.success("Legenda copiada.");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Não foi possível copiar.");
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-foreground">Legenda do post</p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-8 shrink-0 gap-1.5 px-2 text-xs"
+          onClick={() => void handleCopy()}
+        >
+          {copied ? (
+            <Check className="h-3.5 w-3.5 text-success" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" />
+          )}
+          Copiar
+        </Button>
+      </div>
+      <p className="mt-3 max-h-64 overflow-y-auto whitespace-pre-wrap text-base leading-relaxed text-foreground">
+        {value}
+      </p>
+    </div>
+  );
+}
+
 export function ClientCardDetailDrawer({
   cardId,
   onClose,
@@ -283,6 +323,9 @@ export function ClientCardDetailDrawer({
                       __html: card.roteiro || card.copy_text || "",
                     }}
                   />
+                ) : null}
+                {awaitingFinal && card.legenda?.trim() ? (
+                  <CaptionBlock value={card.legenda} />
                 ) : null}
                 {awaitingRoteiro && (
                   <MaterialUploadQueue

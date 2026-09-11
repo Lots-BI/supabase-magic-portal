@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft } from "lucide-react";
 import { brandTitle } from "@/lib/brand";
 import { detectClientPlatforms, type ClientPlatformRouteKey } from "@/lib/platform-availability";
+import { mergeDashboardPlatforms } from "@/lib/dashboard-accounts";
+import { listHubPluginsForCadastroFn } from "@/modules/dashboards/dashboard-accounts.server";
 import { ClienteWorkspaceProvider } from "@/components/lots/cliente-workspace-context";
 import { slugify } from "@/lib/slug";
 
@@ -66,10 +68,17 @@ export const clienteRefQuery = (slug: string) =>
 
 export type PlatformKey = ClientPlatformRouteKey;
 
-export const clientePlatformsQuery = (queryName: string) =>
+export const clientePlatformsQuery = (queryName: string, cadastroId?: number | null) =>
   queryOptions({
-    queryKey: ["cliente-platforms", queryName],
-    queryFn: () => detectClientPlatforms(queryName),
+    queryKey: ["cliente-platforms", queryName, cadastroId ?? null],
+    queryFn: async () => {
+      const fromViews = await detectClientPlatforms(queryName);
+      if (!cadastroId) return fromViews;
+      const hubPlugins = await listHubPluginsForCadastroFn({
+        data: { cadastroClienteId: cadastroId },
+      });
+      return mergeDashboardPlatforms(fromViews, hubPlugins);
+    },
     staleTime: 5 * 60 * 1000,
   });
 
@@ -124,7 +133,7 @@ function ClienteShell({ slug }: { slug: string }) {
 
   return (
     <div className="min-w-0">
-      <ClienteWorkspaceProvider queryName={ref.queryName}>
+      <ClienteWorkspaceProvider queryName={ref.queryName} cadastroId={ref.cadastroId}>
         <Outlet />
       </ClienteWorkspaceProvider>
     </div>

@@ -2,15 +2,13 @@ import { INTEGRATION_EVENTS_CONTRACT_VERSION } from "../../../../contracts/event
 import type { ConnectionRecordV1 } from "@/modules/platform-hub/connections/types/connection-record.v1";
 import type { ExecutionResultV1 } from "./types";
 import type { HealthInboundSignalV1 } from "@/modules/platform-hub/health/types";
+import { countEnvelopeRows } from "./count-envelope-rows";
 
 export function buildSyncFinishedSignal(
   connection: ConnectionRecordV1,
   result: ExecutionResultV1,
 ): HealthInboundSignalV1 {
-  const rowsCount =
-    result.envelope && result.envelope.profile === "metrics-timeseries"
-      ? result.envelope.payload.rows.length
-      : 0;
+  const rowsCount = countEnvelopeRows(result.envelope);
 
   return {
     version: INTEGRATION_EVENTS_CONTRACT_VERSION,

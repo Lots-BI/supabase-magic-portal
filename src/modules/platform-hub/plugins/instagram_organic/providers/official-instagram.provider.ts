@@ -25,6 +25,29 @@ import {
 
 const METRICS_CAPABILITY = INSTAGRAM_ORGANIC_METRICS_CAPABILITY as Capability;
 const PROFILE_CAPABILITY = INSTAGRAM_ORGANIC_PROFILE_CAPABILITY as Capability;
+const INSIGHT_CONCURRENCY = 4;
+
+async function mapPool<T, R>(
+  items: readonly T[],
+  concurrency: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  if (items.length === 0) return [];
+  const results = new Array<R>(items.length);
+  let next = 0;
+  async function worker() {
+    while (true) {
+      const index = next;
+      next += 1;
+      if (index >= items.length) return;
+      results[index] = await fn(items[index]!);
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, items.length) }, () => worker()),
+  );
+  return results;
+}
 
 export interface OfficialInstagramProviderConfig {
   credentialAccess: CredentialAccessPort;
@@ -130,34 +153,38 @@ export function createOfficialInstagramProvider(
         stories = [];
       }
 
-      const allMedia = [...permanentMedia, ...stories];
-      const items: IgMediaSyncItemV1[] = [];
+      const allMedia = [...permanentMedia, ...stories].filter((media) => Boolean(media.id));
 
-      for (const media of allMedia) {
-        if (!media.id) continue;
-        const productType = (media.media_product_type ?? "FEED").toUpperCase();
-
-        let metrics = mapInsightsToMetrics({ data: [] }, media);
-        try {
-          const insights = await graphClient.fetchMediaInsights(accessToken, media.id, productType);
-          metrics = mapInsightsToMetrics(insights, media);
-        } catch {
-          metrics = mapInsightsToMetrics({ data: [] }, media);
-        }
-
-        items.push({
-          igMediaId: media.id,
-          mediaProductType: productType,
-          mediaType: (media.media_type ?? "IMAGE").toUpperCase(),
-          caption: media.caption,
-          permalink: media.permalink,
-          mediaUrl: media.media_url,
-          thumbnailUrl: media.thumbnail_url,
-          publishedAt: mediaPublishedAt(media),
-          metrics,
-          metricsCollectedAt: collectedAt,
-        });
-      }
+      const items: IgMediaSyncItemV1[] = await mapPool(
+        allMedia,
+        INSIGHT_CONCURRENCY,
+        async (media) => {
+          const productType = (media.media_product_type ?? "FEED").toUpperCase();
+          let metrics = mapInsightsToMetrics({ data: [] }, media);
+          try {
+            const insights = await graphClient.fetchMediaInsights(
+              accessToken,
+              media.id,
+              productType,
+            );
+            metrics = mapInsightsToMetrics(insights, media);
+          } catch {
+            metrics = mapInsightsToMetrics({ data: [] }, media);
+          }
+          return {
+            igMediaId: media.id,
+            mediaProductType: productType,
+            mediaType: (media.media_type ?? "IMAGE").toUpperCase(),
+            caption: media.caption,
+            permalink: media.permalink,
+            mediaUrl: media.media_url,
+            thumbnailUrl: media.thumbnail_url,
+            publishedAt: mediaPublishedAt(media),
+            metrics,
+            metricsCollectedAt: collectedAt,
+          };
+        },
+      );
 
       return {
         version: "1.0.0",

@@ -150,14 +150,17 @@ export async function syncMetaAdsCampaignsConnection(
     }
   }
 
-  if (daysFilled === 0 && errors.length > 0) {
+  if (daysFilled === 0 && missing.length > 0) {
     return {
       ok: false,
       daysFilled: 0,
       daysRequested: missing.length,
       from,
       to,
-      error: errors.join("; "),
+      error:
+        errors.length > 0
+          ? errors.join("; ")
+          : "A Meta não devolveu campanhas para o período. Confira a conta de anúncios em Conexões.",
     };
   }
 

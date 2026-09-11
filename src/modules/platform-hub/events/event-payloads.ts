@@ -1,6 +1,7 @@
 import { INTEGRATION_EVENTS_CONTRACT_VERSION } from "../../../../contracts/events/integration-events.v1";
 import type { ConnectionRecordV1 } from "@/modules/platform-hub/connections/types/connection-record.v1";
 import type { ExecutionResultV1 } from "@/modules/platform-hub/runtime/types";
+import { countEnvelopeRows } from "@/modules/platform-hub/runtime/count-envelope-rows";
 import type {
   IntegrationEventV1,
   IntegrationSyncFailedV1,
@@ -11,10 +12,7 @@ export function buildIntegrationSyncFinishedEvent(
   connection: ConnectionRecordV1,
   result: ExecutionResultV1,
 ): IntegrationSyncFinishedV1 {
-  const rowsCount =
-    result.envelope && result.envelope.profile === "metrics-timeseries"
-      ? result.envelope.payload.rows.length
-      : 0;
+  const rowsCount = countEnvelopeRows(result.envelope);
 
   return {
     version: INTEGRATION_EVENTS_CONTRACT_VERSION,

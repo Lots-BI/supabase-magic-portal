@@ -1,19 +1,32 @@
 import { createContext, useContext, type ReactNode } from "react";
 
-const ClienteWorkspaceContext = createContext<string | null>(null);
+export type ClienteWorkspaceValue = {
+  queryName: string;
+  cadastroId: number | null;
+};
+
+const ClienteWorkspaceContext = createContext<ClienteWorkspaceValue | null>(null);
 
 export function ClienteWorkspaceProvider({
   queryName,
+  cadastroId,
   children,
 }: {
   queryName: string;
+  cadastroId?: number | null;
   children: ReactNode;
 }) {
   return (
-    <ClienteWorkspaceContext.Provider value={queryName}>{children}</ClienteWorkspaceContext.Provider>
+    <ClienteWorkspaceContext.Provider value={{ queryName, cadastroId: cadastroId ?? null }}>
+      {children}
+    </ClienteWorkspaceContext.Provider>
   );
 }
 
-export function useClienteWorkspaceQueryName() {
+export function useClienteWorkspace(): ClienteWorkspaceValue | null {
   return useContext(ClienteWorkspaceContext);
+}
+
+export function useClienteWorkspaceQueryName() {
+  return useContext(ClienteWorkspaceContext)?.queryName ?? null;
 }

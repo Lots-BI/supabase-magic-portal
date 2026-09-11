@@ -88,7 +88,11 @@ export function InstagramPostsPage({
       <PageHeader
         eyebrow="Instagram"
         title="Publicações"
-        description="Dados coletados para o período selecionado"
+        description={
+          postsQuery.data?.lastSyncedAt
+            ? `Última sincronização: ${new Date(postsQuery.data.lastSyncedAt).toLocaleString("pt-BR")}`
+            : "Dados coletados para o período selecionado"
+        }
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <PeriodPicker value={periodInput} onChange={setPeriodInput} />

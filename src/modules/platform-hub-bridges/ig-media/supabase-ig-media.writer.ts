@@ -20,7 +20,7 @@ async function cacheThumbnail(
   if (!sourceUrl) return null;
 
   try {
-    const response = await fetch(sourceUrl);
+    const response = await fetch(sourceUrl, { signal: AbortSignal.timeout(8_000) });
     if (!response.ok) return null;
     const buffer = await response.arrayBuffer();
     const contentType = response.headers.get("content-type") ?? "image/jpeg";

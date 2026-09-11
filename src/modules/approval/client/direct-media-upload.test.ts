@@ -14,6 +14,14 @@ describe("direct-media-upload", () => {
     );
   });
 
+  it("explica 413 Maximum size exceeded (limite global do Storage)", () => {
+    expect(
+      mapStorageError(
+        "tus: unexpected response while creating upload, originated from request (method: POST, url: https://x.storage.supabase.co/storage/v1/upload/resumable, response code: 413, response text: Maximum size exceeded , request id: n/a)",
+      ),
+    ).toMatch(/limite global/i);
+  });
+
   it("não trata JWT inválido como formato", () => {
     expect(mapStorageError('{"statusCode":"400","error":"InvalidJwt","message":"Invalid JWT"}')).toBe(
       "O envio expirou. Toque em enviar de novo.",

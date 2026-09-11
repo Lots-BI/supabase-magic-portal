@@ -41,8 +41,14 @@ export function resolveSignedUploadUrl(signedUrl: string, supabaseUrl: string, t
 export function mapStorageError(message: string): string {
   const extracted = extractStorageMessage(message);
   const m = extracted.toLowerCase();
-  if (m.includes("allowed size") || m.includes("payload too large") || m.includes("maximum allowed size")) {
-    return "Esse arquivo é grande demais para um envio único. Ele será enviado em partes — tente de novo.";
+  if (
+    m.includes("maximum size") ||
+    m.includes("allowed size") ||
+    m.includes("payload too large") ||
+    m.includes("maximum allowed size") ||
+    /\b413\b/.test(m)
+  ) {
+    return "Este arquivo passou do limite global do Storage. No plano Free o teto é 50 MB; a agência pode subir isso em Storage → Settings.";
   }
   if (m.includes("row-level") || m.includes("unauthorized") || m.includes("42501")) {
     return "Sem permissão para enviar este arquivo. Recarregue a página e tente outra vez.";

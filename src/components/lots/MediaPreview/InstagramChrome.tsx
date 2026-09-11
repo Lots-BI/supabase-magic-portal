@@ -68,15 +68,15 @@ export function InstagramChrome({
           )}
 
           {(text || hashtags.length > 0) && (
-            <div className="space-y-1 px-3 pb-2">
+            <div className="max-h-40 space-y-1 overflow-y-auto px-3 pb-2">
               {text && (
-                <p className="text-[13px] leading-snug">
+                <p className="whitespace-pre-wrap text-[14px] leading-relaxed">
                   <span className="font-semibold">{ctx.accountName} </span>
                   <span className="text-white/90">{text}</span>
                 </p>
               )}
               {hashtags.length > 0 && (
-                <p className="text-[12px] text-secondary-300">{hashtags.join(" ")}</p>
+                <p className="text-[13px] leading-relaxed text-secondary-300">{hashtags.join(" ")}</p>
               )}
             </div>
           )}

@@ -3,7 +3,7 @@ import { Link, useParams } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Check, ChevronDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useClienteWorkspaceQueryName } from "@/components/lots/cliente-workspace-context";
+import { useClienteWorkspace } from "@/components/lots/cliente-workspace-context";
 import { PlatformBrandMark } from "@/components/lots/PlatformBrandMark";
 import {
   catalogForPlatforms,
@@ -36,7 +36,9 @@ function PlatformSwitcherBody({
 }) {
   const [open, setOpen] = useState(false);
   const { cliente: slug } = useParams({ strict: false }) as { cliente?: string };
-  const queryName = useClienteWorkspaceQueryName();
+  const workspace = useClienteWorkspace();
+  const queryName = workspace?.queryName ?? null;
+  const cadastroId = workspace?.cadastroId ?? null;
 
   if (!slug || !queryName) {
     return <span className="truncate">{currentLabel}</span>;
@@ -46,6 +48,7 @@ function PlatformSwitcherBody({
     <PlatformSwitcherMenu
       slug={slug}
       queryName={queryName}
+      cadastroId={cadastroId}
       currentId={currentId}
       currentLabel={currentLabel}
       open={open}
@@ -57,6 +60,7 @@ function PlatformSwitcherBody({
 function PlatformSwitcherMenu({
   slug,
   queryName,
+  cadastroId,
   currentId,
   currentLabel,
   open,
@@ -64,12 +68,13 @@ function PlatformSwitcherMenu({
 }: {
   slug: string;
   queryName: string;
+  cadastroId: number | null;
   currentId: string;
   currentLabel: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { data: platforms } = useSuspenseQuery(clientePlatformsQuery(queryName));
+  const { data: platforms } = useSuspenseQuery(clientePlatformsQuery(queryName, cadastroId));
   const options = optionsForSwitcher(platforms, currentId);
 
   if (options.length <= 1) {

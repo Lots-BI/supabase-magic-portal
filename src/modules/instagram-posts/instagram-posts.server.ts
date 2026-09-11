@@ -8,8 +8,8 @@ import { syncInstagramMediaConnection } from "./instagram-media-sync.server";
 import { syncInstagramProfileConnection } from "./instagram-profile-sync.server";
 import type { IgMediaMetrics, IgMediaRow } from "./types";
 
-const SYNC_COOLDOWN_MS = 5 * 60 * 1000;
-const PROFILE_SYNC_COOLDOWN_MS = 5 * 60 * 1000;
+const SYNC_COOLDOWN_MS = 2 * 60 * 1000;
+const PROFILE_SYNC_COOLDOWN_MS = 2 * 60 * 1000;
 
 const listInputSchema = z.object({
   cadastroClienteId: z.number().int().positive(),

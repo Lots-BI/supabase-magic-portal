@@ -5,6 +5,7 @@ import {
   acceptIgMediaEnvelope,
   isIgMediaSyncEnvelope,
 } from "@/modules/platform-hub-bridges/ig-media/accept-ig-media-envelope";
+import { INSTAGRAM_ORGANIC_METRICS_CAPABILITY } from "@/modules/platform-hub/plugins/instagram_organic/instagram_organic.capabilities";
 
 export type InstagramMediaSyncResult = {
   connectionId: string;
@@ -21,18 +22,40 @@ export async function syncInstagramMediaConnection(
 ): Promise<{ ok: boolean; mediaCount?: number; error?: string }> {
   const stack = await createAdminHubStack(supabase);
   const id = asConnectionId(connectionId);
-  const result = await stack.manualScheduler.run(id);
+  const identities = await stack.identityService.list(id);
+  const provider = stack.registry.getPlugin("instagram_organic").adapter.getProvider("official_api");
 
-  if (result.status !== "success" || !result.envelope) {
-    return { ok: false, error: result.error ?? "Falha na sincronização" };
+  let envelope;
+  try {
+    envelope = await provider.collect({
+      connectionId: id,
+      capability: INSTAGRAM_ORGANIC_METRICS_CAPABILITY,
+      identities,
+    });
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Falha ao consultar o Instagram",
+    };
   }
 
-  if (!isIgMediaSyncEnvelope(result.envelope)) {
-    return { ok: false, error: "Envelope de sincronização inválido" };
+  if (!isIgMediaSyncEnvelope(envelope)) {
+    return {
+      ok: false,
+      error: "A conexão Instagram não devolveu publicações. Reconecte a conta em Conexões.",
+    };
   }
 
-  const writeResult = await acceptIgMediaEnvelope(supabase, result.envelope);
-  return { ok: true, mediaCount: writeResult?.mediaUpserted ?? 0 };
+  const writeResult = await acceptIgMediaEnvelope(supabase, envelope);
+  const mediaCount = writeResult?.mediaUpserted ?? 0;
+  if (mediaCount === 0) {
+    return {
+      ok: false,
+      error:
+        "Nenhuma publicação veio da Meta. Confira se o Instagram Business está conectado e tente de novo.",
+    };
+  }
+  return { ok: true, mediaCount };
 }
 
 export async function syncAllInstagramMediaConnections(

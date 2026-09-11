@@ -60,8 +60,12 @@ export function createOfficialMetaProvider(config: OfficialMetaProviderConfig): 
       assertCapability(params.capability);
 
       const timer = telemetry.start();
-      const today = new Date().toISOString().slice(0, 10);
-      const window = params.window ?? { from: today, to: today };
+      const yesterday = (() => {
+        const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+        const [y, m, d] = today.split("-").map(Number);
+        return new Date(Date.UTC(y, m - 1, d - 1)).toISOString().slice(0, 10);
+      })();
+      const window = params.window ?? { from: yesterday, to: yesterday };
 
       try {
         const adAccount = resolveAdAccountIdentity(params.identities);
