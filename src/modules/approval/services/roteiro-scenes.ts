@@ -19,13 +19,25 @@ export function emptyRoteiroScenes(): RoteiroScenes {
 }
 
 export function isRoteiroHtmlEmpty(html: string | null | undefined): boolean {
-  if (!html) return true;
-  const text = html
+  return roteiroHtmlToPlain(html).length === 0;
+}
+
+export function roteiroHtmlToPlain(html: string | null | undefined): string {
+  if (!html) return "";
+  return html
     .replace(/<[^>]*>/g, " ")
     .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
     .replace(/\s+/g, " ")
     .trim();
-  return text.length === 0;
+}
+
+/** HTML antigo em 3 cenas vira um único documento para o editor. */
+export function unwrapRoteiroHtml(html: string | null | undefined): string {
+  if (!html?.trim()) return "";
+  return html.replace(/<\/?section\b[^>]*>/gi, "").trim();
 }
 
 export function composeRoteiroHtml(scenes: RoteiroScenes): string {

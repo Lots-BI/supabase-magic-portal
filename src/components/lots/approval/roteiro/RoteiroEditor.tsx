@@ -23,8 +23,7 @@ import { KANBAN_COLUMN_META, formatCardSchedule } from "../kanban/kanban-meta";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
 import { BrDateTimeFields, horaToDbValue } from "../shared/BrDateTimeFields";
 import { ChangeRequestBanner } from "../shared/ChangeRequestBanner";
-import { RoteiroSceneEditor } from "./RoteiroSceneEditor";
-import { RoteiroSceneCards } from "./RoteiroSceneCards";
+import { RoteiroHtmlEditor } from "./RoteiroHtmlEditor";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";
@@ -272,17 +271,18 @@ export function RoteiroEditor({
       )}
 
       {mode === "admin" ? (
-        <RoteiroSceneEditor
+        <RoteiroHtmlEditor
           resetKey={card.id}
           html={card.roteiro}
           editable
+          minHeightClass="min-h-[420px]"
           onChange={(html) => {
             htmlRef.current = html;
             scheduleSave(html);
           }}
         />
       ) : (
-        <RoteiroSceneCards html={card.roteiro || card.copy_text} />
+        <RoteiroHtmlEditor resetKey={card.id} html={card.roteiro || card.copy_text} editable={false} />
       )}
 
       {showStaffCta && (

@@ -240,7 +240,7 @@ function AprovacoesAdminPage() {
   if (clientesQ.isLoading) return <DashboardSkeleton />;
 
   return (
-    <div className="space-y-6 pb-24 md:pb-6">
+    <div className="min-w-0 space-y-6 pb-24 md:pb-6">
       <PageHeader eyebrow="Social" title="Conteúdos" />
 
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
@@ -272,7 +272,7 @@ function AprovacoesAdminPage() {
       )}
 
       {clienteId ? (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+        <div className="min-w-0 space-y-6">
           <Suspense fallback={<ApprovalPanelSkeleton rows={8} />}>
             <ApprovalCalendar
               cadastroClienteId={clienteId}

@@ -12,3 +12,9 @@ export const contentCardCommentSchema = z.object({
   card_id: z.string().uuid(),
   mensagem: z.string().trim().min(1).max(2000),
 });
+
+export const contentCardRequestChangesSchema = z.object({
+  card_id: z.string().uuid(),
+  mensagem: z.string().trim().max(2000).optional().default(""),
+  roteiro: z.string().max(80_000).optional().nullable(),
+});

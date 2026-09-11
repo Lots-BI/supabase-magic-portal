@@ -5,7 +5,7 @@ import { contentCardEventRepository } from "../repositories/content-card-event.r
 import { editorialPillarRepository } from "../repositories/editorial-pillar.repository.server";
 import { buildKanbanBoard } from "../services/build-kanban-board";
 import { buildCardTimeline } from "../services/build-card-timeline";
-import { listCardAttachmentsWithUrls } from "./attachment-lifecycle.server";
+import { applyAttachmentCoversToCards, listCardAttachmentsWithUrls } from "./attachment-lifecycle.server";
 import { loadPublishedIgForCard, type CardDetail } from "./card-query.server";
 
 export async function getClientKanbanBoard(supabase: SupabaseClient, scope: ClientAccessScope) {
@@ -14,8 +14,9 @@ export async function getClientKanbanBoard(supabase: SupabaseClient, scope: Clie
     scope.cadastroClienteIds,
     { excludeArchived: true },
   );
+  const withCovers = await applyAttachmentCoversToCards(supabase, cards);
   // Rascunhos internos (roteiro) não entram na fila do cliente.
-  return buildKanbanBoard(cards.filter((c) => c.status !== "roteiro"));
+  return buildKanbanBoard(withCovers.filter((c) => c.status !== "roteiro"));
 }
 
 export async function getClientCardDetail(

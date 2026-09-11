@@ -20,7 +20,7 @@ import {
 } from "../internal/attachment-lifecycle.server";
 import { refreshCardChecklist } from "../internal/card-lifecycle.server";
 import { getActorEmail } from "../internal/staff-auth.server";
-import { contentCardCommentSchema } from "../validators/content-card-event";
+import { contentCardCommentSchema, contentCardRequestChangesSchema } from "../validators/content-card-event";
 import { MEDIA_ROLES } from "../types/content-card-attachment";
 
 async function clientActor(context: {
@@ -89,7 +89,7 @@ export const clientApproveCardFn = createServerFn({ method: "POST" })
 
 export const clientRequestChangesFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => contentCardCommentSchema.parse(d))
+  .inputValidator((d: unknown) => contentCardRequestChangesSchema.parse(d))
   .handler(async ({ data, context }) => {
     const actor = await clientActor(context);
     await clientRequestChanges(context.supabase, actor, data);

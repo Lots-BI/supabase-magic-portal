@@ -3,7 +3,8 @@ import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
 import { contentCardAttachmentRepository } from "../repositories/content-card-attachment.repository.server";
 import { contentCardEventRepository } from "../repositories/content-card-event.repository.server";
 import { contentCardRepository } from "../repositories/content-card.repository.server";
-import type { AttachmentKind } from "../types/content-card-attachment";
+import type { AttachmentKind, ContentCardAttachment } from "../types/content-card-attachment";
+import type { ContentCard } from "../types/content-card";
 import type { LifecycleActor } from "./card-lifecycle.server";
 import { capaUrlToAsset, type MediaAsset } from "@/lib/media-preview";
 import { assertCardAction } from "../permissions/resolve-card-action";
@@ -85,6 +86,69 @@ async function assertActorCanUploadCard(
       throw new Error("Envie as mídias quando o roteiro estiver com você para aprovação.");
     }
   }
+}
+
+const COVER_ROLE_RANK: Record<string, number> = {
+  final: 0,
+  preview: 1,
+  attachment: 2,
+  cliente_material: 3,
+};
+
+function coverScore(row: ContentCardAttachment): number {
+  const role = COVER_ROLE_RANK[row.media_role] ?? 8;
+  const visual = row.kind === "image" || row.poster_path ? 0 : 1;
+  return role * 10 + visual;
+}
+
+function pickCoverAttachment(rows: ContentCardAttachment[]): ContentCardAttachment | null {
+  const visual = rows.filter((row) => row.kind === "image" || row.kind === "video");
+  if (visual.length === 0) return null;
+  return visual.reduce((best, row) => (coverScore(row) < coverScore(best) ? row : best));
+}
+
+/** Preenche `capa_url` com URL assinada da melhor mídia anexada (o campo no banco quase sempre vem vazio). */
+export async function applyAttachmentCoversToCards(
+  supabase: SupabaseClient,
+  cards: ContentCard[],
+): Promise<ContentCard[]> {
+  if (cards.length === 0) return cards;
+  let rows: ContentCardAttachment[] = [];
+  try {
+    rows = await contentCardAttachmentRepository.listByCardIds(
+      supabase,
+      cards.map((card) => card.id),
+    );
+  } catch {
+    return cards;
+  }
+  const grouped = new Map<string, ContentCardAttachment[]>();
+  for (const row of rows) {
+    const list = grouped.get(row.card_id) ?? [];
+    list.push(row);
+    grouped.set(row.card_id, list);
+  }
+  const bestByCard = new Map<string, ContentCardAttachment>();
+  for (const [cardId, list] of grouped) {
+    const picked = pickCoverAttachment(list);
+    if (picked) bestByCard.set(cardId, picked);
+  }
+  const urls = new Map<string, string>();
+  await Promise.all(
+    [...bestByCard.entries()].map(async ([cardId, row]) => {
+      const path =
+        row.kind === "video" ? (row.poster_path ?? row.storage_path) : row.storage_path;
+      try {
+        urls.set(cardId, await signedUrlFor(path));
+      } catch {
+        // Capa fica a URL já persistida, se houver.
+      }
+    }),
+  );
+  return cards.map((card) => ({
+    ...card,
+    capa_url: urls.get(card.id) ?? card.capa_url,
+  }));
 }
 
 export async function listCardAttachmentsWithUrls(

@@ -9,6 +9,7 @@ import { canClientTransitionStatus } from "../workflow/status-machine";
 import { eventTypeForTransition } from "../services/event-type-for-transition";
 import type { ContentCard } from "../types/content-card";
 import { combineBrazilSchedule } from "../services/brazil-schedule";
+import { isRoteiroHtmlEmpty, roteiroHtmlToPlain } from "../services/roteiro-scenes";
 
 async function appendClientEvent(
   supabase: SupabaseClient,
@@ -124,23 +125,31 @@ export async function clientApproveCard(
 export async function clientRequestChanges(
   supabase: SupabaseClient,
   actor: LifecycleActor,
-  input: { card_id: string; mensagem: string },
+  input: { card_id: string; mensagem?: string; roteiro?: string | null },
 ): Promise<ContentCard> {
   assertCardAction({ role: actor.role, action: "request_changes" });
   const card = await contentCardRepository.findById(supabase, input.card_id);
   if (!card) throw new Error("Card não encontrado");
   await assertCardInClientAccess(supabase, actor.userId, card.cadastro_cliente_id);
-  if (!input.mensagem.trim()) {
+  const mensagem =
+    input.mensagem?.trim() || roteiroHtmlToPlain(input.roteiro).slice(0, 2000);
+  if (!mensagem) {
     throw new Error("Descreva a alteração solicitada.");
   }
+
+  const roteiroPatch =
+    input.roteiro != null && !isRoteiroHtmlEmpty(input.roteiro)
+      ? { roteiro: input.roteiro }
+      : {};
 
   if (card.status === "aguardando_aprovacao") {
     const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
     const updated = await contentCardRepository.update(getSupabaseAdmin(), card.id, {
       status: "alteracoes_roteiro",
+      ...roteiroPatch,
     });
     await appendClientEvent(supabase, card.id, actor, "changes_requested", {
-      mensagem: input.mensagem.trim(),
+      mensagem,
       kind: "roteiro",
       status_de: card.status,
       status_para: "alteracoes_roteiro",
@@ -156,9 +165,10 @@ export async function clientRequestChanges(
     const updated = await contentCardRepository.update(getSupabaseAdmin(), card.id, {
       status: "alteracoes_design",
       checklist,
+      ...roteiroPatch,
     });
     await appendClientEvent(supabase, card.id, actor, "changes_requested", {
-      mensagem: input.mensagem.trim(),
+      mensagem,
       kind: "peca",
       status_de: card.status,
       status_para: "alteracoes_design",

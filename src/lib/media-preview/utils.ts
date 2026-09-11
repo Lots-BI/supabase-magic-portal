@@ -67,6 +67,31 @@ export function assetsForPublishPreview(
   );
 }
 
+const DISPLAY_ROLE_RANK: Record<string, number> = {
+  final: 0,
+  preview: 1,
+  attachment: 2,
+  cliente_material: 3,
+};
+
+/** Qualquer mídia visual anexada, para o cartaz / sheet do cliente. */
+export function assetsForCardDisplay(
+  assets: MediaAsset[],
+  preferFinal = false,
+): MediaAsset[] {
+  const visual = assets.filter((asset) => asset.kind === "image" || asset.kind === "video");
+  if (visual.length === 0) return [];
+  const agency = visual.filter((asset) => asset.mediaRole !== "cliente_material");
+  const source = agency.length > 0 ? agency : visual;
+  return [...source].sort((a, b) => {
+    const rank = (asset: MediaAsset) => {
+      if (preferFinal && asset.mediaRole === "final") return -1;
+      return DISPLAY_ROLE_RANK[asset.mediaRole ?? ""] ?? 8;
+    };
+    return rank(a) - rank(b) || (a.ordem ?? 0) - (b.ordem ?? 0);
+  });
+}
+
 export function buildPreviewContext(
   post: {
     formato: string | null;

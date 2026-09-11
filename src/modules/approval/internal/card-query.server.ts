@@ -7,6 +7,7 @@ import { buildCardTimeline } from "../services/build-card-timeline";
 import type { ContentCard } from "../types/content-card";
 import type { PublishedIgSnapshot } from "@/modules/instagram-posts/types";
 import {
+  applyAttachmentCoversToCards,
   attachmentToMediaAsset,
   listCardAttachmentsWithUrls,
 } from "./attachment-lifecycle.server";
@@ -21,7 +22,7 @@ export async function getKanbanBoardForClient(
     cadastroClienteId,
     excludeArchived: true,
   });
-  return buildKanbanBoard(cards);
+  return buildKanbanBoard(await applyAttachmentCoversToCards(supabase, cards));
 }
 
 export type CardDetail = {

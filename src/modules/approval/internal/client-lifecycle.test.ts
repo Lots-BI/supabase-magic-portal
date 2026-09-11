@@ -136,11 +136,12 @@ describe("client-lifecycle", () => {
     await clientRequestChanges(supabase, actor, {
       card_id: "c1",
       mensagem: "Ajustar CTA",
+      roteiro: "<p>Novo gancho e CTA</p>",
     });
     expect(contentCardRepository.update).toHaveBeenCalledWith(
       adminClient,
       "c1",
-      expect.objectContaining({ status: "alteracoes_roteiro" }),
+      expect.objectContaining({ status: "alteracoes_roteiro", roteiro: "<p>Novo gancho e CTA</p>" }),
     );
     expect(contentCardEventRepository.append).toHaveBeenCalledWith(
       supabase,
@@ -150,6 +151,30 @@ describe("client-lifecycle", () => {
           mensagem: "Ajustar CTA",
           status_para: "alteracoes_roteiro",
         }),
+      }),
+    );
+  });
+
+  it("grava o roteiro editado mesmo sem mensagem avulsa", async () => {
+    vi.mocked(contentCardRepository.findById).mockResolvedValue({
+      ...baseCard,
+      status: "aguardando_aprovacao",
+    } as never);
+    vi.mocked(contentCardRepository.update).mockResolvedValue({
+      ...baseCard,
+      status: "alteracoes_roteiro",
+    } as never);
+
+    await clientRequestChanges(supabase, actor, {
+      card_id: "c1",
+      roteiro: "<p>Trocar o gancho</p>",
+    });
+    expect(contentCardRepository.update).toHaveBeenCalledWith(
+      adminClient,
+      "c1",
+      expect.objectContaining({
+        status: "alteracoes_roteiro",
+        roteiro: "<p>Trocar o gancho</p>",
       }),
     );
   });

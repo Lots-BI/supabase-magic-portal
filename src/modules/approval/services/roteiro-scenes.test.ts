@@ -3,6 +3,7 @@ import {
   composeRoteiroHtml,
   isRoteiroHtmlEmpty,
   parseRoteiroScenes,
+  unwrapRoteiroHtml,
 } from "./roteiro-scenes";
 
 describe("parseRoteiroScenes", () => {
@@ -49,5 +50,16 @@ describe("isRoteiroHtmlEmpty", () => {
   it("trata parágrafo vazio como vazio", () => {
     expect(isRoteiroHtmlEmpty("<p></p>")).toBe(true);
     expect(isRoteiroHtmlEmpty("<p>Oi</p>")).toBe(false);
+  });
+});
+
+describe("unwrapRoteiroHtml", () => {
+  it("remove as seções de cena e deixa o texto corrido", () => {
+    const html = composeRoteiroHtml({
+      gancho: "<p>Abre</p>",
+      meio: "<p>Meio</p>",
+      cta: "<p>Fecha</p>",
+    });
+    expect(unwrapRoteiroHtml(html)).toBe("<p>Abre</p><p>Meio</p><p>Fecha</p>");
   });
 });

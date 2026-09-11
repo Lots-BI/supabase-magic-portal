@@ -22,6 +22,7 @@ export function ContentPosterCard({
   const day = publicationDayNumber(card.data_publicacao);
   const hero = size === "hero";
   const thumb = thumbnailUrl || card.capa_url;
+  const isVideo = !!thumb && /\.(mp4|webm|mov)(\?|$)/i.test(thumb);
 
   return (
     <button
@@ -33,8 +34,8 @@ export function ContentPosterCard({
       )}
     >
       {thumb ? (
-        thumb.match(/\.(mp4|webm|mov)(\?|$)/i) ? (
-          <video src={thumb} className="absolute inset-0 h-full w-full object-cover" muted />
+        isVideo ? (
+          <video src={thumb} className="absolute inset-0 h-full w-full object-cover" muted playsInline />
         ) : (
           <img src={thumb} alt="" className="absolute inset-0 h-full w-full object-cover" />
         )

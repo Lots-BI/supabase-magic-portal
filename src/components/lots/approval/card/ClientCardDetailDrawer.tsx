@@ -10,7 +10,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   getClientContentCard,
   clientApproveCardFn,
@@ -19,15 +18,16 @@ import {
   confirmClientMaterialUpload,
 } from "@/modules/approval/cards/client-cards.server";
 import { MaterialUploadQueue } from "./MaterialUploadQueue";
+import { CardAttachedMedia } from "./CardAttachedMedia";
 import { getScopedContentCardFn } from "@/modules/client/scoped-portal.functions";
 import { useOptionalClientScope } from "@/modules/client/context";
 import { formatCardSchedule } from "../kanban/kanban-meta";
-import { SocialPreviewPanel } from "../preview/SocialPreviewPanel";
-import { RoteiroSceneCards } from "../roteiro/RoteiroSceneCards";
-import { assetsForPublishPreview, buildPreviewContext } from "@/lib/media-preview";
+import { RoteiroHtmlEditor, RoteiroHtmlView } from "../roteiro/RoteiroHtmlEditor";
+import { assetsForCardDisplay } from "@/lib/media-preview";
 import { Check, CheckCircle2, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
+import { isRoteiroHtmlEmpty, roteiroHtmlToPlain } from "@/modules/approval/services/roteiro-scenes";
 import type { ContentCard } from "@/modules/approval/types/content-card";
 import type { MediaAsset } from "@/lib/media-preview";
 import type { EditorialPillar } from "@/modules/approval/types/editorial-pillar";
@@ -102,7 +102,7 @@ export function ClientCardDetailDrawer({
   const confirmUploadFn = useServerFn(confirmClientMaterialUpload);
 
   const [changeOpen, setChangeOpen] = useState(false);
-  const [changeNote, setChangeNote] = useState("");
+  const [editHtml, setEditHtml] = useState("");
 
   const scopeKey = portalScope?.scopeQueryKey ?? "client";
   const canMutate = allowMutations ?? portalScope?.mode !== "slug_context";
@@ -165,10 +165,17 @@ export function ClientCardDetailDrawer({
   });
 
   const changesMut = useMutation({
-    mutationFn: () => changesFn({ data: { card_id: cardId, mensagem: changeNote } }),
+    mutationFn: () =>
+      changesFn({
+        data: {
+          card_id: cardId,
+          mensagem: roteiroHtmlToPlain(editHtml).slice(0, 2000),
+          roteiro: editHtml,
+        },
+      }),
     onSuccess: () => {
       toast.success("Alteração enviada.");
-      setChangeNote("");
+      setEditHtml("");
       setChangeOpen(false);
       invalidate();
       onClose();
@@ -176,24 +183,12 @@ export function ClientCardDetailDrawer({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const previewCtx =
-    card &&
-    buildPreviewContext(
-      {
-        formato: card.formato,
-        plataforma: card.plataforma,
-        legenda: card.legenda,
-        cliente_nome: card.cliente_nome,
-        data_publicacao: card.data_publicacao,
-        localizacao: card.localizacao,
-      },
-      assetsForPublishPreview(
-        detailQ.data?.attachments ?? [],
-        awaitingFinal || card.status === "publicado" || card.status === "agendado"
-          ? "final"
-          : "draft",
-      ),
-    );
+  const displayAssets = assetsForCardDisplay(
+    detailQ.data?.attachments ?? [],
+    awaitingFinal || card?.status === "publicado" || card?.status === "agendado",
+  );
+  const displayIds = new Set(displayAssets.map((asset) => asset.id));
+  const extraClientMaterials = clientMaterials.filter((asset) => !displayIds.has(asset.id));
 
   const approveDisabled =
     approveMut.isPending || changesMut.isPending || (awaitingRoteiro && !hasClientMaterial);
@@ -217,9 +212,24 @@ export function ClientCardDetailDrawer({
         {card && (
           <>
             <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 pb-28 pt-12">
-              {previewCtx ? <SocialPreviewPanel context={previewCtx} /> : null}
+              {displayAssets.length > 0 ? <CardAttachedMedia assets={displayAssets} /> : null}
 
-              <RoteiroSceneCards html={card.roteiro || card.copy_text} />
+              {changeOpen && canAct ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Edite o roteiro com o que precisa mudar e envie a alteração.
+                  </p>
+                  <RoteiroHtmlEditor
+                    resetKey={`${card.id}-edit`}
+                    html={editHtml}
+                    editable
+                    minHeightClass="min-h-[280px]"
+                    onChange={setEditHtml}
+                  />
+                </div>
+              ) : (
+                <RoteiroHtmlView html={card.roteiro || card.copy_text} />
+              )}
 
               {awaitingFinal && card.legenda?.trim() ? <CaptionBlock value={card.legenda} /> : null}
 
@@ -239,9 +249,9 @@ export function ClientCardDetailDrawer({
                 />
               ) : null}
 
-              {clientMaterials.length > 0 ? (
+              {extraClientMaterials.length > 0 ? (
                 <ul className="grid grid-cols-3 gap-2">
-                  {clientMaterials.map((m) => (
+                  {extraClientMaterials.map((m) => (
                     <li key={m.id} className="overflow-hidden rounded-xl border border-border">
                       {m.kind === "video" ? (
                         <video src={m.url} className="aspect-square w-full object-cover" />
@@ -254,12 +264,9 @@ export function ClientCardDetailDrawer({
               ) : null}
 
               {changeOpen && canAct ? (
-                <Textarea
-                  autoFocus
-                  rows={3}
-                  value={changeNote}
-                  onChange={(e) => setChangeNote(e.target.value)}
-                />
+                <p className="text-xs text-muted-foreground">
+                  A agência recebe o roteiro editado e volta com a versão ajustada.
+                </p>
               ) : null}
             </div>
 
@@ -283,19 +290,20 @@ export function ClientCardDetailDrawer({
                   )}
                   onClick={() => {
                     if (!changeOpen) {
+                      setEditHtml(card.roteiro || card.copy_text || "");
                       setChangeOpen(true);
                       return;
                     }
-                    if (!changeNote.trim()) return;
+                    if (isRoteiroHtmlEmpty(editHtml)) return;
                     changesMut.mutate();
                   }}
                   disabled={
                     changesMut.isPending ||
                     approveMut.isPending ||
-                    (changeOpen && !changeNote.trim())
+                    (changeOpen && isRoteiroHtmlEmpty(editHtml))
                   }
                 >
-                  Mudar
+                  {changeOpen ? "Enviar alteração" : "Mudar"}
                 </Button>
               </div>
             ) : null}
