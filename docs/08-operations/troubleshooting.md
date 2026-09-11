@@ -41,8 +41,10 @@ Cards zerados, gráficos flat, "—" nos KPIs.
 
 ### Timeout (`canceling statement due to statement timeout`)
 
-Causa histórica: `vw_overview_cliente` 8× UNION ALL. Correção: migration **56** +
-`getAdminPortfolioFn`. Se o JS antigo estiver em cache, Ctrl+F5. Auditoria:
+Causa histórica: `vw_overview_cliente` 8× UNION ALL (migration **56**). Em 2026-09-11
+voltou: RPCs `SECURITY INVOKER` + RLS `has_role` por linha. Correção: migration **64**
+(`SECURITY DEFINER`; o recorte `current_user_clientes` permanece). Ctrl+F5 se o JS
+estiver em cache. Auditoria:
 [overview-relatorios-timeout-audit.md](../reports/overview-relatorios-timeout-audit.md).
 
 ### Conversões = 0 com spend Meta preenchido
