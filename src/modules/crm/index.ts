@@ -16,3 +16,4 @@ export * from "./ingest/map-graph-comment";
 export * from "./ingest/map-graph-dm";
 export * from "./ingest/map-lead-form";
 export * from "./ingest/map-whatsapp";
+export * from "./ingest/map-ingest-interaction";

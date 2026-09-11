@@ -107,7 +107,7 @@ export function DashboardsHub({
               </p>
               <p className="mt-1 font-display text-base font-semibold">Quem falou com a marca</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Pessoas que comentaram, com jornada e retenção. Sem e-mail inventado.
+                Caixa de entrada da audiência. Sem e-mail inventado.
               </p>
             </div>
             <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />

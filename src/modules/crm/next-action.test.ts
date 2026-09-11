@@ -32,7 +32,17 @@ describe("nextAction", () => {
     );
   });
 
-  it("asks to reply a high-intent Direct", () => {
+  it("asks to reply a Direct", () => {
     expect(nextAction({ stats: baseStats, lastKind: "dm" }).code).toBe("reply_dm");
+  });
+
+  it("asks to reply WhatsApp even without high intent lexicon", () => {
+    expect(
+      nextAction({ stats: { ...baseStats, intentScore: 25 }, lastKind: "whatsapp" }).code,
+    ).toBe("open_whatsapp");
+  });
+
+  it("asks to reply a form ingest", () => {
+    expect(nextAction({ stats: baseStats, lastKind: "form" }).code).toBe("reply_inbox");
   });
 });

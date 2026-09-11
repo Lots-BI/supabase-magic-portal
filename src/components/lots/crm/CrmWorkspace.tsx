@@ -9,6 +9,8 @@ import {
   Star,
   MessageCircle,
   Download,
+  KeyRound,
+  Copy,
 } from "lucide-react";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { StatCard } from "@/components/lots/StatCard";
@@ -33,19 +35,23 @@ import type { CrmPeopleView } from "@/modules/crm/inbox";
 import {
   addCrmPersonNoteFn,
   assignCrmPersonFn,
+  createCrmIngestTokenFn,
   exportCrmPeopleFn,
   getCrmCoverageFn,
   getCrmPersonFn,
   getCrmRankingFn,
   ignoreCrmPersonFn,
+  listCrmIngestTokensFn,
   listCrmPeopleFn,
   mergeCrmPeopleFn,
   previewCrmCustomAudienceFn,
   replyCrmCommentFn,
   replyCrmDmFn,
+  revokeCrmIngestTokenFn,
   setCrmPersonVipFn,
   syncCrmCommentsFn,
   type CrmCollectorChip,
+  type CrmIngestTokenRow,
   type CrmPersonListRow,
   type CrmRankingRow,
 } from "@/modules/crm/crm.server";
@@ -77,6 +83,125 @@ function downloadCsv(csv: string, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+function ingestCurlExample(origin: string, token = "lots_crm_SEU_TOKEN") {
+  return `curl -X POST ${origin}/api/crm/v1/interactions \\
+  -H "Authorization: Bearer ${token}" \\
+  -H "Content-Type: application/json" \\
+  -d '{"channel":"whatsapp","external_id":"wamid.exemplo","body":"quero orçamento","identities":[{"kind":"whatsapp","value":"5511999999999"}]}'`;
+}
+
+function IngestTokenPanel({ cadastroClienteId }: { cadastroClienteId: number }) {
+  const qc = useQueryClient();
+  const [label, setLabel] = useState("n8n / ManyChat");
+  const [plainOnce, setPlainOnce] = useState<string | null>(null);
+  const listFn = useServerFn(listCrmIngestTokensFn);
+  const createFn = useServerFn(createCrmIngestTokenFn);
+  const revokeFn = useServerFn(revokeCrmIngestTokenFn);
+  const origin = typeof window === "undefined" ? "" : window.location.origin;
+
+  const tokensQuery = useQuery({
+    queryKey: crmKeys.ingestTokens(cadastroClienteId),
+    queryFn: () => listFn({ data: { cadastroClienteId } }),
+  });
+
+  const createMut = useMutation({
+    mutationFn: () => createFn({ data: { cadastroClienteId, label: label.trim() || "API" } }),
+    onSuccess: (row) => {
+      setPlainOnce(row.token);
+      void qc.invalidateQueries({ queryKey: crmKeys.ingestTokens(cadastroClienteId) });
+      void qc.invalidateQueries({ queryKey: crmKeys.coverage(cadastroClienteId) });
+      toast.success("Token gerado — copie agora; o Lots não volta a mostrar o valor.");
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Falha ao gerar token.");
+    },
+  });
+
+  const revokeMut = useMutation({
+    mutationFn: (tokenId: string) => revokeFn({ data: { tokenId } }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: crmKeys.ingestTokens(cadastroClienteId) });
+      toast.success("Token revogado.");
+    },
+  });
+
+  const tokens = tokensQuery.data ?? [];
+
+  return (
+    <SectionCard
+      title="API de ingestão"
+      description="ManyChat, n8n, Typeform ou o site enviam a mesma ficha CRM. O texto da mensagem nunca vira e-mail."
+    >
+      <div className="mb-3 flex flex-wrap items-end gap-2">
+        <div className="min-w-[12rem] flex-1">
+          <p className="mb-1 text-xs text-muted-foreground">Rótulo</p>
+          <Input value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} />
+        </div>
+        <Button
+          size="sm"
+          onClick={() => createMut.mutate()}
+          disabled={createMut.isPending}
+        >
+          <KeyRound className="mr-1.5 h-3.5 w-3.5" />
+          Gerar token
+        </Button>
+      </div>
+      {plainOnce ? (
+        <div className="mb-3 rounded-md border border-border bg-muted/40 p-3">
+          <p className="text-xs text-muted-foreground">Copie agora. Não armazenamos o valor em claro.</p>
+          <div className="mt-2 flex items-center gap-2">
+            <Input readOnly value={plainOnce} className="font-mono text-xs" />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                void navigator.clipboard.writeText(plainOnce);
+                toast.success("Token copiado.");
+              }}
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {tokens.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Nenhum token ainda.</p>
+      ) : (
+        <ul className="divide-y divide-border text-sm">
+          {tokens.map((token: CrmIngestTokenRow) => (
+            <li key={token.id} className="flex items-center justify-between gap-3 py-2">
+              <div className="min-w-0">
+                <p className={token.revokedAt ? "text-muted-foreground line-through" : "font-medium"}>
+                  {token.label}{" "}
+                  <span className="font-mono text-xs text-muted-foreground">{token.tokenPrefix}…</span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {token.revokedAt
+                    ? `Revogado ${formatWhen(token.revokedAt)}`
+                    : `Último uso ${formatWhen(token.lastUsedAt)}`}
+                </p>
+              </div>
+              {!token.revokedAt ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => revokeMut.mutate(token.id)}
+                  disabled={revokeMut.isPending}
+                >
+                  Revogar
+                </Button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+      <pre className="mt-3 overflow-x-auto rounded-md bg-muted/50 p-3 text-[11px] leading-relaxed text-muted-foreground">
+        {ingestCurlExample(origin, plainOnce ?? "lots_crm_SEU_TOKEN")}
+      </pre>
+    </SectionCard>
+  );
+}
+
 export function CrmWorkspace({
   cadastroClienteId,
   clienteNome,
@@ -93,7 +218,7 @@ export function CrmWorkspace({
   const qc = useQueryClient();
   const [days, setDays] = useState<PeriodDays>(30);
   const [q, setQ] = useState("");
-  const [view, setView] = useState<CrmPeopleView>("all");
+  const [view, setView] = useState<CrmPeopleView>("inbox");
   const [openId, setOpenId] = useState<string | null>(null);
 
   const coverageFn = useServerFn(getCrmCoverageFn);
@@ -137,7 +262,7 @@ export function CrmWorkspace({
       <PageHeader
         eyebrow="Dados"
         title="CRM"
-        description={`Audiência identificável de ${clienteNome} — quem comentou, quantas vezes, onde, e se está voltando. E-mail só existe com Lead Ads ou WhatsApp.`}
+        description={`Caixa de entrada da audiência de ${clienteNome} — WhatsApp, Direct, formulário, comentário. E-mail só entra se o canal entregar o campo, nunca extraído do texto.`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <PeriodToggle value={days} onChange={setDays} />
@@ -199,21 +324,19 @@ export function CrmWorkspace({
         <StatCard
           label="Com e-mail/telefone"
           value={withPii}
-          hint="Só fato de Lead Ads ou WhatsApp"
+          hint="Só fato enviado pelo canal (form, WhatsApp, Lead Ads)"
         />
       </div>
 
-      <RankingTable rows={rankingQuery.data ?? []} days={days} loading={rankingQuery.isLoading} />
-
       <SectionCard
-        title="Pessoas"
-        description="Ordenadas por calor (recência × frequência × intenção)."
+        title="Caixa de entrada"
+        description="Quem falou com a marca e ainda não teve resposta da marca neste recorte."
       >
         <Tabs value={view} onValueChange={(v) => setView(v as CrmPeopleView)} className="mb-4">
           <TabsList>
-            <TabsTrigger value="all">Todas</TabsTrigger>
-            <TabsTrigger value="inbox">Responder agora</TabsTrigger>
+            <TabsTrigger value="inbox">Caixa de entrada</TabsTrigger>
             <TabsTrigger value="churn">Em risco</TabsTrigger>
+            <TabsTrigger value="all">Todas</TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="mb-4 flex items-center gap-2">
@@ -222,7 +345,7 @@ export function CrmWorkspace({
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar @username"
+              placeholder="Buscar nome, @username ou telefone"
               className="pl-8"
             />
           </div>
@@ -235,7 +358,7 @@ export function CrmWorkspace({
             compact
             title={
               view === "inbox"
-                ? "Nada para responder agora"
+                ? "Nada na caixa de entrada"
                 : view === "churn"
                   ? "Ninguém em risco neste recorte"
                   : "Nenhuma pessoa identificada neste recorte"
@@ -243,7 +366,7 @@ export function CrmWorkspace({
             description={
               commentsChip?.status === "scope_missing"
                 ? "Refaça o login Instagram com a permissão de comentários."
-                : "Puxe comentários das publicações já sincronizadas, ou aguarde o cron."
+                : "Puxe comentários das publicações já sincronizadas, ou envie eventos pela API de ingestão (ManyChat, n8n, Typeform)."
             }
             action={
               <Button asChild variant="outline" size="sm">
@@ -286,6 +409,10 @@ export function CrmWorkspace({
         )}
       </SectionCard>
 
+      {canWrite ? <IngestTokenPanel cadastroClienteId={cadastroClienteId} /> : null}
+
+      <RankingTable rows={rankingQuery.data ?? []} days={days} loading={rankingQuery.isLoading} />
+
       {syncMut.isError ? (
         <p className="text-sm text-danger">
           {syncMut.error instanceof Error ? syncMut.error.message : "Falha ao puxar comentários."}
@@ -316,7 +443,7 @@ function RankingTable({
   return (
     <SectionCard
       title="O que traz gente de volta"
-      description="Pessoas cujo primeiro sinal foi neste post. Comentários da mídia (volume) e pessoas no CRM são colunas distintas."
+      description="Pessoas cujo primeiro sinal foi neste post. Volume da mídia e pessoas no CRM são colunas distintas."
     >
       {loading ? (
         <p className="text-sm text-muted-foreground">Calculando coortes…</p>
@@ -505,7 +632,7 @@ function PersonDrawer({
               {detail.facts.length === 0 ? (
                 <p className="mt-1 text-sm text-muted-foreground">
                   A Graph não entrega e-mail nem endereço de quem comentou. Esses campos só
-                  aparecem com Lead Ads ou WhatsApp.
+                  aparecem se um formulário, WhatsApp ou a API de ingestão enviar o fato.
                 </p>
               ) : (
                 <ul className="mt-1 space-y-1 text-sm">

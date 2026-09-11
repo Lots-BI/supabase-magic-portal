@@ -4,6 +4,7 @@ export type NextActionCode =
   | "reply_comment"
   | "reply_dm"
   | "open_whatsapp"
+  | "reply_inbox"
   | "person_gone"
   | "need_lead_form"
   | "relogin"
@@ -25,17 +26,25 @@ export function nextAction(input: {
       label: "Refazer login Instagram para coletar comentários.",
     };
   }
-  if (input.lastKind === "dm" && input.stats.intentScore >= 70) {
-    return { code: "reply_dm", label: "Responder o Direct." };
+  if (input.lastKind === "dm" || input.lastKind === "story_reply") {
+    return { code: "reply_dm", label: "Responder a mensagem." };
   }
-  if (input.lastKind === "whatsapp" && input.stats.intentScore >= 70) {
-    return { code: "open_whatsapp", label: "Responder no WhatsApp (janela 24h)." };
+  if (input.lastKind === "whatsapp") {
+    return { code: "open_whatsapp", label: "Responder no WhatsApp." };
+  }
+  if (input.lastKind === "comment" || input.lastKind === "reply") {
+    return { code: "reply_comment", label: "Responder o comentário." };
   }
   if (
-    (input.lastKind === "comment" || input.lastKind === "reply") &&
-    input.stats.intentScore >= 70
+    input.lastKind === "form" ||
+    input.lastKind === "lead_form" ||
+    input.lastKind === "email" ||
+    input.lastKind === "call" ||
+    input.lastKind === "review" ||
+    input.lastKind === "mention" ||
+    input.lastKind === "other"
   ) {
-    return { code: "reply_comment", label: "Responder o comentário." };
+    return { code: "reply_inbox", label: "Responder a última interação." };
   }
   if (input.stats.churnState === "em_risco" || input.stats.churnState === "dormindo") {
     return {

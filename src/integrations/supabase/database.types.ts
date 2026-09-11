@@ -1531,6 +1531,64 @@ export type Database = {
           },
         ]
       }
+      crm_ingest_tokens: {
+        Row: {
+          cadastro_cliente_id: number
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          last_used_at: string | null
+          revoked_at: string | null
+          token_hash: string
+          token_prefix: string
+        }
+        Insert: {
+          cadastro_cliente_id: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          token_hash: string
+          token_prefix: string
+        }
+        Update: {
+          cadastro_cliente_id?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          token_hash?: string
+          token_prefix?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_ingest_tokens_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "cadastro_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_ingest_tokens_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_agency_client_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_ingest_tokens_cadastro_cliente_id_fkey"
+            columns: ["cadastro_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "vw_clientes_admin"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crm_people: {
         Row: {
           cadastro_cliente_id: number
@@ -4693,6 +4751,10 @@ export type Database = {
         | "review"
         | "mention"
         | "brand_reply"
+        | "form"
+        | "email"
+        | "call"
+        | "other"
       crm_signal_place:
         | "feed"
         | "reels"
@@ -4702,6 +4764,8 @@ export type Database = {
         | "gbp"
         | "youtube"
         | "unknown"
+        | "web"
+        | "phone"
       decisao_resultado_status: "pendente" | "positivo" | "negativo" | "neutro"
       hipotese_status: "aberta" | "em_teste" | "validada" | "invalidada"
       oportunidade_origem: "manual" | "regra" | "ia"
@@ -5032,6 +5096,10 @@ export const Constants = {
         "review",
         "mention",
         "brand_reply",
+        "form",
+        "email",
+        "call",
+        "other",
       ],
       crm_signal_place: [
         "feed",
@@ -5042,6 +5110,8 @@ export const Constants = {
         "gbp",
         "youtube",
         "unknown",
+        "web",
+        "phone",
       ],
       decisao_resultado_status: ["pendente", "positivo", "negativo", "neutro"],
       hipotese_status: ["aberta", "em_teste", "validada", "invalidada"],

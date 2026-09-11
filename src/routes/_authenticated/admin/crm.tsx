@@ -31,7 +31,7 @@ function AdminCrmHub() {
       <PageHeader
         eyebrow="Dados"
         title="CRM"
-        description="Audiência identificável de cada marca — quem comentou, voltou, ou sumiu. Clique para abrir a ficha."
+        description="Audiência de cada marca — caixa de entrada unificada (WhatsApp, Direct, formulário, comentário). Clique para abrir."
         actions={<PeriodToggle value={days} onChange={setDays} />}
       />
       <div className="lots-surface overflow-x-auto">

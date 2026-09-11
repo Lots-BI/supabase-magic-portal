@@ -30,7 +30,15 @@ export async function persistCrmSignal(
   const email = identities.find((i) => i.kind === "email")?.value ?? null;
   const phone = identities.find((i) => i.kind === "phone")?.value ?? null;
   const whatsapp = identities.find((i) => i.kind === "whatsapp")?.value ?? null;
-  const decision = resolvePersonStitch({ people, igsid, username, email, phone, whatsapp });
+  const decision = resolvePersonStitch({
+    people,
+    igsid,
+    username,
+    email,
+    phone,
+    whatsapp,
+    incoming: identities,
+  });
 
   let personId: string;
   if (decision.action === "match") {
@@ -85,6 +93,7 @@ export async function persistCrmSignal(
       occurred_at: signal.occurredAt,
       ig_media_id: signal.igMediaId,
       content_card_id: signal.contentCardId,
+      campaign_key: signal.campaignKey ?? null,
       payload: signal.payload ?? {},
     },
     { onConflict: "cadastro_cliente_id,source,external_id" },

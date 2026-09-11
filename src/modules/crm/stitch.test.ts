@@ -33,6 +33,20 @@ describe("resolvePersonStitch", () => {
     expect(other.action).toBe("create");
   });
 
+  it("matches messenger_psid from ingest identities", () => {
+    const people = [
+      {
+        id: "p1",
+        identities: [{ kind: "messenger_psid" as const, value: "psid-9", source: "ingest_api:messenger" }],
+      },
+    ];
+    const match = resolvePersonStitch({
+      people,
+      incoming: [{ kind: "messenger_psid", value: "psid-9", source: "ingest_api:messenger" }],
+    });
+    expect(match).toEqual({ action: "match", personId: "p1" });
+  });
+
   it("matches a later lead-form email to the same person", () => {
     const people = [
       {

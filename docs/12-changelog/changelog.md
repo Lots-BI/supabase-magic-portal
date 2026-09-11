@@ -21,6 +21,13 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Adicionado
 
+- **CRM caixa de entrada + API de ingestão (2026-09-11):** a aba CRM abre na caixa de
+  entrada (qualquer interação inbound, não só comentário de intenção alta).
+  `POST /api/crm/v1/interactions` com token por marca (hash SHA-256; valor em claro
+  uma vez). ManyChat / n8n / Typeform / site escrevem o mesmo grafo. Migration 63.
+  Doc: [crm.md](../06-dashboards/crm.md), [crm-ingest-api.md](../07-integrations/crm-ingest-api.md).
+  Novidades `2026-09-11-crm-inbox`.
+
 - **CRM de audiência (2026-09-11):** aba CRM em Dados (acima de Relatórios) no admin e no
   portal do cliente. Grafo de pessoas a partir de comentários Instagram oficiais,
   jornada, inbox (responder agora / em risco), ranking de posts que trazem gente de volta,

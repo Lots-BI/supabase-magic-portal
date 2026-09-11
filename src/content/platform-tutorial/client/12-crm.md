@@ -1,17 +1,17 @@
 ---
 title: CRM — quem falou com a sua marca
-description: Pessoas que comentaram nos posts, com jornada e retenção.
+description: Caixa de entrada da audiência — WhatsApp, formulário, Direct, comentário. Sem e-mail inventado.
 ---
 
 # CRM (`/cliente/{sua-marca}/crm`)
 
-O **CRM** mostra pessoas identificáveis na sua audiência — em geral quem comentou nas publicações.
+O **CRM** é a caixa de entrada da sua audiência: cada pessoa que falou com a marca numa ficha só.
 
 ## Como abrir
 
 1. Menu **Dados** → **CRM** (acima de Relatório).
 2. Ou o card **CRM** no hub de Dashboards.
 
-Você vê quantas vezes a pessoa interagiu, em quais formatos (Feed, Reels, Stories) e se está voltando ou sumiu. Há uma lista **Responder agora** e um ranking dos posts que trazem gente de volta.
+A lista abre em **Caixa de entrada** — quem interagiu e ainda não teve resposta da marca neste recorte. Há também **Em risco** (sumiu) e **Todas**.
 
-O Lots **não inventa** e-mail ou endereço a partir de um comentário. O CSV exportado deixa essas colunas vazias até existir um formulário de anúncio ou WhatsApp.
+O Lots **não inventa** e-mail ou endereço a partir de um comentário ou mensagem. Esses campos só aparecem se um formulário, o WhatsApp ou a integração da agência enviar o dado.

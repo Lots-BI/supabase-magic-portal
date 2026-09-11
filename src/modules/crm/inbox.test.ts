@@ -1,47 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { isChurnQueue, isInboxNow } from "./inbox";
+import { isChurnQueue, isOpenInbox } from "./inbox";
 
-const now = new Date("2026-09-11T12:00:00.000Z");
-
-describe("isInboxNow", () => {
-  it("keeps a high-intent comment from the last 48h", () => {
-    expect(
-      isInboxNow(
-        {
-          ignoredAt: null,
-          lastKind: "comment",
-          lastSignalAt: "2026-09-11T10:00:00.000Z",
-          intentScore: 80,
-        },
-        now,
-      ),
-    ).toBe(true);
+describe("isOpenInbox", () => {
+  it("keeps any inbound last signal, including WhatsApp and form", () => {
+    expect(isOpenInbox({ ignoredAt: null, lastKind: "whatsapp" })).toBe(true);
+    expect(isOpenInbox({ ignoredAt: null, lastKind: "form" })).toBe(true);
+    expect(isOpenInbox({ ignoredAt: null, lastKind: "comment" })).toBe(true);
   });
 
-  it("drops ignored people even with reply_comment", () => {
-    expect(
-      isInboxNow({
-        ignoredAt: "2026-09-11T09:00:00.000Z",
-        lastKind: "comment",
-        lastSignalAt: "2026-09-11T10:00:00.000Z",
-        intentScore: 90,
-        nextActionCode: "reply_comment",
-      }),
-    ).toBe(false);
+  it("drops people the brand already answered", () => {
+    expect(isOpenInbox({ ignoredAt: null, lastKind: "brand_reply" })).toBe(false);
   });
 
-  it("drops stale low-intent comments", () => {
-    expect(
-      isInboxNow(
-        {
-          ignoredAt: null,
-          lastKind: "comment",
-          lastSignalAt: "2026-09-01T10:00:00.000Z",
-          intentScore: 40,
-        },
-        now,
-      ),
-    ).toBe(false);
+  it("drops ignored people", () => {
+    expect(isOpenInbox({ ignoredAt: "2026-09-11T09:00:00.000Z", lastKind: "whatsapp" })).toBe(
+      false,
+    );
   });
 });
 

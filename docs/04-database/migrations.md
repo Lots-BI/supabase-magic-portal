@@ -63,6 +63,7 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `60_dashboard_prefer_hub_rpc.sql`         | RPC `dashboard_prefer_hub_long` + `dashboard_coverage`: dashboards filtram cliente+data nas tabelas base (sem varrer o portfólio nas views diárias). |
 | `61_crm_people_graph.sql`                 | CRM de audiência: pessoas, identidades, sinais, stats, notas, cobertura. View `vw_crm_people_list`. |
 | `62_crm_inbox.sql`                        | Dono, merge (`merged_into_id`), recibos de webhook Meta, view com `last_kind`. |
+| `63_crm_ingest_api.sql`                   | Tokens da API de ingestão CRM (`crm_ingest_tokens`, hash SHA-256). Kinds `form`/`email`/`call`/`other`; places `web`/`phone`. |
 
 > Conteúdos (38–45) e demais arquivos em `supabase/migrations-official/` seguem a mesma
 > numeração. Lista completa no diretório. **Não existe `04`.** A tentativa

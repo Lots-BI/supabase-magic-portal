@@ -21,15 +21,22 @@ export function resolvePersonStitch(input: {
   email?: string | null;
   phone?: string | null;
   whatsapp?: string | null;
+  incoming?: readonly CrmIdentityInput[];
 }): StitchDecision {
   const igsid = normalizeIdentityValue("igsid", input.igsid);
   const username = normalizeUsername(input.username);
   const email = normalizeIdentityValue("email", input.email);
   const phone = normalizeIdentityValue("phone", input.phone);
   const whatsapp = normalizeIdentityValue("whatsapp", input.whatsapp);
+  const incoming = (input.incoming ?? [])
+    .map((ident) => {
+      const value = normalizeIdentityValue(ident.kind, ident.value);
+      return value ? { ...ident, value } : null;
+    })
+    .filter((ident): ident is CrmIdentityInput => Boolean(ident));
 
-  if (!igsid && !username && !email && !phone && !whatsapp) {
-    throw new Error("stitch requires igsid, username, email, phone or whatsapp");
+  if (!igsid && !username && !email && !phone && !whatsapp && incoming.length === 0) {
+    throw new Error("stitch requires at least one identity");
   }
 
   const index = new Map<string, string>();
@@ -47,6 +54,11 @@ export function resolvePersonStitch(input: {
   if (email) lookups.push({ kind: "email", value: email });
   if (phone) lookups.push({ kind: "phone", value: phone });
   if (whatsapp) lookups.push({ kind: "whatsapp", value: whatsapp });
+  for (const ident of incoming) {
+    if (!lookups.some((row) => row.kind === ident.kind && row.value === ident.value)) {
+      lookups.push({ kind: ident.kind, value: ident.value });
+    }
+  }
 
   for (const lookup of lookups) {
     const match = index.get(identityKey(lookup.kind, lookup.value));
@@ -54,10 +66,15 @@ export function resolvePersonStitch(input: {
   }
 
   const identities: CrmIdentityInput[] = [];
-  if (igsid) identities.push({ kind: "igsid", value: igsid, source: "instagram" });
-  if (username) identities.push({ kind: "ig_username", value: username, source: "instagram" });
-  if (email) identities.push({ kind: "email", value: email, source: "lead_ads" });
-  if (phone) identities.push({ kind: "phone", value: phone, source: "lead_ads" });
-  if (whatsapp) identities.push({ kind: "whatsapp", value: whatsapp, source: "whatsapp_cloud" });
+  const push = (ident: CrmIdentityInput) => {
+    if (identities.some((row) => row.kind === ident.kind && row.value === ident.value)) return;
+    identities.push(ident);
+  };
+  if (igsid) push({ kind: "igsid", value: igsid, source: "instagram" });
+  if (username) push({ kind: "ig_username", value: username, source: "instagram" });
+  if (email) push({ kind: "email", value: email, source: "lead_ads" });
+  if (phone) push({ kind: "phone", value: phone, source: "lead_ads" });
+  if (whatsapp) push({ kind: "whatsapp", value: whatsapp, source: "whatsapp_cloud" });
+  for (const ident of incoming) push(ident);
   return { action: "create", identities };
 }

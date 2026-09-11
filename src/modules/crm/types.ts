@@ -8,6 +8,10 @@ export const CRM_SIGNAL_KINDS = [
   "review",
   "mention",
   "brand_reply",
+  "form",
+  "email",
+  "call",
+  "other",
 ] as const;
 
 export type CrmSignalKind = (typeof CRM_SIGNAL_KINDS)[number];
@@ -20,6 +24,8 @@ export const CRM_SIGNAL_PLACES = [
   "whatsapp",
   "gbp",
   "youtube",
+  "web",
+  "phone",
   "unknown",
 ] as const;
 
@@ -60,6 +66,7 @@ export const CRM_COLLECTOR_KEYS = [
   "dm",
   "lead_ads",
   "whatsapp",
+  "ingest_api",
   "gbp_reviews",
   "likes",
 ] as const;

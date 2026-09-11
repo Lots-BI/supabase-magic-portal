@@ -60,9 +60,24 @@ async function ensureBaselineCollectors(supabase: SupabaseClient, cadastroClient
     lead_ads: "Lead Ads — webhook leadgen (App Review leads_retrieval).",
     whatsapp: "WhatsApp Cloud — plugin Hub ainda não ligado; mapper pronto.",
     gbp_reviews: "Avaliações do Google Business — planejado.",
+    ingest_api: "POST /api/crm/v1/interactions — ManyChat, n8n, Typeform, site.",
   };
-  await upsertCollector(supabase, cadastroClienteId, "likes", "impossible", "A Graph não lista quem curtiu.");
+  const { data: existing } = await supabase
+    .from("crm_collector_state")
+    .select("collector_key")
+    .eq("cadastro_cliente_id", cadastroClienteId);
+  const have = new Set((existing ?? []).map((row) => row.collector_key));
+  if (!have.has("likes")) {
+    await upsertCollector(
+      supabase,
+      cadastroClienteId,
+      "likes",
+      "impossible",
+      "A Graph não lista quem curtiu.",
+    );
+  }
   for (const [key, detail] of Object.entries(planned)) {
+    if (have.has(key)) continue;
     await upsertCollector(supabase, cadastroClienteId, key, "planned", detail);
   }
 }

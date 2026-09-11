@@ -7,4 +7,5 @@ export const crmKeys = {
   portfolio: (days: number) => ["crm", "portfolio", days] as const,
   ranking: (cadastroClienteId: number, days: number) =>
     ["crm", "ranking", cadastroClienteId, days] as const,
+  ingestTokens: (cadastroClienteId: number) => ["crm", "ingest-tokens", cadastroClienteId] as const,
 };

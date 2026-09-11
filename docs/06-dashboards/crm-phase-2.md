@@ -21,7 +21,7 @@ Produto: [crm.md](./crm.md). Invariantes abaixo prevalecem sobre qualquer tela.
 - CRM = audiência da **marca do cliente**, não `agency_leads` / Central.
 - Hub **nunca** escreve Make. CRM **não** grava `base_metricas_hub`.
 - Ciclo de Conteúdos (rascunho → publicar) **não muda**.
-- `crm_field_facts` só com origem estruturada e consentida: Lead Ads, WhatsApp Cloud, ou dado que a própria pessoa enviou no Direct. **Nunca** regex de e-mail no texto do comentário.
+- `crm_field_facts` só com origem estruturada e consentida: Lead Ads, WhatsApp Cloud, `facts[]` na API de ingestão, ou dado que a própria pessoa enviou no Direct. **Nunca** regex de e-mail no texto do comentário.
 - Graph **não** lista quem curtiu. Coletor `likes` permanece `impossible`.
 - Custom Audience Meta: só e-mail/telefone **hasheados** que já existem em `crm_field_facts`. **Nunca** IGSID de comentador.
 - Cliente lê audiência. Notas da agência e merge de identidades = admin. Responder comentário / Direct = admin na v2 (mesmo `canWrite` da v1).

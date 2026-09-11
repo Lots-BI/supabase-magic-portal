@@ -21,4 +21,6 @@ No App Dashboard (mesmo app do OAuth):
 
 Direct e Lead Ads **não** pedem scope no OAuth até `META_REQUEST_IG_MESSAGES_SCOPE=1` e `META_REQUEST_LEADS_SCOPE=1` (App Review). Sem isso o chip permanece planejado e o comentário segue.
 
+Enquanto o App Review não sair, use a [API de ingestão](./crm-ingest-api.md) (`POST /api/crm/v1/interactions`) para ManyChat / n8n / Typeform.
+
 Idempotência: `crm_webhook_receipts` unique `(provider, external_id)`.

@@ -60,6 +60,7 @@ const COLLECTOR_LABEL: Record<CrmCollectorKey, string> = {
   dm: "Direct",
   lead_ads: "Lead Ads",
   whatsapp: "WhatsApp",
+  ingest_api: "API de ingestão",
   gbp_reviews: "Avaliações GBP",
   likes: "Curtidas",
 };
@@ -164,7 +165,9 @@ export const getCrmCoverageFn = createServerFn({ method: "GET" })
             ? "A Graph não lista quem curtiu."
             : key === "comments"
               ? "Ainda não coletamos comentadores nesta conta."
-              : "Próximo coletor."),
+              : key === "ingest_api"
+                ? "Gere um token nesta tela e envie eventos (ManyChat, n8n, Typeform, site)."
+                : "Próximo coletor."),
         label: COLLECTOR_LABEL[key],
       };
     });
@@ -258,12 +261,13 @@ export const listCrmPeopleFn = createServerFn({ method: "GET" })
               isInboxNow({
                 ignoredAt: null,
                 lastKind: p.lastKind,
-                lastSignalAt: p.lastSignalAt,
-                intentScore: p.intentScore,
-                nextActionCode: p.nextActionCode,
               }),
             )
-            .sort((a, b) => b.intentScore - a.intentScore || (b.lastSignalAt ?? "").localeCompare(a.lastSignalAt ?? ""))
+            .sort(
+              (a, b) =>
+                (b.lastSignalAt ?? "").localeCompare(a.lastSignalAt ?? "") ||
+                b.intentScore - a.intentScore,
+            )
         : view === "churn"
           ? mapped.filter((p) => isChurnQueue(p.churnState, null))
           : mapped;
@@ -842,5 +846,109 @@ export const replyCrmDmFn = createServerFn({ method: "POST" })
       occurred_at: new Date().toISOString(),
     });
     return { ok: true, id: posted.id };
+  });
+
+export type CrmIngestTokenRow = {
+  id: string;
+  label: string;
+  tokenPrefix: string;
+  lastUsedAt: string | null;
+  revokedAt: string | null;
+  createdAt: string;
+};
+
+export const listCrmIngestTokensFn = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => cadastroSchema.parse(d))
+  .handler(async ({ data, context }): Promise<CrmIngestTokenRow[]> => {
+    await requireAdmin(context);
+    const { data: rows, error } = await context.supabase
+      .from("crm_ingest_tokens")
+      .select("id, label, token_prefix, last_used_at, revoked_at, created_at")
+      .eq("cadastro_cliente_id", data.cadastroClienteId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (rows ?? []).map((row) => ({
+      id: row.id,
+      label: row.label,
+      tokenPrefix: row.token_prefix,
+      lastUsedAt: row.last_used_at,
+      revokedAt: row.revoked_at,
+      createdAt: row.created_at,
+    }));
+  });
+
+export const createCrmIngestTokenFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        cadastroClienteId: z.number().int().positive(),
+        label: z.string().trim().min(1).max(80),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<CrmIngestTokenRow & { token: string }> => {
+    await requireAdmin(context);
+    const { generateCrmIngestToken } = await import("./ingest/ingest-token");
+    const minted = generateCrmIngestToken();
+    const admin = getSupabaseAdmin();
+    const { data: row, error } = await admin
+      .from("crm_ingest_tokens")
+      .insert({
+        cadastro_cliente_id: data.cadastroClienteId,
+        label: data.label,
+        token_prefix: minted.prefix,
+        token_hash: minted.hash,
+        created_by: context.userId,
+      })
+      .select("id, label, token_prefix, last_used_at, revoked_at, created_at")
+      .single();
+    if (error) throw new Error(error.message);
+    const { data: collector } = await admin
+      .from("crm_collector_state")
+      .select("status")
+      .eq("cadastro_cliente_id", data.cadastroClienteId)
+      .eq("collector_key", "ingest_api")
+      .maybeSingle();
+    if (!collector || collector.status === "planned") {
+      await admin.from("crm_collector_state").upsert(
+        {
+          cadastro_cliente_id: data.cadastroClienteId,
+          collector_key: "ingest_api",
+          status: "planned",
+          detail: "Token criado. Aguardando o primeiro evento.",
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "cadastro_cliente_id,collector_key" },
+      );
+    }
+    return {
+      id: row.id,
+      label: row.label,
+      tokenPrefix: row.token_prefix,
+      lastUsedAt: row.last_used_at,
+      revokedAt: row.revoked_at,
+      createdAt: row.created_at,
+      token: minted.plaintext,
+    };
+  });
+
+export const revokeCrmIngestTokenFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ tokenId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await requireAdmin(context);
+    const admin = getSupabaseAdmin();
+    const { data: row, error } = await admin
+      .from("crm_ingest_tokens")
+      .update({ revoked_at: new Date().toISOString() })
+      .eq("id", data.tokenId)
+      .is("revoked_at", null)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Token não encontrado ou já revogado.");
+    return { ok: true };
   });
 

@@ -1,7 +1,7 @@
 import { matchIntentLexicon } from "./intent-lexicon";
 import type { CrmSignalInput } from "./types";
 
-const WEIGHTED_KINDS = new Set(["dm", "lead_form", "whatsapp"]);
+const WEIGHTED_KINDS = new Set(["dm", "lead_form", "whatsapp", "form", "email", "call"]);
 
 function daysBetween(iso: string, now: Date): number {
   const t = new Date(iso).getTime();

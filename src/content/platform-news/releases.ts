@@ -21,6 +21,20 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-09-11-crm-inbox",
+    date: "2026-09-11",
+    title: "CRM: caixa de entrada da audiência",
+    summary:
+      "A aba CRM passou a ser a caixa de entrada de quem falou com a marca — WhatsApp, formulário, Direct ou comentário. Sem e-mail inventado no texto.",
+    bullets: [
+      "Menu **Dados** → **CRM**. A lista abre em **Caixa de entrada**.",
+      "A agência pode ligar ManyChat, n8n ou Typeform na mesma ficha (token na tela, só admin).",
+      "E-mail e telefone só entram se o canal enviar o campo — nunca extraídos da mensagem.",
+    ],
+    audience: "all",
+    tags: ["CRM", "Novidade"],
+  },
+  {
     id: "2026-09-11-crm-audiencia",
     date: "2026-09-11",
     title: "CRM: quem comentou, voltou ou sumiu",
