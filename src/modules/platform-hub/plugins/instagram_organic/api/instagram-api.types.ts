@@ -56,8 +56,27 @@ export interface InstagramCommentV1 {
   from?: { id?: string; username?: string };
 }
 
-export interface InstagramCommentListResponseV1 {
-  data?: InstagramCommentV1[];
+export interface InstagramConversationV1 {
+  id: string;
+  updated_time?: string;
+  participants?: { data?: Array<{ id?: string; username?: string }> };
+}
+
+export interface InstagramConversationMessageV1 {
+  id: string;
+  created_time?: string;
+  message?: string;
+  from?: { id?: string; username?: string };
+}
+
+export interface InstagramConversationListResponseV1 {
+  data?: InstagramConversationV1[];
+  paging?: { cursors?: { after?: string } };
+  error?: { message: string; code?: number };
+}
+
+export interface InstagramConversationMessagesResponseV1 {
+  data?: InstagramConversationMessageV1[];
   paging?: { cursors?: { after?: string } };
   error?: { message: string; code?: number };
 }

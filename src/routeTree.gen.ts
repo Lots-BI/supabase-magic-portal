@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthIndexRouteImport } from './routes/auth/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AuthenticatedSobreRouteImport } from './routes/_authenticated/sobre'
 import { Route as AuthenticatedPlanoEstrategicoRouteImport } from './routes/_authenticated/plano-estrategico'
 import { Route as AuthenticatedNovidadesRouteImport } from './routes/_authenticated/novidades'
@@ -26,6 +27,14 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as OauthTiktokCallbackRouteImport } from './routes/oauth/tiktok/callback'
 import { Route as OauthMetaCallbackRouteImport } from './routes/oauth/meta/callback'
 import { Route as OauthGoogleCallbackRouteImport } from './routes/oauth/google/callback'
+import { Route as ApiWebhooksMetaRouteImport } from './routes/api/webhooks/meta'
+import { Route as ApiCronMetaAdsCampaignsSyncRouteImport } from './routes/api/cron/meta-ads-campaigns-sync'
+import { Route as ApiCronInstagramProfileSyncRouteImport } from './routes/api/cron/instagram-profile-sync'
+import { Route as ApiCronInstagramMediaSyncRouteImport } from './routes/api/cron/instagram-media-sync'
+import { Route as ApiCronInstagramCrmCommentsSyncRouteImport } from './routes/api/cron/instagram-crm-comments-sync'
+import { Route as ApiCronGoogleAdsCampaignsSyncRouteImport } from './routes/api/cron/google-ads-campaigns-sync'
+import { Route as ApiCronGa4ProfileSyncRouteImport } from './routes/api/cron/ga4-profile-sync'
+import { Route as ApiCronConteudosPublishDueRouteImport } from './routes/api/cron/conteudos-publish-due'
 import { Route as AuthenticatedTutorialSplatRouteImport } from './routes/_authenticated/tutorial/$'
 import { Route as AuthenticatedClienteClienteRouteImport } from './routes/_authenticated/cliente.$cliente'
 import { Route as AuthenticatedAdminServicosRouteImport } from './routes/_authenticated/admin/servicos'
@@ -49,6 +58,7 @@ import { Route as AuthenticatedAdminKnowledgeIndexRouteImport } from './routes/_
 import { Route as AuthenticatedAdminDebugIndexRouteImport } from './routes/_authenticated/admin/debug.index'
 import { Route as AuthenticatedAdminConexoesIndexRouteImport } from './routes/_authenticated/admin/conexoes.index'
 import { Route as AuthenticatedAdminClientesIndexRouteImport } from './routes/_authenticated/admin/clientes.index'
+import { Route as ApiCrmV1InteractionsRouteImport } from './routes/api/crm/v1/interactions'
 import { Route as AuthenticatedClienteClienteTiktokRouteImport } from './routes/_authenticated/cliente.$cliente.tiktok'
 import { Route as AuthenticatedClienteClienteRelatorioRouteImport } from './routes/_authenticated/cliente.$cliente.relatorio'
 import { Route as AuthenticatedClienteClientePublicacoesRouteImport } from './routes/_authenticated/cliente.$cliente.publicacoes'
@@ -107,6 +117,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
   getParentRoute: () => AuthRouteRoute,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSobreRoute = AuthenticatedSobreRouteImport.update({
   id: '/sobre',
@@ -171,6 +186,52 @@ const OauthGoogleCallbackRoute = OauthGoogleCallbackRouteImport.update({
   path: '/oauth/google/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWebhooksMetaRoute = ApiWebhooksMetaRouteImport.update({
+  id: '/api/webhooks/meta',
+  path: '/api/webhooks/meta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronMetaAdsCampaignsSyncRoute =
+  ApiCronMetaAdsCampaignsSyncRouteImport.update({
+    id: '/api/cron/meta-ads-campaigns-sync',
+    path: '/api/cron/meta-ads-campaigns-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiCronInstagramProfileSyncRoute =
+  ApiCronInstagramProfileSyncRouteImport.update({
+    id: '/api/cron/instagram-profile-sync',
+    path: '/api/cron/instagram-profile-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiCronInstagramMediaSyncRoute =
+  ApiCronInstagramMediaSyncRouteImport.update({
+    id: '/api/cron/instagram-media-sync',
+    path: '/api/cron/instagram-media-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiCronInstagramCrmCommentsSyncRoute =
+  ApiCronInstagramCrmCommentsSyncRouteImport.update({
+    id: '/api/cron/instagram-crm-comments-sync',
+    path: '/api/cron/instagram-crm-comments-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiCronGoogleAdsCampaignsSyncRoute =
+  ApiCronGoogleAdsCampaignsSyncRouteImport.update({
+    id: '/api/cron/google-ads-campaigns-sync',
+    path: '/api/cron/google-ads-campaigns-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiCronGa4ProfileSyncRoute = ApiCronGa4ProfileSyncRouteImport.update({
+  id: '/api/cron/ga4-profile-sync',
+  path: '/api/cron/ga4-profile-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronConteudosPublishDueRoute =
+  ApiCronConteudosPublishDueRouteImport.update({
+    id: '/api/cron/conteudos-publish-due',
+    path: '/api/cron/conteudos-publish-due',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedTutorialSplatRoute =
   AuthenticatedTutorialSplatRouteImport.update({
     id: '/$',
@@ -307,6 +368,11 @@ const AuthenticatedAdminClientesIndexRoute =
     path: '/clientes/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const ApiCrmV1InteractionsRoute = ApiCrmV1InteractionsRouteImport.update({
+  id: '/api/crm/v1/interactions',
+  path: '/api/crm/v1/interactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedClienteClienteTiktokRoute =
   AuthenticatedClienteClienteTiktokRouteImport.update({
     id: '/tiktok',
@@ -522,6 +588,7 @@ export interface FileRoutesByFullPath {
   '/novidades': typeof AuthenticatedNovidadesRoute
   '/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
   '/sobre': typeof AuthenticatedSobreRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/': typeof AuthIndexRoute
   '/admin/knowledge': typeof AuthenticatedAdminKnowledgeRouteRouteWithChildren
@@ -540,6 +607,14 @@ export interface FileRoutesByFullPath {
   '/admin/servicos': typeof AuthenticatedAdminServicosRoute
   '/cliente/$cliente': typeof AuthenticatedClienteClienteRouteWithChildren
   '/tutorial/$': typeof AuthenticatedTutorialSplatRoute
+  '/api/cron/conteudos-publish-due': typeof ApiCronConteudosPublishDueRoute
+  '/api/cron/ga4-profile-sync': typeof ApiCronGa4ProfileSyncRoute
+  '/api/cron/google-ads-campaigns-sync': typeof ApiCronGoogleAdsCampaignsSyncRoute
+  '/api/cron/instagram-crm-comments-sync': typeof ApiCronInstagramCrmCommentsSyncRoute
+  '/api/cron/instagram-media-sync': typeof ApiCronInstagramMediaSyncRoute
+  '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
+  '/api/cron/meta-ads-campaigns-sync': typeof ApiCronMetaAdsCampaignsSyncRoute
+  '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
   '/oauth/meta/callback': typeof OauthMetaCallbackRoute
   '/oauth/tiktok/callback': typeof OauthTiktokCallbackRoute
@@ -573,6 +648,7 @@ export interface FileRoutesByFullPath {
   '/cliente/$cliente/publicacoes': typeof AuthenticatedClienteClientePublicacoesRoute
   '/cliente/$cliente/relatorio': typeof AuthenticatedClienteClienteRelatorioRoute
   '/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
+  '/api/crm/v1/interactions': typeof ApiCrmV1InteractionsRoute
   '/admin/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/admin/conexoes/': typeof AuthenticatedAdminConexoesIndexRoute
   '/admin/debug/': typeof AuthenticatedAdminDebugIndexRoute
@@ -594,6 +670,7 @@ export interface FileRoutesByTo {
   '/novidades': typeof AuthenticatedNovidadesRoute
   '/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
   '/sobre': typeof AuthenticatedSobreRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth': typeof AuthIndexRoute
   '/account/security': typeof AuthenticatedAccountSecurityRoute
@@ -608,6 +685,14 @@ export interface FileRoutesByTo {
   '/admin/relatorios': typeof AuthenticatedAdminRelatoriosRoute
   '/admin/servicos': typeof AuthenticatedAdminServicosRoute
   '/tutorial/$': typeof AuthenticatedTutorialSplatRoute
+  '/api/cron/conteudos-publish-due': typeof ApiCronConteudosPublishDueRoute
+  '/api/cron/ga4-profile-sync': typeof ApiCronGa4ProfileSyncRoute
+  '/api/cron/google-ads-campaigns-sync': typeof ApiCronGoogleAdsCampaignsSyncRoute
+  '/api/cron/instagram-crm-comments-sync': typeof ApiCronInstagramCrmCommentsSyncRoute
+  '/api/cron/instagram-media-sync': typeof ApiCronInstagramMediaSyncRoute
+  '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
+  '/api/cron/meta-ads-campaigns-sync': typeof ApiCronMetaAdsCampaignsSyncRoute
+  '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
   '/oauth/meta/callback': typeof OauthMetaCallbackRoute
   '/oauth/tiktok/callback': typeof OauthTiktokCallbackRoute
@@ -640,6 +725,7 @@ export interface FileRoutesByTo {
   '/cliente/$cliente/publicacoes': typeof AuthenticatedClienteClientePublicacoesRoute
   '/cliente/$cliente/relatorio': typeof AuthenticatedClienteClienteRelatorioRoute
   '/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
+  '/api/crm/v1/interactions': typeof ApiCrmV1InteractionsRoute
   '/admin/clientes': typeof AuthenticatedAdminClientesIndexRoute
   '/admin/conexoes': typeof AuthenticatedAdminConexoesIndexRoute
   '/admin/debug': typeof AuthenticatedAdminDebugIndexRoute
@@ -666,6 +752,7 @@ export interface FileRoutesById {
   '/_authenticated/novidades': typeof AuthenticatedNovidadesRoute
   '/_authenticated/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
   '/_authenticated/sobre': typeof AuthenticatedSobreRoute
+  '/api/health': typeof ApiHealthRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/': typeof AuthIndexRoute
   '/_authenticated/admin/knowledge': typeof AuthenticatedAdminKnowledgeRouteRouteWithChildren
@@ -684,6 +771,14 @@ export interface FileRoutesById {
   '/_authenticated/admin/servicos': typeof AuthenticatedAdminServicosRoute
   '/_authenticated/cliente/$cliente': typeof AuthenticatedClienteClienteRouteWithChildren
   '/_authenticated/tutorial/$': typeof AuthenticatedTutorialSplatRoute
+  '/api/cron/conteudos-publish-due': typeof ApiCronConteudosPublishDueRoute
+  '/api/cron/ga4-profile-sync': typeof ApiCronGa4ProfileSyncRoute
+  '/api/cron/google-ads-campaigns-sync': typeof ApiCronGoogleAdsCampaignsSyncRoute
+  '/api/cron/instagram-crm-comments-sync': typeof ApiCronInstagramCrmCommentsSyncRoute
+  '/api/cron/instagram-media-sync': typeof ApiCronInstagramMediaSyncRoute
+  '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
+  '/api/cron/meta-ads-campaigns-sync': typeof ApiCronMetaAdsCampaignsSyncRoute
+  '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
   '/oauth/meta/callback': typeof OauthMetaCallbackRoute
   '/oauth/tiktok/callback': typeof OauthTiktokCallbackRoute
@@ -717,6 +812,7 @@ export interface FileRoutesById {
   '/_authenticated/cliente/$cliente/publicacoes': typeof AuthenticatedClienteClientePublicacoesRoute
   '/_authenticated/cliente/$cliente/relatorio': typeof AuthenticatedClienteClienteRelatorioRoute
   '/_authenticated/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
+  '/api/crm/v1/interactions': typeof ApiCrmV1InteractionsRoute
   '/_authenticated/admin/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/_authenticated/admin/conexoes/': typeof AuthenticatedAdminConexoesIndexRoute
   '/_authenticated/admin/debug/': typeof AuthenticatedAdminDebugIndexRoute
@@ -743,6 +839,7 @@ export interface FileRouteTypes {
     | '/novidades'
     | '/plano-estrategico'
     | '/sobre'
+    | '/api/health'
     | '/auth/callback'
     | '/auth/'
     | '/admin/knowledge'
@@ -761,6 +858,14 @@ export interface FileRouteTypes {
     | '/admin/servicos'
     | '/cliente/$cliente'
     | '/tutorial/$'
+    | '/api/cron/conteudos-publish-due'
+    | '/api/cron/ga4-profile-sync'
+    | '/api/cron/google-ads-campaigns-sync'
+    | '/api/cron/instagram-crm-comments-sync'
+    | '/api/cron/instagram-media-sync'
+    | '/api/cron/instagram-profile-sync'
+    | '/api/cron/meta-ads-campaigns-sync'
+    | '/api/webhooks/meta'
     | '/oauth/google/callback'
     | '/oauth/meta/callback'
     | '/oauth/tiktok/callback'
@@ -794,6 +899,7 @@ export interface FileRouteTypes {
     | '/cliente/$cliente/publicacoes'
     | '/cliente/$cliente/relatorio'
     | '/cliente/$cliente/tiktok'
+    | '/api/crm/v1/interactions'
     | '/admin/clientes/'
     | '/admin/conexoes/'
     | '/admin/debug/'
@@ -815,6 +921,7 @@ export interface FileRouteTypes {
     | '/novidades'
     | '/plano-estrategico'
     | '/sobre'
+    | '/api/health'
     | '/auth/callback'
     | '/auth'
     | '/account/security'
@@ -829,6 +936,14 @@ export interface FileRouteTypes {
     | '/admin/relatorios'
     | '/admin/servicos'
     | '/tutorial/$'
+    | '/api/cron/conteudos-publish-due'
+    | '/api/cron/ga4-profile-sync'
+    | '/api/cron/google-ads-campaigns-sync'
+    | '/api/cron/instagram-crm-comments-sync'
+    | '/api/cron/instagram-media-sync'
+    | '/api/cron/instagram-profile-sync'
+    | '/api/cron/meta-ads-campaigns-sync'
+    | '/api/webhooks/meta'
     | '/oauth/google/callback'
     | '/oauth/meta/callback'
     | '/oauth/tiktok/callback'
@@ -861,6 +976,7 @@ export interface FileRouteTypes {
     | '/cliente/$cliente/publicacoes'
     | '/cliente/$cliente/relatorio'
     | '/cliente/$cliente/tiktok'
+    | '/api/crm/v1/interactions'
     | '/admin/clientes'
     | '/admin/conexoes'
     | '/admin/debug'
@@ -886,6 +1002,7 @@ export interface FileRouteTypes {
     | '/_authenticated/novidades'
     | '/_authenticated/plano-estrategico'
     | '/_authenticated/sobre'
+    | '/api/health'
     | '/auth/callback'
     | '/auth/'
     | '/_authenticated/admin/knowledge'
@@ -904,6 +1021,14 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/servicos'
     | '/_authenticated/cliente/$cliente'
     | '/_authenticated/tutorial/$'
+    | '/api/cron/conteudos-publish-due'
+    | '/api/cron/ga4-profile-sync'
+    | '/api/cron/google-ads-campaigns-sync'
+    | '/api/cron/instagram-crm-comments-sync'
+    | '/api/cron/instagram-media-sync'
+    | '/api/cron/instagram-profile-sync'
+    | '/api/cron/meta-ads-campaigns-sync'
+    | '/api/webhooks/meta'
     | '/oauth/google/callback'
     | '/oauth/meta/callback'
     | '/oauth/tiktok/callback'
@@ -937,6 +1062,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cliente/$cliente/publicacoes'
     | '/_authenticated/cliente/$cliente/relatorio'
     | '/_authenticated/cliente/$cliente/tiktok'
+    | '/api/crm/v1/interactions'
     | '/_authenticated/admin/clientes/'
     | '/_authenticated/admin/conexoes/'
     | '/_authenticated/admin/debug/'
@@ -956,9 +1082,19 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  ApiHealthRoute: typeof ApiHealthRoute
+  ApiCronConteudosPublishDueRoute: typeof ApiCronConteudosPublishDueRoute
+  ApiCronGa4ProfileSyncRoute: typeof ApiCronGa4ProfileSyncRoute
+  ApiCronGoogleAdsCampaignsSyncRoute: typeof ApiCronGoogleAdsCampaignsSyncRoute
+  ApiCronInstagramCrmCommentsSyncRoute: typeof ApiCronInstagramCrmCommentsSyncRoute
+  ApiCronInstagramMediaSyncRoute: typeof ApiCronInstagramMediaSyncRoute
+  ApiCronInstagramProfileSyncRoute: typeof ApiCronInstagramProfileSyncRoute
+  ApiCronMetaAdsCampaignsSyncRoute: typeof ApiCronMetaAdsCampaignsSyncRoute
+  ApiWebhooksMetaRoute: typeof ApiWebhooksMetaRoute
   OauthGoogleCallbackRoute: typeof OauthGoogleCallbackRoute
   OauthMetaCallbackRoute: typeof OauthMetaCallbackRoute
   OauthTiktokCallbackRoute: typeof OauthTiktokCallbackRoute
+  ApiCrmV1InteractionsRoute: typeof ApiCrmV1InteractionsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -997,6 +1133,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/callback'
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRouteRoute
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/sobre': {
       id: '/_authenticated/sobre'
@@ -1080,6 +1223,62 @@ declare module '@tanstack/react-router' {
       path: '/oauth/google/callback'
       fullPath: '/oauth/google/callback'
       preLoaderRoute: typeof OauthGoogleCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/webhooks/meta': {
+      id: '/api/webhooks/meta'
+      path: '/api/webhooks/meta'
+      fullPath: '/api/webhooks/meta'
+      preLoaderRoute: typeof ApiWebhooksMetaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/meta-ads-campaigns-sync': {
+      id: '/api/cron/meta-ads-campaigns-sync'
+      path: '/api/cron/meta-ads-campaigns-sync'
+      fullPath: '/api/cron/meta-ads-campaigns-sync'
+      preLoaderRoute: typeof ApiCronMetaAdsCampaignsSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/instagram-profile-sync': {
+      id: '/api/cron/instagram-profile-sync'
+      path: '/api/cron/instagram-profile-sync'
+      fullPath: '/api/cron/instagram-profile-sync'
+      preLoaderRoute: typeof ApiCronInstagramProfileSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/instagram-media-sync': {
+      id: '/api/cron/instagram-media-sync'
+      path: '/api/cron/instagram-media-sync'
+      fullPath: '/api/cron/instagram-media-sync'
+      preLoaderRoute: typeof ApiCronInstagramMediaSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/instagram-crm-comments-sync': {
+      id: '/api/cron/instagram-crm-comments-sync'
+      path: '/api/cron/instagram-crm-comments-sync'
+      fullPath: '/api/cron/instagram-crm-comments-sync'
+      preLoaderRoute: typeof ApiCronInstagramCrmCommentsSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/google-ads-campaigns-sync': {
+      id: '/api/cron/google-ads-campaigns-sync'
+      path: '/api/cron/google-ads-campaigns-sync'
+      fullPath: '/api/cron/google-ads-campaigns-sync'
+      preLoaderRoute: typeof ApiCronGoogleAdsCampaignsSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/ga4-profile-sync': {
+      id: '/api/cron/ga4-profile-sync'
+      path: '/api/cron/ga4-profile-sync'
+      fullPath: '/api/cron/ga4-profile-sync'
+      preLoaderRoute: typeof ApiCronGa4ProfileSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/conteudos-publish-due': {
+      id: '/api/cron/conteudos-publish-due'
+      path: '/api/cron/conteudos-publish-due'
+      fullPath: '/api/cron/conteudos-publish-due'
+      preLoaderRoute: typeof ApiCronConteudosPublishDueRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/tutorial/$': {
@@ -1242,6 +1441,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/clientes/'
       preLoaderRoute: typeof AuthenticatedAdminClientesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/api/crm/v1/interactions': {
+      id: '/api/crm/v1/interactions'
+      path: '/api/crm/v1/interactions'
+      fullPath: '/api/crm/v1/interactions'
+      preLoaderRoute: typeof ApiCrmV1InteractionsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/cliente/$cliente/tiktok': {
       id: '/_authenticated/cliente/$cliente/tiktok'
@@ -1771,9 +1977,19 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRouteRoute: AuthRouteRouteWithChildren,
+  ApiHealthRoute: ApiHealthRoute,
+  ApiCronConteudosPublishDueRoute: ApiCronConteudosPublishDueRoute,
+  ApiCronGa4ProfileSyncRoute: ApiCronGa4ProfileSyncRoute,
+  ApiCronGoogleAdsCampaignsSyncRoute: ApiCronGoogleAdsCampaignsSyncRoute,
+  ApiCronInstagramCrmCommentsSyncRoute: ApiCronInstagramCrmCommentsSyncRoute,
+  ApiCronInstagramMediaSyncRoute: ApiCronInstagramMediaSyncRoute,
+  ApiCronInstagramProfileSyncRoute: ApiCronInstagramProfileSyncRoute,
+  ApiCronMetaAdsCampaignsSyncRoute: ApiCronMetaAdsCampaignsSyncRoute,
+  ApiWebhooksMetaRoute: ApiWebhooksMetaRoute,
   OauthGoogleCallbackRoute: OauthGoogleCallbackRoute,
   OauthMetaCallbackRoute: OauthMetaCallbackRoute,
   OauthTiktokCallbackRoute: OauthTiktokCallbackRoute,
+  ApiCrmV1InteractionsRoute: ApiCrmV1InteractionsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

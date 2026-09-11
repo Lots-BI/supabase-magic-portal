@@ -21,6 +21,11 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Adicionado
 
+- **Runtime `/api/*` no TanStack Start (2026-09-11):** crons Hub, publicação agendada,
+  webhook Meta e ingestão CRM passam a ser `src/routes/api/**` (não Nitro
+  `server/routes`, que o Vercel não montava). Prova: `GET /api/health`. Direct Instagram
+  entra pela Graph no Lots, sem ManyChat. Doc: [deployment.md](../08-operations/deployment.md).
+
 - **CRM caixa de entrada + API de ingestão (2026-09-11):** a aba CRM abre na caixa de
   entrada (qualquer interação inbound, não só comentário de intenção alta).
   `POST /api/crm/v1/interactions` com token por marca (hash SHA-256; valor em claro

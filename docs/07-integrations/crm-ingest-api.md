@@ -14,7 +14,7 @@ last_review: 2026-09-11
 
 Autenticação: `Authorization: Bearer <token>`. O token é gerado na aba CRM (admin), por marca. O Lots guarda só o hash SHA-256; o valor em claro aparece **uma vez**.
 
-Vite local responde 404 em `/api/*` (Nitro só no deploy Vercel). Teste o endpoint em produção ou com `npm run preview` / função Nitro.
+Vite local e produção Vercel atendem a rota via **TanStack Start** (`src/routes/api/crm/v1/interactions.ts`). Não use ManyChat/n8n — Direct Instagram entra pela Graph no Lots.
 
 ## Contrato
 

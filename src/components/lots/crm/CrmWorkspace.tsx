@@ -92,7 +92,7 @@ function ingestCurlExample(origin: string, token = "lots_crm_SEU_TOKEN") {
 
 function IngestTokenPanel({ cadastroClienteId }: { cadastroClienteId: number }) {
   const qc = useQueryClient();
-  const [label, setLabel] = useState("n8n / ManyChat");
+  const [label, setLabel] = useState("Formulário do site");
   const [plainOnce, setPlainOnce] = useState<string | null>(null);
   const listFn = useServerFn(listCrmIngestTokensFn);
   const createFn = useServerFn(createCrmIngestTokenFn);
@@ -129,8 +129,8 @@ function IngestTokenPanel({ cadastroClienteId }: { cadastroClienteId: number }) 
 
   return (
     <SectionCard
-      title="API de ingestão"
-      description="ManyChat, n8n, Typeform ou o site enviam a mesma ficha CRM. O texto da mensagem nunca vira e-mail."
+      title="API extra (formulário do site)"
+      description="Direct e comentário Instagram já entram pela Graph no Lots. Use um token só se o site ou um formulário próprio precisar empurrar um evento."
     >
       <div className="mb-3 flex flex-wrap items-end gap-2">
         <div className="min-w-[12rem] flex-1">
@@ -262,7 +262,7 @@ export function CrmWorkspace({
       <PageHeader
         eyebrow="Dados"
         title="CRM"
-        description={`Caixa de entrada da audiência de ${clienteNome} — WhatsApp, Direct, formulário, comentário. E-mail só entra se o canal entregar o campo, nunca extraído do texto.`}
+        description={`Caixa de entrada da audiência de ${clienteNome} — Direct e comentários entram pela Graph no Lots, sem ManyChat. E-mail só se o canal entregar o campo.`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <PeriodToggle value={days} onChange={setDays} />
@@ -302,7 +302,7 @@ export function CrmWorkspace({
             {canWrite ? (
               <Button size="sm" onClick={() => syncMut.mutate()} disabled={syncMut.isPending}>
                 <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", syncMut.isPending && "animate-spin")} />
-                Puxar comentários
+                Puxar Instagram
               </Button>
             ) : null}
           </div>
@@ -366,7 +366,7 @@ export function CrmWorkspace({
             description={
               commentsChip?.status === "scope_missing"
                 ? "Refaça o login Instagram com a permissão de comentários."
-                : "Puxe comentários das publicações já sincronizadas, ou envie eventos pela API de ingestão (ManyChat, n8n, Typeform)."
+                : "Puxe o Instagram nesta tela (comentários e Direct). Sem ManyChat."
             }
             action={
               <Button asChild variant="outline" size="sm">
