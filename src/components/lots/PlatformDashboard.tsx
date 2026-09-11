@@ -1,19 +1,20 @@
 // ============================================================================
 // Lots BI · PlatformDashboard
 // Componente GENÉRICO. Renderiza o dashboard completo de QUALQUER plataforma
-// descrita por um PlatformDef. Faz UMA query a def.view cobrindo [prevFrom, to]
-// — assim cards, KPIs, charts, tabela, ranking e insights vivem do mesmo
+// descrita por um PlatformDef. Faz UMA RPC (cliente+data no banco) cobrindo
+// [prevFrom, to] — cards, KPIs, charts, tabela, ranking e insights no mesmo
 // dataset. Nada de cálculos no componente: tudo passa pelo engine.
 // ============================================================================
 
-import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useSuspenseQuery, queryOptions, keepPreviousData } from "@tanstack/react-query";
 import { Suspense, useMemo } from "react";
 import { Inbox, Sparkles, TrendingDown, TrendingUp, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { PlatformDef, ValueFormat } from "@/lib/platforms/types";
 import type { CommonMetric } from "@/lib/metrics";
 import { METRIC_META, resolveMetricDescription } from "@/lib/metrics";
-import { aggregatePeriod, pctDelta, platformViewSelect } from "@/lib/platforms/engine";
+import { aggregatePeriod, pctDelta } from "@/lib/platforms/engine";
+import { fetchDashboardRows } from "@/lib/platforms/fetch-dashboard-rows";
 import type { Period } from "@/lib/period";
 import { formatBR } from "@/lib/period";
 import { SectionCard } from "./SectionCard";
@@ -81,17 +82,9 @@ function metricToChartCommon(metricKey: string, format: ValueFormat): CommonMetr
 const platformRowsQuery = (def: PlatformDef, cliente: string, prevFrom: string, to: string) =>
   queryOptions({
     queryKey: ["platform-rows", def.key, cliente, prevFrom, to],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from(def.view)
-        .select(platformViewSelect(def))
-        .eq("cliente", cliente)
-        .gte("data", prevFrom)
-        .lte("data", to)
-        .order("data", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as Array<Record<string, unknown> & { data: string; cliente: string }>;
-    },
+    queryFn: () => fetchDashboardRows(supabase, def, cliente, prevFrom, to),
+    staleTime: 5 * 60_000,
+    placeholderData: keepPreviousData,
   });
 
 // ---------- Componente principal -------------------------------------------

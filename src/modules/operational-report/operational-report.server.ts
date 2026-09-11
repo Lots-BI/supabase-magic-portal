@@ -7,7 +7,8 @@ import { assertClientPortalAccess } from "@/modules/approval/internal/client-acc
 import { resolvePeriod, type PeriodInput, type PeriodPreset } from "@/lib/period";
 import { OVERVIEW_CLIENTE_SELECT, sumOverview, type OverviewRow } from "@/lib/metrics";
 import { PLATFORMS } from "@/lib/platforms/registry";
-import { platformViewSelect, type Row } from "@/lib/platforms/engine";
+import { fetchDashboardRows } from "@/lib/platforms/fetch-dashboard-rows";
+import type { Row } from "@/lib/platforms/engine";
 import {
   buildOperationalReport,
   type ReportCardRow,
@@ -66,30 +67,19 @@ async function fetchPlatformRows(
   prevFrom: string,
   to: string,
 ): Promise<Record<string, Row[]>> {
-  const out: Record<string, Row[]> = {};
-  for (const def of PLATFORMS) {
-    try {
-      const { data, error } = await supabase
-        .from(def.view)
-        .select(platformViewSelect(def))
-        .eq("cliente", clienteNome)
-        .gte("data", prevFrom)
-        .lte("data", to)
-        .order("data", { ascending: true })
-        .limit(4000);
-      if (error) {
-        console.warn(`[relatorio] ${def.view}:`, error.message);
-        out[def.key] = [];
-        continue;
+  const entries = await Promise.all(
+    PLATFORMS.map(async (def) => {
+      try {
+        const rows = await fetchDashboardRows(supabase, def, clienteNome, prevFrom, to);
+        return [def.key, rows] as const;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn(`[relatorio] ${def.key}:`, message);
+        return [def.key, [] as Row[]] as const;
       }
-      out[def.key] = (data ?? []) as Row[];
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.warn(`[relatorio] ${def.view}:`, message);
-      out[def.key] = [];
-    }
-  }
-  return out;
+    }),
+  );
+  return Object.fromEntries(entries);
 }
 
 function mapOverviewRow(row: Record<string, unknown>): OverviewRow {

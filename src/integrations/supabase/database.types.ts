@@ -3791,6 +3791,28 @@ export type Database = {
         Returns: boolean
       }
       is_platform_owner: { Args: { _user_id: string }; Returns: boolean }
+      dashboard_coverage: {
+        Args: { p_cliente: string; p_from: string }
+        Returns: {
+          data: string
+          plataforma: string
+        }[]
+      }
+      dashboard_prefer_hub_long: {
+        Args: {
+          p_cliente: string
+          p_from: string
+          p_plataforma: string
+          p_to: string
+        }
+        Returns: {
+          campanha: string
+          cliente: string
+          data: string
+          metrica: string
+          valor: number
+        }[]
+      }
       portfolio_clientes_ativos: {
         Args: never
         Returns: {

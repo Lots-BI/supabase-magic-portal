@@ -21,6 +21,10 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Adicionado
 
+- **Dashboards mais rápidos (2026-09-11):** leitura via RPC `dashboard_prefer_hub_long`
+  (cliente + data no banco). Hub de contas e barra de sync deixam de sondar as views
+  diárias. Migration 60.
+
 - **Relatório operacional (2026-09-11):** `/cliente/{slug}/relatorio` passou a canvas visual
   (heróis, pulso, mix, tiles da marca). Plataforma sem coleta no recorte **não** entra.
   Publicações e Conteúdos só com peça no período. Engine em

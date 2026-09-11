@@ -28,10 +28,9 @@ function pluginsByCadastro(
 export const listDashboardAccountsFn = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<DashboardAccountRow[]> => {
-    const { data: ativos, error: ativosError } = await context.supabase
-      .from("vw_clientes_ativos")
-      .select("cliente,ultima_data_recebida,plataformas_ativas")
-      .order("ultima_data_recebida", { ascending: false });
+    const { data: ativos, error: ativosError } = await context.supabase.rpc(
+      "portfolio_clientes_ativos",
+    );
     if (ativosError) throw new Error(ativosError.message);
 
     const { data: cadastros, error: cadError } = await context.supabase
@@ -68,7 +67,8 @@ export const listDashboardAccountsFn = createServerFn({ method: "GET" })
           ativo.plataformas_ativas,
           cad ? hubByCadastro.get(cad.id) : [],
         ),
-        lastData: ativo.ultima_data_recebida,
+        lastData:
+          ativo.ultima_data_recebida != null ? String(ativo.ultima_data_recebida).slice(0, 10) : null,
       });
     }
 

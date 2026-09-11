@@ -59,6 +59,8 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `56_portfolio_overview_single_pass.sql`   | Overview 1-pass FILTER; RPC `portfolio_overview` / `portfolio_clientes_ativos`. |
 | `57_overview_paid_conversions.sql`        | Colunas no fim: `meta_results`, `meta_conversions`, `google_conversions`. |
 | `58_meta_ads_messaging_metrics.sql`       | `vw_meta_ads_diario`: `messaging_conversations_started`, `messaging_first_replies`, `page_engagements` no **fim**. WhatsApp do Gerenciador. |
+| `59_ig_media_link_content_cards.sql`      | Liga publicações IG a `content_cards`. |
+| `60_dashboard_prefer_hub_rpc.sql`         | RPC `dashboard_prefer_hub_long` + `dashboard_coverage`: dashboards filtram cliente+data nas tabelas base (sem varrer o portfólio nas views diárias). |
 
 > Conteúdos (38–45) e demais arquivos em `supabase/migrations-official/` seguem a mesma
 > numeração. Lista completa no diretório. **Não existe `04`.** A tentativa
@@ -140,6 +142,7 @@ Projeto Supabase: `ywvhoctcmibjitvwkkhb`.
 55_overview_query_timeout.sql
 56_portfolio_overview_single_pass.sql
 57_overview_paid_conversions.sql
+60_dashboard_prefer_hub_rpc.sql
 ```
 
 ### Rollback

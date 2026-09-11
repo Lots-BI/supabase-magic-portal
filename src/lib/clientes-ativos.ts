@@ -10,12 +10,14 @@ export type ClienteAtivo = {
 export const clientesAtivosQuery = queryOptions({
   queryKey: ["vw_clientes_ativos"],
   queryFn: async (): Promise<ClienteAtivo[]> => {
-    const { data, error } = await supabase
-      .from("vw_clientes_ativos")
-      .select("cliente,ultima_data_recebida,plataformas_ativas")
-      .order("ultima_data_recebida", { ascending: false });
+    const { data, error } = await supabase.rpc("portfolio_clientes_ativos");
     if (error) throw error;
-    return (data ?? []) as ClienteAtivo[];
+    return (data ?? []).map((row) => ({
+      cliente: row.cliente,
+      ultima_data_recebida:
+        row.ultima_data_recebida != null ? String(row.ultima_data_recebida).slice(0, 10) : null,
+      plataformas_ativas: row.plataformas_ativas ?? null,
+    }));
   },
   staleTime: 60_000,
 });

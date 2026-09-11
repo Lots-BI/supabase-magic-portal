@@ -28,13 +28,15 @@ const clienteSyncMetaQuery = (queryName: string) =>
   queryOptions({
     queryKey: ["cliente-sync-meta", queryName],
     queryFn: async (): Promise<ClienteAtivo | null> => {
-      const { data, error } = await supabase
-        .from("vw_clientes_ativos")
-        .select("cliente,ultima_ingestao,plataformas_ativas")
-        .eq("cliente", queryName)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("portfolio_clientes_ativos");
       if (error) throw error;
-      return (data as ClienteAtivo | null) ?? null;
+      const row = (data ?? []).find((item) => item.cliente === queryName);
+      if (!row) return null;
+      return {
+        cliente: row.cliente,
+        ultima_ingestao: row.ultima_ingestao ?? null,
+        plataformas_ativas: row.plataformas_ativas ?? null,
+      };
     },
     staleTime: 60_000,
   });
@@ -43,13 +45,15 @@ const clienteCoverageQuery = (queryName: string, since: string) =>
   queryOptions({
     queryKey: ["cliente-sync-coverage", queryName, since],
     queryFn: async (): Promise<MetricDayRow[]> => {
-      const { data, error } = await supabase
-        .from("vw_metricas_normalizadas")
-        .select("plataforma,data")
-        .eq("cliente", queryName)
-        .gte("data", since);
+      const { data, error } = await supabase.rpc("dashboard_coverage", {
+        p_cliente: queryName,
+        p_from: since,
+      });
       if (error) throw error;
-      return (data ?? []) as MetricDayRow[];
+      return (data ?? []).map((row) => ({
+        plataforma: row.plataforma,
+        data: String(row.data).slice(0, 10),
+      }));
     },
     staleTime: 60_000,
   });
