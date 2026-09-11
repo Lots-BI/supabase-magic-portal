@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, CheckCheck } from "lucide-react";
 import {
   listNotifications,
@@ -8,6 +8,11 @@ import {
   unreadCount,
   type AppNotification,
 } from "@/lib/notifications";
+import {
+  listAppNotificationsFn,
+  markAllAppNotificationsReadFn,
+  markAppNotificationReadFn,
+} from "@/modules/notifications/app-notifications.server";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -41,20 +46,62 @@ function formatWhen(iso: string) {
 }
 
 export function NotificationCenter() {
-  const [items, setItems] = useState<AppNotification[]>([]);
-  const [unread, setUnread] = useState(0);
+  const queryClient = useQueryClient();
+  const [localItems, setLocalItems] = useState<AppNotification[]>([]);
+  const [localUnread, setLocalUnread] = useState(0);
 
-  const refresh = () => {
-    setItems(listNotifications());
-    setUnread(unreadCount());
+  const serverQuery = useQuery({
+    queryKey: ["app-notifications"],
+    queryFn: () => listAppNotificationsFn(),
+    staleTime: 30_000,
+    retry: 1,
+  });
+
+  const refreshLocal = () => {
+    setLocalItems(listNotifications());
+    setLocalUnread(unreadCount());
   };
 
   useEffect(() => {
-    refresh();
-    const handler = () => refresh();
+    refreshLocal();
+    const handler = () => refreshLocal();
     window.addEventListener("lots-bi:notifications", handler);
     return () => window.removeEventListener("lots-bi:notifications", handler);
   }, []);
+
+  const serverItems = serverQuery.data ?? [];
+  const items = mergeNotifications(serverItems, localItems);
+  const unread =
+    serverItems.filter((n) => !n.read).length + localUnread;
+
+  const markOne = useMutation({
+    mutationFn: async (id: string) => {
+      if (serverItems.some((n) => n.id === id)) {
+        await markAppNotificationReadFn({ data: { id } });
+      } else {
+        markRead(id);
+      }
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["app-notifications"] });
+      refreshLocal();
+    },
+  });
+
+  const markAll = useMutation({
+    mutationFn: async () => {
+      try {
+        await markAllAppNotificationsReadFn();
+      } catch {
+        // localStorage ainda marca
+      }
+      markAllRead();
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["app-notifications"] });
+      refreshLocal();
+    },
+  });
 
   return (
     <DropdownMenu>
@@ -79,7 +126,7 @@ export function NotificationCenter() {
           {unread > 0 && (
             <button
               type="button"
-              onClick={() => markAllRead()}
+              onClick={() => markAll.mutate()}
               className="lots-focus inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
             >
               <CheckCheck className="h-3 w-3" />
@@ -97,13 +144,13 @@ export function NotificationCenter() {
             <DropdownMenuItem
               key={n.id}
               className={cn("flex flex-col items-start gap-0.5 py-2.5", !n.read && "bg-primary/5")}
-              onSelect={() => markRead(n.id)}
+              onSelect={() => markOne.mutate(n.id)}
               asChild={!!n.href}
             >
               {n.href ? (
-                <Link to={n.href} className="w-full">
+                <a href={n.href} className="w-full">
                   <NotificationRow n={n} />
-                </Link>
+                </a>
               ) : (
                 <div className="w-full">
                   <NotificationRow n={n} />
@@ -127,5 +174,15 @@ function NotificationRow({ n }: { n: AppNotification }) {
       {n.body && <span className="text-[11px] text-muted-foreground line-clamp-2">{n.body}</span>}
       <span className="text-[10px] text-muted-foreground">{formatWhen(n.createdAt)}</span>
     </>
+  );
+}
+
+function mergeNotifications(
+  server: AppNotification[],
+  local: AppNotification[],
+): AppNotification[] {
+  const seen = new Set(server.map((item) => item.id));
+  return [...server, ...local.filter((item) => !seen.has(item.id))].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt),
   );
 }

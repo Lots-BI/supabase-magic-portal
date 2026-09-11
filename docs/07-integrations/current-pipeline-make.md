@@ -86,35 +86,22 @@ Substituir Make quando **todos** forem verdadeiros para aquela plataforma:
 
 ### Instagram (perfil/conta) — status
 
-- [x] Coletor Lots BI implementado — plugin `instagram_organic`, capability
-      `instagram_organic:profile:collect` (Graph API, `metrics-timeseries` → `base_metricas_hub`).
-      Ver [instagram.md](../06-dashboards/platforms/instagram.md).
-- [x] Dashboard já prefere Hub por dia+cliente sem cutover global — migration
-      `34_instagram_profile_prefer_hub.sql`.
-- [ ] Paridade de dados validada (amostragem ≥ 7 dias, Gate B) — pendente.
-- [ ] Scheduler automático (cron) — hoje só manual via botão **Puxar métricas**; reaproveitar
-      workflow pendente de `/publicacoes` (`.github/workflows/instagram-media-sync-cron.yml`).
-- [ ] Runbook de reprocessamento — cobrir "backfill parcial" (cap de 30 dias/clique).
-- [ ] Make desligado para Instagram — **ainda não**; dual-run intencional nesta fase.
-- [x] Conexão self-service pelo cliente — disponível em `/cliente/:slug/conexoes`
-      (`CLIENT_SELF_SERVICE_PLUGIN_KEYS` inclui `instagram_organic`), além da via admin
-      (`/admin/conexoes/nova`).
+- [x] Coletor Lots BI + **cron noturno** (`instagram-profile-sync-cron.yml`).
+- [x] Dashboard `prefer_hub`. Writer Hub é **replace-by-day**.
+- [ ] Paridade 14 dias medida no Diário do AGENT-PLAN (Make pode continuar gravando).
+- [ ] Pausar cenário Make no Make.com — só depois da paridade. A tabela `base_metricas_make` permanece.
 
 ### Meta Ads (campanhas) — status
 
-- [x] Coletor Lots BI implementado — plugin `meta_ads`, capability `meta:metrics:collect`
-      (Marketing Insights API, `level=campaign`, `time_increment=1`, `metrics-timeseries` →
-      `base_metricas_hub`). Provider já validado em dual-run/E2E antes desta entrega — ver
-      [meta-ads.md](../06-dashboards/platforms/meta-ads.md).
-- [x] Dashboard já prefere Hub por dia+cliente sem cutover global — migration
-      `36_meta_ads_prefer_hub.sql`.
-- [ ] Paridade de dados validada (amostragem ≥ 7 dias, Gate B) — pendente.
-- [ ] Scheduler automático (cron) — hoje só manual via botão **Puxar métricas**.
-- [ ] Runbook de reprocessamento — cobrir "backfill parcial" (cap de 30 dias/clique).
-- [ ] Make desligado para Meta Ads — **ainda não**; dual-run intencional nesta fase.
-- [x] Conexão self-service pelo cliente — disponível em `/cliente/:slug/conexoes`
-      (`CLIENT_SELF_SERVICE_PLUGIN_KEYS` inclui `meta_ads`), além da via admin
-      (`/admin/conexoes/nova`).
+- [x] Coletor Lots BI + **cron noturno** (`meta-ads-campaigns-sync-cron.yml`).
+- [x] Dashboard `prefer_hub` (sentinelas vazias não escondem Make).
+- [ ] Paridade 14 dias no Diário. Não pausar Make se o SQL mostrar furo.
+
+### Google Ads / GA4 — status
+
+- [x] Receita Hub no código (sync, `prefer_hub`, botão Puxar, cron).
+- [ ] Conexão OAuth + `GOOGLE_ADS_DEVELOPER_TOKEN` em produção — **único passo humano restante para coletar**.
+- [ ] Make Google/GA4 está congelado em 2026-08-17; dashboards continuam no Make até o primeiro dia Hub.
 
 ---
 

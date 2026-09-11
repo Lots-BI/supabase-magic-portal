@@ -43,7 +43,7 @@ import { Copy, Archive, MessageSquare } from "lucide-react";
 import { PillarBadge } from "../shared/PillarBadge";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
 import { ApprovalConfirmDialog } from "../shared/ApprovalConfirmDialog";
-import { BrDateTimeFields, horaToDbValue } from "../shared/BrDateTimeFields";
+import { PublishedIgMetrics } from "./PublishedIgMetrics";
 
 export function CardDetailDrawer({
   cardId,
@@ -77,6 +77,7 @@ export function CardDetailDrawer({
   });
 
   const card = detailQ.data?.card;
+  const publishedIg = detailQ.data?.publishedIg;
   const [comment, setComment] = useState("");
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [draft, setDraft] = useState({
@@ -318,6 +319,9 @@ export function CardDetailDrawer({
 
                 <TabsContent value="conteudo" className="space-y-4">
                   {selectedPillar && <PillarBadge pillar={selectedPillar} />}
+                  {(card.status === "publicado" || card.publish_status === "published") && (
+                    <PublishedIgMetrics ig={publishedIg} />
+                  )}
                   <BrDateTimeFields
                     date={draft.data_publicacao}
                     time={draft.hora_publicacao}

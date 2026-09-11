@@ -71,7 +71,11 @@ export function InstagramPostsPage({
         toast.error(result.error ?? "Não foi possível puxar métricas");
         return;
       }
-      toast.success(`${result.mediaCount ?? 0} publicações atualizadas`);
+      toast.success(
+        (result.mediaCount ?? 0) === 0
+          ? "Nenhuma publicação na conta — conexão ok"
+          : `${result.mediaCount} publicações atualizadas`,
+      );
       queryClient.invalidateQueries({ queryKey: ["instagram-posts", cadastroClienteId] });
     },
     onError: (error) => toast.error(error.message),

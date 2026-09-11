@@ -24,6 +24,7 @@ import {
   groupIntoContiguousRanges,
   listMissingDates,
 } from "@/modules/instagram-posts/instagram-profile-gap-finder";
+import { syncAllActivePluginConnections } from "@/modules/platform-hub-bridges/ph-persistence/sync-all-active-connections";
 
 /**
  * Lookback padrão para o primeiro backfill. Diferente do Instagram (limite
@@ -169,7 +170,7 @@ export async function syncMetaAdsCampaignsConnection(
         window: range,
       });
 
-      if (!isMetricsTimeseriesEnvelope(envelope)) continue;
+      if (!isMetricsTimeseriesEnvelope(envelope) || envelope.payload.rows.length === 0) continue;
 
       envelope.payload.canonicalClientName = canonicalClientName;
       envelope.payload.platformLabel = envelope.payload.platformLabel || META_ADS_PLATFORM_LABEL;
@@ -203,4 +204,10 @@ export async function syncMetaAdsCampaignsConnection(
     to,
     error: errors.length > 0 ? errors.join("; ") : undefined,
   };
+}
+
+export async function syncAllMetaAdsCampaignsConnections(supabase: SupabaseClient) {
+  return syncAllActivePluginConnections(supabase, "meta_ads", (connectionId) =>
+    syncMetaAdsCampaignsConnection(supabase, connectionId),
+  );
 }

@@ -22,10 +22,18 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import type { ContentCard } from "@/modules/approval/types/content-card";
 import { adminConteudosCalendarHref } from "@/modules/approval/services/admin-conteudos-href";
+import { PublishedIgMetrics } from "../card/PublishedIgMetrics";
 
 type PublishMode = "now" | "schedule";
 
-type CardDetailPayload = { card: ContentCard };
+type CardDetailPayload = {
+  card: ContentCard;
+  publishedIg?: {
+    permalink: string | null;
+    lastSyncedAt: string | null;
+    metrics: Record<string, number>;
+  } | null;
+};
 
 function toDatetimeLocalValue(card: ContentCard): string {
   if (card.scheduled_publish_at) {
@@ -69,6 +77,7 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
   });
 
   const card = detailQ.data?.card;
+  const publishedIg = detailQ.data?.publishedIg;
 
   useEffect(() => {
     if (card) setScheduledAt(toDatetimeLocalValue(card));
@@ -286,6 +295,11 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
       ) : null}
 
       <SectionCard title="Confirmação da publicação">
+        {(card.status === "publicado" || card.publish_status === "published") && (
+          <div className="mb-4">
+            <PublishedIgMetrics ig={publishedIg} />
+          </div>
+        )}
         <dl className="space-y-2 text-sm">
           <div className="flex gap-2">
             <dt className="text-muted-foreground">Status:</dt>

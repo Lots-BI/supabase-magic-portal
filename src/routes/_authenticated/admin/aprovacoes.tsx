@@ -67,6 +67,7 @@ const aprovacoesSearchSchema = z.object({
   tab: z.enum(["calendar", "kanban", "materials", "library", "pillars"]).optional(),
   estrategia: z.string().uuid().optional(),
   cliente: z.coerce.number().int().positive().optional().catch(undefined),
+  card: z.string().uuid().optional().catch(undefined),
 });
 
 function invalidateApprovalViews(
@@ -118,7 +119,7 @@ function AprovacoesAdminPage() {
 
   const clienteId = search.cliente;
   const [tab, setTab] = useState<ApprovalTab>(search.tab ?? "calendar");
-  const [openCardId, setOpenCardId] = useState<string | null>(null);
+  const [openCardId, setOpenCardId] = useState<string | null>(search.card ?? null);
   const [archiveCardId, setArchiveCardId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [calendarCreateDate, setCalendarCreateDate] = useState<string | null>(null);
@@ -127,6 +128,10 @@ function AprovacoesAdminPage() {
   useEffect(() => {
     if (search.tab && search.tab !== tab) setTab(search.tab);
   }, [search.tab, tab]);
+
+  useEffect(() => {
+    if (search.card) setOpenCardId(search.card);
+  }, [search.card]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

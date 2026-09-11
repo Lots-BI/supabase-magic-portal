@@ -17,6 +17,7 @@ import {
   todayInSaoPaulo,
 } from "@/modules/platform-hub/plugins/instagram_organic/api/date-utils";
 import { groupIntoContiguousRanges, listMissingDates } from "./instagram-profile-gap-finder";
+import { syncAllActivePluginConnections } from "@/modules/platform-hub-bridges/ph-persistence/sync-all-active-connections";
 
 /** Meta expõe Insights de conta por ~90 dias (documentação oficial). */
 export const INSTAGRAM_PROFILE_LOOKBACK_DAYS = 89;
@@ -25,7 +26,17 @@ export const INSTAGRAM_PROFILE_LOOKBACK_DAYS = 89;
 export const INSTAGRAM_PROFILE_MAX_DAYS_PER_RUN = 30;
 
 /** Reconsulta recente para inserir views/replies sem reprocessar 90 dias. */
-const INSTAGRAM_PROFILE_REFRESH_DAYS = 14;
+export const INSTAGRAM_PROFILE_REFRESH_DAYS = 14;
+
+/** Cron noturno usa janela menor para não estourar timeout do workflow. */
+export const INSTAGRAM_PROFILE_CRON_REFRESH_DAYS = Number(
+  process.env.INSTAGRAM_PROFILE_CRON_REFRESH_DAYS ?? 3,
+);
+
+export interface InstagramProfileSyncOptions {
+  refreshDays?: number;
+  maxDaysPerRun?: number;
+}
 
 const INSTAGRAM_PLATFORM_LABEL = "Instagram";
 
@@ -77,10 +88,13 @@ async function fetchExistingInstagramDates(
 export async function syncInstagramProfileConnection(
   supabase: SupabaseClient,
   connectionId: string,
+  options: InstagramProfileSyncOptions = {},
 ): Promise<InstagramProfileSyncResult> {
   // Insights de conta têm atraso de 24–48h — usamos "ontem" como fim do range.
   const to = addDaysToDateStr(todayInSaoPaulo(), -1);
   const from = addDaysToDateStr(to, -INSTAGRAM_PROFILE_LOOKBACK_DAYS);
+  const refreshDays = options.refreshDays ?? INSTAGRAM_PROFILE_REFRESH_DAYS;
+  const maxDaysPerRun = options.maxDaysPerRun ?? INSTAGRAM_PROFILE_MAX_DAYS_PER_RUN;
 
   const stack = await createAdminHubStack(supabase);
   const id = asConnectionId(connectionId);
@@ -100,16 +114,16 @@ export async function syncInstagramProfileConnection(
   const identities = await stack.identityService.list(id);
   const existingDates = await fetchExistingInstagramDates(supabase, canonicalClientName, from, to);
   const missing = listMissingDates(from, to, existingDates);
-  const refreshFrom = addDaysToDateStr(to, -(INSTAGRAM_PROFILE_REFRESH_DAYS - 1));
-  const refreshDays = listMissingDates(refreshFrom, to, new Set());
-  const toFetch = [...new Set([...missing, ...refreshDays])].sort();
+  const refreshFrom = addDaysToDateStr(to, -(refreshDays - 1));
+  const refreshWindow = listMissingDates(refreshFrom, to, new Set());
+  const toFetch = [...new Set([...missing, ...refreshWindow])].sort();
 
   if (toFetch.length === 0) {
     return { ok: true, daysFilled: 0, daysRequested: 0, from, to };
   }
 
   // Prioriza os dias mais recentes; o restante é preenchido em próximos cliques.
-  const capped = toFetch.slice(Math.max(0, toFetch.length - INSTAGRAM_PROFILE_MAX_DAYS_PER_RUN));
+  const capped = toFetch.slice(Math.max(0, toFetch.length - maxDaysPerRun));
   const ranges = groupIntoContiguousRanges(capped);
 
   const provider = stack.registry
@@ -128,7 +142,7 @@ export async function syncInstagramProfileConnection(
         window: range,
       });
 
-      if (!isMetricsTimeseriesEnvelope(envelope)) continue;
+      if (!isMetricsTimeseriesEnvelope(envelope) || envelope.payload.rows.length === 0) continue;
 
       envelope.payload.canonicalClientName = canonicalClientName;
       envelope.payload.platformLabel = envelope.payload.platformLabel || INSTAGRAM_PLATFORM_LABEL;
@@ -162,4 +176,16 @@ export async function syncInstagramProfileConnection(
     to,
     error: errors.length > 0 ? errors.join("; ") : undefined,
   };
+}
+
+export async function syncAllInstagramProfileConnections(
+  supabase: SupabaseClient,
+  options: InstagramProfileSyncOptions = {
+    refreshDays: INSTAGRAM_PROFILE_CRON_REFRESH_DAYS,
+    maxDaysPerRun: 14,
+  },
+) {
+  return syncAllActivePluginConnections(supabase, "instagram_organic", (connectionId) =>
+    syncInstagramProfileConnection(supabase, connectionId, options),
+  );
 }

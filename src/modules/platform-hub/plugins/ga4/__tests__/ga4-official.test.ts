@@ -13,7 +13,14 @@ const SAMPLE_REPORT = {
   rows: [
     {
       dimensionValues: [{ value: "20260701" }],
-      metricValues: [{ value: "500" }, { value: "700" }],
+      metricValues: [
+        { value: "500" },
+        { value: "700" },
+        { value: "400" },
+        { value: "1200" },
+        { value: "3000" },
+        { value: "12" },
+      ],
     },
   ],
 };
@@ -63,8 +70,8 @@ describe("OfficialGa4Provider", () => {
     });
 
     expect(envelope.payload.platformLabel).toBe(GA4_PLATFORM_LABEL);
-    expect(envelope.payload.rows).toHaveLength(2);
-    expect(envelope.payload.rows.find((row) => row.metricKey === "users")?.value).toBe(500);
+    expect(envelope.payload.rows).toHaveLength(6);
+    expect(envelope.payload.rows.find((row) => row.metricKey === "activeusers")?.value).toBe(500);
 
     const pipeline = createMetricPipelineStack();
     expect((await pipeline.metricPipeline.accept(envelope)).accepted).toBe(true);

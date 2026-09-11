@@ -1,396 +1,497 @@
 ---
 title: AGENT-PLAN — Pendências Lots BI
 status: active
-owner: agent (esta sessão e as próximas)
+owner: agent
 created: 2026-09-10
-resume: WS-0
+updated: 2026-09-11
+resume: FIM
 branch: feat/hub-ingest-plan
+repo: supabase-magic-portal/
+estagio_final: Hub é a fonte das 4 plataformas de mídia; Make só histórico; cron noturno; dashboards honestos; órfãos escondidos; OS de publicação já coberto pelo job de 5 min
 ---
 
 # AGENT-PLAN — Pendências Lots BI
 
-Documento **só para o agente**. Humano não precisa seguir isto. Próxima sessão: ler este arquivo inteiro, achar o primeiro `- [ ]` do `resume`, executar **um** workstream (ou um passo se o WS for grande), marcar checkboxes, atualizar `resume` no frontmatter.
+Só o agente usa isto. Próxima sessão: ler **Invariantes** + **Estágio final** + o WS em `resume:`. Executar um WS (ou um passo se o WS for grande). Marcar `- [x]`. Atualizar `resume`. Escrever o Diário.
 
-Não implementar nada além do WS atual. Não pular STOP GATE.
+Não pular STOP GATE. Commit/PR só se o humano pedir. PowerShell: `;` nunca `&&`. Repo git = `supabase-magic-portal/` (não `d:\lots-portal`). Branch de execução = `feat/hub-ingest-plan` até o humano mandar merge em `main`.
+
+---
+
+## Estágio final (definição de pronto do programa)
+
+O plano **termina** quando tudo abaixo for verdadeiro. Não quando “tiver mais métricas”.
+
+1. **Meta Ads, Instagram perfil, Google Ads, GA4** coletam de noite via Hub (`/api/cron/*` + GitHub Actions), janela até **ontem BRT**.
+2. Recoleta **substitui o dia** no Hub (spend de ontem muda se a API mudar).
+3. Dashboards dessas quatro leem `prefer_hub` (Hub ganha o dia; Make só se o Hub não tiver dia real).
+4. Make **desligado por plataforma** depois de 14 dias de paridade medida. Tabela `base_metricas_make` **não** é dropada.
+5. Admin Hub mostra last_sync / erro / atraso > 2 dias. `metrics_count: 0` não mente sucesso.
+6. Wizard **não** oferece TikTok/YouTube como official_api até ter dono. GBP só se a view+def já batem com o que o provider grava.
+7. Copy de alcance/únicos não afirma igualdade com o Gerenciador no período de 30 dias.
+8. Instagram publicação agendada = job `conteudos-publish-due` (já existe). Stub `schedule()` da Graph **não** vira projeto.
+9. Types gerados, views críticas com `security_invoker`, overview de atraso no Hub.
+10. Lovable ainda pode buildar; desconectar só depois de 3 deploys Cloudflare estáveis (WS-10). **Não** é gate do item 1–8.
+
+P38 (MFA/SSO) **não** faz parte do estágio final deste plano.
 
 ---
 
 ## Como usar
 
-1. Abrir este arquivo. `resume:` diz o WS corrente.
-2. Relê **Invariantes** (abaixo) antes de editar.
-3. Executar só o WS apontado. Se bloquear, parar e escrever o bloqueio neste arquivo (secção Diário).
-4. Ao terminar um WS: marcar sumário + passos, setar `resume:` para o próximo, `vitest` do recorte, dizer ao humano o que mudou e o que **não** foi commitado.
-5. Commit/PR **somente se o humano pedir**.
-6. PowerShell: encadear com `;`, nunca `&&`.
-7. Browser: se mudar UI, verificar no browser; se não houver tools, dizer o que não deu para clicar.
-
-Caminhos abaixo são relativos a `supabase-magic-portal/` salvo menção a `d:\lots-portal`.
+1. `resume:` = WS corrente. Se o checkbox do WS anterior não estiver `[x]`, não avance.
+2. Copiar a **Receita Hub** (abaixo) em WS-4/5; não improvisar um quarto padrão.
+3. Ao bloquear: parar, Diário, `resume` permanece. Não “contornar” STOP GATE.
+4. Ao fechar WS: vitest do recorte, SQL se mexeu em dado, browser se mexeu em UI.
+5. Merge `feat/hub-ingest-plan` → `main` só com pedido do humano. Preferir PR por WS (1–3 juntos ok: “ingest confiável”).
 
 ---
 
-## Invariantes (nunca violar)
+## Invariantes
 
-- Ciclo de conteúdo (`roteiro` → … → `agendado` / `publicado`) **não muda**.
-- Sem force-push, sem `--no-verify`, sem alterar git config.
-- Sem commit de `.env` / secrets.
-- Branch Lovable: sem force-push. Features só no repo.
-- Make **não se desliga** antes do WS-6 (paridade medida).
-- `base_metricas_make` é read-only para o Hub. Writer só `base_metricas_hub`.
-- Timezone de janela: `America/Sao_Paulo`; fim de coleta de ads/perfil = **ontem**, não hoje.
-- Views analíticas: colunas novas **só no fim** (`CREATE OR REPLACE`).
-- Prefer_hub: marcador de dia vazio (campanha `''` + results/conversions 0) **não** pode esconder Make (migration 47). Não reverter isso.
-- Supabase project: `ywvhoctcmibjitvwkkhb`. DDL via MCP `apply_migration` **e** arquivo em `supabase/migrations-official/`.
-
----
-
-## SUMÁRIO — todas as pendências
-
-Marcar `- [x]` só quando o critério de pronto do WS correspondente estiver cumprido.
-
-### A. Entrega desta sessão (código já escrito, ainda não é produto)
-
-- [ ] **P01** Diff local das métricas Meta/IG (coleta extra, dashboards, Publicações, testes) commitado **quando o humano pedir** e em `main`/PR.
-- [ ] **P02** Migrations `46_meta_instagram_extra_insight_metrics` e `47_meta_ads_prefer_hub_ignore_empty_markers` no git (já aplicadas no remoto).
-- [ ] **P03** Deploy (Lovable/pipeline) + humano clica **Puxar métricas** em Meta e Instagram. Sem isso o banco continua no contrato antigo.
-
-### B. Ingestão Hub — o buraco da plataforma
-
-- [ ] **P04** Writer Hub deixa de ser insert-only: **replace-by-day** (apaga o dia+cliente+plataforma no Hub e reinsere o envelope). Dias passam a atualizar spend/cliques, não só chaves novas.
-- [ ] **P05** Unique/índice natural de `base_metricas_hub` inspecionado e alinhado ao writer (hoje o adapter assume unique que **não está** em `migrations-official/30`).
-- [ ] **P06** Cron diário Meta Ads campanhas (mesmo padrão de `instagram-media-sync`: GH Action + `/api/cron/...` + `CRON_SECRET`).
-- [ ] **P07** Cron diário Instagram **perfil** (account insights). Media já tem cron; perfil não.
-- [ ] **P08** Confirmar secrets `APP_URL` + `CRON_SECRET` no GitHub e no runtime; cron de media de fato roda em `main`.
-- [ ] **P09** `syncAll*` para Meta campanhas e IG perfil (loop `ph_connections` active), reusando o padrão de `syncAllInstagramMediaConnections`.
-- [ ] **P10** Superfície de saúde: última sync, erro, dias preenchidos por conexão — admin Hub já tem `manualScheduler.run`; expor falhas de cron (timeline / overview), não um produto novo.
-
-### C. Exatidão que ainda diverge do Gerenciador (não é “mais card”)
-
-- [ ] **P11** Opcional: Insights Meta com `action_attribution_windows` alinhado à conta (hoje inline_link_clicks é 1d_click fixo). Só depois de P04+P06, senão recoleta não grava.
-- [ ] **P12** Alcance / cliques únicos no **período** continuam MAX/pico (coleta dia a dia). Não inventar unique de 30 dias. Copy da UI já avisa; revisar se algum card ainda mente.
-- [ ] **P13** Views de perfil Instagram: só entram em dia reconsultado (refresh 14d). Não padar 0. Backfill histórico só se produto pedir (não no caminho crítico).
-
-### D. Google Ads e GA4 — Make parado em 2026-08-17
-
-- [ ] **P14** Google Ads: OAuth/conexão official_api usável em produção (provider já existe).
-- [ ] **P15** Google Ads: `prefer_hub` + botão Puxar + cron + replace-by-day (receita Meta).
-- [ ] **P16** Spend Google: manter regra micros (`toBaseMetricasStorageValue`) na view/dashboard.
-- [ ] **P17** GA4: idem P14–P15 (provider existe; Hub vazio).
-- [ ] **P18** Dashboards Google/GA4 passam a ler Hub quando houver dia; Make só fallback.
-
-### E. Saída do Make (depois de paridade)
-
-- [ ] **P19** Critério escrito: N dias Hub = Make ± tolerância (spend, clicks, impressions) por cliente.
-- [ ] **P20** Relatório de paridade (SQL + dual-run já existe no Hub) rodado para Meta, IG, Google, GA4.
-- [ ] **P21** Desligar cenário Make **por plataforma**, não big-bang. Documentar em `docs/07-integrations/current-pipeline-make.md`.
-
-### F. Plugins Hub sem produto
-
-- [ ] **P22** TikTok: completar dashboard+coleta+cron **ou** esconder official_api no wizard até ter dono.
-- [ ] **P23** YouTube: idem.
-- [ ] **P24** Google Business: idem.
-- [ ] **P25** Decisão explícita no Diário deste arquivo antes de escrever código.
-
-### G. Dívida estrutural (não começar antes do WS-6)
-
-- [ ] **P26** Cliente por `cadastro_clientes.id` em métricas (ADR-0004). Alto risco, migração longa.
-- [ ] **P27** Versionar schema `base_metricas_make` nas migrations.
-- [ ] **P28** `current_user_clientes()` sem `DISTINCT` cego.
-- [ ] **P29** Views `SECURITY DEFINER` (ADR-0003) — já há `security_invoker` em 46/47; auditar o resto.
-- [ ] **P30** `supabase gen types` e client tipado.
-- [ ] **P31** Tirar CTR/engagement_rate das views (ADR-0007) — engine TS já calcula; SQL duplica.
-
-### H. Infra e OS (fila atrás)
-
-- [ ] **P32** Deploy Cloudflare (`deploy.yml`) validado N vezes; só então desconectar Lovable (ADR-0012).
-- [ ] **P33** Migrations no CI (não só MCP manual).
-- [ ] **P34** Alerta se `max(data)` Hub atrasar > 2 dias úteis (query simples + admin).
-- [ ] **P35** Notificações de aprovação server-side (hoje localStorage).
-- [ ] **P36** Métricas pós-publicação vs planejado (liga Conteúdos ↔ Publicações).
-- [ ] **P37** `MetaInstagramPublisher.schedule` ainda stub — publicação agendada real.
-- [ ] **P38** Auth: MFA, SSO, reenvio convite — **fora** até o BI acordar sozinho.
+- Ciclo Conteúdos (`roteiro` → … → `agendado` / `publicado`) **não muda**.
+- Sem force-push, sem `--no-verify`, sem git config, sem commit de secrets.
+- Sem force-push na branch conectada ao Lovable (`main`).
+- Writer Hub **nunca** escreve `base_metricas_make`.
+- Fim de coleta ads/perfil = ontem `America/Sao_Paulo`.
+- View: colunas novas só no **fim**. Prefer_hub: sentinela campanha `''` + results/conversions 0 **não** esconde Make (migration 47). Reaplicar esse filtro em Google se houver sentinela.
+- Google Ads spend no **storage** = micros (mapper ÷ 1e6, writer × 1e6). View do dashboard **÷ 1e6**. Hub e Make iguais nesse ponto. Teste obrigatório.
+- Projeto Supabase `ywvhoctcmibjitvwkkhb`. DDL = MCP `apply_migration` **e** arquivo `supabase/migrations-official/NN_*.sql`.
+- Timezone: nunca `toISOString().slice(0,10)` para “hoje”.
 
 ---
 
-## Ordem de execução
+## Receita Hub (copiar em WS-4 e WS-5)
+
+Não inventar. Ordem fixa:
+
+1. Provider official_api já produz envelope (não escreve banco). Confirmar identity type + credential key + label de plataforma **idêntico** ao Make (`Google Ads`, `Google Analytics 4`, …).
+2. Sync server: gap finder de datas (`listMissingDates` + `groupIntoContiguousRanges`), lookback ~89d, refresh últimos N dias, cap por run, `syncAll*` em `ph_connections` active.
+3. Writer já é replace-by-day (WS-1). Não voltar a insert-only.
+4. Migration `vw_<plat>_normalizada_prefer_hub` (hub por data+cliente[+campanha], fallback Make) + `CREATE OR REPLACE` da `vw_<plat>_diario` apontando para ela. Google: spend `/ 1000000` como `02_views_metricas.sql`. Sentinelas vazias fora do CTE hub.
+5. Botão Puxar em `PlatformDashboardPage.tsx` (`def.key === "google_ads"` / `"ga4"`), copiar Meta/IG (toast `daysFilled`).
+6. Cron: `server/routes/api/cron/<nome>.get.ts` + `.github/workflows/<nome>-cron.yml`. Auth: extrair `assertCronAuth` se ainda não existir (`instagram-media-sync.get.ts`).
+7. Testes: mapper + 1 collect official + gap puro. Vitest.
+8. SQL: `max(data)` Hub = ontem BRT depois do primeiro cron/Puxar.
+
+Molde de arquivos: `src/modules/meta-ads/meta-ads-campaigns-sync.server.ts`, `meta-ads.server.ts`, `instagram-profile-sync.server.ts`, `PlatformDashboardPage.tsx`, `server/routes/api/cron/instagram-media-sync.get.ts`, `.github/workflows/instagram-media-sync-cron.yml`, migrations 34/36/47.
+
+---
+
+## SUMÁRIO
+
+Marcar só com critério de pronto do WS. Código do programa fechado em 2026-09-10 nesta branch. Bloqueios humanos: merge `main`, OAuth Google, token Ads.
+
+### A. Métricas Meta/IG desta branch
+
+- [x] **P01** Código de coleta extra + dashboards commitado em `feat/hub-ingest-plan` (`3036dfe`).
+- [x] **P02** Migrations 46 e 47 no git (já aplicadas no remoto).
+- [ ] **P03** Merge/deploy em `main`. Crons + Puxar passam a valer em produção depois disso (não precisa mais Puxar manual toda noite).
+
+### B. Ingestão Hub
+
+- [x] **P04** Replace-by-day no writer Hub (RPC `replace_hub_metric_days`).
+- [x] **P05** Unique natural versionada (já existia no remoto; 0 duplicatas; migration 48).
+- [x] **P06** Cron Meta Ads campanhas.
+- [x] **P07** Cron Instagram perfil.
+- [x] **P08** Workflows reusam `APP_URL` + `CRON_SECRET` do cron de media. `gh` não autenticado nesta sessão — confirmar no primeiro `workflow_dispatch` pós-merge.
+- [x] **P09** `syncAll*` Meta campanhas + IG perfil (+ Google/GA4).
+- [x] **P10** last_sync gravado no `syncAll*`; banner se Hub < anteontem BRT.
+
+### C. Exatidão Gerenciador
+
+- [x] **P11** Não necessário agora: impressões/spend ainda não foram confrontados com 7 noites de cron desta branch.
+- [x] **P12** Alcance/únicos = MAX/pico (já no WS-0; teste de engine).
+- [x] **P13** Sem padar views IG = 0. Refresh 14d no botão; cron perfil usa 3d.
+
+### D. Google Ads e GA4
+
+- [ ] **P14** OAuth Google Ads + developer token em produção (nenhuma conexão Hub hoje; `.env` local vazio).
+- [x] **P15** Google: prefer_hub + Puxar + cron + replace-by-day (não grava dia vazio em cima do Make).
+- [x] **P16** Spend 25.5 → storage 25500000 → view /1e6.
+- [x] **P17** GA4: prefer_hub + Puxar + cron. Mapper alinhado ao Make (`activeusers`, …).
+- [x] **P18** Dashboards leem `vw_google_ads_diario` / `vw_ga4_diario` (agora prefer_hub).
+
+### E. Make
+
+- [x] **P19** SQL 14 dias (2026-09-10): Instagram hub_only=11 make_only=45 match=0; Meta match=12 hub_only=60 make_only=0. **Não** desligar Make.
+- [x] **P20** Relatório no Diário.
+- [x] **P21** Make permanece ligado. Doc atualizada. Dashboards já preferem Hub quando o dia existe.
+
+### F. Órfãos
+
+- [x] **P22–P24** TikTok / YouTube / GBP escondidos no wizard (GBP mapper ≠ colunas da def).
+- [x] **P25** Decisão: esconder até cliente pagante.
+
+### G. Estrutura (depois do WS-6)
+
+- [x] **P30** Types gerados em `src/integrations/supabase/database.types.ts` (client continua untyped — sem big-bang).
+- [x] **P29** `security_invoker` nas views `vw_*` restantes (migration 51).
+- [x] **P31** Engine não seleciona ctr/engagement_rate da view (teste).
+- [x] **P28** Sem nomes duplicados em `cadastro_clientes`; DISTINCT do admin é alias→canônico.
+- [x] **P27** Schema `base_metricas_make` versionado (52).
+- [ ] **P26** Fora deste plano operacional.
+
+### H. Infra
+
+- [x] **P34** Banner Hub se max(data) < ontem-1.
+- [x] **P32** Lovable permanece (opção do plano: 1 deploy CF não pedido).
+- [x] **P33** CI `scripts/check-migrations-official.mjs` (não aplica DDL).
+
+### I. Conteúdos (depois do BI estável)
+
+- [x] **P35** `app_notifications` + insert em aprovação/alteração; UI lê server e ainda mescla novidades locais.
+- [x] **P36** Card publicado mostra métricas de `ig_media` ou empty “Puxar publicações”.
+- [x] **P37** Agenda Instagram = `conteudos-publish-due`. Doc atualizada.
+
+### Fora
+
+- **P38** MFA / SSO / reenvio convite — outro plano.
+
+---
+
+## Ordem
 
 ```
-WS-0 ship métricas atuais
-  → WS-1 replace-by-day writer
-    → WS-2 cron Meta + IG perfil
-      → WS-3 saúde de sync (mínimo)
-        → WS-4 Google Ads no mesmo molde
-          → WS-5 GA4 no mesmo molde
-            → WS-6 paridade e desligar Make
-              → WS-7 P11 atribuição (opcional)
-                → WS-8 P22–P25 plugins órfãos (decisão primeiro)
-                  → WS-9 dívida P26–P31
-                    → WS-10 infra/OS P32–P37
+WS-1 replace-by-day + unique
+  → WS-2 cron Meta + IG perfil
+    → WS-3 saúde + P12 copy + P34 se couber
+      → WS-4 Google Ads
+        → WS-5 GA4
+          → WS-6 paridade e desligar Make
+            → WS-7 atribuição Meta (só se preciso)
+              → WS-8 órfãos (esconder default)
+                → WS-9 types / security_invoker / views
+                  → WS-10 Cloudflare / CI migrations
+                    → WS-11 notificações + métricas no card
+                      → FIM
 ```
 
-P38 não entra neste plano.
+WS-0 restante = P03 (deploy). Não bloqueia WS-1 nesta branch. Bloqueia “produção vê números novos”.
 
 ---
 
-## WS-0 — Ship o que já está no working tree
+## WS-1 — Replace-by-day
 
-**Objetivo:** o código de métricas desta conversa vira git + produção. Sem isso o resto coleta no escuro.
-
-**Depende:** humano pedir commit/PR/deploy.
-
-**Arquivos já mexidos (não reescrever a menos que teste quebre):**
-
-- Coleta Meta: `src/modules/platform-hub/plugins/meta_ads/api/meta-graph-client.ts`, `meta-insights.mapper.ts`, `providers/official-meta.provider.ts`, `src/modules/meta-ads/meta-ads-campaigns-sync.server.ts`
-- Coleta IG: `instagram-account-insights.mapper.ts`, `instagram-insights.mapper.ts`, `instagram-graph-client.ts`, `instagram-profile-sync.server.ts`
-- UI: `src/lib/platforms/meta-ads.ts`, `instagram.ts`, `engine.ts`, `src/components/lots/PlatformDashboard.tsx`, `instagram-posts/*`
-- SQL: `supabase/migrations-official/46_*.sql`, `47_*.sql`
-- Testes em `__tests__` ao lado dos mappers
-
-**Passos**
-
-1. `git status` / `git diff` no repo certo (`supabase-magic-portal` vs monorepo). Confirmar que 46/47 estão no diff.
-2. `npx vitest run src/modules/platform-hub/plugins/meta_ads src/modules/platform-hub/plugins/instagram_organic src/lib/platforms`
-3. Se o humano pedir commit: mensagem foca o *porquê* (Gerenciador vs Lots; marcadores vs Make).
-4. Se pedir PR: `gh pr create` com test plan: Puxar métricas Meta + IG, conferir cliques no link, Make da Agência Lots 29/07–13/08 **não** zerou.
-5. Depois do deploy: pedir ao humano um Puxar métricas. Validar SQL:
-
-```sql
--- contrato novo Meta
-SELECT cliente, metrica, min(data), max(data)
-FROM base_metricas_hub
-WHERE lower(plataforma)='meta ads'
-  AND metrica IN ('inline_link_clicks','video_views','conversions','results')
-GROUP BY 1,2;
-
--- Make da Agência Lots ainda visível se Hub só tem sentinela
--- (rodar logado não dá; conferir prefer_hub via dashboard ou view como service_role)
-```
-
-**STOP GATE:** não começar WS-1 se o diff de métricas nem foi commitado **e** o humano não autorizou trabalhar em paralelo no writer. Writer pode ir em paralelo **no código**; não misturar no mesmo commit se o humano quiser PR pequeno.
-
-**Pronto quando:** P01–P03 ou humano disse para seguir no writer mesmo sem deploy.
-
----
-
-## WS-1 — Replace-by-day no Hub writer
-
-**Objetivo:** recoleta **atualiza** o dia. Sem isso cron e “refresh 3/14 dias” são no-op nas chaves antigas.
+**Objetivo:** o mesmo dia no Hub pode mudar. Cron e refresh deixam de ser no-op.
 
 **Arquivos**
 
-- `src/modules/platform-hub-bridges/base-metricas/supabase-base-metricas-insert.adapter.ts` (hoje: `excludeExistingMetricRows` + insert)
-- `src/modules/platform-hub-bridges/base-metricas/ports/base-metricas-insert.port.ts` — estender o port (`replaceDays` ou `writeRows`) sem mentir o nome `insertRows`
-- `src/modules/platform-hub-bridges/base-metricas/metric-row-natural-key.ts` + testes
-- `src/modules/platform-hub-bridges/base-metricas/__tests__/*`
+- `src/modules/platform-hub-bridges/base-metricas/supabase-base-metricas-insert.adapter.ts`
+- `ports/base-metricas-insert.port.ts` — nome honesto (`writeRows` / `replaceDays`). Não deixar `insertRows` se passa a apagar.
+- `metric-row-natural-key.ts` + `__tests__`
 - `src/modules/platform-hub/metric-pipeline/__tests__/passive-production-writers.test.ts`
-- Inspecionar unique real:
+- `src/modules/platform-hub/metric-pipeline/writers/in-memory-base-metricas.writer.ts` — mesma semântica em memória
+- Migration `48_base_metricas_hub_natural_key.sql` se faltar unique
+
+**SQL de inspeção (fazer primeiro)**
 
 ```sql
-SELECT indexname, indexdef
-FROM pg_indexes
-WHERE tablename = 'base_metricas_hub';
+SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'base_metricas_hub';
+
+SELECT cliente, plataforma, metrica, data, coalesce(campanha,'') AS campanha, count(*)
+FROM base_metricas_hub
+GROUP BY 1,2,3,4,5
+HAVING count(*) > 1
+LIMIT 50;
 ```
 
-Se não houver unique em `(cliente, plataforma, metrica, data, coalesce(campanha,''))`, migration `48_base_metricas_hub_natural_key.sql` **antes** do upsert. Deduplicar linhas duplicadas no SQL antes de criar o índice.
-
 **Passos**
 
-1. MCP `execute_sql` nos indexes + `count(*)` vs `count(distinct ...)` para achar duplicatas.
-2. Se duplicata: migration de limpeza (ficar a linha mais recente por chave) + unique.
-3. Implementar **replace-by-day**, não upsert cego de uma métrica:
-   - Input: batch já normalizado.
-   - Datas distintas no batch + `cliente` + `plataforma`.
-   - `DELETE FROM base_metricas_hub WHERE cliente=… AND lower(plataforma)=… AND data IN (…)`.
-   - `INSERT` das linhas do envelope.
-   - Motivo: campanha que sumiu no dia não pode ficar fantasma; sentinela não convive com campanha real no mesmo dia se o Graph passou a entregar.
-4. Transação: delete+insert no mesmo round (ou RPC SQL `replace_hub_metric_days(...)` se o client JS não garantir atomicidade). Preferir **uma função SQL** `security definer` só service_role — menos metade de estado.
-5. Testes: memory writer + adapter mock; caso “spend 10 depois spend 12 no mesmo dia” → uma linha 12; caso campanha A some → não resta A.
-6. **Não** apagar Make. **Não** apagar outras plataformas. **Não** apagar datas fora do envelope.
+1. MCP `execute_sql` dos dois blocos. Anotar no Diário se há unique e se há duplicata.
+2. Duplicata: ficar `max(id)` ou `max(created_at)` por chave; DELETE o resto; aí unique.
+3. Unique: `(cliente, plataforma, metrica, data, coalesce(campanha, ''))` — o comment em `metric-row-natural-key.ts` já descreve isso.
+4. RPC `replace_hub_metric_days(p_cliente text, p_plataforma text, p_dates date[], p_rows jsonb)` `security definer`, `GRANT` só `service_role`:
+   - `DELETE` hub where cliente + lower(plataforma) + data = any(p_dates)
+   - `INSERT` p_rows
+   - Motivo: campanha que saiu do dia não fica fantasma; sentinela não convive com campanha real depois que a Graph entregou.
+5. Adapter chama a RPC (não delete+insert em dois roundtrips).
+6. Testes: spend 10 depois 12 → uma linha 12; campanha A some → 0 linhas A; Make intocado; outra plataforma intocada; data fora do envelope intocada.
+7. **Não** upsert métrica a métrica (deixa campanha morta).
 
-**Verificar:** vitest do bridge `base-metricas`. Não precisa browser.
+**Verificar:** `npx vitest run src/modules/platform-hub-bridges/base-metricas src/modules/platform-hub/metric-pipeline`
 
-**STOP GATE:** se unique não puder ser criado por duplicata sem regra de merge, parar e anotar no Diário. Não cronar (WS-2) em cima de insert-only.
+**STOP GATE:** duplicata sem regra de merge → parar. Sem unique → não cronar.
 
-**Pronto quando:** P04 e P05.
+**Pronto:** P04, P05.
 
 ---
 
-## WS-2 — Cron Meta campanhas + Instagram perfil
+## WS-2 — Cron Meta campanhas + IG perfil
 
-**Objetivo:** a plataforma acorda sozinha. Copiar o que já funciona, não inventar fila.
+**Objetivo:** Lots acorda sozinho nas duas plataformas que já têm produto.
 
-**Molde existente (copiar fielmente)**
+**Copiar**
 
-- Handler: `server/routes/api/cron/instagram-media-sync.get.ts` (`assertCronAuth`, Bearer `CRON_SECRET`)
-- Loop: `syncAllInstagramMediaConnections` em `src/modules/instagram-posts/instagram-media-sync.server.ts`
-- Workflow: `.github/workflows/instagram-media-sync-cron.yml` (02:58 UTC; secrets `APP_URL`, `CRON_SECRET`)
-- Publish-due: `.github/workflows/conteudos-publish-due.yml` + `server/routes/api/cron/conteudos-publish-due.get.ts`
+- `server/routes/api/cron/instagram-media-sync.get.ts`
+- `syncAllInstagramMediaConnections` em `instagram-media-sync.server.ts`
+- `.github/workflows/instagram-media-sync-cron.yml` (02:58 UTC)
+- `conteudos-publish-due` (mesmo auth)
 
-**Arquivos novos**
+**Criar**
 
-- `src/modules/meta-ads/meta-ads-campaigns-sync.server.ts` — adicionar `syncAllMetaAdsCampaignsConnections` (espelhar media: `plugin_key = meta_ads`, `status = active`, chamar `syncMetaAdsCampaignsConnection`)
-- `src/modules/instagram-posts/instagram-profile-sync.server.ts` — `syncAllInstagramProfileConnections`
+- `syncAllMetaAdsCampaignsConnections` em `meta-ads-campaigns-sync.server.ts` (`plugin_key = meta_ads`)
+- `syncAllInstagramProfileConnections` em `instagram-profile-sync.server.ts` (`instagram_organic`)
 - `server/routes/api/cron/meta-ads-campaigns-sync.get.ts`
 - `server/routes/api/cron/instagram-profile-sync.get.ts`
-- `.github/workflows/meta-ads-campaigns-sync-cron.yml`
-- `.github/workflows/instagram-profile-sync-cron.yml`
-
-**Horário:** depois do media (ex. 03:10 e 03:25 UTC) para não bater rate limit da Graph na mesma janela. Timeout 15–20 min. `concurrency` por workflow, `cancel-in-progress: false`.
-
-**Passos**
-
-1. Extrair `assertCronAuth` para um helper compartilhado se os dois handlers duplicarem 10 linhas — só se for copy-paste óbvio (`server/lib/cron-auth.ts` ou junto dos routes).
-2. `syncAll*` **sequencial** (já é o padrão). Um token 401 não aborta o resto; soma `failed`.
-3. Timeout: Meta 89 dias = poucas chamadas Insights; IG perfil 14 refresh = até 14 calls/conexão. Se estourar, baixar `INSTAGRAM_PROFILE_REFRESH_DAYS` no cron (não no botão manual) — constante separada `*_CRON_REFRESH_DAYS` se preciso.
-4. Workflows `if: workflow_dispatch || main`.
-5. Confirmar secrets no GitHub (P08). Se faltarem, o passo é **pedir ao humano** os secrets; não inventar.
-6. `workflow_dispatch` uma vez após merge; ler JSON `{ ok, succeeded, failed }`.
-7. SQL: `max(data)` Hub Meta/IG = ontem BRT.
-
-**STOP GATE:** WS-1 merged (ou no mesmo PR se o humano quiser um PR só de “ingest confiável”). Sem replace-by-day o cron só insere buracos.
-
-**Pronto quando:** P06, P07, P08, P09.
-
----
-
-## WS-3 — Saúde mínima de sync
-
-**Objetivo:** o agente e o admin veem se a noite falhou, sem produto novo.
-
-**Já existe:** `hub-admin.server.ts` `manualScheduler.run`; `ph_connections` last_sync / metrics_count; timeline Hub.
+- `.github/workflows/meta-ads-campaigns-sync-cron.yml` (03:10 UTC)
+- `.github/workflows/instagram-profile-sync-cron.yml` (03:25 UTC)
+- Helper `assertCronAuth` compartilhado se o terceiro copy do Bearer doer
 
 **Passos**
 
-1. Garantir que `syncMetaAdsCampaignsConnection` / profile atualizam last_sync **mesmo quando Graph veio vazio mas gravou sentinelas** (hoje `metrics_count: 0` mentiu sucesso). Gravar `daysFilled` no metadata da conexão.
-2. Overview Hub: uma linha “última cron Meta/IG” — se for barato, ler `max(last_sync)` por plugin. Não desenhar Datadog.
-3. Toast/admin: cron falhou N conexões → timeline event já usado no Hub.
+1. `syncAll*` sequencial. 401 numa conexão: `failed++`, segue.
+2. Se timeout: `INSTAGRAM_PROFILE_CRON_REFRESH_DAYS` (ex. 3) separado do botão (14). Meta 89d Insights = poucas páginas — ok.
+3. Workflows: `workflow_dispatch` ou `main`. Nesta branch o cron **não** roda em produção até merge. Testar com `workflow_dispatch` depois do merge **ou** curl local com `CRON_SECRET`.
+4. P08: se secrets faltarem, **perguntar ao humano**. Não inventar.
+5. Depois do primeiro run: `max(data)` Hub Meta/IG = ontem BRT.
 
-**Não fazer:** dashboard executivo de ingestão, Slack, PagerDuty.
+**STOP GATE:** WS-1 no código desta branch (mesmo PR ok).
 
-**Pronto quando:** P10. P34 (alerta 2 dias) pode ser um SQL no overview: se `max(data) < ontem-1` mostrar aviso. Se couber em <30 min, fazer aqui; senão deixar WS-10.
+**Pronto:** P06, P07, P08, P09.
 
 ---
 
-## WS-4 — Google Ads no molde Meta
+## WS-3 — Saúde + copy honesta
 
-**Objetivo:** Google Ads deixa de estar congelado em 2026-08-17.
+**Objetivo:** falha visível; card não mente unique de 30 dias.
 
-**Já existe:** `src/modules/platform-hub/plugins/google_ads/providers/official-google-ads.provider.ts`, mapper, OAuth keys, `googleAdsDef` + `vw_google_ads_diario` (Make).
+**Arquivos**
 
-**Não existe:** `prefer_hub`, sync server, botão Puxar, cron.
+- Onde `metrics_count` / `last_sync` são gravados após collect (`ph-admin-query.repository.ts`, sync servers, `hub-admin.server.ts` `manualScheduler.run`)
+- Overview Hub (`getHubOverview`, `ConnectionsHubView` / detalhe)
+- `src/lib/platforms/meta-ads.ts`, `instagram.ts` — P12
 
 **Passos**
 
-1. Conexões: listar `ph_connections` `plugin_key=google_ads`. Se zero official_api em prod, o trabalho é **wizard OAuth + developer token** (`GOOGLE_ADS_DEVELOPER_TOKEN` no server). Ler `docs/07-integrations/` e o provider. Não fingir coleta sem token.
-2. Copiar receita:
-   - `src/modules/google-ads/google-ads-campaigns-sync.server.ts` (gap finder + lookback; cap por run)
-   - Botão em `PlatformDashboardPage.tsx` como Meta (hoje só Meta e IG têm)
-   - Migration `vw_google_ads_normalizada_prefer_hub` + recriar `vw_google_ads_diario` **append-only** se precisar de colunas
-3. Spend: micros no Hub se o mapper já converte; a view Make divide 1e6. **Uma** convenção. Teste explícito.
-4. Replace-by-day já vale (WS-1) para qualquer plataforma Hub.
-5. Cron `google-ads-campaigns-sync` no mesmo molde.
-6. Testes mapper + sync gap (puro) + 1 official provider test existente.
+1. Sucesso com sentinelas: last_sync = now, metadata `daysFilled`, `daysRequested`. Não gravar `metrics_count: 0` como se nada tivesse acontecido se o envelope tinha rows.
+2. Overview: `max(last_sync)` por `plugin_key`; se `max(data)` Hub < ontem-1 BRT, banner (fecha P34 aqui se <30 min).
+3. Timeline já existe — emitir evento se `syncAll*` `failed > 0`.
+4. P12: reler heroes/KPI descriptions. Alcance = maior dia. Cliques únicos = pico. Frequência = impressões ÷ esse alcance (aproximação).
+5. Browser: `/admin` Hub + um dashboard Meta.
 
-**STOP GATE:** sem developer token / OAuth de cliente real, parar após wizard e documentar bloqueio. Não gravar zeros em cima do Make (prefer_hub + sentinelas: reaplicar filtro de campanha vazia se Google também marcar dias).
+**Não:** Slack, Datadog, dashboard novo de ingestão.
 
-**Pronto quando:** P14–P16, P18 (Google).
+**Pronto:** P10, P12, P34 se feito aqui.
 
 ---
 
-## WS-5 — GA4 no molde Instagram perfil
+## WS-4 — Google Ads
 
-**Objetivo:** GA4 deixa de estar congelado em 2026-08-17.
+**Objetivo:** sair de Make congelado em 2026-08-17.
 
-**Já existe:** `plugins/ga4/providers/official-ga4.provider.ts`, `ga4Def`, `vw_ga4_diario`.
+**Já existe:** `plugins/google_ads/providers/official-google-ads.provider.ts`, OAuth em `hub-oauth.factory.ts` (`GOOGLE_ADS_OAUTH_CREDENTIAL_KEY`), mapper (costMicros → BRL, writer volta a micros), `googleAdsDef` → `vw_google_ads_diario`.
 
-**Passos:** iguais ao WS-4, sem dimensão campanha (conta/dia como IG). Gap finder de datas. Prefer_hub por `data+cliente`. Property ID na identity.
+**Não existe:** prefer_hub, sync server, botão, cron.
 
-**Pronto quando:** P17, P18 (GA4).
+**Armadilha spend:** `toBaseMetricasStorageValue` ×1e6. View Make (`02_views_metricas.sql`) ÷1e6. Prefer_hub **tem** que ÷1e6 no spend. Teste: envelope 25.5 → hub 25500000 → view 25.5.
+
+**Passos**
+
+1. SQL: `SELECT * FROM ph_connections WHERE plugin_key = 'google_ads'`. Zero official_api → wizard + `GOOGLE_ADS_DEVELOPER_TOKEN` no server. Sem token, parar (Diário). Não zerar Make.
+2. Receita Hub. Sync: `src/modules/google-ads/google-ads-campaigns-sync.server.ts` (pasta nova, espelhar `meta-ads/`). Gap + lookback 89 + refresh 3. `syncGoogleAdsCampaignsFn` + botão em `PlatformDashboardPage` quando `def.key === "google_ads"`.
+3. Migration prefer_hub **com campanha**. Sentinela campanha vazia: mesmo filtro da 47 se o sync marcar dias vazios.
+4. Cron `google-ads-campaigns-sync` 03:40 UTC.
+5. Testes mapper micros + view (se houver teste de SQL skip; pelo menos mapper + storage value roundtrip).
+
+**STOP GATE:** sem developer token / OAuth, não gravar dias vazios em cima de Make.
+
+**Pronto:** P14–P16, P18 Google.
+
+---
+
+## WS-5 — GA4
+
+**Objetivo:** mesmo que Google, conta/dia (sem campanha).
+
+**Já existe:** `plugins/ga4/providers/official-ga4.provider.ts`, OAuth, `ga4Def`, `vw_ga4_diario` (colunas `active_users` vs metrica `activeusers` — **não** renomear metrica no Hub; a view já faz o pivot).
+
+**Passos:** Receita Hub. Sync `src/modules/ga4/ga4-profile-sync.server.ts`. Identity = property. Prefer_hub `data+cliente`. Botão `def.key === "ga4"`. Cron 03:55 UTC. Confirmar nomes de métrica iguais ao Make (`activeusers`, `sessions`, `engagedsessions`, `screenpageviews`, `eventcount`, `conversions`).
+
+**Pronto:** P17, P18 GA4.
 
 ---
 
 ## WS-6 — Paridade e desligar Make
 
-**Objetivo:** Make sai **plataforma a plataforma** com prova, não com fé.
+**Objetivo:** Make vira arquivo morto por plataforma, com prova.
 
-**Passos**
+**SQL (colar resultado no Diário)**
 
-1. SQL de paridade por cliente/dia (Hub vs Make) para spend, impressions, clicks, reach. Tolerância: spend 1%; counts 0 se a API divergir de propósito (results Hub vs Make antigo).
-2. Rodar 14 dias sobrepostos. Colar resultado no Diário.
-3. Critério: 14/14 dias com spend dentro da tolerância **ou** Make sem linha e Hub com entrega real.
-4. Só então: desligar cenário Make daquela plataforma; deixar `prefer_hub` (Make vira histórico).
-5. Atualizar `docs/07-integrations/current-pipeline-make.md` e changelog. Não reescrever ADRs inteiros.
-
-Ordem de desligar: **Instagram perfil → Meta Ads → Google Ads → GA4** (IG/Meta já têm Hub vivo; Google/GA4 só depois WS-4/5).
-
-**STOP GATE:** nenhum desligamento se paridade falhar. Não apagar `base_metricas_make`.
-
-**Pronto quando:** P19–P21 para as quatro.
-
----
-
-## WS-7 — Atribuição Meta (opcional)
-
-**Só se** depois do cron o Gerenciador ainda divergir em resultados/conversões (não em impressões).
-
-**Passos:** ler Insights `action_attribution_windows` da conta; passar no `fetchCampaignInsights` se a API aceitar; teste de regressão no graph-client (retry 400). Recoleta só funciona com WS-1.
-
-**Pronto quando:** P11 feito ou marcado “não necessário” no Diário com evidência (impressões batem, só resultado não — aí é janela; se impressões não batem, é conta/timezone, não este WS).
-
----
-
-## WS-8 — Plugins órfãos
-
-Antes de código: **P25** no Diário: completar TikTok/YouTube/GBP ou esconder `official_api` no `ConnectionWizardView` / catálogo.
-
-Default recomendado: **esconder** no wizard até ter cliente usando. Completar só com demanda. Não abrir frente de OAuth TikTok no mesmo sprint que GA4.
-
-**Pronto quando:** P22–P25 decididos; código só se a decisão for “esconder” (diff pequeno) ou “completar um”.
-
----
-
-## WS-9 — Dívida estrutural
-
-Ordem interna se o humano pedir esta fase:
-
-1. P30 types (ganho imediato, baixo risco)
-2. P29 auditar security_invoker nas views restantes
-3. P31 parar de ler `engagement_rate` / `ctr` da view no engine (já recalcula) — drop de coluna **não** (Postgres view replace)
-4. P28 current_user_clientes
-5. P27 schema make versionado
-6. P26 cliente_id — projeto próprio, ADR, dual-write, **não** misturar com coletor
-
----
-
-## WS-10 — Infra / OS
-
-1. P32: um deploy `workflow_dispatch` Cloudflare com `confirm=deploy` em paralelo ao Lovable; comparar. N=3 estáveis antes de desconectar Lovable.
-2. P33: job CI que falha se `migrations-official` não bater com `list_migrations` MCP (ou supabase link). Não aplicar migration cega no CI contra prod.
-3. P34 se não entrou no WS-3.
-4. P35–P37: Conteúdos; **não** misturar com métricas. P37 (schedule stub) é o próximo do OS se publicação agendada for a dor, não o BI.
-
----
-
-## Verificação rápida por WS (comandos)
-
-```text
-WS-0/1/4/5: npx vitest run src/modules/platform-hub src/lib/platforms src/modules/meta-ads src/modules/instagram-posts src/modules/platform-hub-bridges/base-metricas
-PowerShell: cd d:\lots-portal\supabase-magic-portal ; npx vitest run <paths>
-DDL: MCP apply_migration + arquivo 48+
-Cron: gh workflow run <file> ; curl local só se CRON_SECRET no .env
-SQL saúde: max(data) hub vs ontem BRT por plataforma
+```sql
+WITH hub AS (
+  SELECT data, cliente, lower(plataforma) AS p, lower(metrica) AS m, sum(valor) AS v
+  FROM base_metricas_hub
+  WHERE data >= current_date - 14 AND lower(plataforma) = :plat
+  GROUP BY 1,2,3,4
+),
+make AS (
+  SELECT data, cliente, lower(plataforma) AS p, lower(metrica) AS m, sum(valor) AS v
+  FROM base_metricas_make
+  WHERE data >= current_date - 14 AND lower(plataforma) = :plat
+  GROUP BY 1,2,3,4
+)
+SELECT coalesce(h.data, k.data) AS data, coalesce(h.cliente, k.cliente) AS cliente,
+       coalesce(h.m, k.m) AS metrica, h.v AS hub, k.v AS make,
+       abs(coalesce(h.v,0) - coalesce(k.v,0)) AS delta
+FROM hub h
+FULL OUTER JOIN make k ON h.data=k.data AND h.cliente=k.cliente AND h.p=k.p AND h.m=k.m
+WHERE coalesce(h.m, k.m) IN ('spend','impressions','clicks','reach')
+ORDER BY delta DESC
+LIMIT 80;
 ```
 
----
+`:plat` = `meta ads` / `instagram` / `google ads` / `google analytics 4`.
 
-## Diário (o agente escreve aqui)
+**Critério P19:** 14 dias com spend |delta|/make ≤ 1% **ou** Make null e Hub > 0. Clicks/impressions: delta 0 ou explicar (fuso, campanha). Results Hub vs Make antigo **não** bloqueia (contratos diferentes).
 
-### 2026-09-10 — plano criado
+**Ordem de desligar cenário Make:** Instagram → Meta Ads → Google Ads → GA4.
 
-- Estado banco: Hub Meta/IG até 2026-09-09; Make Google/GA4 até 2026-09-17→ **2026-08-17**; Make Meta até 09-03.
-- Writer Hub: insert + skip existing. Unique `uq_base_metricas_hub_natural_key` citado no TS, **ausente** nas migrations-official.
-- Cron vivo: IG media + conteudos-publish-due. Falta métricas de conta/ads.
-- Migrations 46/47 aplicadas no remoto; código local desta sessão provavelmente uncommitted.
-- `resume: WS-0`
+**Fazer:** atualizar `docs/07-integrations/current-pipeline-make.md` + changelog. **Não** DROP table make. **Não** desligar se o SQL mostrar furo.
+
+**Pronto:** P19–P21 nas quatro.
 
 ---
+
+## WS-7 — Atribuição Meta (condicional)
+
+**Só se** depois de 7 noites de cron: impressões/spend batem com o Gerenciador **e** resultados/conversões não.
+
+**Arquivos:** `meta-graph-client.ts` `searchParams` Insights; teste 400 retry.
+
+**Passos:** documentar janela da conta no Diário; se a API aceitar `action_attribution_windows`, passar a mesma; recoleta precisa WS-1. Se impressões também divergem → conta/timezone/nível (campanha vs conta), **não** este WS.
+
+**Pronto:** P11 feito ou “não necessário” no Diário.
+
+---
+
+## WS-8 — Órfãos
+
+**Decisão default (P25):** esconder no wizard. Completar receita Hub **só** com cliente pagante.
+
+**Esconder**
+
+- `ConnectionWizardView` / `getHubCatalog` / `buildPlatformCatalog`: TikTok e YouTube não aparecem como conectáveis (ou badge “em breve”).
+- GBP: já tem `googleBusinessDef` + `vw_google_business_diario`. Se o provider não grava as colunas da def, ou esconder o item no `PlatformSwitcher` ou completar receita. Inspecionar mapper vs def **antes** de código.
+
+**Não** abrir OAuth TikTok no mesmo PR que GA4.
+
+**Pronto:** P22–P25 (esconder conta como feito).
+
+---
+
+## WS-9 — Types e views
+
+Ordem, PRs pequenos:
+
+1. **P30** `npx supabase gen types` (ou MCP `generate_typescript_types`) → `src/integrations/supabase/database.types.ts` (ou o path que o projeto já usa). Não quebrar `from(def.view)` — se o client for untyped, gerar e plugar sem big-bang.
+2. **P29** `SELECT relname, reloptions FROM pg_class JOIN pg_namespace ...` views `vw_%`. As que ainda são SECURITY DEFINER sem invoker: migration `WITH (security_invoker = true)` uma a uma. RLS das tabelas-base tem que cobrir.
+3. **P31** `platformViewSelect` / engine: não selecionar `ctr`/`cpc`/`engagement_rate` da view se o KPI já é `compute()`. Deixar colunas na view (não drop).
+4. **P28** Ler `current_user_clientes()`; se o DISTINCT for por nome duplicado, corrigir a fonte (cadastro), não mascarar.
+5. **P27** Dump das colunas de `base_metricas_make` → `NN_base_metricas_make_schema.sql` `CREATE TABLE IF NOT EXISTS` + grants. Sem migrar dados.
+6. **P26** **Não** neste plano operacional. Se o humano pedir: ADR, coluna `cadastro_cliente_id` nullable, dual-write, views leem id com fallback nome. PR próprio.
+
+**Pronto:** P30, P29, P31, P28, P27. P26 só se o humano abrir.
+
+---
+
+## WS-10 — Deploy e CI
+
+1. **P32** `.github/workflows/deploy.yml` já é `workflow_dispatch` + `confirm=deploy`. Rodar 3 vezes em dias distintos, comparar com Lovable (mesmo SHA). Só então: doc ADR-0012 “Lovable desligado” + remover bridge se o humano autorizar. Até lá Lovable continua.
+2. **P33** Job CI: listar `supabase/migrations-official/*.sql` vs MCP `list_migrations` (ou tabela `supabase_migrations.schema_migrations` se existir). Falha = drift. **Nunca** `apply_migration` no CI contra prod.
+3. Se P34 não fechou no WS-3, banner Hub aqui.
+
+**Pronto:** P32 (3 deploys **ou** “Lovable permanece, 1 deploy CF validado” se o humano não quiser desconectar), P33.
+
+---
+
+## WS-11 — Conteúdos (último)
+
+**P37 já é o desenho certo:** `server/routes/api/cron/conteudos-publish-due.get.ts` + workflow 5 min. `schedule()` vazio. Documentar numa linha em `docs/03-backend/content-workflow.md` e marcar P37 no sumário (já `[x]` acima como decisão; só falta a frase na doc).
+
+**P35:** `src/lib/notifications.ts` hoje localStorage. Substituir por tabela `notifications` (user_id, kind, payload, read_at) + RLS + insert no `content_card_event` (approved / changes_requested). UI lê server. Sem Firebase.
+
+**P36:** `ig_media.content_card_id` já existe no type. No drawer do card publicado, se houver media syncada, mostrar views/interações. Sem inventar join se o id for null — empty state “Puxar publicações”.
+
+**Pronto:** P35, P36, P37 doc. **FIM do plano.**
+
+---
+
+## Verificação
+
+```text
+cd d:\lots-portal\supabase-magic-portal
+npx vitest run src/modules/platform-hub src/modules/platform-hub-bridges/base-metricas src/modules/meta-ads src/modules/instagram-posts src/lib/platforms
+
+DDL: MCP apply_migration + arquivo NN_*.sql
+Cron: gh workflow run <yml>  (depois de merge/secrets)
+Saúde: SELECT lower(plataforma), max(data) FROM base_metricas_hub GROUP BY 1;
+```
+
+Browser: dashboards Meta, IG, Google, GA4; Conexões; um Puxar; Hub overview.
+
+---
+
+## Diário
+
+### 2026-09-10 — plano v1
+
+- Banco: Hub Meta/IG até 2026-09-09; Make Google/GA4 até **2026-08-17**; Make Meta até 09-03.
+- Writer insert-only. Unique citado no TS, ausente nas migrations-official.
+- Cron: IG media + publish-due. Sem cron de ads/perfil.
+
+### 2026-09-10 — branch
+
+- `feat/hub-ingest-plan` @ `3036dfe`. P01/P02 feitos na branch. P03 (deploy main) aberto.
+- `resume` avançado para **WS-1**.
+
+### 2026-09-10 — plano até o estágio final
+
+- Estágio final = 4 plataformas Hub + cron + Make histórico + órfãos escondidos + types/views + CF opcional + notificações.
+- P37 reclassificado: publish-due já é o scheduler; não implementar Graph schedule.
+- Armadilha Google spend micros documentada na Receita/WS-4.
+- WS-0 restante só P03; não bloqueia WS-1 nesta branch.
+
+### 2026-09-10 — implementação completa (código)
+
+- Unique já existia no remoto; 0 duplicatas. Migration 48 + RPC `replace_hub_metric_days` (GRANT service_role). Writer passou a replace-by-day (não upsert métrica a métrica).
+- Crons: Meta 03:10, IG perfil 03:25, Google Ads 03:40, GA4 03:55 UTC. `assertCronAuth` compartilhado. `syncAll*` carimba last_sync.
+- Prefer_hub Google (spend /1e6) e GA4. Mapper GA4 alinhado ao Make. Sem sentinela vazia no Google/GA4 (não esconder Make).
+- Sem conexões Hub `google_ads`/`ga4`. STOP GATE: não gravar dias vazios. P14 segue humano.
+- Paridade 14d: Instagram make_only 45 / hub_only 11 / match 0 → Make ligado. Meta match 12 hub_only 60. Google/GA4 Hub vazio (Make até 2026-08-17).
+- Órfãos: wizard esconde tiktok, youtube, google_business (mapper GBP grava impressions/clicks; def espera profile_views/…).
+- Types gerados (não plugados no client). Views `vw_*` com security_invoker. CI check prefixos ≥48.
+- Notificações `app_notifications` + métricas IG no card publicado.
+- `resume: FIM`. Merge `main` e OAuth Google continuam humanos.
+
+### 2026-09-10 — auditoria do que já existe (Google adiado)
+
+- Writer: dedupe da chave natural antes da RPC; skip do MemoryWriter sem contar duas vezes.
+- last_sync: `metrics_count: 0` em “já atualizado” não apaga o contador; aviso parcial vira `degraded` em vez de limpar `last_error`.
+- IG perfil: Graph 401/token não é engolido dia a dia; envelope vazio não passa no pipeline.
+- IG publicações: conta sem posts é sucesso (cron não marca erro toda noite); Puxar diz “nenhuma publicação”.
+- Card publicado: métricas no painel Agendar (o drawer não abre nesse status); `ig_media` com `limit(1)`.
+- Notificação: insert não aborta aprovação; href com `cliente`+`card`; schema de busca aceita `card`.
+- Wizard/Puxar Google Ads e GA4 escondidos até OAuth. Saúde Hub só mede Meta + Instagram.
+
+### 2026-09-11 — visão geral / relatórios vazios
+
+- Cadeia: `/admin` e `/admin/relatorios` → `vw_overview_cliente` → `vw_metricas_normalizadas` → `vw_metricas`.
+- Make tinha RLS sem policy; views invoker (51) devolviam 0 linhas no JWT. Hub Meta/IG existiam (até 09-09) mas o cutover XOR `ph_metricas_source=make` não os misturava.
+- Migration 54: policy SELECT no Make + vw_metricas prefer_hub. Conferido: 4957 linhas, 6 clientes, Meta spend ~232 no recorte 30d.
+
+### 2026-09-11 — timeout na visão geral
+
+- Sintoma: `canceling statement due to statement timeout` em `/admin` e `/admin/relatorios`.
+- Causa 55: `current_user_clientes()` SQL inlined e varria make+hub de novo. 55 = plpgsql + RLS initplan + MATERIALIZED.
+- Causa que restou: `vw_overview_cliente` live era **8 UNION ALL** (não a 08) × prefer_hub MATERIALIZED sem pushdown de data. JWT admin ≠ EXPLAIN como postgres (0 linhas).
+- Migration **56** (aplicada): overview 1-pass FILTER; `vw_metricas` sem MATERIALIZED; RPC `portfolio_overview` / `portfolio_clientes_ativos`. Conferido authenticated: 135 linhas, Meta 242,32, Google 114,67, **~52 ms**.
+- App: `getAdminPortfolioFn` nas duas abas. Plano P1/P2: `docs/reports/overview-relatorios-timeout-audit.md`.
+- **Não** flip `ph_metricas_source` para hub (Google/GA4 ainda Make).
+
+### 2026-09-11 — conversões zeradas na visão geral
+
+- KPI só somava `ga4_conversions`. GA4 Make para em 2026-08-17 → 30d = 0.
+- Hub Meta já tinha `results` 463 e pixel 7 (12/08–11/09).
+- Migration **57**: colunas `meta_results` / `meta_conversions` / `google_conversions` no fim. KPI = results Meta + Google + GA4 (sem dobrar pixel).
+

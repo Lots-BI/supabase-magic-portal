@@ -86,6 +86,8 @@ async function findInstagramConnection(cadastroClienteId: number) {
     .eq("cadastro_id", cadastroClienteId)
     .eq("plugin_key", "instagram_organic")
     .eq("status", "active")
+    .order("updated_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
   if (error) throw new Error(error.message);
   return data;

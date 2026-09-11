@@ -28,6 +28,13 @@ export type CardDetail = {
   events: ReturnType<typeof buildCardTimeline>;
   attachments: Awaited<ReturnType<typeof listCardAttachmentsWithUrls>>;
   pillar: { id: string; titulo: string; objetivo: string | null; cor: string } | null;
+  publishedIg:
+    | {
+        permalink: string | null;
+        lastSyncedAt: string | null;
+        metrics: Record<string, number>;
+      }
+    | null;
 };
 
 export async function getCardDetail(
@@ -37,10 +44,27 @@ export async function getCardDetail(
   const card = await contentCardRepository.findById(supabase, cardId);
   if (!card) return null;
 
-  const [events, attachments] = await Promise.all([
+  const [events, attachments, igRow] = await Promise.all([
     contentCardEventRepository.listByCardId(supabase, cardId),
     listCardAttachmentsWithUrls(supabase, cardId, card.capa_url),
+    supabase
+      .from("ig_media")
+      .select("metrics, permalink, last_synced_at")
+      .eq("content_card_id", cardId)
+      .order("last_synced_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
+
+  if (igRow.error) throw new Error(igRow.error.message);
+  const publishedIg = igRow.data
+    ? {
+        permalink: igRow.data.permalink != null ? String(igRow.data.permalink) : null,
+        lastSyncedAt:
+          igRow.data.last_synced_at != null ? String(igRow.data.last_synced_at) : null,
+        metrics: (igRow.data.metrics as Record<string, number>) ?? {},
+      }
+    : null;
 
   let pillar: CardDetail["pillar"] = null;
   if (card.pilar_id) {
@@ -53,6 +77,7 @@ export async function getCardDetail(
     events: buildCardTimeline(events),
     attachments,
     pillar,
+    publishedIg,
   };
 }
 

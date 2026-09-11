@@ -36,8 +36,8 @@ export class SupabaseBaseMetricasWriter implements MetricWriterPort {
   }
 
   async write(batch: NormalizedMetricBatchV1): Promise<WriteResultV1> {
-    const insertRows = toBaseMetricasInsertRows(batch);
-    const invalidCount = batch.rows.length - insertRows.length;
+    const mappedRows = toBaseMetricasInsertRows(batch);
+    const invalidCount = batch.rows.length - mappedRows.length;
 
     if (!this.enabled) {
       return {
@@ -47,7 +47,7 @@ export class SupabaseBaseMetricasWriter implements MetricWriterPort {
       };
     }
 
-    if (insertRows.length === 0) {
+    if (mappedRows.length === 0) {
       return {
         rowsWritten: 0,
         rowsSkipped: batch.rows.length,
@@ -55,11 +55,11 @@ export class SupabaseBaseMetricasWriter implements MetricWriterPort {
       };
     }
 
-    const { inserted } = await this.insertPort.insertRows(insertRows);
+    const { written } = await this.insertPort.writeRows(mappedRows);
 
     return {
-      rowsWritten: inserted,
-      rowsSkipped: invalidCount + (insertRows.length - inserted),
+      rowsWritten: written,
+      rowsSkipped: invalidCount + (mappedRows.length - written),
       writerKey: `${this.writerKey}:${this.writerTarget.toLowerCase()}`,
     };
   }

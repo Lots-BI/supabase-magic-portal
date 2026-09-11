@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { byCampaign } from "../engine";
+import { byCampaign, platformViewSelect } from "../engine";
 import { metaAdsDef } from "../meta-ads";
+import { googleAdsDef } from "../google-ads";
+import { ga4Def } from "../ga4";
 import type { Period } from "@/lib/period";
 
 const period: Period = {
@@ -37,5 +39,17 @@ describe("byCampaign", () => {
       period,
     );
     expect(campaigns.map((c) => c.campanha)).toEqual(["Campanha A"]);
+  });
+});
+
+describe("platformViewSelect", () => {
+  it("não pede colunas de KPI derivadas (ctr / engagement_rate)", () => {
+    expect(platformViewSelect(googleAdsDef).split(",")).not.toContain("ctr");
+    expect(platformViewSelect(ga4Def).split(",")).not.toContain("engagement_rate");
+    expect(platformViewSelect(metaAdsDef).split(",")).not.toContain("ctr");
+    expect(metaAdsDef.metrics.find((m) => m.key === "unique_clicks")?.aggregation.kind).toBe(
+      "max",
+    );
+    expect(metaAdsDef.metrics.find((m) => m.key === "reach")?.aggregation.kind).toBe("max");
   });
 });

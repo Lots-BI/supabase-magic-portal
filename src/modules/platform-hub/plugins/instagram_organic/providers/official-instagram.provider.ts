@@ -27,6 +27,12 @@ const METRICS_CAPABILITY = INSTAGRAM_ORGANIC_METRICS_CAPABILITY as Capability;
 const PROFILE_CAPABILITY = INSTAGRAM_ORGANIC_PROFILE_CAPABILITY as Capability;
 const INSIGHT_CONCURRENCY = 4;
 
+function isFatalInstagramGraphError(message: string): boolean {
+  return /oauth|access token|#10\b|#190\b|401|permission|invalidated|not found in CredentialVault/i.test(
+    message,
+  );
+}
+
 async function mapPool<T, R>(
   items: readonly T[],
   concurrency: number,
@@ -90,14 +96,20 @@ export function createOfficialInstagramProvider(
     const dates = enumerateDatesInclusive(window.from, window.to);
 
     const rows: MetricRowV1[] = [];
+    const dayErrors: string[] = [];
     for (const date of dates) {
       try {
         const response = await graphClient.fetchAccountInsightsForDay(accessToken, igUserId, date);
         rows.push(...mapAccountInsightsDayToMetricRows(response, date));
-      } catch {
-        // Dia pontualmente indisponível — segue para o próximo; o gap
-        // finder do sync server tentará novamente em uma próxima execução.
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (isFatalInstagramGraphError(message)) throw err;
+        dayErrors.push(`${date}: ${message}`);
       }
+    }
+
+    if (rows.length === 0 && dayErrors.length > 0) {
+      throw new Error(dayErrors.join("; "));
     }
 
     return {

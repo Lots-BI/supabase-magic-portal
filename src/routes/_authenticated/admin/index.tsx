@@ -3,7 +3,6 @@ import { useQuery, useSuspenseQuery, queryOptions } from "@tanstack/react-query"
 import { Suspense, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listClientes } from "@/lib/admin.functions";
-import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { StatCard } from "@/components/lots/StatCard";
 import { SectionCard } from "@/components/lots/SectionCard";
@@ -26,9 +25,8 @@ import {
   sumOverview,
   aggregateByCliente,
   METRIC_META,
-  OVERVIEW_CLIENTE_SELECT,
-  type OverviewRow,
 } from "@/lib/metrics";
+import { adminPortfolioQuery } from "@/modules/dashboards/admin-portfolio.server";
 import { slugify } from "@/lib/slug";
 import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import { getApprovalOpsDashboard } from "@/modules/approval/dashboard/dashboard.server";
@@ -49,46 +47,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type ClienteAtivo = {
-  cliente: string;
-  ultima_data_recebida: string | null;
-  ultima_ingestao: string | null;
-  plataformas_ativas: string[] | null;
-  total_registros: number;
-};
-
 const clientesAdminQuery = queryOptions({
   queryKey: ["admin", "clientes"],
   queryFn: () => listClientes(),
 });
-
-const clientesAtivosQuery = queryOptions({
-  queryKey: ["vw_clientes_ativos"],
-  queryFn: async (): Promise<ClienteAtivo[]> => {
-    const { data, error } = await supabase
-      .from("vw_clientes_ativos")
-      .select("cliente,ultima_data_recebida,ultima_ingestao,plataformas_ativas,total_registros")
-      .order("ultima_data_recebida", { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as ClienteAtivo[];
-  },
-});
-
-const overviewAdminQuery = (days: PeriodDays) =>
-  queryOptions({
-    queryKey: ["admin", "overview", days],
-    queryFn: async (): Promise<OverviewRow[]> => {
-      const { prevFrom, to } = periodRange(days);
-      const { data, error } = await supabase
-        .from("vw_overview_cliente")
-        .select(OVERVIEW_CLIENTE_SELECT)
-        .gte("data", prevFrom)
-        .lte("data", to)
-        .order("data", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as OverviewRow[];
-    },
-  });
 
 const STALE_MS = 48 * 3600_000;
 
@@ -96,8 +58,7 @@ export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({ meta: [{ title: adminTitle("Visão geral") }] }),
   loader: ({ context }) => {
     void context.queryClient.ensureQueryData(clientesAdminQuery);
-    void context.queryClient.ensureQueryData(clientesAtivosQuery);
-    void context.queryClient.ensureQueryData(overviewAdminQuery(30));
+    void context.queryClient.ensureQueryData(adminPortfolioQuery(30));
   },
   component: AdminOverview,
   errorComponent: ({ error }) => (
@@ -127,8 +88,9 @@ function AdminOverview() {
 
 function OverviewBody({ days }: { days: PeriodDays }) {
   const { data: clientes } = useSuspenseQuery(clientesAdminQuery);
-  const { data: ativos } = useSuspenseQuery(clientesAtivosQuery);
-  const { data: overview } = useSuspenseQuery(overviewAdminQuery(days));
+  const { data: portfolio } = useSuspenseQuery(adminPortfolioQuery(days));
+  const overview = portfolio.overview;
+  const ativos = portfolio.ativos;
   const opsFn = useServerFn(getApprovalOpsDashboard);
 
   const opsQ = useQuery({
@@ -283,7 +245,11 @@ function OverviewBody({ days }: { days: PeriodDays }) {
           icon={Target}
           delta={pctDelta(cT.conversions, pT.conversions)}
           description={METRIC_META.conversions.description}
-          hint={cpa > 0 ? `CPA ${formatMetric("spend", cpa)}` : undefined}
+          hint={
+            cpa > 0
+              ? `CPA ${formatMetric("spend", cpa)} · resultados Meta + GA4`
+              : "Resultados Meta + conversões GA4"
+          }
         />
         <StatCard
           label="Sessões GA4"

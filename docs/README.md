@@ -56,6 +56,7 @@ Ferramentas **transitórias**: Make (ingestão), Lovable (build/deploy). Ver
 | 12  | [Changelog](./12-changelog/changelog.md)         | Histórico de mudanças relevantes                                                                                                                                                                            | Todos           |
 | 13  | [Platform Hub](./13-platform-hub/README.md)      | Hub de conexões RC1 — handoff, homologação, próximos passos, `hub:doctor`                                                                                                                                   | Eng, Ops        |
 | —   | [Auditoria de completude](./AUDIT.md)            | Cobertura CTO, lacunas, matriz código→doc                                                                                                                                                                   | Liderança, Eng  |
+| —   | [Varredura de segurança](./reports/security-scan-plan.md) | Protocolo somente-leitura: isolamento entre clientes, REST, RLS, Hub, cron                                                                                                                         | Eng, Ops        |
 
 ---
 

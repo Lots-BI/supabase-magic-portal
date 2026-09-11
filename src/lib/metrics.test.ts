@@ -47,6 +47,28 @@ describe("sumOverview", () => {
     expect(t.google_spend).toBe(90);
     expect(t.spend).toBe(270);
     expect(t.reach).toBe(250);
+    expect(t.conversions).toBe(1);
+  });
+
+  it("conta resultados Meta + GA4 + Google, sem somar pixel Meta em dobro", () => {
+    const t = sumOverview([
+      {
+        data: "2026-06-20",
+        cliente: "Acme",
+        meta_spend: 100,
+        google_spend: 0,
+        total_impressions: 0,
+        total_clicks: 0,
+        ga4_sessions: 0,
+        ga4_conversions: 2,
+        instagram_reach: 0,
+        instagram_interactions: 0,
+        meta_results: 10,
+        meta_conversions: 3,
+        google_conversions: 1,
+      },
+    ]);
+    expect(t.conversions).toBe(13);
   });
 });
 

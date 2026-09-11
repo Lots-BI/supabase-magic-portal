@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { StatCard } from "@/components/lots/StatCard";
 import { SectionCard } from "@/components/lots/SectionCard";
@@ -18,10 +17,11 @@ import {
   periodRange,
   sumOverview,
   METRIC_META,
-  OVERVIEW_CLIENTE_SELECT,
-  type OverviewRow,
 } from "@/lib/metrics";
-import { VW_CLIENTES_ATIVOS_SELECT } from "@/lib/db-selects";
+import {
+  adminPortfolioQuery,
+  type PortfolioClienteAtivo,
+} from "@/modules/dashboards/admin-portfolio.server";
 import { slugify } from "@/lib/slug";
 import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import {
@@ -43,48 +43,14 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type ClienteAtivo = {
-  cliente: string;
-  ultima_data_recebida: string | null;
-  ultima_ingestao: string | null;
-  plataformas_ativas: string[] | null;
-  total_registros: number;
-};
-
-const clientesAtivosQuery = queryOptions({
-  queryKey: ["vw_clientes_ativos"],
-  queryFn: async (): Promise<ClienteAtivo[]> => {
-    const { data, error } = await supabase
-      .from("vw_clientes_ativos")
-      .select(VW_CLIENTES_ATIVOS_SELECT);
-    if (error) throw error;
-    return (data ?? []) as ClienteAtivo[];
-  },
-});
-
-const overviewQuery = (days: PeriodDays) =>
-  queryOptions({
-    queryKey: ["relatorios", "overview", days],
-    queryFn: async (): Promise<OverviewRow[]> => {
-      const { prevFrom, to } = periodRange(days);
-      const { data, error } = await supabase
-        .from("vw_overview_cliente")
-        .select(OVERVIEW_CLIENTE_SELECT)
-        .gte("data", prevFrom)
-        .lte("data", to)
-        .order("data", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as OverviewRow[];
-    },
-  });
+type ClienteAtivo = PortfolioClienteAtivo;
 
 type SortKey = "cliente" | "spend" | "conversions" | "cpa" | "ctr" | "sessions" | "delta" | "sync";
 
 export const Route = createFileRoute("/_authenticated/admin/relatorios")({
   head: () => ({ meta: [{ title: adminTitle("Relatórios") }] }),
   loader: ({ context }) => {
-    void context.queryClient.ensureQueryData(clientesAtivosQuery);
-    void context.queryClient.ensureQueryData(overviewQuery(30));
+    void context.queryClient.ensureQueryData(adminPortfolioQuery(30));
   },
   component: RelatoriosHub,
   errorComponent: ({ error }) => (
@@ -113,8 +79,9 @@ function RelatoriosHub() {
 }
 
 function HubBody({ days }: { days: PeriodDays }) {
-  const { data: ativos } = useSuspenseQuery(clientesAtivosQuery);
-  const { data: overview } = useSuspenseQuery(overviewQuery(days));
+  const { data: portfolio } = useSuspenseQuery(adminPortfolioQuery(days));
+  const ativos = portfolio.ativos;
+  const overview = portfolio.overview;
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("spend");

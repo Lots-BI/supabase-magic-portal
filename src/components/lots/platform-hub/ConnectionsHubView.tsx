@@ -102,6 +102,17 @@ export function ConnectionsHubView({
         <StatCard label="Unhealthy" value={overview.unhealthy} variant="compact" />
       </div>
 
+      {overview.ingestLagging && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm">
+          Coleta Hub atrasada (último dia &lt; anteontem BRT):{" "}
+          {overview.ingestLag
+            .filter((row) => row.lagging)
+            .map((row) => `${row.plataforma}${row.maxDate ? ` (${row.maxDate})` : " (vazio)"}`)
+            .join(" · ")}
+          . Confira os crons noturnos.
+        </div>
+      )}
+
       <SectionCard title="Filtros" bodyClassName="p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <div className="relative flex-1">

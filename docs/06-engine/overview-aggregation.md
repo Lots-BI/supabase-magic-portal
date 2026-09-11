@@ -13,6 +13,10 @@ last_review: 2026-06-26
 Camada de agregação **cross-platform** para overview executivo, dashboard do cliente e
 `/admin/relatorios`. Complementa (não substitui) o platform engine.
 
+**Timeout 2026-09-11:** as abas admin **não** devem ler `vw_overview_cliente` 8-union no browser.
+Usar `getAdminPortfolioFn` → RPC `portfolio_overview` / `portfolio_clientes_ativos` (migration 56).
+Auditoria e plano: `docs/reports/overview-relatorios-timeout-audit.md`.
+
 ---
 
 ## Consumidores
@@ -66,6 +70,7 @@ Camada de agregação **cross-platform** para overview executivo, dashboard do c
 | ----------------- | ------------------- | --------------------------- |
 | `google_spend`    | **MAX** por cliente | Spend cumulativo/reportado  |
 | `instagram_reach` | **MAX** por cliente | Contagem única, não somável |
+| `conversions`     | **SUM** de `meta_results` + `google_conversions` + `ga4_conversions` | Pixel Meta (`meta_conversions`) não entra — evitaria dobro. GA4 sozinho zerava o KPI. |
 | Demais            | **SUM**             | Acumulativas                |
 
 Comentado no código — crítico para não "corrigir" sem entender.
