@@ -5,7 +5,7 @@ status: living
 owner: Engenharia / Dados Lots BI
 tags: [dashboard, google-ads, platformdef]
 difficulty: intermediate
-last_review: 2026-06-26
+last_review: 2026-09-11
 related:
   - 06-engine/platform-catalog
   - 06-engine/formulas
@@ -20,7 +20,7 @@ related:
 | Platform key   | `google_ads`                      |
 | View SQL       | `vw_google_ads_diario`            |
 | PlatformDef    | `src/lib/platforms/google-ads.ts` |
-| Ingestão atual | Make → Supabase (transitório)     |
+| Ingestão atual | Hub `prefer_hub` (código + cron). **Sem** conexão OAuth em prod — dashboard lê Make até **2026-08-17**. |
 | Granularidade  | Diária por campanha (`campanha`)  |
 
 ## Métricas oficiais

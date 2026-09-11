@@ -38,7 +38,7 @@ export const META_ADS_LOOKBACK_DAYS = 89;
 export const META_ADS_MAX_DAYS_PER_RUN = 89;
 
 /** Reconsulta os últimos dias: Insights atrasam e zeros de ontem não podem ficar eternos. */
-const META_ADS_REFRESH_DAYS = 3;
+const META_ADS_REFRESH_DAYS = 14;
 
 const META_ADS_PLATFORM_LABEL = "Meta Ads";
 const META_ADS_METRICS_CAPABILITY = META_ADS_CAPABILITIES[0];
@@ -86,14 +86,11 @@ async function fetchExistingMetaAdsDates(
       metrics.has("impressions") ||
       metrics.has("clicks") ||
       metrics.has("reach");
-    const hasClickBreakdown =
-      metrics.has("inline_link_clicks") ||
-      metrics.has("link_clicks") ||
-      metrics.has("video_views");
+    const hasMessagingContract = metrics.has("messaging_conversations_started");
     // Marcadores de dia sem entrega (só 0 em results/conversions) contam como
-    // preenchidos. Dias com entrega no contrato antigo são refeitos para puxar
-    // cliques no link / visualizações de vídeo.
-    if (!hasDelivery || hasClickBreakdown) dates.add(date);
+    // preenchidos. Dias com entrega no contrato antigo (sem conversas) são
+    // refeitos para puxar WhatsApp/Messenger e o field oficial de Resultados.
+    if (!hasDelivery || hasMessagingContract) dates.add(date);
   }
 
   // Make nunca gravou results/conversions — dias só no Make continuam "faltantes"

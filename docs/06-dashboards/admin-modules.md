@@ -3,7 +3,7 @@ title: Módulos Admin & Operacionais
 description: Telas administrativas, editorial, aprovações, relatórios e debug.
 status: living
 owner: Engenharia / Produto Lots BI
-last_review: 2026-07-07
+last_review: 2026-09-11
 ---
 
 # Módulos Admin & Operacionais
@@ -37,8 +37,8 @@ flowchart TB
 | Item    | Detalhe                                     |
 | ------- | ------------------------------------------- |
 | Arquivo | `admin/index.tsx`                           |
-| Dados   | `vw_overview_cliente`, `vw_clientes_ativos` |
-| Motor   | `metrics.ts` — `sumOverview`, agregações    |
+| Dados   | RPC `portfolio_overview` / `portfolio_clientes_ativos` (`getAdminPortfolioFn`) |
+| Motor   | `metrics.ts` — `sumOverview`, `overviewConversions` |
 | Período | `PeriodSelector` + `resolvePeriod`          |
 
 Visão de portfólio: investimento total, clientes ativos, comparativo de período.
@@ -51,7 +51,7 @@ Visão de portfólio: investimento total, clientes ativos, comparativo de perío
 | --------- | ------------------------------------------------------------- |
 | Arquivo   | `admin/relatorios.tsx`                                        |
 | Propósito | Hub de relatórios — **não** duplica dashboards                |
-| Dados     | `vw_clientes_ativos`, `vw_overview_cliente`                   |
+| Dados     | Mesma RPC do dashboard executivo |
 | Motor     | `metrics.ts` — `aggregateByCliente`, `deriveCtr`, `deriveCpa` |
 | Período   | `PeriodToggle` (7/30/90 dias)                                 |
 

@@ -3,13 +3,16 @@ title: Pipeline Make (Transitório)
 description: Ingestão atual via Make — estado observado, limitações e plano de substituição.
 status: living
 owner: Engenharia / Ops Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
-# Pipeline Make (Transitório)
+# Pipeline Make (Leftover)
 
-> **⚠️ TRANSITÓRIO:** Make é a solução **atual** de coleta de dados. Faz parte da validação
-> inicial do produto, **não** da arquitetura definitiva. Plano: substituir por
+> **⚠️ LEFTOVER:** Make **não** é mais a fonte viva de Meta Ads nem Instagram perfil. Esses
+> dashboards leem Hub (`prefer_hub`). Make ainda grava Google Ads / GA4 (último dia
+> **2026-08-17**) e pode gravar histórico nas outras. Tabela **não** é dropada.
+>
+> Estado atual: [current-pipeline-hub.md](./current-pipeline-hub.md). Alvo de fila:
 > [Coletores proprietários](./target-collectors.md).
 
 ---
@@ -21,7 +24,7 @@ sequenceDiagram
     participant API as APIs Oficiais
     participant Make as Make (externo)
     participant CC as cadastro_clientes
-    participant BM as base_metricas
+    participant BM as base_metricas_make
     participant Views as vw_* (Supabase)
 
     Make->>CC: Lê IDs técnicos por cliente
@@ -37,7 +40,7 @@ sequenceDiagram
 
 | Fato                                      | Fonte                                         |
 | ----------------------------------------- | --------------------------------------------- |
-| Make grava em `base_metricas`             | Análise de views + docs de integrações        |
+| Make grava em `base_metricas_make`        | Migration 52 + views prefer_hub               |
 | IDs técnicos em `cadastro_clientes`       | Migration 05 (`google_ads_customer_id`, etc.) |
 | Spend Google Ads chega em micros          | Views convertem `/ 1_000_000`                 |
 | Chave de cliente por **nome** (+ aliases) | Migration 08, ADR-0004                        |

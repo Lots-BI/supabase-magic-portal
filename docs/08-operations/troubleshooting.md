@@ -3,7 +3,7 @@ title: Troubleshooting
 description: Guia de diagnóstico para problemas comuns — dados, auth, build e deploy.
 status: living
 owner: Engenharia / Ops Lots BI
-last_review: 2026-07-01
+last_review: 2026-09-11
 ---
 
 # Troubleshooting
@@ -29,10 +29,38 @@ Cards zerados, gráficos flat, "—" nos KPIs.
 
 | Causa                   | Solução                                                               |
 | ----------------------- | --------------------------------------------------------------------- |
-| Make não rodou          | Verificar ingestão externa                                            |
-| Nome cliente divergente | Adicionar alias                                                       |
-| `valor IS NULL`         | Corrigir pipeline Make                                                |
-| RLS / views             | Ver [ADR-0003](../02-architecture/adr/0003-views-security-definer.md) |
+| Make leftover parado (Google/GA4) | Esperado até OAuth Hub; Meta/IG devem vir do Hub |
+| Hub sem `last_sync` / atraso > 2d | Puxar em `/admin/conexoes` ou `workflow_dispatch` do cron |
+| Nome cliente divergente | Adicionar alias |
+| `valor IS NULL` | Corrigir writer / pipeline |
+| RLS / Make sem SELECT | Migration 54; views `security_invoker` (51) |
+
+---
+
+## `/admin` e Relatórios: timeout ou vazio
+
+### Timeout (`canceling statement due to statement timeout`)
+
+Causa histórica: `vw_overview_cliente` 8× UNION ALL. Correção: migration **56** +
+`getAdminPortfolioFn`. Se o JS antigo estiver em cache, Ctrl+F5. Auditoria:
+[overview-relatorios-timeout-audit.md](../reports/overview-relatorios-timeout-audit.md).
+
+### Conversões = 0 com spend Meta preenchido
+
+KPI = `meta_results + google_conversions + ga4_conversions` (migration **57**). GA4 Make
+para em 2026-08-17 — janela 30d zera GA4. Não somar pixel Meta em cima de results.
+
+### Overview vazio com Hub cheio
+
+XOR `ph_metricas_source=make` escondia Hub. **Não** virar para `hub` (esconde Google/GA4).
+A 54 faz prefer_hub **por dia** em `vw_metricas`.
+
+---
+
+## Hub atrasado (Meta/IG)
+
+`max(data)` no Hub deve ser **ontem BRT** depois do cron (03:10 / 03:25 UTC). Se parou em
+09-09: Actions → Run workflow dos crons, ou Puxar nas conexões com `last_sync` nulo.
 
 ---
 
@@ -84,8 +112,8 @@ O Supabase usa a **URL de redirecionamento** configurada no envio do convite. Se
 
 ### Correção
 
-1. **Runtime do app (Lovable ou Cloudflare):** defina `APP_URL` com a URL pública do portal, **sem barra no final**  
-   Ex.: `https://portal.suaempresa.com`
+1. **Runtime do app (Vercel):** defina `APP_URL` com a URL pública, **sem barra no final**
+   Ex.: `https://lotsbi.leandromajr.com`
 
 2. **Supabase Dashboard → Authentication → URL Configuration:**
    - **Site URL:** mesma URL de produção (`APP_URL`)
@@ -175,7 +203,7 @@ Não é necessário acessar o Dashboard do Supabase. Documentação completa:
 
 ## Migrations
 
-1. Aplicar em ordem numérica (`01` → `13`)
+1. Aplicar em ordem numérica (`01` → `57`)
 2. Cada migration tem bloco de validação no final
 3. Idempotente — safe re-run
 4. **View com colunas novas no meio:** use `DROP VIEW IF EXISTS` + `CREATE VIEW` (ver migration `05`)

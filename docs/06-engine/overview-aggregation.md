@@ -3,7 +3,7 @@ title: Overview & Relatórios — metrics.ts
 description: Agregação cross-platform para dashboards consolidados e relatórios admin.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Overview & Relatórios — `metrics.ts`

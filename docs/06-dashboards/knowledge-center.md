@@ -5,7 +5,7 @@ status: living
 owner: Engenharia Lots BI
 tags: [knowledge-center, admin, documentation]
 difficulty: intermediate
-last_review: 2026-09-02
+last_review: 2026-09-11
 ---
 
 # Knowledge Center
@@ -81,7 +81,11 @@ fluxos visíveis ao usuário.
 | Admin | `/admin/tutorial` | Operação, conexões, clientes, KC |
 | Cliente | `/tutorial` | Dashboards, aprovações, publicações IG |
 
-Capítulos recentes (set/2026): admin `15-conexoes-instagram-publicacoes`; client `08-publicacoes-instagram`, `09-novidades-plataforma`.
+Capítulos recentes (set/2026): admin `03-visao-geral`, `04-relatorios`, `10-diagnostico`,
+`07-clientes-integracoes`, `15-conexoes-instagram-publicacoes`; client `08-publicacoes-instagram`,
+`09-novidades-plataforma`.
+
+Docs de ingestão no KC: [current-pipeline-hub.md](../07-integrations/current-pipeline-hub.md).
 
 ## Novidades da plataforma (clientes)
 

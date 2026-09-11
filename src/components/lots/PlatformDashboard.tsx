@@ -63,7 +63,14 @@ function metricToChartCommon(metricKey: string, format: ValueFormat): CommonMetr
   if (metricKey.includes("reach") || metricKey.includes("engaged") || metricKey.includes("users"))
     return "reach";
   if (metricKey.includes("session")) return "sessions";
-  if (metricKey.includes("conversion")) return "conversions";
+  if (
+    metricKey.includes("conversion") ||
+    metricKey.includes("result") ||
+    metricKey.includes("messaging") ||
+    metricKey.includes("conversation")
+  ) {
+    return "conversions";
+  }
   if (metricKey.includes("click")) return "clicks";
   if (metricKey.includes("engagement") || metricKey.includes("interaction")) return "engagement";
   return "impressions";

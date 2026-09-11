@@ -3,7 +3,7 @@ title: Banco — Schema & Modelo de Dados
 description: Tabelas, enums, relacionamentos, RLS e o modelo multi-tenant do Lots BI.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Banco de Dados — Schema & Modelo de Dados
@@ -14,6 +14,10 @@ domínio. As definições vivem em `supabase/migrations-official/`.
 **Modelo de métricas (oficiais vs derivadas):** [metrics-model.md](./metrics-model.md)
 
 **RLS policies:** [rls-policies.md](./rls-policies.md)
+
+Métricas long: `base_metricas_hub` (writer Hub, replace-by-day) e `base_metricas_make`
+(leftover; schema na migration 52). Views preferem Hub por dia. Não virar
+`ph_metricas_source` XOR para `hub` no consolidado enquanto Google/GA4 forem Make.
 
 ---
 

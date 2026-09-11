@@ -3,7 +3,7 @@ title: Observabilidade & Monitoramento
 description: Logs, métricas operacionais, saúde de ingestão e APM — atual e alvo.
 status: living
 owner: Engenharia / Ops Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Observabilidade & Monitoramento
@@ -19,7 +19,8 @@ last_review: 2026-06-26
 | Error reporting | `lovable-error-reporting.ts`               | Transitório              |
 | APM / tracing   | Não existe                                 | —                        |
 | Alertas         | Não existe                                 | —                        |
-| Saúde ingestão  | `vw_clientes_ativos.ultima_ingestao`       | Manual                   |
+| Logs produção   | Vercel (runtime) + GitHub Actions (crons) | Básico                   |
+| Saúde ingestão  | `vw_clientes_ativos` + Hub `last_sync_at` | Manual + banner Hub      |
 | Debug interno   | `/admin/debug*`                            | ✅ Ferramenta de produto |
 
 ---

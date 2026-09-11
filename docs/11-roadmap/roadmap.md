@@ -3,7 +3,7 @@ title: Roadmap & Dívidas Técnicas
 description: Direção de evolução do Lots BI — estado atual, arquitetura alvo e dívidas priorizadas.
 status: living
 owner: Engenharia / Produto Lots BI
-last_review: 2026-07-05
+last_review: 2026-09-11
 ---
 
 # Roadmap & Dívidas Técnicas
@@ -173,18 +173,29 @@ Plano: [content-workflow-implementation-plan.md](../03-backend/content-workflow-
 
 ---
 
+## Fase Hub — ingestão official_api (2026-09, em curso)
+
+- ✅ Writer replace-by-day, crons Meta/IG/Google/GA4, prefer_hub nas 4 views diárias.
+- ✅ Overview admin via RPC (timeout 8-union resolvido).
+- ✨ **P14** OAuth Google Ads + developer token (humano).
+- ✨ Paridade 14d → pausar Make **por plataforma** (tabela Make permanece).
+- 🔧 Não virar `ph_metricas_source` XOR para `hub` enquanto Google/GA4 forem Make.
+- Detalhe: [current-pipeline-hub.md](../07-integrations/current-pipeline-hub.md) ·
+  [AGENT-PLAN](../13-execution/AGENT-PLAN.md).
+
+---
+
 ## Fase 1 — Fundações de dados (alta prioridade)
 
 - 🔧 **Chave de cliente por ID (FK), não por nome.** Migrar `base_metricas`/pipeline para
   referenciar `cadastro_clientes.id`. Ver [ADR-0004](../02-architecture/adr/0004-chave-de-cliente-por-nome-e-aliases.md).
-- 🔧 **Versionar `base_metricas`.** Trazer schema para migrations. Ver
-  [Pipeline Make](../07-integrations/current-pipeline-make.md).
+- ✅ **Schema Make versionado** (migration 52). Hub unique + RPC replace (48).
 - 🔧 **Catálogo de clientes dedicado** para substituir `SELECT DISTINCT` em
   `current_user_clientes()` (admin).
 
 ## Fase 2 — Confiabilidade & segurança
 
-- 🔧 **Reavaliar `SECURITY DEFINER` das views.** Ver [ADR-0003](../02-architecture/adr/0003-views-security-definer.md).
+- ✅ **Views `security_invoker` (51) + SELECT Make (54).** ADR-0003 = histórico.
 - 🔧 **Testes automatizados** — `formulas.ts` + `period.ts` ✅; expandir `engine.ts` + RLS.
 - 🔧 **Tipagem Supabase** (`supabase gen types`).
 - ~~Endurecer cadastro de usuários (limitar signUp público)~~ — **Entregue** Auth Module v3.
@@ -197,16 +208,15 @@ Plano: [content-workflow-implementation-plan.md](../03-backend/content-workflow-
 - ~~✨ **Resolver identidade Lots BI vs Lots BI.**~~ — **Entregue:** produto padronizado como **Lots BI**.
 - ✨ **LinkedIn, Pinterest, YouTube** — apenas após Fase 4 (coletores).
 
-## Fase 4 — Coletores Lots BI 🎯 (substituir Make)
+## Fase 4 — Coletores Lots BI 🎯 (Hub em produção; fila ainda não)
 
-> **Transitório → Proprietário.** Ver [ADR-0008](../02-architecture/adr/0008-proprietary-data-collectors.md).
+> **Parcialmente entregue via Platform Hub.** Fila/workers genéricos continuam alvo.
+> Ver [ADR-0008](../02-architecture/adr/0008-proprietary-data-collectors.md).
 
-- 🎯 **Piloto `GoogleAdsCollector`** — paridade com Make, dual-run, desligar Make para Google Ads.
-- 🎯 **Fila + workers** — scheduler, retries, dead-letter, UPSERT idempotente.
-- 🎯 **Token manager** — OAuth refresh centralizado (tabela de credenciais — não existe hoje).
-- 🎯 **Dashboard admin de sync** — status por cliente/plataforma/run.
-- 🎯 Migrar Meta → Instagram → GA4 (ordem sugerida, validar com produto).
-- 🎯 **Desligar Make** plataforma a plataforma.
+- ✅ Meta Ads + Instagram perfil em Hub (crons + Puxar).
+- 🎯 **OAuth Google Ads / GA4** — único bloqueio para as outras duas.
+- 🎯 **Fila + workers** — além dos crons Actions (retries, dead-letter).
+- 🎯 **Desligar Make** plataforma a plataforma após paridade 14d.
 
 ## Fase 5 — Motor de métricas unificado 🎯
 
@@ -233,9 +243,9 @@ Plano: [content-workflow-implementation-plan.md](../03-backend/content-workflow-
 | #   | Dívida                                | Impacto              | Esforço | Fase |
 | --- | ------------------------------------- | -------------------- | ------- | ---- |
 | D1  | Junção de cliente por nome            | Alto                 | Alto    | 1    |
-| D2  | `base_metricas`/Make fora de versão   | Alto                 | Médio   | 1    |
+| D2  | Make leftover (Google/GA4 sem Hub)    | Alto                 | Médio   | Hub  |
 | D3  | `DISTINCT` em runtime no multi-tenant | Médio                | Médio   | 1    |
-| D4  | Views `SECURITY DEFINER`              | Alto                 | Médio   | 2    |
+| D4  | ~~Views DEFINER~~ → invoker (51)      | Resolvido            | —       | 2    |
 | D5  | Ausência de testes                    | Alto                 | Médio   | 2    |
 | D6  | `any` em server functions             | Médio                | Baixo   | 2    |
 | D7  | `signUp` público aberto               | ~~Médio~~ ✅ Auth v3 | —       | 2    |

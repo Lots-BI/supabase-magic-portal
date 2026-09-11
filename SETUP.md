@@ -63,27 +63,20 @@ Detalhes: [CONTRIBUTING.md](./CONTRIBUTING.md) · [development-workflow.md](./do
 
 ## Deploy
 
-### Hoje (transitório)
+### Produção (hoje)
 
-Produção ainda pode ser publicada via **Lovable** (sync do branch `main`).
+**Vercel** em [https://lotsbi.leandromajr.com](https://lotsbi.leandromajr.com). Merge em `main` publica.
+Secrets Hub/OAuth/`APP_URL` no projeto Vercel.
 
-### Deploy proprietário (preparado)
+Lovable ainda pode sincronizar o branch; **não** é o host do domínio real.
 
-1. Configure secrets no GitHub (`Settings → Secrets → Actions`):
-   - `CLOUDFLARE_API_TOKEN`
-   - `VITE_OFFICIAL_SUPABASE_URL`, `VITE_OFFICIAL_SUPABASE_ANON_KEY`, `VITE_OFFICIAL_SUPABASE_PROJECT_ID`
-   - `OFFICIAL_SUPABASE_URL`, `OFFICIAL_SUPABASE_ANON_KEY`, `OFFICIAL_SERVICE_ROLE_KEY`
-   - `APP_URL` — URL pública do portal (ex.: `https://seu-dominio.com`), usada nos convites por e-mail
+### Cloudflare (preparado, não é produção)
 
-2. **Manual (local):** após `npm run build`:
+1. Secrets no GitHub: `CLOUDFLARE_API_TOKEN` + `OFFICIAL_*` / `VITE_OFFICIAL_*` + `APP_URL`
+2. Actions → **Deploy (Cloudflare)** → confirmar com `deploy`
+3. Local: `npm run build`; `npm run deploy:cloudflare`
 
-   ```bash
-   npm run deploy:cloudflare
-   ```
-
-3. **Manual (CI):** GitHub → Actions → **Deploy (Cloudflare)** → digite `deploy` para confirmar.
-
-> Mantenha Lovable ativo até validar paridade do deploy Cloudflare em produção.
+Crons Hub: workflows `*-cron.yml` (secrets `APP_URL` + `CRON_SECRET`).
 
 ## Transição para stack 100% interna
 
@@ -92,7 +85,8 @@ Produção ainda pode ser publicada via **Lovable** (sync do branch `main`).
 | Dev no Cursor + Git        | ✅                      | ADR-0010          |
 | CI lint/test/build         | ✅                      | ADR-0011          |
 | Knowledge Center           | ✅                      | docs nativos      |
-| Deploy GitHub → Cloudflare | 🟡 Preparado            | workflow + script |
+| Deploy GitHub → Cloudflare | 🟡 Manual, não é o domínio real | `deploy.yml` |
+| Produção Vercel            | ✅ `lotsbi.leandromajr.com`     | merge `main` |
 | Remover preset Lovable     | ⏳ Fase 6               | ADR-0012          |
 | Desconectar Lovable        | ⏳ Após deploy validado | ops               |
 | Horizons / leandromajr.com | ⏳ Futuro               | fora deste repo   |

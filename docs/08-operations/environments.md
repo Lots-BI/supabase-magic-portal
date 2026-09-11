@@ -3,7 +3,7 @@ title: Ambientes
 description: Desenvolvimento, staging e produção — configuração e segredos.
 status: living
 owner: Engenharia / Ops Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Ambientes
@@ -15,7 +15,7 @@ last_review: 2026-06-26
 | Ambiente     | Propósito                 | Status documentado           |
 | ------------ | ------------------------- | ---------------------------- |
 | **Local**    | Desenvolvimento no Cursor | ✅                           |
-| **Produção** | Portal Lots BI (usuários)   | Parcial                      |
+| **Produção** | Portal Lots BI (usuários)   | ✅ `https://lotsbi.leandromajr.com` (Vercel) |
 | **Staging**  | Pré-produção              | ⚠️ INFORMAÇÃO NÃO ENCONTRADA |
 
 ---
@@ -45,16 +45,12 @@ Em dev, **duplicar** URL e anon key com e sem prefixo `VITE_`:
 
 | Item   | Observado                                                                   |
 | ------ | --------------------------------------------------------------------------- |
-| Build  | `npm run build` → Nitro → Cloudflare                                        |
-| Preset | `@lovable.dev/vite-tanstack-config` (transitório)                           |
-| Deploy | Via Lovable (transitório) **ou** GitHub Actions → Cloudflare (`deploy.yml`) |
+| URL    | `https://lotsbi.leandromajr.com`                                            |
+| Host   | **Vercel** (`Server: Vercel`) — merge em `main` publica                     |
+| Build  | Vite + Nitro (preset Lovable no `vite.config.ts`)                           |
+| Extra  | GitHub Actions → Cloudflare (`deploy.yml`) é **manual** e não aponta este domínio |
 
-Deploy proprietário: [CI/CD](./cicd.md) · ADR-0012.
-
-> ⚠️ **INFORMAÇÃO NÃO ENCONTRADA:** domínio de produção, URL pública do Portal Lots BI,
-> mapeamento de secrets no Cloudflare/Lovable dashboard.
-
-**Ação recomendada:** documentar URL e painel de secrets quando confirmado com Ops.
+Deploy Cloudflare preparado: [CI/CD](./cicd.md) · ADR-0012 (ainda não é produção).
 
 ---
 

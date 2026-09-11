@@ -71,10 +71,10 @@ O formulário usa o catálogo `INTEGRATIONS` — cada plataforma tem campos téc
 5. Aguarde próxima ingestão (ver **Painel operacional** em Debug).
 6. Confira dados em `/cliente/{slug}/meta-ads`.
 
-> **Coleta oficial (Platform Hub):** além do Make acima, é possível conectar o Meta Ads também
-> em `/admin/conexoes/nova` (plugin `meta_ads`, identidade `ad_account`) para habilitar o botão
-> **Puxar métricas** no dashboard — coleta direto da Marketing Insights API, sem depender do
-> Make (dual-run, sem desligar o Make). Ver [meta-ads.md](../../../../docs/06-dashboards/platforms/meta-ads.md).
+> **Coleta oficial (Platform Hub) — fonte viva de Meta e Instagram:** conecte em
+> `/admin/conexoes` (ou o cliente em `/cliente/:slug/conexoes`). Crons noturnos + **Puxar
+> métricas**. Make não precisa gravar esses dias. Google Ads / GA4: os IDs no cadastro
+> ainda alimentam o Make; o wizard Hub esconde essas plataformas até o OAuth (P14).
 
 ### Passo a passo Google Ads
 

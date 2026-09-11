@@ -3,7 +3,7 @@ title: Changelog
 description: Histórico de mudanças relevantes do Lots BI (produto, dados e infraestrutura).
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-06
+last_review: 2026-09-11
 ---
 
 # Changelog
@@ -20,6 +20,21 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 ## [Não lançado]
 
 ### Adicionado
+
+- **Meta Ads: métricas do Gerenciador (2026-09-11):** dashboard mostra Valor gasto,
+  Resultados, Conversas por mensagem iniciadas, cliques, vídeo, página de destino e
+  engajamentos com os nomes do Ads Manager. Coletor grava WhatsApp/Messenger
+  (`messaging_conversations_started`). Migration 58. Sem **Puxar métricas**, dias
+  antigos continuam com Resultados = 0 (caso Rodrigo: 1 conversa no Gerenciador).
+
+- **Ingestão Hub em produção (2026-09-11):** PR #2 mergeado em `main`. Crons noturnos Meta
+  Ads, Instagram perfil, Google Ads e GA4; writer `replace_hub_metric_days`; views
+  `prefer_hub` (34/36/47/49/50). Google/GA4 **sem** conexões Hub até OAuth (P14). Make
+  permanece leftover. Doc: [current-pipeline-hub.md](../07-integrations/current-pipeline-hub.md).
+
+- **Visão geral / Relatórios via RPC (2026-09-11):** `getAdminPortfolioFn` →
+  `portfolio_overview` / `portfolio_clientes_ativos` (migrations 54–57). KPI Conversões =
+  resultados Meta + Google + GA4. Produção: Vercel `https://lotsbi.leandromajr.com`.
 
 - **Conteúdos: workflow editorial + publicação Instagram (2026-09-06):** calendário e
   roteiro → cliente aprova e envia originais → Materiais → produção da peça final →

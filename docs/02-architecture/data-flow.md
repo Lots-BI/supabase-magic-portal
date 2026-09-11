@@ -3,100 +3,87 @@ title: Arquitetura — Fluxo de Dados
 description: Como os dados percorrem o sistema, da API de marketing ao dashboard.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Arquitetura — Fluxo de Dados
 
-> Este documento descreve o **estado atual**. O fluxo alvo (coletores → fila → workers) está
-> em [Arquitetura alvo](./target-architecture.md) e [Coletores alvo](../07-integrations/target-collectors.md).
+> Estado atual. Alvo (fila/workers) em [Arquitetura alvo](./target-architecture.md).
 
-## Visão ponta a ponta (estado atual)
+## Visão ponta a ponta (2026-09)
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant API as APIs de Marketing
-    participant Make as Make (worker)
-    participant BM as base_metricas
-    participant V as Views vw_*
+    participant Hub as Hub cron / Puxar
+    participant Make as Make leftover
+    participant H as base_metricas_hub
+    participant M as base_metricas_make
+    participant V as vw_*_diario prefer_hub
+    participant RPC as portfolio_overview
     participant FE as Frontend
-    participant ENG as Engine (TS)
-    participant U as Usuário
+    participant ENG as Engine TS
 
-    API->>Make: métricas brutas (por conta/dia)
-    Make->>BM: INSERT (data, cliente, plataforma, metrica, valor, campanha)
-    Note over BM,V: Leitura sob demanda do usuário
-    U->>FE: abre dashboard (período)
-    FE->>V: SELECT vw_overview_cliente (janela atual + anterior)
-    V->>BM: normaliza, aplica aliases, filtra por current_user_clientes()
-    V-->>FE: linhas normalizadas
-    FE->>ENG: agrega + deriva KPIs + séries diárias
-    ENG-->>FE: totais, deltas, insights
-    FE-->>U: dashboard renderizado
+    API->>Hub: Insights (ontem BRT)
+    Hub->>H: replace_hub_metric_days
+    API->>Make: Google/GA4 até haver OAuth
+    Make->>M: INSERT long
+    Note over V: Dashboards de plataforma
+    FE->>V: SELECT JWT
+    V->>H: dia Hub ganha
+    V->>M: só se Hub não tem o dia
+    Note over RPC: Visão geral / Relatórios
+    FE->>RPC: getAdminPortfolioFn
+    RPC-->>FE: linhas data×cliente
+    FE->>ENG: sumOverview (conversões = meta_results + GA4)
 ```
+
+Ingestão: [current-pipeline-hub.md](../07-integrations/current-pipeline-hub.md).
+Make legado: [current-pipeline-make.md](../07-integrations/current-pipeline-make.md).
 
 ---
 
-## Etapa 1 — Ingestão (externa, Make)
+## Etapa 1 — Ingestão (Hub + Make leftover)
 
-Cenários no Make leem os **IDs técnicos** de cada cliente em `cadastro_clientes`
-(`google_ads_customer_id`, `ga4_property_id`, `facebook_ad_account_id`,
-`instagram_page_id`, `google_business_location_id`, `tiktok_ad_account_id`), chamam as APIs
-e gravam em `base_metricas` no formato _long_:
+**Fonte viva (Meta Ads e Instagram perfil):** Platform Hub. Crons GitHub Actions (03:10 /
+03:25 UTC) e botão **Puxar métricas**. Writer: RPC `replace_hub_metric_days` em
+`base_metricas_hub`. Fim da janela = ontem `America/Sao_Paulo`.
+
+**Leftover Make:** ainda grava `base_metricas_make` (formato long). Google Ads e GA4
+congelados em **2026-08-17** até OAuth Hub. Layout versionado na migration **52**.
+
+Detalhe: [current-pipeline-hub.md](../07-integrations/current-pipeline-hub.md).
 
 | coluna       | exemplo              |
 | ------------ | -------------------- |
-| `data`       | `2026-06-25`         |
+| `data`       | `2026-09-10`         |
 | `cliente`    | `Antena`             |
 | `plataforma` | `Google Ads`         |
 | `metrica`    | `spend`              |
 | `valor`      | `164824476` (micros) |
 | `campanha`   | `Branding - Junho`   |
 
-> ⚠️ **INFORMAÇÃO NÃO ENCONTRADA** — o schema de `base_metricas` e os cenários do Make não
-> estão versionados no repositório. O formato acima é **inferido** das views e migrations.
-> Detalhes e lacunas em [Integrações → Pipeline de ingestão](../07-integrations/integrations.md#pipeline-de-ingestão-workers).
-
 ---
 
 ## Etapa 2 — Normalização (Postgres views)
 
-A view base `vw_metricas_normalizadas` (definida em
-`supabase/migrations-official/08_aliases_e_null_guard.sql`) faz, em uma só passada:
+A view `vw_metricas` (54) mistura Hub e Make **por dia**. `vw_metricas_normalizadas` aplica
+aliases, spend Google `/ 1e6` e `current_user_clientes()`. Dashboards de plataforma **não**
+leem essa cadeia: usam `vw_*_diario` + `prefer_hub`.
 
-1. **Padroniza plataforma** para snake_case (`"Google Ads"` → `google_ads`).
-2. **Padroniza métrica** para minúsculas.
-3. **Converte Google Ads `spend`** de micros para moeda (`valor / 1.000.000`).
-4. **Aplica alias de cliente** → expõe sempre o nome canônico (`COALESCE(alias, cliente)`).
-5. **Descarta `valor IS NULL`** (ruído).
-6. **Filtra por `current_user_clientes()`** (isolação multi-tenant).
-
-A partir dela, views derivadas pivotam por plataforma e dia
-(`vw_meta_ads_diario`, `vw_google_ads_diario`, `vw_ga4_diario`, `vw_instagram_diario`,
-`vw_google_business_diario`), além de `vw_overview_cliente` e `vw_clientes_ativos`.
-
-Detalhes em [Banco → Views](../04-database/views.md).
+Overview admin: RPC `portfolio_overview` (não SELECT 8-union no browser).
 
 ---
 
 ## Etapa 3 — Leitura (Frontend + React Query)
 
-O frontend consulta as views **diretamente** via client Supabase anon. Padrão recorrente:
-buscar a janela `[prevFrom, to]` numa única query para já ter o comparativo.
+Admin `/admin` e `/admin/relatorios` **não** fazem esse SELECT. Usam
+`getAdminPortfolioFn` → `portfolio_overview` / `portfolio_clientes_ativos`.
 
-```ts
-// src/routes/_authenticated/dashboard.tsx (resumo)
-supabase
-  .from("vw_overview_cliente")
-  .select("*")
-  .gte("data", prevFrom)
-  .lte("data", to)
-  .order("data", { ascending: true });
-```
+O dashboard do **cliente** (`/dashboard`) ainda lê `vw_overview_cliente` com JWT + RLS.
 
-As queries são encapsuladas em `queryOptions` do React Query, com `queryKey` que inclui o
-período — garantindo cache correto por janela.
+As queries vão em `queryOptions` do React Query, `queryKey` com o período.
 
 ---
 

@@ -14,10 +14,12 @@ Portal **Lots BI**: dashboards multi-plataforma, painel administrativo, fluxo ed
 | ---- | --------- |
 | **Cliente** | Dashboards por marca (`/cliente/:slug`), plano estratégico, aprovações, publicações Instagram |
 | **Admin** | Central operacional, clientes, usuários, conexões Platform Hub, relatórios |
-| **Dados** | Supabase (`base_metricas`, views analíticas, `ig_media`, Platform Hub) |
-| **Ingestão** | Make (perfil/diário) + APIs oficiais via Platform Hub (crescendo) |
+| **Dados** | Supabase (`base_metricas_hub` + `base_metricas_make`, views `prefer_hub`, Platform Hub) |
+| **Ingestão** | **Hub** (Meta/IG + crons) · Make leftover (Google/GA4 até OAuth) |
 
-Desenvolvimento oficial: **Cursor + Git** neste repositório. Lovable permanece transitório para build/deploy até cutover Cloudflare (ver [SETUP.md](./SETUP.md)).
+Desenvolvimento oficial: **Cursor + Git**. Produção: **Vercel** em
+[lotsbi.leandromajr.com](https://lotsbi.leandromajr.com). Lovable ainda sincroniza o repo;
+Cloudflare `deploy.yml` é manual e **não** é o domínio real. Ver [SETUP.md](./SETUP.md).
 
 ---
 

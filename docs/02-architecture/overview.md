@@ -3,7 +3,7 @@ title: Arquitetura — Visão Geral
 description: Visão de sistema do Lots BI, componentes, responsabilidades e limites.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Arquitetura — Visão Geral
@@ -16,12 +16,12 @@ last_review: 2026-06-26
 O Lots BI é uma aplicação **full-stack TypeScript** construída sobre **TanStack Start**
 (SSR + roteamento por arquivos) e **Supabase** (Postgres + Auth + RLS). Não há servidor
 backend próprio: a lógica de servidor vive em **server functions** do TanStack Start, e a
-camada de dados/segurança vive no Postgres (RLS + views + funções `SECURITY DEFINER`).
+camada de dados/segurança vive no Postgres (RLS + views `security_invoker` + funções
+`SECURITY DEFINER` pontuais como `current_user_clientes()`).
 
-A ingestão das métricas é feita por **automações externas (Make)**, que gravam em uma
-tabela legada (`base_metricas`). A aplicação é, em essência, uma **consumidora** desses
-dados já ingeridos, com uma poderosa camada de normalização em SQL e um engine de cálculo
-declarativo em TypeScript.
+A ingestão viva de Meta Ads e Instagram perfil é o **Platform Hub** (`base_metricas_hub` +
+crons GitHub Actions). Make grava leftover em `base_metricas_make`. Google Ads e GA4 ainda
+leem Make até OAuth Hub. Produção do app: **Vercel** (`https://lotsbi.leandromajr.com`).
 
 **Visão futura:** coletores proprietários, fila de processamento, banco com métricas
 oficiais apenas, motor de métricas unificado e API interna — substituindo Make e
@@ -39,7 +39,7 @@ desacoplando Lovable. Detalhes em [Arquitetura alvo](./target-architecture.md).
 | Backend                  | Server functions (TanStack Start)                                                                     |
 | Banco/Auth               | Supabase (Postgres, Auth, RLS)                                                                        |
 | Validação                | Zod                                                                                                   |
-| Build/Runtime            | Vite 8 + Nitro (via `@lovable.dev/vite-tanstack-config`), alvo Cloudflare                             |
+| Build/Runtime            | Vite 8 + Nitro (preset Lovable); **produção = Vercel**                                    |
 | Dev oficial              | **Cursor** + Git ([ADR-0010](./adr/0010-cursor-official-development-environment.md))                  |
 | Build/deploy transitório | Lovable (pipeline; não implementar features lá)                                                       |
 
@@ -57,25 +57,27 @@ flowchart TB
     subgraph lotus["Plataforma Lots BI"]
         direction TB
         fe["Frontend React 19\n(SSR via TanStack Start)"]
-        sf["Server Functions\nadmin.functions · editorial.functions"]
+        sf["Server Functions\nadmin · editorial · portfolio"]
         mw["Auth middleware\nrequireSupabaseAuth"]
     end
 
     subgraph supabase["Supabase"]
         direction TB
         auth["Auth (JWT)"]
-        pg[("Postgres\ntabelas + views + RLS")]
+        pg[("Postgres\nhub + make + views + RPC")]
     end
 
-    make["⚙️ Make (workers de ingestão)"]
-    ads["APIs de Marketing\nMeta · Google · GA4 · IG · GBP · TikTok"]
+    hub["⚙️ Platform Hub\ncrons + Puxar"]
+    make["⚙️ Make leftover"]
+    ads["APIs de Marketing\nMeta · Google · GA4 · IG"]
 
     user_admin --> fe
     user_client --> fe
-    fe -->|"client anon (RLS)"| pg
+    fe -->|"JWT + RLS"| pg
     fe --> sf --> mw --> pg
     fe --> auth
     sf -->|"service-role (só servidor)"| pg
+    ads --> hub --> pg
     ads --> make --> pg
 ```
 
@@ -86,7 +88,8 @@ flowchart TB
 ### Frontend (`src/routes`, `src/components`)
 
 - Renderiza dashboards e telas de operação.
-- Lê **views analíticas diretamente** com o client Supabase anon (sujeito a RLS).
+- Lê **views analíticas** com JWT (dashboards de plataforma). Admin visão geral / relatórios:
+  `getAdminPortfolioFn` → RPC.
 - Usa server functions para operações de escrita/privilegiadas.
 - Não calcula KPIs: delega ao engine (`src/lib`).
 
@@ -100,14 +103,14 @@ flowchart TB
 ### Camada de dados (Supabase / Postgres)
 
 - **Tabelas de domínio** com RLS por papel.
-- **Views analíticas** que normalizam `base_metricas`.
-- **Funções `SECURITY DEFINER`** (`has_role`, `current_user_clientes`) que sustentam a
-  segurança multi-tenant.
+- **Views analíticas** `security_invoker` sobre `base_metricas_hub` / `base_metricas_make`.
+- **Funções `SECURITY DEFINER`** pontuais (`has_role`, `current_user_clientes`).
+- **RPC** `portfolio_overview` / `portfolio_clientes_ativos` (admin).
 
-### Ingestão (Make — externo)
+### Ingestão (Hub + Make leftover)
 
-- Lê IDs técnicos de `cadastro_clientes`, chama as APIs, grava em `base_metricas`.
-- **Não versionado neste repositório.** Ver [Integrações](../07-integrations/integrations.md).
+- Hub: official_api Meta/IG + crons. Make: leftover Google/GA4.
+- Ver [current-pipeline-hub.md](../07-integrations/current-pipeline-hub.md).
 
 ---
 

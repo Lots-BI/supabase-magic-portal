@@ -8,6 +8,17 @@ export interface MetaActionValueV1 {
   value?: string;
 }
 
+/**
+ * Item de `results` / `objective_results` na Insights API — a coluna
+ * Resultados do Gerenciador. Formato varia (value plano ou values[]).
+ */
+export interface MetaResultStatV1 {
+  indicator?: string;
+  action_type?: string;
+  value?: string;
+  values?: Array<{ value?: string }>;
+}
+
 export interface MetaInsightRowV1 {
   campaign_name?: string;
   campaign_id?: string;
@@ -23,6 +34,13 @@ export interface MetaInsightRowV1 {
   actions?: MetaActionValueV1[];
   /** Subconjunto de conversões da Insights API (pixel / API / CRM). */
   conversions?: MetaActionValueV1[];
+  /**
+   * Coluna Resultados do Gerenciador (outcome da campanha). Lista; não é o
+   * mesmo que `conversions`.
+   */
+  results?: MetaResultStatV1[];
+  /** Mesmo recorte, quando a versão da API expõe objective_results. */
+  objective_results?: MetaResultStatV1[];
 }
 
 export interface MetaInsightsResponseV1 {

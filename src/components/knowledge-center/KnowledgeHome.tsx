@@ -17,16 +17,16 @@ import { getFavorites, getRecent } from "@/lib/knowledge-center/storage";
 
 const HIGHLIGHTS = [
   {
-    slug: "06-dashboards/instagram-posts",
-    title: "Publicações Instagram",
-    description: "Métricas por post, plugin instagram_organic e sync.",
-    icon: Sparkles,
+    slug: "07-integrations/current-pipeline-hub",
+    title: "Ingestão Hub (atual)",
+    description: "Crons Meta/IG, prefer_hub, Make leftover e o que falta (OAuth Google).",
+    icon: Plug,
   },
   {
-    slug: "13-platform-hub/readme",
-    title: "Platform Hub (RC1)",
-    description: "Hub de conexões — handoff, homologação e próximos passos.",
-    icon: Plug,
+    slug: "reports/overview-relatorios-timeout-audit",
+    title: "Visão geral / Relatórios",
+    description: "RPC portfolio_overview, timeout 8-union e KPI de conversões.",
+    icon: Wrench,
   },
   {
     slug: "12-changelog/changelog",
@@ -37,14 +37,14 @@ const HIGHLIGHTS = [
   {
     slug: "04-database/migrations",
     title: "Migrations",
-    description: "Ordem oficial 01→33, idempotência e validação.",
+    description: "Ordem oficial 01→57, idempotência e validação.",
     icon: Database,
   },
   {
-    slug: "08-operations/troubleshooting",
-    title: "Troubleshooting",
-    description: "Diagnóstico: views, admin, build e erros comuns.",
-    icon: Wrench,
+    slug: "13-platform-hub/README",
+    title: "Platform Hub",
+    description: "Conexões, official_api, crons e próximos passos (P14).",
+    icon: Plug,
   },
   {
     slug: "06-dashboards/knowledge-center",

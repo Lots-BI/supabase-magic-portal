@@ -5,7 +5,7 @@ owner: agent
 created: 2026-09-10
 updated: 2026-09-11
 resume: FIM
-branch: feat/hub-ingest-plan
+branch: main
 repo: supabase-magic-portal/
 estagio_final: Hub é a fonte das 4 plataformas de mídia; Make só histórico; cron noturno; dashboards honestos; órfãos escondidos; OS de publicação já coberto pelo job de 5 min
 ---
@@ -14,7 +14,7 @@ estagio_final: Hub é a fonte das 4 plataformas de mídia; Make só histórico; 
 
 Só o agente usa isto. Próxima sessão: ler **Invariantes** + **Estágio final** + o WS em `resume:`. Executar um WS (ou um passo se o WS for grande). Marcar `- [x]`. Atualizar `resume`. Escrever o Diário.
 
-Não pular STOP GATE. Commit/PR só se o humano pedir. PowerShell: `;` nunca `&&`. Repo git = `supabase-magic-portal/` (não `d:\lots-portal`). Branch de execução = `feat/hub-ingest-plan` até o humano mandar merge em `main`.
+Não pular STOP GATE. Commit/PR só se o humano pedir. PowerShell: `;` nunca `&&`. Repo git = `supabase-magic-portal/` (não `d:\lots-portal`). Código Hub está em **`main`** (PR #2, 2026-09-11). Próximo trabalho: branch nova a partir de `main`.
 
 ---
 
@@ -80,13 +80,13 @@ Molde de arquivos: `src/modules/meta-ads/meta-ads-campaigns-sync.server.ts`, `me
 
 ## SUMÁRIO
 
-Marcar só com critério de pronto do WS. Código do programa fechado em 2026-09-10 nesta branch. Bloqueios humanos: merge `main`, OAuth Google, token Ads.
+Marcar só com critério de pronto do WS. Código do programa em `main` (PR #2). Bloqueio humano restante: OAuth Google (P14). Primeiro cron em `main` pode precisar de `workflow_dispatch`.
 
 ### A. Métricas Meta/IG desta branch
 
 - [x] **P01** Código de coleta extra + dashboards commitado em `feat/hub-ingest-plan` (`3036dfe`).
 - [x] **P02** Migrations 46 e 47 no git (já aplicadas no remoto).
-- [ ] **P03** Merge/deploy em `main`. Crons + Puxar passam a valer em produção depois disso (não precisa mais Puxar manual toda noite).
+- [x] **P03** Merge/deploy em `main` (PR #2, `9515aae`, 2026-09-11). Crons valem em produção na próxima janela UTC ou via `workflow_dispatch`.
 
 ### B. Ingestão Hub
 
@@ -494,4 +494,17 @@ Browser: dashboards Meta, IG, Google, GA4; Conexões; um Puxar; Hub overview.
 - KPI só somava `ga4_conversions`. GA4 Make para em 2026-08-17 → 30d = 0.
 - Hub Meta já tinha `results` 463 e pixel 7 (12/08–11/09).
 - Migration **57**: colunas `meta_results` / `meta_conversions` / `google_conversions` no fim. KPI = results Meta + Google + GA4 (sem dobrar pixel).
+
+### 2026-09-11 — documentação + Knowledge Center
+
+- Docs vivos alinhados ao PR #2: Hub ingest, RPC overview, Vercel, migrations 48–57.
+- KC: `docs/` (glob) + destaques na home + tutorial admin + `/novidades` admin.
+- P03 fechado. P14 (OAuth Google) permanece humano.
+
+### 2026-09-11 — Meta Ads Resultados (WhatsApp Rodrigo)
+
+- Gerenciador: 1 conversa. Hub gravava `results=0` (mapper ignorava messaging sem objective).
+- Coletor: `messaging_conversations_started` + Results = conversa quando não é OUTCOME_SALES.
+- View 58 (aplicada): colunas no fim. Dashboard: nomes do Gerenciador.
+- Falta humano: **Puxar métricas** na aba Meta Ads do Rodrigo; commit/push se quiser Vercel.
 

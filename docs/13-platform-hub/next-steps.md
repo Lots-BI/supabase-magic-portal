@@ -5,23 +5,36 @@ status: living
 owner: Engenharia Lots BI
 tags: [platform-hub, roadmap, backlog]
 difficulty: intermediate
-last_review: 2026-07-09
+last_review: 2026-09-11
 ---
 
-# O que falta — Platform Hub RC1 → Produção
+# O que falta — Platform Hub
 
-Estado em **jul/2026** após entrega RC1. Prioridade: **P0** bloqueia produção client-facing; **P1** homologação; **P2** melhoria.
+Estado em **2026-09-11** após merge PR #2. Código Hub das 4 plataformas está em `main`.
+Bloqueio humano: **OAuth Google Ads + developer token**. Não virar `ph_metricas_source` XOR.
 
 ---
 
-## P0 — Bloqueadores de produção
+## Feito (não é mais P0)
+
+| Item | Situação |
+|------|----------|
+| Scheduler | Crons GitHub Actions (Meta 03:10, IG 03:25, Google 03:40, GA4 03:55 UTC) + Puxar |
+| Writer | `replace_hub_metric_days` — nunca escreve Make |
+| Prefer_hub | Meta, IG, Google, GA4 (Google/GA4 sem dados Hub até OAuth) |
+| Overview admin | RPC `portfolio_overview` (56–57) |
+| Órfãos | Wizard esconde TikTok / YouTube / GBP |
+| Cutover XOR | **Não fazer** enquanto Google/GA4 forem Make |
+
+---
+
+## P0 — Bloqueadores restantes
 
 | # | Item | Situação | Ação |
 |---|------|----------|------|
-| 1 | **Cutover `ph_metricas_source`** | Default `make` | Dual-run estável → update controlado + monitoramento |
-| 2 | **OAuth secrets no deploy** | `deploy.yml` sem vars Hub/OAuth | Adicionar secrets Meta/Google/TikTok + `APP_URL` + `HUB_CREDENTIAL_ENCRYPTION_KEY` |
-| 3 | **Piloto real com dados live** | Não validado end-to-end em prod | 1 cliente, 1 plataforma, 2 semanas dual-run |
-| 4 | **Scheduler automático** | Apenas `ManualScheduler` | Cron/queue para sync periódico (Edge Function ou worker) |
+| 1 | **OAuth Google + developer token** | Nenhuma conexão Hub Google/GA4 | P14 — humano |
+| 2 | **Primeira noite de cron em `main`** | Merge foi depois das 03:10 UTC em 11/09 | `workflow_dispatch` ou esperar a próxima janela |
+| 3 | **Paridade 14d → pausar Make** | Instagram make_only ainda alto | SQL no Diário; pausar **por plataforma** |
 
 ---
 
@@ -64,7 +77,7 @@ Estado em **jul/2026** após entrega RC1. Prioridade: **P0** bloqueia produção
 - Limiar de divergência aceitável no dual-run (por métrica/plataforma)
 - Ordem de cutover: Meta primeiro vs GA4 primeiro
 - Onde roda o scheduler (Supabase Cron vs Cloudflare Worker)
-- Data alvo para `active_source = 'hub'` em staging vs produção
+- Data alvo para `active_source = 'hub'` — **adiado**; prefer_hub por dia já mistura fontes.
 
 ---
 

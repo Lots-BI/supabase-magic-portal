@@ -51,23 +51,25 @@ Fonte: `src/lib/platforms/*.ts` + `registry.ts`.
 
 ### Métricas oficiais
 
-| Key         | Coluna      | Agg     | Nota                               |
-| ----------- | ----------- | ------- | ---------------------------------- |
-| spend       | spend       | sum     |                                    |
-| reach       | reach       | **sum** | Soma diária — ver semântica abaixo |
-| impressions | impressions | sum     |                                    |
-| clicks      | clicks      | sum     |                                    |
-| results     | results     | sum     | Coluna Resultados do Gerenciador   |
-| conversions | conversions | sum     | Campo `conversions` da Insights API |
+Nomes no dashboard = Gerenciador (pt-BR). Lista completa em [meta-ads.md](../06-dashboards/platforms/meta-ads.md).
+
+| Key | Label | Agg |
+| --- | --- | --- |
+| spend | Valor gasto | sum |
+| results | Resultados | sum |
+| messaging_conversations_started | Conversas por mensagem iniciadas | sum |
+| clicks | Cliques (todos) | sum |
+| reach / unique_clicks | Alcance / Cliques únicos | **max** |
+| conversions | Conversões | sum |
 
 ### KPIs derivados
 
-CTR, CPC, CPM, Frequency, **Custo por resultado** (`spend / results`), **Taxa de conversão**
-(`conversions / clicks`)
+CTR, CTR do link, CPC, CPC do link, CPM, Frequência, **Custo por resultado**, **Custo por conversão**.
 
 ### Semântica de reach (importante)
 
-No **dashboard Meta**, reach agrega com **SUM** (soma dos reaches diários).
+No **dashboard Meta**, reach agrega com **MAX** (maior alcance diário no período).
+Não somar dias — inflaria pessoas únicas.
 
 No **overview** (`metrics.ts`), `instagram_reach` e métricas similares usam **MAX**.
 Documentado como diferença intencional a unificar (dívida D8).

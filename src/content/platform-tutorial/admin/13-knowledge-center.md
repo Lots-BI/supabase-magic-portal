@@ -23,7 +23,8 @@ O **Knowledge Center** é a biblioteca técnica da plataforma — ADRs, arquitet
 
 ## O que você encontra
 
-- **Árvore por pastas** — `00-company`, `02-architecture`, `03-backend`, `06-dashboards`, etc.
+Comece pelos destaques da home: **Ingestão Hub**, **Visão geral / Relatórios** e **Changelog**
+(set/2026). A pasta `docs/` é a fonte; o glob indexa no build.
 - **Busca na home** — digite termos como “RLS”, “Content Workflow”, “ADR”
 - **Busca global** (`Ctrl+K`) — também indexa documentos do KC
 - **Favoritos e recentes** — salvos no seu navegador (localStorage)

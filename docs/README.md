@@ -3,7 +3,7 @@ title: Centro de Conhecimento do Lots BI
 description: Documentação interna de engenharia, produto e operações da plataforma Lots BI.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # 🪷 Centro de Conhecimento do Lots BI
@@ -30,7 +30,10 @@ Depois: [Onboarding técnico](./10-onboarding/onboarding.md) para setup local.
 | **Como funciona hoje** | [Estado atual](./02-architecture/current-state.md)           |
 | **Para onde vamos**    | [Arquitetura alvo](./02-architecture/target-architecture.md) |
 
-Ferramentas **transitórias**: Make (ingestão), Lovable (build/deploy). Ver
+Ingestão **hoje:** Platform Hub (Meta/IG + crons) com Make leftover. Produção:
+**Vercel** em `https://lotsbi.leandromajr.com`. Lovable e Cloudflare `deploy.yml` são
+pipelines paralelos/transitórios. Ver
+[current-pipeline-hub.md](./07-integrations/current-pipeline-hub.md) ·
 [ADR-0009](./02-architecture/adr/0009-platform-proprietary-infrastructure.md).
 
 ---
@@ -48,7 +51,7 @@ Ferramentas **transitórias**: Make (ingestão), Lovable (build/deploy). Ver
 | 05  | [Frontend](./05-frontend/overview.md)            | Stack, [estrutura](./05-frontend/repository-structure.md), roteamento, UI, [erros](./05-frontend/observability-errors.md)                                                                                   | Engenharia      |
 | 06  | [Dashboards](./06-dashboards/dashboards.md)      | KPIs, telas analíticas, [módulos admin](./06-dashboards/admin-modules.md)                                                                                                                                   | Eng, PM         |
 | 06b | [Engine de métricas](./06-engine/overview.md)    | PlatformDef, [fórmulas](./06-engine/formulas.md), [período](./06-engine/period.md), [catálogo](./06-engine/platform-catalog.md)                                                                             | Eng, Dados      |
-| 07  | [Integrações](./07-integrations/integrations.md) | Catálogo, Make, coletores alvo                                                                                                                                                                              | Eng, Ops        |
+| 07  | [Integrações](./07-integrations/integrations.md) | Hub atual, Make leftover, coletores alvo                                                                                                                                                                    | Eng, Ops        |
 | 08  | [Operações](./08-operations/deployment.md)       | Deploy, [ambientes](./08-operations/environments.md), [CI/CD](./08-operations/cicd.md), [observabilidade](./08-operations/observability.md), [troubleshooting](./08-operations/troubleshooting.md), runbook | Eng, Ops        |
 | 09  | [Padrões](./09-standards/development.md)         | Convenções, [governança](./09-standards/governance.md), testes, fluxo, doc-as-code                                                                                                                          | Engenharia      |
 | 10  | [Onboarding](./10-onboarding/onboarding.md)      | Setup local, primeiros passos                                                                                                                                                                               | Novos devs      |
@@ -65,29 +68,35 @@ Ferramentas **transitórias**: Make (ingestão), Lovable (build/deploy). Ver
 ```mermaid
 flowchart LR
     subgraph Ext["Fontes externas"]
-        APIs["APIs de Marketing\nMeta · Google Ads · GA4 · Instagram · GBP · TikTok"]
+        APIs["APIs de Marketing\nMeta · Google Ads · GA4 · Instagram"]
     end
 
-    subgraph Pipe["Ingestão (externo)"]
-        Make["Cenários Make\n(workers)"]
+    subgraph Pipe["Ingestão"]
+        Hub["Platform Hub\ncrons + Puxar"]
+        Make["Make leftover"]
     end
 
     subgraph Supa["Supabase (Postgres)"]
-        BM["base_metricas\n(tabela legada, long)"]
-        Views["Views analíticas\nvw_*"]
-        Domain["Tabelas de domínio\nclientes · usuários · editorial"]
+        HUBT["base_metricas_hub"]
+        BM["base_metricas_make"]
+        Views["Views vw_* prefer_hub"]
+        RPC["portfolio_overview"]
+        Domain["Clientes · usuários · editorial"]
     end
 
     subgraph App["App Lots BI (TanStack Start)"]
-        SF["Server Functions\n(admin · editorial)"]
-        UI["Frontend React 19\nDashboards"]
+        SF["Server Functions"]
+        UI["Frontend React 19"]
     end
 
+    APIs --> Hub --> HUBT
     APIs --> Make --> BM
+    HUBT --> Views
     BM --> Views
     Views --> UI
-    Domain --> SF --> UI
-    UI -->|client anon + RLS| Views
+    Views --> RPC --> SF --> UI
+    Domain --> SF
+    UI -->|JWT + RLS| Views
 ```
 
 > Diagramas detalhados em [Arquitetura → Visão geral](./02-architecture/overview.md) e

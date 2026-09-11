@@ -744,7 +744,7 @@ SELECT bm.id, bm.data, bm.cliente,
 FROM public.base_metricas bm
 WHERE bm.cliente IN (SELECT cliente_nome FROM public.current_user_clientes());`,
   vw_overview_cliente: `Filtra: plataforma IN ('meta_ads','google_ads','ga4','instagram')\nMétricas usadas: spend, impressions, clicks, sessions, conversions, reach, total_interactions`,
-  vw_meta_ads_diario: `Filtra: plataforma = 'meta_ads'\nMétricas: reach, impressions, clicks, spend, results, conversions, inline_link_clicks, unique_clicks, link_clicks, landing_page_views, video_views, post_engagements`,
+  vw_meta_ads_diario: `Filtra: plataforma = 'meta_ads'\nMétricas: reach, impressions, clicks, spend, results, conversions, inline_link_clicks, unique_clicks, link_clicks, landing_page_views, video_views, post_engagements, messaging_conversations_started, messaging_first_replies, page_engagements`,
   vw_google_ads_diario: `Filtra: plataforma = 'google_ads'\nMétricas: impressions, clicks, spend (com /1000000)`,
   vw_ga4_diario: `Filtra: plataforma = 'ga4'\nMétricas: activeusers, sessions, engagedsessions, screenpageviews, eventcount, conversions`,
   vw_instagram_diario: `Filtra: plataforma = 'instagram'\nMétricas: reach, total_interactions, accounts_engaged, likes, comments, saves, shares, profile_links_taps, views, replies, website_clicks, follows`,

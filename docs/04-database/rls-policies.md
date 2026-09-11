@@ -3,7 +3,7 @@ title: RLS — Catálogo de Policies
 description: Todas as Row Level Security policies do Postgres, por tabela.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # RLS — Catálogo de Policies
@@ -111,10 +111,18 @@ Cliente final pode atualizar post **apenas** quando status atual é `aguardando_
 
 ---
 
-## `base_metricas`
+## `base_metricas_make` e `base_metricas_hub`
 
-**RLS habilitada, sem policy para `authenticated`.** Motivo das views `SECURITY DEFINER`.
-Ver [ADR-0003](../02-architecture/adr/0003-views-security-definer.md).
+RLS **ON**. Migration **54** concede SELECT autenticado no Make (antes: RLS sem policy →
+views `security_invoker` devolviam `[]` no JWT). Hub já tinha SELECT por cliente via
+conexões / policies Hub.
+
+Views críticas usam `security_invoker` (51). Isolação extra: `current_user_clientes()` nas
+views de normalização. O workaround DEFINER da migration 07 / ADR-0003 **não** é o estado
+live das views analíticas.
+
+A tabela histórica `base_metricas` (nome sem sufixo) pode ainda existir no remoto; o app
+lê Make/Hub. Schema Make versionado na **52**.
 
 ---
 

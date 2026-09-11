@@ -3,18 +3,21 @@ title: Banco — Views Analíticas
 description: Catálogo das views vw_* que alimentam os dashboards.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Views Analíticas (`vw_*`)
 
-Todas as views são **`SECURITY DEFINER`** (ver
-[ADR-0003](../02-architecture/adr/0003-views-security-definer.md)) e concedem `SELECT` ao
-papel `authenticated`. A isolação multi-tenant acontece em `vw_metricas_normalizadas`, da
-qual as demais derivam.
+Views críticas `vw_*` usam **`security_invoker = true`** (migration 51): o JWT do usuário
+vale, RLS das tabelas-base aplica. Isolação extra em `vw_metricas_normalizadas` via
+`current_user_clientes()` (plpgsql, cadastro + `client_access` — migration 55).
 
-Definições atuais em `supabase/migrations-official/08_aliases_e_null_guard.sql` (a 07 e 02
-são versões anteriores das mesmas views).
+Dashboards de plataforma leem `vw_*_diario` prefer_hub. Visão geral / Relatórios **não**
+varrem essas views no browser: usam RPC `portfolio_overview` / `portfolio_clientes_ativos`
+(migrations 56–57).
+
+Definições históricas: `08_aliases_e_null_guard.sql`. Prefer_hub e overview: 34, 36, 47,
+49, 50, 54–57.
 
 ---
 
@@ -57,7 +60,7 @@ Colunas: `id, data, cliente, plataforma, metrica, valor, campanha, created_at`.
 
 | View                        | Granularidade             | Colunas principais                                                                                                             |
 | --------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `vw_meta_ads_diario`        | data × cliente × campanha | reach, impressions, clicks, cpc, cpm, ctr, frequency, spend, results, conversions                                              |
+| `vw_meta_ads_diario`        | data × cliente × campanha | … spend, results, conversions, cliques/vídeo/engajamento (46), conversas WhatsApp e page_engagements (58)                      |
 | `vw_google_ads_diario`      | data × cliente × campanha | impressions, clicks, spend + ctr/cpc/cpm derivados na view                                                                     |
 | `vw_ga4_diario`             | data × cliente            | active_users, sessions, engaged_sessions, pageviews, event_count, conversions, engagement_rate                                 |
 | `vw_instagram_diario`       | data × cliente            | reach, interactions, accounts_engaged, likes, comments, saves, shares, profile_links_taps, engagement_rate                     |
@@ -68,53 +71,50 @@ Colunas: `id, data, cliente, plataforma, metrica, valor, campanha, created_at`.
 
 ---
 
-## `vw_instagram_diario` e `vw_meta_ads_diario` — exceção: preferem Hub
+## Views diárias — preferem Hub (Meta, IG, Google Ads, GA4)
 
-Diferente das demais views por plataforma, essas duas **não** leem direto de
-`vw_metricas_normalizadas`. Cada uma lê de uma view intermediária `vw_*_normalizada_prefer_hub`
-que, por `data + cliente` (Meta Ads inclui também `campanha` como coluna de passagem):
+Não leem `vw_metricas_normalizadas`. Cada uma lê `vw_*_normalizada_prefer_hub`
+por `data + cliente` (Meta Ads e Google Ads também passam `campanha`):
 
-1. Inclui a linha de `base_metricas_hub` quando existir (Platform Hub — Graph API oficial).
-2. Caso contrário, cai para `base_metricas_make` (Make, pipeline legado).
+1. Inclui a linha de `base_metricas_hub` quando existir.
+2. Caso contrário, cai para `base_metricas_make`.
 
-| Dashboard | View final          | View intermediária                     | Migration                            |
-| --------- | -------------------- | --------------------------------------- | ------------------------------------- |
-| Instagram | `vw_instagram_diario` | `vw_instagram_normalizada_prefer_hub`   | `34_instagram_profile_prefer_hub.sql` |
-| Meta Ads  | `vw_meta_ads_diario`  | `vw_meta_ads_normalizada_prefer_hub`    | `36_meta_ads_prefer_hub.sql`          |
+| Dashboard | View final | View intermediária | Migration |
+| --------- | ---------- | ------------------ | --------- |
+| Instagram | `vw_instagram_diario` | `vw_instagram_normalizada_prefer_hub` | 34, 47 |
+| Meta Ads | `vw_meta_ads_diario` | `vw_meta_ads_normalizada_prefer_hub` | 36, 47, 58 |
+| Google Ads | `vw_google_ads_diario` | `vw_google_ads_normalizada_prefer_hub` | 49 (spend `/ 1e6`) |
+| GA4 | `vw_ga4_diario` | `vw_ga4_normalizada_prefer_hub` | 50 |
 
-A preferência é **por linha** (dia+cliente), restrita à plataforma correspondente —
-`ph_metricas_source.active_source` (troca global make↔hub) **não é alterado** por essas views.
-Isso permite o botão **Puxar métricas** em `/cliente/:slug/instagram` e no dashboard Meta Ads
-preencher gaps no Hub sem exigir cutover de nenhuma outra plataforma. Ver
-[instagram.md](../06-dashboards/platforms/instagram.md) e
-[meta-ads.md](../06-dashboards/platforms/meta-ads.md).
+`ph_metricas_source` XOR **não** é virado por essas views. Sentinela Meta `campanha=''` +
+results/conversions 0 **não** esconde Make. Google/GA4 Hub só preenchidos depois do OAuth.
 
-> Nota Meta Ads: o coletor oficial grava `impressions`/`reach`/`clicks`/`spend`/`results`/
-> `conversions`. As colunas `cpc`/`cpm`/`ctr`/`frequency` do pivot (herdadas do Make) ficam
-> `NULL` em dias vindos do Hub. Sem impacto: o dashboard calcula esses KPIs no cliente
-> (`src/lib/platforms/meta-ads.ts`), não lê essas colunas da view.
+Puxar métricas: Meta e Instagram no dashboard. Google/GA4 o wizard esconde até P14.
+Ver [current-pipeline-hub.md](../07-integrations/current-pipeline-hub.md).
+
+> Nota Meta Ads: `cpc`/`cpm`/`ctr`/`frequency` do pivot ficam `NULL` em dias Hub. O
+> dashboard deriva no engine (`src/lib/platforms/meta-ads.ts`).
 
 ---
 
 ## `vw_overview_cliente` (consolidado)
 
-Uma linha por `data × cliente` com os números cross-plataforma usados nos dashboards de visão
-geral. Lê `vw_metricas_normalizadas` → `vw_metricas` (prefer_hub por dia desde a migration 54).
-Sem isso, `security_invoker` + RLS no Make sem policy devolviam `[]` no JWT admin.
+Uma linha por `data × cliente`. Forma live = um `GROUP BY` + `FILTER` (migration 56).
+A view 8-union no remoto causava timeout no JWT admin.
 
-| Coluna                                      | Origem               |
-| ------------------------------------------- | -------------------- |
-| `meta_spend`, `google_spend`                | spend por plataforma |
-| `total_impressions`, `total_clicks`         | meta + google        |
-| `ga4_sessions`, `ga4_conversions`           | GA4                  |
-| `instagram_reach`, `instagram_interactions` | Instagram            |
+Admin `/admin` e `/admin/relatorios` leem via RPC `portfolio_overview` (não o PostgREST
+na view). Colunas novas **só no fim** (57):
 
-| Coluna                                      | Origem               |
-| ------------------------------------------- | -------------------- |
-| `meta_spend`, `google_spend`                | spend por plataforma |
-| `total_impressions`, `total_clicks`         | meta + google        |
-| `ga4_sessions`, `ga4_conversions`           | GA4                  |
-| `instagram_reach`, `instagram_interactions` | Instagram            |
+| Coluna | Origem |
+| ------ | ------ |
+| `meta_spend`, `google_spend` | spend |
+| `total_impressions`, `total_clicks` | meta + google |
+| `ga4_sessions`, `ga4_conversions` | GA4 |
+| `instagram_reach`, `instagram_interactions` | Instagram |
+| `meta_results`, `meta_conversions` | Meta Ads |
+| `google_conversions` | Google Ads (ainda vazio sem Hub) |
+
+KPI Conversões no app = `meta_results + google_conversions + ga4_conversions`.
 
 ---
 
@@ -138,8 +138,6 @@ para o painel admin (`select("*")` no app).
 
 ## Notas de consumo no frontend
 
-- O frontend lê estas views **diretamente** com o client anon (RLS aplicada).
-- Para dashboards, costuma-se buscar `[prevFrom, to]` em uma query e dividir em janela
-  atual/anterior no cliente (ver [Fluxo de dados](../02-architecture/data-flow.md)).
-- As views entregam **nome canônico**; o slug do cliente é resolvido no frontend
-  (`clienteRefQuery` em `src/routes/_authenticated/cliente.$cliente.tsx`).
+- O frontend dos **dashboards de plataforma** lê `vw_*_diario` com o client JWT (RLS).
+- **Visão geral / Relatórios admin** usam `getAdminPortfolioFn` → RPC (não `select` na view).
+- Não usar `getSupabaseAdmin()` nessas views: `auth.uid()` nulo → 0 linhas.

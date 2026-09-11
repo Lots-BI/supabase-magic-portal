@@ -3,7 +3,7 @@ title: Dashboards — KPIs, Fórmulas e Telas
 description: Catálogo das telas analíticas, métricas exibidas e fórmulas oficiais.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Dashboards
@@ -27,7 +27,9 @@ Arquivo: `src/routes/_authenticated/admin/index.tsx`.
 - **Secundários:** serviços ativos, acessos vinculados, última sincronização, CTR consolidado.
 - **Gráficos:** evolução diária (Meta + Google + conversões), mix de investimento (donut).
 - **Listas:** top clientes por investimento, status de ingestão por conta.
-- Fonte: `vw_overview_cliente` + `vw_clientes_ativos` + `listClientes`/`listServicos`.
+- Fonte: RPC `portfolio_overview` + `portfolio_clientes_ativos` via `getAdminPortfolioFn`
+  (`src/modules/dashboards/admin-portfolio.server.ts`). Conversões =
+  `overviewConversions()` (`meta_results` + Google + GA4).
 
 ### 2. Visão Geral do Cliente (cliente) — `/dashboard`
 

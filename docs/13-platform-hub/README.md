@@ -5,14 +5,18 @@ status: living
 owner: Engenharia Lots BI
 tags: [platform-hub, conexoes, integracoes, homologacao]
 difficulty: intermediate
-last_review: 2026-07-09
+last_review: 2026-09-11
 ---
 
 # Platform Hub — Hub de Conexões
 
-> **RC1 (jul/2026):** módulo administrativo para conectar clientes a plataformas de marketing via APIs oficiais, com vault de credenciais, diagnóstico, homologação e caminho de migração Make → Official.
+> **Estado 2026-09:** Meta Ads e Instagram perfil coletam em produção via official_api
+> (`base_metricas_hub` + crons). Google Ads / GA4: código pronto, **sem** OAuth em prod.
+> Make é leftover. RC1 (jul/2026) foi o kernel; não use “só ManualScheduler” como fato atual.
 
-Esta pasta é a **aba dedicada** do Knowledge Center ao Platform Hub. Use-a quando for trabalhar em `/admin/conexoes`, OAuth, writers de métricas ou homologação.
+Esta pasta é a **aba dedicada** do Knowledge Center ao Platform Hub. Use-a em
+`/admin/conexoes`, OAuth, writers ou homologação. Ingestão viva:
+[current-pipeline-hub.md](../07-integrations/current-pipeline-hub.md).
 
 ---
 
@@ -38,9 +42,10 @@ src/modules/platform-hub-admin/     # Server functions admin, OAuth factory, dia
 src/components/lots/platform-hub/  # UI /admin/conexoes/*
 src/routes/oauth/*/callback.tsx     # Callbacks OAuth (Meta, Google, TikTok)
 supabase/migrations-official/
-  28_platform_hub.sql
-  29_platform_hub_homologation.sql
-  30_parallel_metricas_homologation.sql
+  28_platform_hub.sql … 30_parallel_metricas_homologation.sql
+  34, 36, 47–50 prefer_hub
+  48 replace_hub_metric_days
+  51 security_invoker · 54–57 overview
 ```
 
 **Regra de ouro:** a UI e o admin **consomem** o kernel via `createAdminHubStack()` — não altere Runtime/Pipeline/Registry/Contracts sem ADR.

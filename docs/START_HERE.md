@@ -3,7 +3,7 @@ title: START HERE — Lots BI Engineering Handbook
 description: Ponto de entrada principal. Leia isto primeiro para entender o Lots BI em menos de uma hora.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # START HERE
@@ -24,7 +24,8 @@ confiáveis** para tomada de decisão.
 
 **Hoje (observado no repositório):** o Lots BI opera como portal de performance e operação
 para uma agência de marketing, com dashboards multi-plataforma, painel administrativo e
-fluxo editorial/aprovações. O código vive em `lots-bi/`.
+fluxo editorial/aprovações. O código vive em `supabase-magic-portal/` (GitHub
+`Lots-BI/supabase-magic-portal`). Produção: `https://lotsbi.leandromajr.com` (Vercel).
 
 **Visão futura (estratégica):** plataforma completamente proprietária, multi-tenant em
 escala, consolidando dezenas de integrações de marketing com coletores próprios, fila de
@@ -41,17 +42,19 @@ Toda a documentação do Lots BI distingue **dois mundos**. Não confunda um com
 |                        | **Estado Atual**                                   | **Visão Futura (Arquitetura Alvo)**                          |
 | ---------------------- | -------------------------------------------------- | ------------------------------------------------------------ |
 | **O que é**            | Como o sistema funciona **hoje**, no código        | Como o Lots BI **deverá** funcionar quando maduro              |
-| **Ingestão**           | Make → Supabase (`base_metricas`)                  | Coletores proprietários → Fila → Workers → Supabase          |
-| **App**                | TanStack Start + Supabase + Lovable                | Stack proprietária (TanStack ou evolução) **sem** Lovable    |
+| **Ingestão**           | Hub (`base_metricas_hub`) + Make leftover          | Coletores + fila + workers (já há crons Hub; falta OAuth Google) |
+| **App**                | TanStack Start + Supabase; prod **Vercel**         | Stack proprietária **sem** Lovable; Cloudflare ainda opcional |
 | **Métricas derivadas** | Parte calculada nas **views SQL** (dívida)         | Calculadas **somente** na camada de aplicação                |
 | **Onde ler**           | [Estado atual](./02-architecture/current-state.md) | [Arquitetura alvo](./02-architecture/target-architecture.md) |
 
 ```mermaid
 flowchart TB
-    subgraph NOW["Estado Atual (transitório em partes)"]
-        A1["APIs oficiais"] --> M["Make"]
-        M --> S1["Supabase\nbase_metricas + views"]
-        S1 --> F1["TanStack Start\n+ React"]
+    subgraph NOW["Estado Atual (2026-09)"]
+        A1["APIs oficiais"] --> H["Platform Hub"]
+        A1 --> M["Make leftover"]
+        H --> S1["Supabase\nhub + make + views prefer_hub"]
+        M --> S1
+        S1 --> F1["TanStack Start\nVercel"]
     end
 
     subgraph FUTURE["Visão Futura (proprietária)"]
@@ -69,8 +72,9 @@ flowchart TB
 
 Ferramentas **transitórias** (a serem removidas no longo prazo):
 
-- **Make** — ingestão de dados (não versionada neste repositório)
-- **Lovable** — build/deploy transitório (`@lovable.dev/vite-tanstack-config`); **não** é ambiente de dev
+- **Make** — leftover Google/GA4 (congelado 2026-08-17) e histórico Meta/IG; não versionado
+- **Lovable** — ainda sincroniza o repo; **não** é ambiente de dev nem o host de produção
+- **Cloudflare `deploy.yml`** — workflow manual; o domínio real está na **Vercel**
 - **Horizons** — citado na visão estratégica; **não encontrado no repositório**
 
 ## Sistema de Engenharia (2 minutos)

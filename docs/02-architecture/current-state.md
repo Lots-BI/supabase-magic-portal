@@ -3,39 +3,40 @@ title: Arquitetura — Estado Atual
 description: Como o Lots BI funciona hoje, com base no código e migrations versionados.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Arquitetura — Estado Atual
 
-> **Escopo:** fatos observáveis no repositório `lots-bi/`. Para a visão futura,
-> ver [Arquitetura alvo](./target-architecture.md).
+> **Escopo:** fatos observáveis no repositório. Visão futura:
+> [Arquitetura alvo](./target-architecture.md).
 
 ---
 
 ## Resumo
 
-O Lots BI é uma aplicação **full-stack TypeScript** (TanStack Start + React 19) que consome
-dados analíticos do **Supabase Postgres**, ingeridos por **automações Make** externas.
+O Lots BI é uma aplicação **full-stack TypeScript** (TanStack Start + React 19) no
+**Supabase Postgres**. Meta Ads e Instagram perfil entram pelo **Platform Hub**
+(`base_metricas_hub` + crons). Make grava leftover em `base_metricas_make`. Google Ads e
+GA4 ainda leem Make (congelado em 2026-08-17) até OAuth Hub.
 
-Não existe servidor backend dedicado fora do runtime TanStack Start (server functions) e
-do Supabase (Auth, RLS, views, funções SQL).
+Não existe servidor dedicado fora do runtime TanStack Start e do Supabase.
 
 ---
 
 ## Stack (observada em `package.json` e código)
 
-| Camada                   | Tecnologia                             | Notas                                                             |
-| ------------------------ | -------------------------------------- | ----------------------------------------------------------------- |
-| Framework                | TanStack Start + TanStack Router       | Roteamento file-based em `src/routes/`                            |
-| UI                       | React 19, Tailwind v4, Radix, Recharts | Componentes Lots BI em `src/components/lots/`                      |
-| Estado servidor          | TanStack React Query                   | Cache e refetch de views Supabase                                 |
-| Backend lógico           | Server functions                       | `admin.functions.ts`, `editorial.functions.ts`                    |
-| Banco/Auth               | Supabase                               | Project ID: `ywvhoctcmibjitvwkkhb`                                |
-| Build                    | Vite 8 + Nitro                         | Via `@lovable.dev/vite-tanstack-config` (transitório)             |
-| Ingestão                 | **Make** (externo)                     | Não versionado neste repo                                         |
-| Dev oficial              | **Cursor** + Git                       | [ADR-0010](./adr/0010-cursor-official-development-environment.md) |
-| Build/deploy transitório | Lovable                                | Pipeline apenas; features implementadas no repo                   |
+| Camada | Tecnologia | Notas |
+| ------ | ---------- | ----- |
+| Framework | TanStack Start + Router | `src/routes/` |
+| UI | React 19, Tailwind v4, Radix, Recharts | `src/components/lots/` |
+| Estado | TanStack Query | Views + server fns |
+| Backend | Server functions | `*.server.ts`, `admin.functions.ts` |
+| Banco/Auth | Supabase `ywvhoctcmibjitvwkkhb` | Views `security_invoker` |
+| Build | Vite 8 + Nitro | Preset Lovable transitório |
+| Ingestão | **Hub official_api** + Make leftover | [current-pipeline-hub.md](../07-integrations/current-pipeline-hub.md) |
+| Dev | Cursor + Git | ADR-0010 |
+| Produção | **Vercel** em `https://lotsbi.leandromajr.com` | Merge em `main` publica. Cloudflare `deploy.yml` é manual, ainda não é o domínio real. |
 
 ---
 
@@ -43,36 +44,40 @@ do Supabase (Auth, RLS, views, funções SQL).
 
 ```mermaid
 flowchart TB
-    subgraph External["Externo (transitório)"]
-        APIs["APIs Marketing\nGoogle · Meta · GA4 · Instagram · …"]
-        Make["Make\n(cenários não versionados)"]
+    subgraph External["Coleta"]
+        APIs["APIs Marketing"]
+        Hub["Platform Hub\ncrons + Puxar"]
+        Make["Make leftover"]
     end
 
     subgraph Supabase["Supabase"]
-        BM["base_metricas\n(long format)"]
-        CC["cadastro_clientes\n+ aliases + serviços"]
-        ED["posts_editorial\n+ post_revisions"]
-        Views["Views vw_*\n(normalização + agregação)"]
+        HUBT["base_metricas_hub"]
+        BM["base_metricas_make"]
+        CC["cadastro_clientes"]
+        Views["Views vw_* prefer_hub"]
+        RPC["portfolio_overview"]
         RLS["RLS + current_user_clientes()"]
     end
 
-    subgraph App["TanStack Start App"]
+    subgraph App["TanStack Start"]
         Routes["src/routes/*"]
-        SF["Server Functions\nservice-role"]
-        Engine["src/lib/platforms/\nengine · formulas · registry"]
-        UI["Dashboards React"]
+        SF["Server Functions"]
+        Engine["src/lib/platforms/"]
+        UI["Dashboards"]
     end
 
+    APIs --> Hub --> HUBT
     APIs --> Make --> BM
+    HUBT --> Views
     BM --> Views
-    CC --> Views
     Views --> UI
+    Views --> RPC
+    RPC --> SF
     RLS --> Views
     CC --> SF
-    ED --> SF
     SF --> UI
     Engine --> UI
-    UI -->|anon client + JWT| Views
+    UI -->|JWT| Views
 ```
 
 ---
@@ -90,18 +95,18 @@ Ver [Pipeline Make](../07-integrations/current-pipeline-make.md).
 
 ### 2. Camada SQL (views)
 
-Migrations em `supabase/migrations-official/` (01–08):
+Migrations em `supabase/migrations-official/` (**01→57**):
 
-- Normalização: `vw_metricas_normalizadas` (aliases de cliente, spend em micros → reais).
-- Agregação diária por plataforma: `vw_google_ads_diario`, `vw_meta_ads_diario`, etc.
-- Overview: `vw_overview_cliente`.
-- Admin: `vw_clientes_admin`, `vw_clientes_ativos`.
+- Normalização: `vw_metricas_normalizadas` + `vw_metricas` prefer_hub (54).
+- Agregação diária: `vw_*_diario` com `prefer_hub` (34, 36, 49, 50).
+- Overview: `vw_overview_cliente` 1-pass + RPC `portfolio_overview` (56–57).
+- Admin: `vw_clientes_admin`, `vw_clientes_ativos` (RPC `portfolio_clientes_ativos`).
 
-**Dívida observada:** views calculam métricas derivadas (CTR, CPM, engagement_rate). Isso
-**contradiz** a arquitetura alvo. Ver [Modelo de métricas](../04-database/metrics-model.md).
+**Dívida observada:** views ainda calculam alguns derivados (CTR). O engine TS é a fonte
+oficial nos dashboards de plataforma.
 
-Migration 07 alterou views para `SECURITY DEFINER` (workaround RLS). Ver
-[ADR-0003](./adr/0003-views-security-definer.md).
+Views críticas usam `security_invoker` (51). Isolação = RLS das tabelas-base +
+`current_user_clientes()`. ADR-0003 descreve o workaround antigo (DEFINER).
 
 ### 3. Camada de aplicação (TypeScript)
 
@@ -148,11 +153,11 @@ Detalhes: [Roteamento](../05-frontend/routing.md)
 ## Limitações conhecidas (estado atual)
 
 1. **Chave de cliente por nome** (+ aliases) em vez de FK estável — [ADR-0004](./adr/0004-chave-de-cliente-por-nome-e-aliases.md).
-2. **Make externo** — sem observabilidade, versionamento ou testes no repo.
+2. **Make leftover** — Google/GA4 congelados em 2026-08-17; Meta/IG ainda podem gravar histórico.
 3. **Métricas derivadas no SQL** — divergência potencial com engine TS.
-4. **TikTok / GBP** — no catálogo, sem `PlatformDef` completo.
-5. **Lovable acoplado** — deploy e env vars com prefixo `OFFICIAL_`.
-6. **Schema `base_metricas`** — não versionado nas migrations oficiais.
+4. **TikTok / GBP / YouTube** — escondidos no wizard Hub até haver dono.
+5. **Lovable acoplado** ao Git; o host de produção é Vercel.
+6. **OAuth Google Ads** — código Hub pronto; nenhuma conexão em produção (P14).
 
 ---
 
@@ -160,11 +165,11 @@ Detalhes: [Roteamento](../05-frontend/routing.md)
 
 | Componente (visão futura)              | Status                                       |
 | -------------------------------------- | -------------------------------------------- |
-| Coletores proprietários                | Não implementado                             |
-| Fila de processamento                  | Não implementado                             |
-| Workers de sync                        | Não implementado                             |
-| API interna dedicada                   | Não implementado (server functions parciais) |
-| Motor de métricas isolado como serviço | Parcial (`engine.ts` no frontend bundle)     |
+| Coletores proprietários                | **Parcial** — Hub official_api Meta/IG live; Google/GA4 código sem OAuth |
+| Fila de processamento                  | Não implementado (crons GitHub Actions no lugar)                         |
+| Workers de sync                        | **Parcial** — `/api/cron/*` + `syncAll*`                                 |
+| API interna dedicada                   | Não implementado (server functions)                                      |
+| Motor de métricas isolado como serviço | Parcial (`engine.ts` no frontend bundle)                                 |
 
 ---
 

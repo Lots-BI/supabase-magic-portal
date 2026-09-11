@@ -17,15 +17,20 @@ O **Centro executivo** consolida a performance de **todos os clientes** em um ú
 
 ### Hero KPIs (primeira fileira)
 
-| KPI                | Significado                            | Fonte                 |
-| ------------------ | -------------------------------------- | --------------------- |
-| Investimento total | Soma Meta Ads + Google Ads no período  | `vw_overview_cliente` |
-| Clientes ativos    | Quantos clientes têm dados recentes    | `vw_clientes_ativos`  |
-| Alcance Instagram  | Alcance agregado (MAX por cliente/dia) | overview              |
-| Sessões GA4        | Tráfego do site                        | overview              |
-| Conversões         | Total com CPA derivado                 | overview              |
+| KPI                | Significado                            | Fonte |
+| ------------------ | -------------------------------------- | ----- |
+| Investimento total | Soma Meta Ads + Google Ads no período  | RPC `portfolio_overview` |
+| Clientes ativos    | Quantos clientes têm dados recentes    | RPC `portfolio_clientes_ativos` |
+| Alcance Instagram  | Alcance agregado (MAX por cliente/dia) | overview |
+| Sessões GA4        | Tráfego do site                        | overview |
+| Conversões         | Resultados Meta + Google + GA4 (CPA)   | `overviewConversions()` |
 
 Cada card mostra **delta** vs período anterior (pill verde/vermelha).
+
+> **Não** some conversões do pixel Meta (`meta_conversions`) em cima de Resultados — seria dobro.
+> GA4 Make parou em 17/08/2026; na janela de 30 dias o GA4 pode ser zero mesmo com Meta ativo.
+
+Se a tela ficar em branco ou “timeout”, faça **Ctrl+F5**. Os números vêm do servidor, não de um SELECT pesado na view.
 
 ### KPIs secundários
 
@@ -63,7 +68,8 @@ Cada card mostra **delta** vs período anterior (pill verde/vermelha).
 
 1. Cliente cadastrado em **Clientes**.
 2. Integrações configuradas (Meta, Google, GA4, Instagram conforme contrato).
-3. Pipeline de ingestão rodando (ver **Painel operacional** em Debug se zerado).
+3. Pipeline de ingestão: Meta/Instagram pelo **Hub** (crons + Puxar em Conexões). Google/GA4
+   ainda dependem do Make até haver OAuth. Ver **Diagnóstico** se zerado.
 
 ## Integração com Relatórios
 

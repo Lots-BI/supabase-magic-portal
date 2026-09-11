@@ -24,7 +24,9 @@ Igual à Visão geral: **7 / 30 / 90 dias**. Todos os rankings abaixo respeitam 
 
 ### 3. KPIs resumidos
 
-Investimento total, conversões, CTR médio, clientes com dados no período.
+Investimento total, conversões (resultados Meta + Google + GA4), CTR médio, clientes com dados no período.
+
+Os números desta aba usam o **mesmo RPC** da Visão geral (`getAdminPortfolioFn`). Período 7/30/90.
 
 ### 4. Tabela / lista de clientes
 
@@ -50,7 +52,7 @@ Campo de busca filtra por nome do cliente em tempo real — útil com dezenas de
    - Mix de plataformas
    - Comparativo 7/30/90 no painel do cliente
    - Insights automáticos na lateral
-4. Anote clientes com ingestão atrasada — acione integrações antes da reunião.
+4. Anote clientes com ingestão atrasada — Meta/IG: **Conexões** (Puxar ou last_sync). Google/GA4: Make ainda congelado em agosto/2026 até OAuth Hub.
 5. Use o atalho **Relatório executivo** para slide de abertura com totais.
 
 ## Diferença vs Visão geral

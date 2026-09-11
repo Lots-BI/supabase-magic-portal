@@ -3,7 +3,7 @@ title: Operações — Deployment & Ambiente
 description: Build, runtime, variáveis de ambiente, deploy e papel transitório do Lovable.
 status: living
 owner: Engenharia / Ops Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Deployment & Ambiente
@@ -17,17 +17,19 @@ last_review: 2026-06-26
 ```mermaid
 flowchart LR
     CUR["Cursor\n(dev local)"] --> GIT["Git / GitHub"]
-    GIT --> BUILD["Build\n(Vite + Nitro)"]
-    BUILD --> CF["Cloudflare\n(alvo atual)"]
-    CF --> PORTAL["Portal Lots BI"]
+    GIT --> VERCEL["Vercel\n(produção)"]
+    VERCEL --> PORTAL["https://lotsbi.leandromajr.com"]
+    GIT -.->|"opcional, manual"| CF["Cloudflare deploy.yml"]
 ```
 
 | Etapa           | Ferramenta atual                           | Status         |
 | --------------- | ------------------------------------------ | -------------- |
 | Desenvolvimento | **Cursor**                                 | ✅ Oficial     |
-| Versionamento   | Git / GitHub                               | ✅ Oficial     |
+| Versionamento   | Git / GitHub (`Lots-BI/supabase-magic-portal`) | ✅ Oficial |
 | Build           | Vite + `@lovable.dev/vite-tanstack-config` | ⚠️ Transitório |
-| Deploy          | Lovable → Nitro/Cloudflare                 | ⚠️ Transitório |
+| **Produção**    | **Vercel** — merge em `main` publica       | ✅ Confirmado  |
+| Cloudflare      | `deploy.yml` `workflow_dispatch`           | 🟡 Manual, não é o domínio real |
+| Lovable         | Sync do branch; não é o host               | ⚠️ Transitório |
 
 - **Bundler:** Vite 8, configurado via `@lovable.dev/vite-tanstack-config` (`vite.config.ts`).
 - O preset já inclui: `tanstackStart`, `viteReact`, `tailwindcss`, `tsConfigPaths`, **Nitro**
@@ -85,12 +87,8 @@ Este projeto ainda está **conectado ao Lovable** para build (ver `AGENTS.md`). 
 ## Banco de dados
 
 - Projeto Supabase `ywvhoctcmibjitvwkkhb`.
-- Migrations em `supabase/migrations-official/`. Ver [migrations](../04-database/migrations.md).
-
-> ⚠️ **INFORMAÇÃO NÃO ENCONTRADA** — não há pipeline de CI/CD nem automação de migrations
-> versionados no repositório. O alvo Cloudflare vem do preset Lovable, mas a configuração do
-> ambiente de produção (domínio, secrets em produção) não está documentada aqui. Confirmar com
-> Ops e registrar.
+- Migrations em `supabase/migrations-official/` (**01→57**). Ver [migrations](../04-database/migrations.md).
+- Produção do app: **Vercel**, `https://lotsbi.leandromajr.com`. Secrets Hub/OAuth no runtime Vercel (não só no `deploy.yml` Cloudflare).
 
 ## Checklist de deploy (proposto)
 

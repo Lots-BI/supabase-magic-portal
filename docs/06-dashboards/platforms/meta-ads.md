@@ -5,7 +5,7 @@ status: living
 owner: Engenharia / Dados Lots BI
 tags: [dashboard, meta-ads, platformdef]
 difficulty: intermediate
-last_review: 2026-09-05
+last_review: 2026-09-11
 ---
 
 # Meta Ads
@@ -51,40 +51,51 @@ Conexão: pelo **admin** em `/admin/conexoes/nova` (identidade `ad_account`) ou 
 **cliente** em `/cliente/:slug/conexoes` (aba **Conexões**, card Meta Ads) — mesmo fluxo
 self-service já usado no Instagram, ver [instagram-posts.md](../instagram-posts.md).
 
-## Métricas oficiais
+## Métricas oficiais (nomes do Gerenciador)
 
-| Key         | Coluna      | Agregação | Nota                     |
-| ----------- | ----------- | --------- | ------------------------ |
-| spend       | spend       | sum       |                          |
-| reach       | reach       | **sum**   | Soma diária no dashboard |
-| impressions | impressions | sum       |                          |
-| clicks      | clicks      | sum       |                          |
-| results     | results     | sum       | Coluna Resultados do Gerenciador |
-| conversions | conversions | sum       | Campo `conversions` da Insights API |
+Coleta: Insights `actions` + fields de entrega. View: migration 58 acrescenta conversas
+e engajamento com a Página no **fim** de `vw_meta_ads_diario`.
 
-A Insights API não tem um campo `results`, e o campo oficial `conversions` frequentemente vem
-vazio em campanhas com evento custom do pixel (ex.: OUTCOME_SALES). O coletor pede `actions` +
-`conversions` e:
+| Key | Label no dashboard | Agg | Origem |
+| --- | --- | --- | --- |
+| spend | Valor gasto | sum | `spend` |
+| results | Resultados | sum | `results` / `objective_results`, senão actions |
+| messaging_conversations_started | Conversas por mensagem iniciadas | sum | `onsite_conversion.messaging_conversation_started_7d` |
+| messaging_first_replies | Novas conexões de mensagem | sum | `onsite_conversion.messaging_first_reply` |
+| clicks | Cliques (todos) | sum | `clicks` |
+| inline_link_clicks | Cliques no link | sum | `inline_link_clicks` |
+| unique_clicks | Cliques únicos | **max** | `unique_clicks` (não somar dias) |
+| impressions | Impressões | sum | `impressions` |
+| reach | Alcance | **max** | `reach` (não somar dias) |
+| video_views | Visualizações de vídeo de 3 segundos | sum | `video_view` |
+| landing_page_views | Visualizações da página de destino | sum | `landing_page_view` |
+| post_engagements | Engajamento com a publicação | sum | `post_engagement` |
+| page_engagements | Engajamento com a Página | sum | `page_engagement` |
+| conversions | Conversões | sum | campo `conversions` |
+| link_clicks | Cliques no link (ações) | sum | ação `link_click` |
 
-1. **conversions** — soma do campo oficial; se vier vazio, soma compras/leads/`offsite_conversion.custom.*`
-2. **results** — compra padrão → evento custom do pixel → lead → mensagem → landing page / clique
+A Insights API **tem** os fields `results` e `objective_results` — o mesmo recorte da
+coluna Resultados do Gerenciador. O coletor pede esses fields primeiro (com fallback
+para `actions` + `conversions` se a conta recusar). Sem o field oficial, o mapper
+reconstrói: compra → evento custom → lead → **mensagem WhatsApp/Messenger**; tráfego
+(LPV/clique) só com `objective` de tráfego. Campanha `OUTCOME_SALES` sem venda fica 0
+(não conta LPV). Sem objective, uma conversa no WhatsApp **é** Resultado (caso Rodrigo).
 
 Ver [`meta-insights.mapper.ts`](../../../src/modules/platform-hub/plugins/meta_ads/api/meta-insights.mapper.ts).
 
-Dias já coletados sem essas métricas voltam a aparecer como faltantes no **Puxar métricas**
-(o gap-finder só considera o dia completo se `base_metricas_hub` já tiver `results` ou
-`conversions`).
+Dias já coletados **com entrega** e sem `messaging_conversations_started` voltam como
+faltantes no **Puxar métricas**. Marcadores de dia sem entrega (só results/conversions 0)
+continuam preenchidos.
 
 ## KPIs derivados
 
-CTR, CPC, CPM, Frequency (`impressions / reach`), **Custo por resultado** (`spend / results`),
-**Taxa de conversão** (`conversions / clicks × 100`)
+CTR, CTR do link, CPC, CPC do link, CPM, Frequência (`impressions / reach`),
+**Custo por resultado** (`spend / results`), **Custo por conversão** (`spend / conversions`).
 
 ## Limitações e dívida técnica
 
-No **dashboard Meta**, `reach` agrega com **SUM** (soma dos reaches diários).
-
-No **overview** (`metrics.ts`), métricas similares podem usar **MAX** — diferença documentada como dívida D8 a unificar.
+No **dashboard Meta**, `reach` e `unique_clicks` agregam com **MAX** (pico diário).
+Somar dias inflaria pessoas únicas em relação ao Gerenciador no período.
 
 ## Comportamento na UI
 

@@ -5,7 +5,7 @@ status: living
 owner: Engenharia / Dados Lots BI
 tags: [dashboard, ga4, platformdef]
 difficulty: intermediate
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # GA4 (Google Analytics 4)
@@ -17,6 +17,7 @@ last_review: 2026-06-26
 | Platform key | `ga4`                      |
 | View SQL     | `vw_ga4_diario`            |
 | PlatformDef  | `src/lib/platforms/ga4.ts` |
+| Ingestão atual | Hub `prefer_hub` (código + cron). Sem OAuth — Make até **2026-08-17**. Wizard esconde GA4 até P14. |
 
 ## Métricas oficiais
 

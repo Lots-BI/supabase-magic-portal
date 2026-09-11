@@ -3,7 +3,7 @@ title: Segurança
 description: Modelo de defesa em profundidade, segredos, RLS e políticas de acesso.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Segurança
@@ -66,13 +66,14 @@ Exemplo: `createCliente`, `updateCliente`, `createUserAccount`.
 Todas as tabelas de domínio têm RLS habilitada. Policies documentadas em
 [RLS Policies](../04-database/rls-policies.md).
 
-### Exceção: views `SECURITY DEFINER`
+### Views analíticas: `security_invoker`
 
-Views analíticas rodam como owner do banco (migration 07), contornando RLS em
-`base_metricas`. Isolamento mantido via `WHERE current_user_clientes()` na view.
+Desde a migration **51**, views `vw_*` críticas rodam como o JWT (`security_invoker`).
+Isolação = RLS de `base_metricas_make` / `base_metricas_hub` + `current_user_clientes()`.
 
-**Dívida:** reavaliar quando policy correta existir em `base_metricas`.
-Ver [ADR-0003](../02-architecture/adr/0003-views-security-definer.md).
+A migration 07 (DEFINER) e o [ADR-0003](../02-architecture/adr/0003-views-security-definer.md)
+descrevem o workaround antigo. Sem policy SELECT no Make, o invoker devolvia overview
+vazio — corrigido na **54**.
 
 ---
 

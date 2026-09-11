@@ -11,7 +11,7 @@ Ferramentas **técnicas e operacionais** para engenharia e admins experientes. N
 
 ### Objetivo
 
-Verificar se os **dados estão chegando** do pipeline de ingestão para cada cliente e plataforma.
+Verificar se os **dados estão chegando** (Hub para Meta/Instagram; Make leftover para Google/GA4).
 
 ### Passo a passo
 
@@ -24,7 +24,7 @@ Verificar se os **dados estão chegando** do pipeline de ingestão para cada cli
 4. Se vazio:
    - Volte em **Clientes** → integrações `configured`?
    - Token expirado? ID de conta errado?
-   - Pipeline externo rodando?
+   - Pipeline: Hub (crons GitHub Actions + Puxar) para Meta/IG; Make para Google/GA4 até OAuth.
 
 ### Quando usar
 
@@ -60,7 +60,8 @@ Validar que as **views SQL** (`vw_overview_cliente`, `vw_clientes_ativos`, etc.)
 | -------------------------- | ------------------ | ----------------------- |
 | KPI zerado                 | Painel operacional | Integrações em Clientes |
 | Cliente vê menos que admin | Auditoria views    | RLS / client_access     |
-| Dado antigo                | Painel operacional | Re-sync pipeline        |
+| Dado antigo                | Painel operacional | Puxar Hub / cron / Make leftover |
+| Visão geral timeout / vazia | Relatórios = mesma RPC | Ctrl+F5; ver troubleshooting KC |
 
 ## Próximo capítulo
 

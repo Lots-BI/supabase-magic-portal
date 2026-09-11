@@ -3,18 +3,17 @@ title: Integrações & Pipeline de Ingestão
 description: Catálogo de plataformas, IDs técnicos e o pipeline externo (Make/workers).
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Integrações & Pipeline de Ingestão
 
-> **Dois estados:** ingestão **atual** via [Make (transitório)](./current-pipeline-make.md) ·
-> ingestão **alvo** via [Coletores proprietários](./target-collectors.md).
+> **Três documentos:** ingestão **atual** [Hub](./current-pipeline-hub.md) · leftover
+> [Make](./current-pipeline-make.md) · visão de fila [Coletores alvo](./target-collectors.md).
 
-O Lots BI integra com plataformas de marketing de forma **declarativa**: cada plataforma é uma
-entrada em um catálogo (`src/lib/integrations-catalog.ts`) e suas credenciais técnicas são
-colunas em `cadastro_clientes`. Os mesmos campos são lidos pelos workers do Make (hoje) ou
-pelos coletores Lots BI (futuro) para coletar dados.
+O Lots BI integra de forma **declarativa**: catálogo (`src/lib/integrations-catalog.ts`) +
+IDs em `cadastro_clientes` + conexões Hub (`ph_connections`). Meta Ads e Instagram perfil
+coletam via official_api. Make ainda alimenta Google/GA4.
 
 ---
 
@@ -50,32 +49,28 @@ Adicionar plataforma ao catálogo = **uma migration aditiva (`ADD COLUMN`)** + u
 
 ## Pipeline de ingestão
 
-| Estado                         | Documento                                              |
-| ------------------------------ | ------------------------------------------------------ |
-| **Atual (Make — transitório)** | [current-pipeline-make.md](./current-pipeline-make.md) |
-| **Alvo (Coletores Lots BI)**     | [target-collectors.md](./target-collectors.md)         |
-
-Resumo do pipeline **atual** (detalhes no doc dedicado):
-
-> ⚠️ **INFORMAÇÃO NÃO ENCONTRADA / EXTERNA** — cenários Make **não estão versionados** neste
-> repositório. O que segue é inferido do schema e views.
-
-### Modelo inferido
+| Estado | Documento |
+| ------ | --------- |
+| **Atual (Hub + leftover)** | [current-pipeline-hub.md](./current-pipeline-hub.md) |
+| **Make (legado)** | [current-pipeline-make.md](./current-pipeline-make.md) |
+| **Alvo (fila/workers)** | [target-collectors.md](./target-collectors.md) |
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Make as Make (cenário por plataforma)
-    participant CAD as cadastro_clientes
     participant API as API da plataforma
-    participant BM as base_metricas
+    participant Hub as Cron / Puxar
+    participant Make as Make leftover
+    participant H as base_metricas_hub
+    participant M as base_metricas_make
+    participant V as vw_* prefer_hub
 
-    Make->>CAD: lê IDs técnicos (ex.: ga4_property_id) dos clientes ativos
-    loop por cliente/plataforma ativos
-        Make->>API: consulta métricas do período
-        API-->>Make: métricas (por dia/campanha)
-        Make->>BM: INSERT linhas long (data, cliente, plataforma, metrica, valor, campanha)
-    end
+    Hub->>API: Meta / Instagram (ontem BRT)
+    Hub->>H: replace_hub_metric_days
+    Make->>API: Google / GA4 (até OAuth)
+    Make->>M: INSERT long
+    H->>V: dia Hub ganha
+    M->>V: só se Hub não tem o dia
 ```
 
 ### O que sabemos (confirmado pelo código)
@@ -83,7 +78,7 @@ sequenceDiagram
 - Os IDs técnicos que o Make consome moram em `cadastro_clientes` (migration
   `05_cadastro_clientes_make_ids.sql` foi criada exatamente para isso, "eliminando a
   dependência do Google Sheets como fonte de IDs").
-- A saída é `base_metricas` em formato _long_.
+- A saída Make é `base_metricas_make` em formato _long_. Hub usa `base_metricas_hub`.
 - O Google Ads envia `spend` em **micros** (convertido na view).
 - O nome do cliente vindo do Make pode divergir do cadastro (resolvido por
   [aliases](../02-architecture/adr/0004-chave-de-cliente-por-nome-e-aliases.md)).

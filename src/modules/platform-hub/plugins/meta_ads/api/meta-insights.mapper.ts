@@ -1,5 +1,9 @@
 import type { MetricRowV1 } from "../../../../../../contracts/ingest/profiles/metrics-timeseries.v1";
-import type { MetaActionValueV1, MetaInsightRowV1 } from "./meta-api.types";
+import type {
+  MetaActionValueV1,
+  MetaInsightRowV1,
+  MetaResultStatV1,
+} from "./meta-api.types";
 
 const DELIVERY_FIELDS = ["impressions", "reach", "clicks", "spend"] as const;
 
@@ -8,6 +12,12 @@ const ACTION_METRIC_TYPES: Record<string, readonly string[]> = {
   landing_page_views: ["landing_page_view", "omni_landing_page_view"],
   video_views: ["video_view"],
   post_engagements: ["post_engagement"],
+  page_engagements: ["page_engagement"],
+  messaging_conversations_started: [
+    "onsite_conversion.messaging_conversation_started_7d",
+    "onsite_conversion.total_messaging_connection",
+  ],
+  messaging_first_replies: ["onsite_conversion.messaging_first_reply"],
 };
 
 /**
@@ -87,6 +97,33 @@ function parseMetricValue(raw: string | undefined): number | null {
   if (raw === undefined || raw === "") return null;
   const value = Number(raw);
   return Number.isFinite(value) ? value : null;
+}
+
+function valueFromResultStat(stat: MetaResultStatV1): number {
+  const direct = parseMetricValue(stat.value);
+  if (direct !== null) return direct;
+  let total = 0;
+  for (const nested of stat.values ?? []) {
+    const n = parseMetricValue(nested.value);
+    if (n !== null) total += n;
+  }
+  return total;
+}
+
+/**
+ * Soma o field oficial `results` / `objective_results` da Insights API.
+ * Esse é o mesmo recorte da coluna Resultados do Gerenciador.
+ */
+export function pickOfficialResultsList(
+  ...lists: Array<readonly MetaResultStatV1[] | undefined>
+): number {
+  for (const list of lists) {
+    if (!list?.length) continue;
+    let total = 0;
+    for (const stat of list) total += valueFromResultStat(stat);
+    if (total > 0) return total;
+  }
+  return 0;
 }
 
 function sumActionValues(actions: readonly MetaActionValueV1[] | undefined): number {
@@ -186,38 +223,42 @@ export function pickResultsValue(
   insight: MetaInsightRowV1,
   objective = "",
 ): number {
+  const official = pickOfficialResultsList(insight.results, insight.objective_results);
+  if (official > 0) return official;
+
   const byType = actionsByType(insight);
   const normalized = objective.trim().toUpperCase();
+  const messaging = firstPositive(byType, MESSAGING_RESULT_ACTION_TYPES);
+  const conversionLike = pickConversionLikeResults(insight, byType);
 
   if (SALES_OBJECTIVES.has(normalized)) {
-    return pickConversionLikeResults(insight, byType);
+    return conversionLike;
   }
 
   if (LEAD_OBJECTIVES.has(normalized)) {
     const leads = firstPositive(byType, LEAD_RESULT_ACTION_TYPES);
     if (leads > 0) return leads;
-    return pickConversionLikeResults(insight, byType);
+    if (conversionLike > 0) return conversionLike;
+    return messaging;
   }
 
-  if (normalized === "OUTCOME_ENGAGEMENT" || normalized === "MESSAGES") {
-    const messaging = firstPositive(byType, MESSAGING_RESULT_ACTION_TYPES);
-    if (messaging > 0) return messaging;
-    return pickConversionLikeResults(insight, byType);
-  }
+  // WhatsApp / Messenger: o Gerenciador conta a conversa como Resultado.
+  // Sem objective (ou tráfego/engajamento), não descartar a mensagem.
+  if (messaging > 0) return messaging;
 
   if (TRAFFIC_OBJECTIVES.has(normalized)) {
     const traffic = firstPositive(byType, FALLBACK_RESULT_ACTION_TYPES);
     if (traffic > 0) return traffic;
-    return pickConversionLikeResults(insight, byType);
+    return conversionLike;
   }
 
   if (normalized === "OUTCOME_APP_PROMOTION" || normalized === "APP_INSTALLS") {
     const installs = firstPositive(byType, OTHER_PRIMARY_RESULT_ACTION_TYPES);
     if (installs > 0) return installs;
-    return pickConversionLikeResults(insight, byType);
+    return conversionLike;
   }
 
-  return pickConversionLikeResults(insight, byType);
+  return conversionLike;
 }
 
 function enumerateIsoDays(from: string, to: string): string[] {

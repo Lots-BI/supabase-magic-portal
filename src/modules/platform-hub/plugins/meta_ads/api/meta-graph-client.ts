@@ -22,7 +22,7 @@ export interface FetchCampaignInsightsResult {
   rateLimitHit: boolean;
 }
 
-/** Delivery + `actions` (fonte da coluna Resultados no Gerenciador). */
+/** Delivery + `actions` (fallback quando o field oficial `results` falha). */
 export const META_INSIGHTS_FIELDS_ACTIONS =
   "campaign_name,campaign_id,impressions,reach,clicks,spend,actions";
 
@@ -31,6 +31,9 @@ export const META_INSIGHTS_FIELDS_WITH_CONVERSIONS = `${META_INSIGHTS_FIELDS_ACT
 
 /** Cliques no link / únicos — o Gerenciador usa estes, não o `clicks` genérico. */
 export const META_INSIGHTS_FIELDS_FULL = `${META_INSIGHTS_FIELDS_WITH_CONVERSIONS},inline_link_clicks,unique_clicks`;
+
+/** Coluna Resultados do Gerenciador — fields oficiais da Insights API. */
+export const META_INSIGHTS_FIELDS_WITH_RESULTS = `${META_INSIGHTS_FIELDS_FULL},results,objective_results`;
 
 export function shouldRetryInsightsWithoutConversions(error: unknown): boolean {
   if (!(error instanceof HttpClientError)) return false;
@@ -44,6 +47,13 @@ export function shouldRetryInsightsWithoutClickBreakdown(error: unknown): boolea
   if (error.status !== 400) return false;
   const text = `${error.message}\n${error.body ?? ""}`.toLowerCase();
   return text.includes("inline_link_clicks") || text.includes("unique_clicks");
+}
+
+export function shouldRetryInsightsWithoutOfficialResults(error: unknown): boolean {
+  if (!(error instanceof HttpClientError)) return false;
+  if (error.status !== 400) return false;
+  const text = `${error.message}\n${error.body ?? ""}`.toLowerCase();
+  return text.includes("objective_results") || /\bresults\b/.test(text);
 }
 
 function normalizeAdAccountId(externalId: string): string {
@@ -82,7 +92,7 @@ export class MetaGraphClient {
     const baseUrl = `${graphBaseUrl(this.graphVersion)}/${accountId}/insights`;
     let rateLimitHit = false;
 
-    let fields = META_INSIGHTS_FIELDS_FULL;
+    let fields = META_INSIGHTS_FIELDS_WITH_RESULTS;
 
     const fetchInsightsPage = async (after?: string) => {
       const response = await this.config.httpClient.request(baseUrl, {
@@ -110,7 +120,16 @@ export class MetaGraphClient {
         try {
           return await fetchInsightsPage(after);
         } catch (error) {
-          if (!after && shouldRetryInsightsWithoutClickBreakdown(error)) {
+          let current = error;
+          if (!after && shouldRetryInsightsWithoutOfficialResults(current)) {
+            fields = META_INSIGHTS_FIELDS_FULL;
+            try {
+              return await fetchInsightsPage(after);
+            } catch (withoutResultsError) {
+              current = withoutResultsError;
+            }
+          }
+          if (!after && shouldRetryInsightsWithoutClickBreakdown(current)) {
             fields = META_INSIGHTS_FIELDS_WITH_CONVERSIONS;
             try {
               return await fetchInsightsPage(after);
@@ -132,7 +151,7 @@ export class MetaGraphClient {
               throwMetaHttpError(clickRetryError);
             }
           }
-          if (!after && shouldRetryInsightsWithoutConversions(error)) {
+          if (!after && shouldRetryInsightsWithoutConversions(current)) {
             fields = META_INSIGHTS_FIELDS_ACTIONS;
             try {
               return await fetchInsightsPage(after);
@@ -143,10 +162,10 @@ export class MetaGraphClient {
               throwMetaHttpError(retryError);
             }
           }
-          if (error instanceof RateLimitHttpError) {
+          if (current instanceof RateLimitHttpError) {
             rateLimitHit = true;
           }
-          throwMetaHttpError(error);
+          throwMetaHttpError(current);
         }
       },
     });

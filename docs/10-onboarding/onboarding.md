@@ -3,7 +3,7 @@ title: Onboarding de Desenvolvedores
 description: Do zero ao primeiro PR no Lots BI — setup, mapa mental e primeiros passos.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-09-11
 ---
 
 # Onboarding de Desenvolvedores

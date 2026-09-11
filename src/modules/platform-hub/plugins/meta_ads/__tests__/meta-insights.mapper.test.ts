@@ -22,7 +22,8 @@ describe("mapMetaInsightsToMetricRows", () => {
     expect(rows.find((r) => r.metricKey === "inline_link_clicks")?.value).toBe(0);
     expect(rows.find((r) => r.metricKey === "video_views")?.value).toBe(0);
     expect(rows.find((r) => r.metricKey === "unique_clicks")).toBeUndefined();
-    expect(rows).toHaveLength(11);
+    expect(rows.find((r) => r.metricKey === "messaging_conversations_started")?.value).toBe(0);
+    expect(rows).toHaveLength(14);
   });
 
   it("soma o campo conversions da Insights API", () => {
@@ -105,7 +106,31 @@ describe("mapMetaInsightsToMetricRows", () => {
       ],
     };
     expect(pickResultsValue(insight, "OUTCOME_SALES")).toBe(0);
-    expect(pickResultsValue(insight)).toBe(0);
+    // Sem objective: a conversa conta (caso Rodrigo / WhatsApp). LPV não.
+    expect(pickResultsValue(insight)).toBe(2);
+  });
+
+  it("usa o field oficial results da Insights API (coluna do Gerenciador)", () => {
+    const insight: MetaInsightRowV1 = {
+      ...base,
+      actions: [{ action_type: "landing_page_view", value: "103" }],
+      results: [{ indicator: "actions:landing_page_view", value: "103" }],
+    };
+    expect(pickResultsValue(insight, "OUTCOME_SALES")).toBe(103);
+  });
+
+  it("aceita objective_results com values[] aninhado", () => {
+    expect(
+      pickResultsValue({
+        ...base,
+        objective_results: [
+          {
+            indicator: "actions:link_click",
+            values: [{ value: "24" }],
+          },
+        ],
+      }),
+    ).toBe(24);
   });
 
   it("campanha de tráfego usa landing page / clique", () => {
@@ -143,6 +168,24 @@ describe("mapMetaInsightsToMetricRows", () => {
     expect(rows.find((r) => r.metricKey === "landing_page_views")?.value).toBe(7);
     expect(rows.find((r) => r.metricKey === "video_views")?.value).toBe(40);
     expect(rows.find((r) => r.metricKey === "post_engagements")?.value).toBe(15);
+    expect(rows.find((r) => r.metricKey === "page_engagements")?.value).toBe(0);
+  });
+
+  it("conversa no WhatsApp vira Resultado e métrica própria", () => {
+    const insight: MetaInsightRowV1 = {
+      ...base,
+      actions: [
+        { action_type: "onsite_conversion.messaging_conversation_started_7d", value: "1" },
+        { action_type: "post_engagement", value: "20" },
+        { action_type: "link_click", value: "3" },
+      ],
+    };
+    expect(pickResultsValue(insight)).toBe(1);
+    expect(pickResultsValue(insight, "OUTCOME_TRAFFIC")).toBe(1);
+    expect(pickResultsValue(insight, "MESSAGES")).toBe(1);
+    const rows = mapMetaInsightsToMetricRows([insight]);
+    expect(rows.find((r) => r.metricKey === "messaging_conversations_started")?.value).toBe(1);
+    expect(rows.find((r) => r.metricKey === "results")?.value).toBe(1);
   });
 });
 

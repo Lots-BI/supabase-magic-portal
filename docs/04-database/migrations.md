@@ -3,7 +3,7 @@ title: Banco — Migrations
 description: Histórico, convenções e princípios das migrations do Lots BI.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-30
+last_review: 2026-09-11
 ---
 
 # Migrations
@@ -46,9 +46,23 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `35_cliente_diretrizes.sql`            | PDF de diretrizes da marca por cliente — tabela `cliente_diretrizes`, bucket `diretrizes-marca`, RLS admin/cliente. |
 | `36_meta_ads_prefer_hub.sql`              | `vw_meta_ads_diario` passa a preferir `base_metricas_hub` por dia+cliente (via `vw_meta_ads_normalizada_prefer_hub`), fallback Make. Mesma receita da 34, com dimensão `campanha`. Só recria views. Ver [meta-ads.md](../06-dashboards/platforms/meta-ads.md). |
 | `37_meta_ads_results_conversions.sql`     | Acrescenta `results` e `conversions` em `vw_meta_ads_diario` (colunas no fim). Coletor oficial passa a pedir `actions` + `conversions` na Insights API. |
+| `46_meta_instagram_extra_insight_metrics.sql` | Métricas extras Meta/IG no envelope Hub (impressões, alcance, etc. além do núcleo). |
+| `47_meta_ads_prefer_hub_ignore_empty_markers.sql` | Sentinela Hub `campanha=''` + results/conversions 0 **não** esconde Make. |
+| `48_base_metricas_hub_natural_key.sql`    | Unique natural + RPC `replace_hub_metric_days` (replace-by-day; nunca escreve Make). |
+| `49_google_ads_prefer_hub.sql`            | `vw_google_ads_diario` prefer_hub; spend Hub `/ 1e6`. |
+| `50_ga4_prefer_hub.sql`                   | `vw_ga4_diario` prefer_hub. |
+| `51_views_security_invoker.sql`           | Views `vw_*` restantes com `security_invoker = true`. |
+| `52_base_metricas_make_schema.sql`        | Espelho versionado de `base_metricas_make` (sem migrar dados). |
+| `53_app_notifications.sql`                | `app_notifications` (notificações server-side). |
+| `54_overview_prefer_hub_and_make_rls.sql` | SELECT autenticado no Make + `vw_metricas` prefer_hub (overview deixa de ficar vazio). |
+| `55_overview_query_timeout.sql`           | `current_user_clientes()` plpgsql; tentativa MATERIALIZED (substituída pela 56). |
+| `56_portfolio_overview_single_pass.sql`   | Overview 1-pass FILTER; RPC `portfolio_overview` / `portfolio_clientes_ativos`. |
+| `57_overview_paid_conversions.sql`        | Colunas no fim: `meta_results`, `meta_conversions`, `google_conversions`. |
+| `58_meta_ads_messaging_metrics.sql`       | `vw_meta_ads_diario`: `messaging_conversations_started`, `messaging_first_replies`, `page_engagements` no **fim**. WhatsApp do Gerenciador. |
 
-> **Não existe `04`.** A tentativa `04_integracoes_make.sql` foi **deprecada e substituída**
-> pela `05` (que usa nomes de coluna diferentes); a 04 nunca foi aplicada ao banco.
+> Conteúdos (38–45) e demais arquivos em `supabase/migrations-official/` seguem a mesma
+> numeração. Lista completa no diretório. **Não existe `04`.** A tentativa
+> `04_integracoes_make.sql` foi deprecada e substituída pela `05`.
 
 ---
 
@@ -79,10 +93,10 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 Projeto Supabase: `ywvhoctcmibjitvwkkhb`.
 
 1. Acesse o [Supabase Dashboard](https://supabase.com/dashboard) → SQL Editor.
-2. Execute cada arquivo em **ordem numérica** (`01` → `31`).
+2. Execute cada arquivo em **ordem numérica** (`01` → `57`).
 3. Cada migration é idempotente — re-executar é seguro (exceto editar arquivo já aplicado).
 4. Ao final de cada arquivo, rode o bloco de **validação** comentado (quando existir).
-5. Atualize este doc se criar migration `13+`.
+5. Atualize este doc se criar migration `58+`. DDL remoto: MCP `apply_migration` **e** o arquivo no git.
 
 ### Ordem obrigatória
 
@@ -113,6 +127,19 @@ Projeto Supabase: `ywvhoctcmibjitvwkkhb`.
 35_cliente_diretrizes.sql
 36_meta_ads_prefer_hub.sql
 37_meta_ads_results_conversions.sql
+38–45  Conteúdos (ver arquivos)
+46_meta_instagram_extra_insight_metrics.sql
+47_meta_ads_prefer_hub_ignore_empty_markers.sql
+48_base_metricas_hub_natural_key.sql
+49_google_ads_prefer_hub.sql
+50_ga4_prefer_hub.sql
+51_views_security_invoker.sql
+52_base_metricas_make_schema.sql
+53_app_notifications.sql
+54_overview_prefer_hub_and_make_rls.sql
+55_overview_query_timeout.sql
+56_portfolio_overview_single_pass.sql
+57_overview_paid_conversions.sql
 ```
 
 ### Rollback

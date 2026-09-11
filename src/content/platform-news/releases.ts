@@ -21,6 +21,20 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-09-11-hub-ingest-overview",
+    date: "2026-09-11",
+    title: "Métricas Meta/Instagram de noite e visão geral mais rápida",
+    summary:
+      "Meta Ads e Instagram perfil passam a ser coletados pelo Hub (crons + Puxar). A Visão geral e os Relatórios do admin leem um RPC — sem timeout — e Conversões usam resultados Meta além do GA4.",
+    bullets: [
+      "Puxar métricas e crons noturnos no Hub; Make continua só como leftover (Google/GA4 ainda sem OAuth).",
+      "Visão geral e Relatórios: números do portfólio via servidor (Ctrl+F5 se a tela antiga estiver em cache).",
+      "KPI Conversões = resultados das campanhas Meta + Google + GA4 (não soma o pixel em dobro).",
+    ],
+    audience: "admin",
+    tags: ["Platform Hub", "Visão geral", "Relatórios"],
+  },
+  {
     id: "2026-09-06-conteudos-aprovacao-instagram",
     date: "2026-09-06",
     title: "Conteúdos: aprovar roteiro, enviar mídias e publicar no Instagram",

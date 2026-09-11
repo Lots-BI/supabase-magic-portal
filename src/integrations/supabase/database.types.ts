@@ -3700,6 +3700,9 @@ export type Database = {
           inline_link_clicks: number | null
           landing_page_views: number | null
           link_clicks: number | null
+          messaging_conversations_started: number | null
+          messaging_first_replies: number | null
+          page_engagements: number | null
           post_engagements: number | null
           reach: number | null
           results: number | null

@@ -3,7 +3,7 @@ title: Estrutura do Repositório
 description: Organização de pastas, convenções de nomes e mapa de módulos do código.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-30
+last_review: 2026-09-11
 ---
 
 # Estrutura do Repositório
@@ -139,7 +139,7 @@ Migrations numeradas, aditivas, idempotentes. Ordem:
 | 15  | `auth_invalidate_sessions.sql`         | RPC invalidação de sessões            |
 | 16  | `lifecycle_invite_expired_removal.sql` | Dados invite_expired → invite_pending |
 
-> Não existe migration `04` (deprecada).
+> Não existe migration `04` (deprecada). Lista completa **01→57**: [migrations.md](../../04-database/migrations.md). Hub/overview: 34–37, 46–57.
 
 ---
 
