@@ -5,6 +5,7 @@ import { editorialPillarRepository } from "../repositories/editorial-pillar.repo
 import { buildKanbanBoard, type KanbanBoard } from "../services/build-kanban-board";
 import { buildCardTimeline } from "../services/build-card-timeline";
 import type { ContentCard } from "../types/content-card";
+import type { PublishedIgSnapshot } from "@/modules/instagram-posts/types";
 import {
   attachmentToMediaAsset,
   listCardAttachmentsWithUrls,
@@ -28,14 +29,56 @@ export type CardDetail = {
   events: ReturnType<typeof buildCardTimeline>;
   attachments: Awaited<ReturnType<typeof listCardAttachmentsWithUrls>>;
   pillar: { id: string; titulo: string; objetivo: string | null; cor: string } | null;
-  publishedIg:
-    | {
-        permalink: string | null;
-        lastSyncedAt: string | null;
-        metrics: Record<string, number>;
-      }
-    | null;
+  publishedIg: PublishedIgSnapshot | null;
 };
+
+const IG_MEDIA_SELECT =
+  "id, ig_media_id, media_product_type, metrics, permalink, last_synced_at";
+
+function mapPublishedIg(
+  row: Record<string, unknown>,
+  clienteSlug: string | null,
+): PublishedIgSnapshot {
+  return {
+    mediaId: String(row.id),
+    igMediaId: String(row.ig_media_id),
+    mediaProductType: String(row.media_product_type ?? ""),
+    permalink: row.permalink != null ? String(row.permalink) : null,
+    lastSyncedAt: row.last_synced_at != null ? String(row.last_synced_at) : null,
+    metrics: (row.metrics as PublishedIgSnapshot["metrics"]) ?? {},
+    clienteSlug,
+  };
+}
+
+export async function loadPublishedIgForCard(
+  supabase: SupabaseClient,
+  card: Pick<ContentCard, "id" | "cadastro_cliente_id" | "external_post_id">,
+): Promise<PublishedIgSnapshot | null> {
+  const [{ data: cadastro }, byFk] = await Promise.all([
+    supabase.from("cadastro_clientes").select("slug").eq("id", card.cadastro_cliente_id).maybeSingle(),
+    supabase
+      .from("ig_media")
+      .select(IG_MEDIA_SELECT)
+      .eq("content_card_id", card.id)
+      .order("last_synced_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  if (byFk.error) throw new Error(byFk.error.message);
+  const slug = cadastro?.slug != null ? String(cadastro.slug) : null;
+  if (byFk.data) return mapPublishedIg(byFk.data as Record<string, unknown>, slug);
+
+  if (!card.external_post_id) return null;
+  const byExt = await supabase
+    .from("ig_media")
+    .select(IG_MEDIA_SELECT)
+    .eq("cadastro_cliente_id", card.cadastro_cliente_id)
+    .eq("ig_media_id", card.external_post_id)
+    .maybeSingle();
+  if (byExt.error) throw new Error(byExt.error.message);
+  if (!byExt.data) return null;
+  return mapPublishedIg(byExt.data as Record<string, unknown>, slug);
+}
 
 export async function getCardDetail(
   supabase: SupabaseClient,
@@ -44,27 +87,11 @@ export async function getCardDetail(
   const card = await contentCardRepository.findById(supabase, cardId);
   if (!card) return null;
 
-  const [events, attachments, igRow] = await Promise.all([
+  const [events, attachments, publishedIg] = await Promise.all([
     contentCardEventRepository.listByCardId(supabase, cardId),
     listCardAttachmentsWithUrls(supabase, cardId, card.capa_url),
-    supabase
-      .from("ig_media")
-      .select("metrics, permalink, last_synced_at")
-      .eq("content_card_id", cardId)
-      .order("last_synced_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+    loadPublishedIgForCard(supabase, card),
   ]);
-
-  if (igRow.error) throw new Error(igRow.error.message);
-  const publishedIg = igRow.data
-    ? {
-        permalink: igRow.data.permalink != null ? String(igRow.data.permalink) : null,
-        lastSyncedAt:
-          igRow.data.last_synced_at != null ? String(igRow.data.last_synced_at) : null,
-        metrics: (igRow.data.metrics as Record<string, number>) ?? {},
-      }
-    : null;
 
   let pillar: CardDetail["pillar"] = null;
   if (card.pilar_id) {

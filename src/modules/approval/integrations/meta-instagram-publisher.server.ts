@@ -18,6 +18,7 @@ import {
   type InstagramPublishTarget,
 } from "./execute-instagram-publish";
 import { resolveInstagramPublishTarget } from "./resolve-instagram-publish-target.server";
+import { tryLinkIgMediaRowToCard } from "@/modules/instagram-posts/link-ig-media-to-content-cards.server";
 
 const PUBLISH_URL_TTL_SECONDS = 6 * 60 * 60;
 
@@ -145,6 +146,11 @@ export async function publishCardWithClient(
         container_id: published.containerId,
         permalink: published.permalink ?? null,
       },
+    });
+    await tryLinkIgMediaRowToCard(db, {
+      cadastroClienteId: card.cadastro_cliente_id,
+      igMediaId: published.mediaId,
+      cardId,
     });
 
     return {

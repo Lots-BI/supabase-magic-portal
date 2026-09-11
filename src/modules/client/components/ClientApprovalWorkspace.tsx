@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "@/components/lots/PageHeader";
@@ -38,14 +38,18 @@ function invalidateScopedViews(
   qc.invalidateQueries({ queryKey: ["approval", "library", scopeQueryKey] });
 }
 
-export function ClientApprovalWorkspace() {
+export function ClientApprovalWorkspace({ initialCardId }: { initialCardId?: string }) {
   const scope = useClientScope();
   const qc = useQueryClient();
   const accessFn = useServerFn(checkScopedPortalAccessFn);
   const boardFn = useServerFn(getScopedKanbanBoardFn);
   const pillarsFn = useServerFn(listScopedEditorialPillarsFn);
   const [tab, setTab] = useState<ApprovalTab>("calendar");
-  const [openCardId, setOpenCardId] = useState<string | null>(null);
+  const [openCardId, setOpenCardId] = useState<string | null>(initialCardId ?? null);
+
+  useEffect(() => {
+    if (initialCardId) setOpenCardId(initialCardId);
+  }, [initialCardId]);
 
   const accessQ = useQuery({
     queryKey: ["client-aprovacoes", "access", scope.scopeQueryKey],

@@ -6,7 +6,7 @@ import { editorialPillarRepository } from "../repositories/editorial-pillar.repo
 import { buildKanbanBoard } from "../services/build-kanban-board";
 import { buildCardTimeline } from "../services/build-card-timeline";
 import { listCardAttachmentsWithUrls } from "./attachment-lifecycle.server";
-import type { CardDetail } from "./card-query.server";
+import { loadPublishedIgForCard, type CardDetail } from "./card-query.server";
 
 export async function getClientKanbanBoard(supabase: SupabaseClient, scope: ClientAccessScope) {
   const cards = await contentCardRepository.listForCadastroClienteIds(
@@ -31,9 +31,10 @@ export async function getClientCardDetail(
   if (!card) return null;
   if (card.status === "roteiro") return null;
 
-  const [events, attachments] = await Promise.all([
+  const [events, attachments, publishedIg] = await Promise.all([
     contentCardEventRepository.listByCardId(supabase, cardId),
     listCardAttachmentsWithUrls(supabase, cardId, card.capa_url),
+    loadPublishedIgForCard(supabase, card),
   ]);
 
   let pillar: CardDetail["pillar"] = null;
@@ -47,5 +48,6 @@ export async function getClientCardDetail(
     events: buildCardTimeline(events),
     attachments,
     pillar,
+    publishedIg,
   };
 }

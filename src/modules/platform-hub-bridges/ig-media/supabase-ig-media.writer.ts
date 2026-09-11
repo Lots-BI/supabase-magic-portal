@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { IgMediaSyncPayloadV1 } from "@/modules/instagram-posts/types";
+import { linkIgMediaToContentCards } from "@/modules/instagram-posts/link-ig-media-to-content-cards.server";
 
 const THUMB_BUCKET = "ig-media-thumbs";
 
@@ -106,6 +107,16 @@ export async function writeIgMediaSync(
       }
       historyRows += historyRowsToInsert.length;
     }
+  }
+
+  try {
+    await linkIgMediaToContentCards(supabase, {
+      cadastroClienteId: payload.cadastroClienteId,
+      igMediaIds: payload.items.map((item) => item.igMediaId),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn("[ig-media] vínculo com Conteúdos falhou:", message);
   }
 
   return { mediaUpserted, historyRows, thumbsCached };

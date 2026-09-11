@@ -23,16 +23,13 @@ import { cn } from "@/lib/utils";
 import type { ContentCard } from "@/modules/approval/types/content-card";
 import { adminConteudosCalendarHref } from "@/modules/approval/services/admin-conteudos-href";
 import { PublishedIgMetrics } from "../card/PublishedIgMetrics";
+import type { PublishedIgSnapshot } from "@/modules/instagram-posts/types";
 
 type PublishMode = "now" | "schedule";
 
 type CardDetailPayload = {
   card: ContentCard;
-  publishedIg?: {
-    permalink: string | null;
-    lastSyncedAt: string | null;
-    metrics: Record<string, number>;
-  } | null;
+  publishedIg?: PublishedIgSnapshot | null;
 };
 
 function toDatetimeLocalValue(card: ContentCard): string {

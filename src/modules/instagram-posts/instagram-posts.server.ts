@@ -6,6 +6,10 @@ import { resolveIsAdmin } from "@/lib/owner-admin";
 import { assertClientPortalAccess } from "@/modules/approval/internal/client-access.server";
 import { syncInstagramMediaConnection } from "./instagram-media-sync.server";
 import { syncInstagramProfileConnection } from "./instagram-profile-sync.server";
+import {
+  attachContentCardsToPosts,
+  type ContentCardAttachRow,
+} from "./attach-content-cards";
 import type { IgMediaMetrics, IgMediaRow } from "./types";
 
 const SYNC_COOLDOWN_MS = 2 * 60 * 1000;
@@ -22,15 +26,83 @@ const listInputSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
   productType: z.string().optional(),
+  includeMediaId: z.string().uuid().optional(),
 });
 
 const syncInputSchema = z.object({
   cadastroClienteId: z.number().int().positive(),
 });
 
+const historyInputSchema = z.object({
+  cadastroClienteId: z.number().int().positive(),
+  mediaId: z.string().uuid(),
+});
+
 const syncProfileInputSchema = z.object({
   cadastroClienteId: z.number().int().positive(),
 });
+
+const CARD_ATTACH_SELECT =
+  "id, titulo, formato, linha_editorial, tema, cta, pilar_id, status, data_publicacao, hora_publicacao, tags, roteiro, copy_text, legenda, external_post_id";
+
+async function attachEditorialCards(
+  supabase: import("@supabase/supabase-js").SupabaseClient,
+  cadastroClienteId: number,
+  posts: IgMediaRow[],
+): Promise<IgMediaRow[]> {
+  if (posts.length === 0) return posts;
+
+  const cardIds = [
+    ...new Set(posts.map((post) => post.content_card_id).filter((id): id is string => Boolean(id))),
+  ];
+  const unmatchedMediaIds = [
+    ...new Set(posts.filter((post) => !post.content_card_id).map((post) => post.ig_media_id)),
+  ];
+
+  const cards: ContentCardAttachRow[] = [];
+
+  if (cardIds.length > 0) {
+    const { data, error } = await supabase
+      .from("content_cards")
+      .select(CARD_ATTACH_SELECT)
+      .eq("cadastro_cliente_id", cadastroClienteId)
+      .in("id", cardIds);
+    if (error) throw new Error(error.message);
+    cards.push(...((data ?? []) as ContentCardAttachRow[]));
+  }
+
+  if (unmatchedMediaIds.length > 0) {
+    const { data, error } = await supabase
+      .from("content_cards")
+      .select(CARD_ATTACH_SELECT)
+      .eq("cadastro_cliente_id", cadastroClienteId)
+      .in("external_post_id", unmatchedMediaIds);
+    if (error) throw new Error(error.message);
+    for (const row of (data ?? []) as ContentCardAttachRow[]) {
+      if (!cards.some((card) => card.id === row.id)) cards.push(row);
+    }
+  }
+
+  if (cards.length === 0) return posts;
+
+  const pillarIds = [
+    ...new Set(cards.map((card) => card.pilar_id).filter((id): id is string => Boolean(id))),
+  ];
+  const pillarsById: Record<string, string> = {};
+  if (pillarIds.length > 0) {
+    const { data, error } = await supabase
+      .from("editorial_pillars")
+      .select("id, titulo")
+      .eq("cadastro_cliente_id", cadastroClienteId)
+      .in("id", pillarIds);
+    if (error) throw new Error(error.message);
+    for (const row of data ?? []) {
+      pillarsById[String(row.id)] = String(row.titulo);
+    }
+  }
+
+  return attachContentCardsToPosts(posts, cards, pillarsById);
+}
 
 function mapRow(row: Record<string, unknown>): IgMediaRow {
   return {
@@ -118,10 +190,27 @@ export const listInstagramPostsFn = createServerFn({ method: "GET" })
     const { data: rows, error } = await query.limit(500);
     if (error) throw new Error(error.message);
 
+    const posts = (rows ?? []).map((row) => mapRow(row as Record<string, unknown>));
+    if (data.includeMediaId && !posts.some((post) => post.id === data.includeMediaId)) {
+      const extra = await context.supabase
+        .from("vw_ig_media_dashboard")
+        .select("*")
+        .eq("cadastro_cliente_id", data.cadastroClienteId)
+        .eq("id", data.includeMediaId)
+        .maybeSingle();
+      if (extra.error) throw new Error(extra.error.message);
+      if (extra.data) posts.unshift(mapRow(extra.data as Record<string, unknown>));
+    }
+
     const connection = await findInstagramConnection(data.cadastroClienteId);
+    const withCards = await attachEditorialCards(
+      context.supabase,
+      data.cadastroClienteId,
+      posts,
+    );
 
     return {
-      posts: (rows ?? []).map((row) => mapRow(row as Record<string, unknown>)),
+      posts: withCards,
       hasConnection: Boolean(connection),
       lastSyncedAt: rows?.[0]?.last_synced_at != null ? String(rows[0].last_synced_at) : null,
     };
@@ -236,4 +325,36 @@ export const getInstagramPostThumbUrlFn = createServerFn({ method: "GET" })
       .createSignedUrl(data.storagePath, 3600);
     if (error) throw new Error(error.message);
     return { url: signed?.signedUrl ?? null };
+  });
+
+export const listInstagramPostHistoryFn = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => historyInputSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertClienteAccess(context, data.cadastroClienteId);
+
+    const { data: media, error: mediaError } = await context.supabase
+      .from("ig_media")
+      .select("id")
+      .eq("id", data.mediaId)
+      .eq("cadastro_cliente_id", data.cadastroClienteId)
+      .maybeSingle();
+    if (mediaError) throw new Error(mediaError.message);
+    if (!media?.id) throw new Error("Publicação não encontrada");
+
+    const { data: rows, error } = await context.supabase
+      .from("ig_media_metrics_history")
+      .select("metric_key, value, collected_at")
+      .eq("ig_media_id", data.mediaId)
+      .order("collected_at", { ascending: true })
+      .limit(400);
+    if (error) throw new Error(error.message);
+
+    return {
+      points: (rows ?? []).map((row) => ({
+        metricKey: String((row as { metric_key: string }).metric_key),
+        value: Number((row as { value: number }).value),
+        collectedAt: String((row as { collected_at: string }).collected_at),
+      })),
+    };
   });

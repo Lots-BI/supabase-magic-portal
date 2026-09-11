@@ -73,6 +73,11 @@ export function InstagramPostCard({
             year: "numeric",
           })}
         </p>
+        {post.contentCard && (
+          <p className="line-clamp-2 text-[12px] font-medium leading-snug">
+            {post.contentCard.titulo}
+          </p>
+        )}
         <div className="flex flex-wrap gap-1.5">
           {metrics.map((metric) => (
             <span

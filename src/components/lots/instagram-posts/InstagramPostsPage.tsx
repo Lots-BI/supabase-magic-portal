@@ -1,28 +1,26 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, RefreshCw } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { PeriodPicker } from "@/components/lots/PeriodPicker";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { resolvePeriod, type PeriodInput } from "@/lib/period";
+import { resolvePeriod, formatBR, type PeriodInput } from "@/lib/period";
+import { pctDelta } from "@/lib/platforms/engine";
 import type { IgMediaRow } from "@/modules/instagram-posts/types";
 import {
   listInstagramPostsFn,
   syncInstagramPostsFn,
 } from "@/modules/instagram-posts/instagram-posts.server";
 import { InstagramPostCard } from "./InstagramPostCard";
+import { InstagramPostReport } from "./InstagramPostReport";
+import { StatCard } from "@/components/lots/StatCard";
 import {
   engagementRate,
-  formatMetricValue,
-  formatProductTypeLabel,
-  metricLabel,
+  POSTS_KPI_KEYS,
+  POSTS_KPI_LABELS,
+  summarizePosts,
 } from "./format-metrics";
 
 const PRODUCT_FILTERS = [
@@ -35,11 +33,18 @@ const PRODUCT_FILTERS = [
 
 export function InstagramPostsPage({
   cadastroClienteId,
+  clienteSlug,
+  isAdmin,
+  openMediaId,
 }: {
   cadastroClienteId: number;
   clienteNome: string;
+  clienteSlug?: string;
+  isAdmin?: boolean;
+  openMediaId?: string;
 }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [periodInput, setPeriodInput] = useState<PeriodInput>({ preset: "last_30" });
   const [productFilter, setProductFilter] = useState("all");
   const [selected, setSelected] = useState<IgMediaRow | null>(null);
@@ -52,6 +57,7 @@ export function InstagramPostsPage({
       period.from,
       period.to,
       productFilter,
+      openMediaId ?? null,
     ],
     queryFn: () =>
       listInstagramPostsFn({
@@ -59,6 +65,26 @@ export function InstagramPostsPage({
           cadastroClienteId,
           from: period.from,
           to: period.to,
+          productType: productFilter === "all" ? undefined : productFilter,
+          includeMediaId: openMediaId,
+        },
+      }),
+  });
+
+  const previousQuery = useQuery({
+    queryKey: [
+      "instagram-posts",
+      cadastroClienteId,
+      period.prevFrom,
+      period.prevTo,
+      productFilter,
+    ],
+    queryFn: () =>
+      listInstagramPostsFn({
+        data: {
+          cadastroClienteId,
+          from: period.prevFrom,
+          to: period.prevTo,
           productType: productFilter === "all" ? undefined : productFilter,
         },
       }),
@@ -81,11 +107,38 @@ export function InstagramPostsPage({
     onError: (error) => toast.error(error.message),
   });
 
-  const posts = postsQuery.data?.posts ?? [];
+  const rawPosts = postsQuery.data?.posts;
+  const posts = useMemo(
+    () => (rawPosts ?? []).map((post) => ({ ...post, cliente_slug: post.cliente_slug ?? clienteSlug })),
+    [rawPosts, clienteSlug],
+  );
+  const currentTotals = useMemo(() => summarizePosts(posts), [posts]);
+  const previousTotals = useMemo(
+    () => summarizePosts(previousQuery.data?.posts ?? []),
+    [previousQuery.data?.posts],
+  );
   const avgEngagement =
     posts.length > 0
       ? posts.reduce((sum, post) => sum + (engagementRate(post.metrics) ?? 0), 0) / posts.length
       : 0;
+
+  useEffect(() => {
+    if (!openMediaId || posts.length === 0) return;
+    const match = posts.find((post) => post.id === openMediaId);
+    if (match) setSelected(match);
+  }, [openMediaId, posts]);
+
+  function closeReport() {
+    setSelected(null);
+    if (openMediaId && clienteSlug) {
+      void navigate({
+        to: "/cliente/$cliente/publicacoes",
+        params: { cliente: clienteSlug },
+        search: {},
+        replace: true,
+      });
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -125,33 +178,24 @@ export function InstagramPostsPage({
       )}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
-        <KpiCard label="Publicações" value={String(posts.length)} />
-        <KpiCard
-          label="Visualizações"
-          value={sumMetric(posts, "views").toLocaleString("pt-BR")}
-        />
-        <KpiCard
-          label="Alcance (soma)"
-          value={sumMetric(posts, "reach").toLocaleString("pt-BR")}
-        />
-        <KpiCard
-          label="Interações"
-          value={sumMetric(posts, "total_interactions").toLocaleString("pt-BR")}
-        />
-        <KpiCard label="Curtidas" value={sumMetric(posts, "likes").toLocaleString("pt-BR")} />
-        <KpiCard label="Salvos" value={sumMetric(posts, "saves").toLocaleString("pt-BR")} />
-        <KpiCard
-          label="Compartilhamentos"
-          value={sumMetric(posts, "shares").toLocaleString("pt-BR")}
-        />
-        <KpiCard
-          label="Comentários"
-          value={sumMetric(posts, "comments").toLocaleString("pt-BR")}
-        />
+        {POSTS_KPI_KEYS.map((key) => (
+          <StatCard
+            key={key}
+            label={POSTS_KPI_LABELS[key]}
+            value={currentTotals[key]}
+            delta={
+              previousQuery.isFetched
+                ? pctDelta(currentTotals[key], previousTotals[key])
+                : null
+            }
+            description={`Vs ${formatBR(period.prevFrom)} – ${formatBR(period.prevTo)}`}
+            emphasis="compact"
+          />
+        ))}
       </div>
       <p className="text-[11px] text-muted-foreground">
-        Alcance somado entre publicações pode contar a mesma pessoa mais de uma vez. Engajamento
-        médio: {avgEngagement.toFixed(1)}%.
+        Cards: variação vs o período anterior do mesmo tamanho. Alcance somado entre publicações
+        pode contar a mesma pessoa mais de uma vez. Engajamento médio: {avgEngagement.toFixed(1)}%.
       </p>
 
       <div className="flex flex-wrap gap-2">
@@ -189,87 +233,12 @@ export function InstagramPostsPage({
         </div>
       )}
 
-      <PostDetailDialog post={selected} onClose={() => setSelected(null)} />
+      <InstagramPostReport
+        post={selected}
+        posts={posts}
+        isAdmin={isAdmin}
+        onClose={closeReport}
+      />
     </div>
-  );
-}
-
-function KpiCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="lots-surface p-4">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
-    </div>
-  );
-}
-
-function sumMetric(posts: IgMediaRow[], key: string): number {
-  return posts.reduce((sum, post) => {
-    const value = post.metrics[key];
-    return sum + (typeof value === "number" ? value : 0);
-  }, 0);
-}
-
-function PostDetailDialog({
-  post,
-  onClose,
-}: {
-  post: IgMediaRow | null;
-  onClose: () => void;
-}) {
-  if (!post) return null;
-
-  const metrics = Object.entries(post.metrics).filter(
-    ([, value]) => typeof value === "number",
-  );
-  const rate = engagementRate(post.metrics);
-
-  return (
-    <Dialog open={Boolean(post)} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>
-            {formatProductTypeLabel(post.media_product_type)} ·{" "}
-            {new Date(post.published_at).toLocaleString("pt-BR")}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          {post.caption && (
-            <p className="text-sm text-muted-foreground line-clamp-6">{post.caption}</p>
-          )}
-          {rate != null && (
-            <p className="text-sm font-medium">Engajamento: {rate.toFixed(1)}%</p>
-          )}
-          <div className="grid grid-cols-2 gap-2">
-            {metrics.map(([key, value]) => (
-              <div key={key} className="rounded-lg border border-border p-2">
-                <p className="text-[10px] uppercase text-muted-foreground">{metricLabel(key)}</p>
-                <p className="text-lg font-semibold tabular-nums">
-                  {formatMetricValue(key, Number(value))}
-                </p>
-              </div>
-            ))}
-          </div>
-          {post.permalink && (
-            <a
-              href={post.permalink}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-            >
-              Ver no Instagram <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          )}
-          {post.media_product_type === "STORY" && (
-            <p className="text-xs text-muted-foreground">
-              Stories expiram nas métricas após ~24h — dados podem não estar disponíveis depois
-              desse período.
-            </p>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 }

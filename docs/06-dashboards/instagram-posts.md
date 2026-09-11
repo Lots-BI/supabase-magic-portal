@@ -74,6 +74,26 @@ curl -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/instagram-media-
 - View: `vw_ig_media_dashboard`
 - Thumbnails: bucket `ig-media-thumbs`
 
+## Relatório ao abrir uma publicação
+
+O mesmo componente serve **cliente e admin** (`InstagramPostsPage` em `/cliente/:slug/publicacoes`).
+
+Ao clicar numa peça, abre um relatório com:
+
+- Todas as métricas gravadas no Hub (não só as 8 da grade)
+- Média e posição vs as outras publicações do recorte (mesmo formato se houver ≥2 pares)
+- O que ficou acima / abaixo da média (±8% / ±25%)
+- Gráfico desta peça vs média e composição das interações
+- Evolução se `ig_media_metrics_history` tiver mais de uma coleta
+
+Implementação: `post-report.ts` + `InstagramPostReport.tsx`.
+
+## Cards vs período anterior
+
+Os 8 cards do topo (publicações, views, alcance, interações, curtidas, salvos,
+compartilhamentos, comentários) comparam o recorte atual com a janela anterior do **mesmo
+tamanho** (`Period.prevFrom` / `prevTo`). A grade de peças continua só no período escolhido.
+
 ## Gate B
 
 ```bash

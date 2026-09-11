@@ -38,12 +38,15 @@ import type { ContentCard } from "@/modules/approval/types/content-card";
 import type { MediaAsset } from "@/lib/media-preview";
 import type { EditorialPillar } from "@/modules/approval/types/editorial-pillar";
 import type { TimelineEntry } from "@/modules/approval/services/build-card-timeline";
+import type { PublishedIgSnapshot } from "@/modules/instagram-posts/types";
+import { PublishedIgMetrics } from "./PublishedIgMetrics";
 
 type ClientCardDetail = {
   card: ContentCard;
   attachments: MediaAsset[];
   events: TimelineEntry[];
   pillar: Pick<EditorialPillar, "titulo" | "cor" | "objetivo"> | null;
+  publishedIg?: PublishedIgSnapshot | null;
 };
 
 function ReadField({
@@ -426,6 +429,9 @@ export function ClientCardDetailDrawer({
                           objetivo: detailQ.data.pillar.objetivo,
                         }}
                       />
+                    )}
+                    {(card.status === "publicado" || card.publish_status === "published") && (
+                      <PublishedIgMetrics ig={detailQ.data?.publishedIg} />
                     )}
                     <div className="divide-y divide-border">
                       <ReadField label="Rede social" value={card.plataforma} />
