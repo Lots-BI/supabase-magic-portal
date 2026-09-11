@@ -139,7 +139,7 @@ function MaterialInboxCard({
         {ready ? (
           <Button type="button" size="sm" disabled={marking} onClick={onDownloadAndProduce}>
             <HardDriveDownload className="mr-2 h-4 w-4" />
-            Baixar e ir para produção
+            Começar peça
           </Button>
         ) : null}
       </div>

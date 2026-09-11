@@ -1,9 +1,8 @@
 import { adminTitle } from "@/lib/brand";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { toast } from "sonner";
 import { Plus, BarChart3 } from "lucide-react";
 import { z } from "zod";
 import { PageHeader } from "@/components/lots/PageHeader";
@@ -12,51 +11,30 @@ import { Button } from "@/components/ui/button";
 import { listClientes } from "@/lib/admin.functions";
 import {
   getKanbanBoard,
-  moveCard,
-  archiveCard,
   listEditorialPillars,
   runPublishDueTickFn,
 } from "@/modules/approval/cards/cards.server";
 import { buildPillarMap } from "@/modules/approval/services/group-cards-by-date";
 import { CardDetailDrawer } from "@/components/lots/approval/card/CardDetailDrawer";
-import { CardCreateSheet } from "@/components/lots/approval/card/CardCreateSheet";
 import { CalendarCreateSheet } from "@/components/lots/approval/calendar/CalendarCreateSheet";
-import {
-  ApprovalWorkspaceTabs,
-  type ApprovalTab,
-} from "@/components/lots/approval/shared/ApprovalWorkspaceTabs";
-import { ApprovalEmptyState } from "@/components/lots/approval/shared/ApprovalEmptyState";
 import { ApprovalPanelSkeleton } from "@/components/lots/approval/shared/ApprovalPanelSkeleton";
 import { ClienteCombobox } from "@/components/lots/approval/shared/ClienteCombobox";
 import { ApprovalAgencyQueue } from "@/components/lots/approval/shared/ApprovalAgencyQueue";
-import { ApprovalConfirmDialog } from "@/components/lots/approval/shared/ApprovalConfirmDialog";
-import { ClipboardList } from "lucide-react";
+import { AgencyNowStrip } from "@/components/lots/approval/shared/AgencyNowStrip";
+import { ContentInsightsPanel } from "@/components/lots/approval/insights/ContentInsightsPanel";
 import type { ContentCardStatus } from "@/modules/approval/types/content-card";
 import { isoDay } from "@/modules/approval/services/calendar-date-utils";
+import { agencyTurnCards, flattenKanbanCards } from "@/modules/approval/services/workflow-stamps";
+import type { KanbanBoard } from "@/modules/approval/services/build-kanban-board";
+import { buildContentInsights } from "@/modules/approval/services/build-content-insights";
+import { listInstagramPostsFn } from "@/modules/instagram-posts/instagram-posts.server";
+import type { IgMediaRow } from "@/modules/instagram-posts/types";
 
-const KanbanBoardView = lazy(() =>
-  import("@/components/lots/approval/kanban/KanbanBoard").then((m) => ({
-    default: m.KanbanBoardView,
-  })),
-);
+const EMPTY_POSTS: IgMediaRow[] = [];
+
 const ApprovalCalendar = lazy(() =>
   import("@/components/lots/approval/calendar/ApprovalCalendar").then((m) => ({
     default: m.ApprovalCalendar,
-  })),
-);
-const EditorialPillarsPanel = lazy(() =>
-  import("@/components/lots/approval/pillars/EditorialPillarsPanel").then((m) => ({
-    default: m.EditorialPillarsPanel,
-  })),
-);
-const LibraryPanel = lazy(() =>
-  import("@/components/lots/approval/library/LibraryPanel").then((m) => ({
-    default: m.LibraryPanel,
-  })),
-);
-const MaterialInboxPanel = lazy(() =>
-  import("@/components/lots/approval/library/MaterialInboxPanel").then((m) => ({
-    default: m.MaterialInboxPanel,
   })),
 );
 
@@ -82,6 +60,7 @@ function invalidateApprovalViews(
   qc.invalidateQueries({ queryKey: ["approval", "library", clienteId] });
   qc.invalidateQueries({ queryKey: ["approval", "materials", clienteId] });
   qc.invalidateQueries({ queryKey: ["approval", "ops-dashboard"] });
+  qc.invalidateQueries({ queryKey: ["approval", "insights", clienteId] });
 }
 
 function workspacePathForStatus(_cardId: string, status: ContentCardStatus): string | null {
@@ -111,23 +90,15 @@ function AprovacoesAdminPage() {
   const qc = useQueryClient();
   const listClientesFn = useServerFn(listClientes);
   const boardFn = useServerFn(getKanbanBoard);
-  const moveFn = useServerFn(moveCard);
-  const archiveFn = useServerFn(archiveCard);
   const pillarsFn = useServerFn(listEditorialPillars);
   const publishTickFn = useServerFn(runPublishDueTickFn);
+  const listPostsFn = useServerFn(listInstagramPostsFn);
   const restoredRef = useRef(false);
 
   const clienteId = search.cliente;
-  const [tab, setTab] = useState<ApprovalTab>(search.tab ?? "calendar");
   const [openCardId, setOpenCardId] = useState<string | null>(search.card ?? null);
-  const [archiveCardId, setArchiveCardId] = useState<string | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
   const [calendarCreateDate, setCalendarCreateDate] = useState<string | null>(null);
   const statusByCardRef = useRef<Record<string, ContentCardStatus>>({});
-
-  useEffect(() => {
-    if (search.tab && search.tab !== tab) setTab(search.tab);
-  }, [search.tab, tab]);
 
   useEffect(() => {
     if (search.card) setOpenCardId(search.card);
@@ -147,11 +118,11 @@ function AprovacoesAdminPage() {
     if (Number.isInteger(n) && n > 0) {
       void navigate({
         to: "/admin/aprovacoes",
-        search: { tab: search.tab ?? "calendar", estrategia: search.estrategia, cliente: n },
+        search: { estrategia: search.estrategia, cliente: n },
         replace: true,
       });
     }
-  }, [clienteId, navigate, search.estrategia, search.tab]);
+  }, [clienteId, navigate, search.estrategia]);
 
   useEffect(() => {
     const now = Date.now();
@@ -160,25 +131,15 @@ function AprovacoesAdminPage() {
     void publishTickFn().catch(() => undefined);
   }, [publishTickFn]);
 
-  const setSearch = (next: { tab?: ApprovalTab; cliente?: number }) => {
+  const setCliente = (id: number | null) => {
     void navigate({
       to: "/admin/aprovacoes",
       search: {
-        tab: next.tab ?? search.tab ?? "calendar",
         estrategia: search.estrategia,
-        ...(next.cliente != null ? { cliente: next.cliente } : {}),
+        ...(id != null ? { cliente: id } : {}),
       },
       replace: true,
     });
-  };
-
-  const setTabAndUrl = (next: ApprovalTab) => {
-    setTab(next);
-    setSearch({ tab: next, cliente: clienteId });
-  };
-
-  const setCliente = (id: number | null) => {
-    setSearch({ tab: search.tab ?? "calendar", cliente: id ?? undefined });
   };
 
   const openCard = (id: string, status?: ContentCardStatus) => {
@@ -219,13 +180,13 @@ function AprovacoesAdminPage() {
   const boardQ = useQuery({
     queryKey: ["approval", "kanban", clienteId],
     queryFn: () => boardFn({ data: { cadastro_cliente_id: clienteId! } }),
-    enabled: !!clienteId && tab === "kanban",
+    enabled: !!clienteId,
   });
 
   useEffect(() => {
     if (!boardQ.data) return;
     const map: Record<string, ContentCardStatus> = {};
-    for (const col of boardQ.data.columns) {
+    for (const col of (boardQ.data as KanbanBoard).columns) {
       for (const card of col.cards) map[card.id] = card.status;
     }
     statusByCardRef.current = { ...statusByCardRef.current, ...map };
@@ -241,73 +202,36 @@ function AprovacoesAdminPage() {
     staleTime: 30_000,
   });
 
-  const pillarMap = useMemo(() => buildPillarMap(pillarsQ.data ?? []), [pillarsQ.data]);
+  const from90 = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 90);
+    return isoDay(d);
+  }, []);
 
+  const insightsQ = useQuery({
+    queryKey: ["approval", "insights", clienteId, from90],
+    queryFn: () =>
+      listPostsFn({
+        data: {
+          cadastroClienteId: clienteId!,
+          from: from90,
+          to: isoDay(new Date()),
+        },
+      }),
+    enabled: !!clienteId,
+    staleTime: 60_000,
+  });
+
+  const pillarMap = useMemo(() => buildPillarMap(pillarsQ.data ?? []), [pillarsQ.data]);
+  const nowCards = useMemo(() => agencyTurnCards(flattenKanbanCards(boardQ.data)), [boardQ.data]);
   const thumbMap = useMemo(() => {
     const map: Record<string, string | null> = {};
-    if (!boardQ.data) return map;
-    for (const col of boardQ.data.columns) {
-      for (const card of col.cards) {
-        map[card.id] = card.capa_url;
-      }
-    }
+    for (const card of nowCards) map[card.id] = card.capa_url;
     return map;
-  }, [boardQ.data]);
-
-  const totalCards = useMemo(
-    () => boardQ.data?.columns.reduce((sum, col) => sum + col.cards.length, 0) ?? 0,
-    [boardQ.data],
-  );
-
-  const moveMut = useMutation({
-    mutationFn: (input: { id: string; status: ContentCardStatus; kanban_ordem: number }) =>
-      moveFn({ data: input }),
-    onMutate: async (input) => {
-      const key = ["approval", "kanban", clienteId];
-      await qc.cancelQueries({ queryKey: key });
-      const prev = qc.getQueryData(key);
-      qc.setQueryData(key, (old: typeof boardQ.data) => {
-        if (!old) return old;
-        let movedCard = null as (typeof old.columns)[0]["cards"][0] | null;
-        const columns = old.columns.map((col) => {
-          const filtered = col.cards.filter((c) => {
-            if (c.id === input.id) {
-              movedCard = { ...c, status: input.status, kanban_ordem: input.kanban_ordem };
-              return false;
-            }
-            return true;
-          });
-          return { ...col, cards: filtered };
-        });
-        if (!movedCard) return old;
-        return {
-          columns: columns.map((col) =>
-            col.status === input.status ? { ...col, cards: [...col.cards, movedCard!] } : col,
-          ),
-        };
-      });
-      return { prev };
-    },
-    onError: (e: Error, _v, ctx) => {
-      if (ctx?.prev) qc.setQueryData(["approval", "kanban", clienteId], ctx.prev);
-      toast.error(e.message);
-    },
-    onSettled: () => {
-      if (clienteId) {
-        void qc.invalidateQueries({ queryKey: ["approval", "kanban", clienteId] });
-      }
-    },
-  });
-
-  const archiveMut = useMutation({
-    mutationFn: (id: string) => archiveFn({ data: { id } }),
-    onSuccess: () => {
-      toast.success("Conteúdo arquivado.");
-      setArchiveCardId(null);
-      if (clienteId) invalidateApprovalViews(qc, clienteId);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+  }, [nowCards]);
+  const insightPosts =
+    (insightsQ.data as { posts?: IgMediaRow[] } | undefined)?.posts ?? EMPTY_POSTS;
+  const peakHour = useMemo(() => buildContentInsights(insightPosts).peakHour, [insightPosts]);
 
   const onCardMutated = () => {
     if (selectedCliente) invalidateApprovalViews(qc, selectedCliente.id, openCardId ?? undefined);
@@ -316,20 +240,11 @@ function AprovacoesAdminPage() {
   if (clientesQ.isLoading) return <DashboardSkeleton />;
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Social"
-        title="Conteúdos"
-        description="Calendário e roteiro → cliente aprova e envia mídias → produção → aprovação final já com horário no Lots."
-      />
+    <div className="space-y-6 pb-24 md:pb-6">
+      <PageHeader eyebrow="Social" title="Conteúdos" />
 
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
-        <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center">
-          <ClienteCombobox clientes={clientes} value={clienteId ?? null} onChange={setCliente} />
-          {clienteId ? (
-            <ApprovalWorkspaceTabs value={tab} onChange={setTabAndUrl} variant="admin" />
-          ) : null}
-        </div>
+        <ClienteCombobox clientes={clientes} value={clienteId ?? null} onChange={setCliente} />
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" asChild>
             <Link to="/admin/aprovacoes/dashboard">
@@ -337,14 +252,13 @@ function AprovacoesAdminPage() {
               Dashboard ops
             </Link>
           </Button>
-          {selectedCliente && (tab === "kanban" || tab === "calendar") ? (
+          {selectedCliente ? (
             <Button
-              onClick={() =>
-                tab === "calendar" ? setCalendarCreateDate(isoDay(new Date())) : setCreateOpen(true)
-              }
+              className="hidden md:inline-flex"
+              onClick={() => setCalendarCreateDate(isoDay(new Date()))}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Novo conteúdo
+              Novo
             </Button>
           ) : null}
         </div>
@@ -352,64 +266,40 @@ function AprovacoesAdminPage() {
 
       {!clienteId && <ApprovalAgencyQueue onSelectCliente={(id) => setCliente(id)} />}
 
-      {clienteId && tab === "kanban" && boardQ.isLoading && <ApprovalPanelSkeleton rows={6} />}
-
-      {clienteId && tab === "kanban" && !boardQ.isLoading && boardQ.data && totalCards === 0 && (
-        <ApprovalEmptyState
-          icon={ClipboardList}
-          title="Nenhum conteúdo no pipeline"
-          description="Crie o primeiro conteúdo editorial para este cliente."
-          action={
-            <Button onClick={() => setCreateOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Novo conteúdo
-            </Button>
-          }
-        />
+      {clienteId && boardQ.isLoading && <ApprovalPanelSkeleton rows={3} />}
+      {clienteId && !boardQ.isLoading && (
+        <AgencyNowStrip cards={nowCards} thumbMap={thumbMap} onOpenCard={openCard} />
       )}
 
-      {clienteId && tab === "kanban" && boardQ.data && totalCards > 0 && (
-        <Suspense fallback={<ApprovalPanelSkeleton rows={6} />}>
-          <KanbanBoardView
-            board={boardQ.data}
-            pillarMap={pillarMap}
-            thumbMap={thumbMap}
-            onMoveCard={(input) => moveMut.mutate(input)}
-            onOpenCard={openCard}
-            onArchiveCard={setArchiveCardId}
+      {clienteId ? (
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+          <Suspense fallback={<ApprovalPanelSkeleton rows={8} />}>
+            <ApprovalCalendar
+              cadastroClienteId={clienteId}
+              estrategiaId={search.estrategia}
+              pillarMap={pillarMap}
+              onOpenCard={openCard}
+              onCreateDay={(iso) => setCalendarCreateDate(iso)}
+            />
+          </Suspense>
+          <ContentInsightsPanel
+            posts={insightPosts}
+            onOpenCard={(id) => openCard(id)}
+            onOpenPermalink={(url) => window.open(url, "_blank", "noopener,noreferrer")}
           />
-        </Suspense>
-      )}
+        </div>
+      ) : null}
 
-      {clienteId && tab === "calendar" && (
-        <Suspense fallback={<ApprovalPanelSkeleton rows={8} />}>
-          <ApprovalCalendar
-            cadastroClienteId={clienteId}
-            estrategiaId={search.estrategia}
-            pillarMap={pillarMap}
-            onOpenCard={openCard}
-            onCreateDay={(iso) => setCalendarCreateDate(iso)}
-          />
-        </Suspense>
-      )}
-
-      {clienteId && tab === "pillars" && (
-        <Suspense fallback={<ApprovalPanelSkeleton />}>
-          <EditorialPillarsPanel cadastroClienteId={clienteId} />
-        </Suspense>
-      )}
-
-      {clienteId && tab === "materials" && (
-        <Suspense fallback={<ApprovalPanelSkeleton rows={6} />}>
-          <MaterialInboxPanel cadastroClienteId={clienteId} />
-        </Suspense>
-      )}
-
-      {clienteId && tab === "library" && (
-        <Suspense fallback={<ApprovalPanelSkeleton rows={6} />}>
-          <LibraryPanel cadastroClienteId={clienteId} />
-        </Suspense>
-      )}
+      {selectedCliente ? (
+        <Button
+          type="button"
+          size="icon"
+          className="fixed bottom-5 right-5 z-40 h-14 w-14 rounded-full shadow-lg md:hidden"
+          onClick={() => setCalendarCreateDate(isoDay(new Date()))}
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      ) : null}
 
       {openCardId && selectedCliente && (
         <CardDetailDrawer
@@ -420,37 +310,6 @@ function AprovacoesAdminPage() {
         />
       )}
 
-      <ApprovalConfirmDialog
-        open={!!archiveCardId}
-        onOpenChange={(open) => {
-          if (!open) setArchiveCardId(null);
-        }}
-        title="Arquivar conteúdo?"
-        description="O card sai do Kanban e da fila de publicação. Você encontra na Biblioteca, como arquivado."
-        confirmLabel="Arquivar"
-        onConfirm={() => {
-          if (archiveCardId) archiveMut.mutate(archiveCardId);
-        }}
-        loading={archiveMut.isPending}
-      />
-
-      {createOpen && selectedCliente && (
-        <CardCreateSheet
-          open={createOpen}
-          onClose={() => setCreateOpen(false)}
-          cliente={selectedCliente}
-          onCreated={(cardId) => {
-            onCardMutated();
-            if (cardId) {
-              void navigate({
-                to: "/admin/aprovacoes/roteiro/$cardId",
-                params: { cardId },
-              });
-            }
-          }}
-        />
-      )}
-
       {calendarCreateDate && selectedCliente && (
         <CalendarCreateSheet
           open
@@ -458,6 +317,7 @@ function AprovacoesAdminPage() {
           cadastroClienteId={selectedCliente.id}
           clienteNome={selectedCliente.nome_cliente}
           defaultDate={calendarCreateDate}
+          suggestedTime={peakHour}
           onCreated={(cardId) => {
             onCardMutated();
             void navigate({

@@ -2,19 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import { Color } from "@tiptap/extension-color";
-import { TextStyle } from "@tiptap/extension-text-style";
-import TextAlign from "@tiptap/extension-text-align";
-import Underline from "@tiptap/extension-underline";
 import { toast } from "sonner";
-import { ArrowLeft, RotateCcw, Send } from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
 import { getContentCard, moveCard, updateCard } from "@/modules/approval/cards/cards.server";
-import {
-  clientRequestChangesFn,
-  getClientContentCard,
-} from "@/modules/approval/cards/client-cards.server";
+import { getClientContentCard } from "@/modules/approval/cards/client-cards.server";
 import {
   FORMAT_LABEL,
   type ContentCard,
@@ -27,31 +18,23 @@ import {
   latestUnansweredChangeRequest,
   type TimelineEntry,
 } from "@/modules/approval/services/build-card-timeline";
+import { isRoteiroHtmlEmpty } from "@/modules/approval/services/roteiro-scenes";
 import { KANBAN_COLUMN_META, formatCardSchedule } from "../kanban/kanban-meta";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
 import { BrDateTimeFields, horaToDbValue } from "../shared/BrDateTimeFields";
 import { ChangeRequestBanner } from "../shared/ChangeRequestBanner";
-import { RoteiroToolbar } from "./RoteiroToolbar";
+import { RoteiroSceneEditor } from "./RoteiroSceneEditor";
+import { RoteiroSceneCards } from "./RoteiroSceneCards";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { adminConteudosCalendarHref } from "@/modules/approval/services/admin-conteudos-href";
 
 type CardDetailPayload = { card: ContentCard; events?: TimelineEntry[] };
 
 const SAVE_DEBOUNCE_MS = 800;
 const SCHEDULE_DEBOUNCE_MS = 500;
-
-const ROTEIRO_EXTENSIONS = [
-  StarterKit,
-  Underline,
-  TextStyle,
-  Color,
-  TextAlign.configure({ types: ["heading", "paragraph"] }),
-];
 
 export function RoteiroEditor({
   cardId,
@@ -67,14 +50,12 @@ export function RoteiroEditor({
   const getClientFn = useServerFn(getClientContentCard);
   const updateFn = useServerFn(updateCard);
   const moveFn = useServerFn(moveCard);
-  const changesFn = useServerFn(clientRequestChangesFn);
 
-  const [changeNote, setChangeNote] = useState("");
   const [dataPub, setDataPub] = useState("");
   const [horaPub, setHoraPub] = useState("");
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scheduleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const initializedRef = useRef(false);
+  const htmlRef = useRef("");
 
   const queryKey = mode === "admin" ? ["content-card", cardId] : ["client-content-card", cardId];
 
@@ -110,6 +91,10 @@ export function RoteiroEditor({
     [mode, cardId, updateFn, invalidate],
   );
 
+  useEffect(() => {
+    htmlRef.current = card?.roteiro ?? "";
+  }, [card?.id, card?.roteiro]);
+
   const persistSchedule = useCallback(
     (date: string, time: string) => {
       if (mode !== "admin") return;
@@ -125,31 +110,6 @@ export function RoteiroEditor({
     },
     [mode, cardId, updateFn, invalidate, invalidateBoards],
   );
-
-  const editor = useEditor({
-    extensions: ROTEIRO_EXTENSIONS,
-    content: card?.roteiro ?? "",
-    editable: mode === "admin",
-    immediatelyRender: false,
-    editorProps: {
-      attributes: {
-        class:
-          "prose prose-sm dark:prose-invert max-w-none min-h-[280px] px-4 py-3 focus:outline-none",
-      },
-    },
-    onUpdate: ({ editor: ed }) => scheduleSave(ed.getHTML()),
-  });
-
-  useEffect(() => {
-    if (!editor || !card || initializedRef.current) return;
-    editor.commands.setContent(card.roteiro ?? "", { emitUpdate: false });
-    editor.setEditable(mode === "admin");
-    initializedRef.current = true;
-  }, [editor, card, mode]);
-
-  useEffect(() => {
-    initializedRef.current = false;
-  }, [cardId]);
 
   useEffect(() => {
     if (!card) return;
@@ -171,8 +131,8 @@ export function RoteiroEditor({
       if (!isRoteiroWorkspaceStatus(card.status)) {
         throw new Error("Só é possível enviar conteúdos em Roteiro ou em Alterações.");
       }
-      const html = editor?.getHTML()?.trim() ?? "";
-      if (!html || html === "<p></p>") {
+      const html = htmlRef.current.trim();
+      if (isRoteiroHtmlEmpty(html)) {
         throw new Error("Escreva o roteiro antes de enviar para aprovação.");
       }
       if (!dataPub) {
@@ -214,16 +174,6 @@ export function RoteiroEditor({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const changesMut = useMutation({
-    mutationFn: () => changesFn({ data: { card_id: cardId, mensagem: changeNote } }),
-    onSuccess: () => {
-      toast.success("Alteração solicitada.");
-      setChangeNote("");
-      invalidate();
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   const statusMeta = card ? KANBAN_COLUMN_META[card.status as ContentCardStatus] : null;
   const statusLabel = card
     ? (KANBAN_COLUMNS.find((c) => c.status === card.status)?.label ?? card.status)
@@ -234,8 +184,6 @@ export function RoteiroEditor({
       : card?.formato;
 
   const showStaffCta = mode === "admin" && card ? isRoteiroWorkspaceStatus(card.status) : false;
-  const showStaffWaiting = mode === "admin" && card?.status === "aguardando_aprovacao";
-  const showClientCta = mode === "client" && card?.status === "aguardando_aprovacao";
   const canEditSchedule = mode === "admin" && card?.status !== "arquivado";
   const changeRequest = latestUnansweredChangeRequest(detailQ.data?.events ?? []);
 
@@ -323,68 +271,32 @@ export function RoteiroEditor({
         </SectionCard>
       )}
 
-      <div
-        className={cn(
-          "overflow-hidden rounded-xl border border-border bg-card",
-          mode === "client" && "bg-muted/20",
-        )}
-      >
-        {editor && mode === "admin" ? <RoteiroToolbar editor={editor} /> : null}
-        {editor ? (
-          <EditorContent editor={editor} />
-        ) : (
-          <div className="min-h-[280px] p-4 text-sm text-muted-foreground">Carregando editor…</div>
-        )}
-      </div>
+      {mode === "admin" ? (
+        <RoteiroSceneEditor
+          resetKey={card.id}
+          html={card.roteiro}
+          editable
+          onChange={(html) => {
+            htmlRef.current = html;
+            scheduleSave(html);
+          }}
+        />
+      ) : (
+        <RoteiroSceneCards html={card.roteiro || card.copy_text} />
+      )}
 
       {showStaffCta && (
-        <div className="flex flex-wrap gap-2">
+        <div className="sticky bottom-3 flex flex-wrap gap-2">
           <Button
             type="button"
+            size="lg"
+            className="h-14 flex-1 bg-[color:var(--success)] text-white hover:bg-[color:var(--success)]/90 sm:flex-none"
             onClick={() => sendApprovalMut.mutate()}
             disabled={sendApprovalMut.isPending}
           >
             <Send className="mr-2 h-4 w-4" />
-            {sendApprovalMut.isPending ? "Enviando…" : "Enviar para aprovação"}
+            {sendApprovalMut.isPending ? "Enviando…" : "Mandar ao cliente"}
           </Button>
-        </div>
-      )}
-
-      {showStaffWaiting && (
-        <p className="text-sm text-muted-foreground">
-          Aguardando o cliente aprovar o roteiro e enviar as mídias gravadas. Data, horário e texto
-          ainda podem ser editados.
-        </p>
-      )}
-
-      {showClientCta && (
-        <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
-          <p className="text-sm text-muted-foreground">
-            Para aprovar, volte ao calendário, anexe as mídias gravadas e clique em Aprovar.
-          </p>
-          <div className="space-y-2">
-            <Textarea
-              placeholder="Descreva as alterações desejadas…"
-              rows={3}
-              value={changeNote}
-              onChange={(e) => setChangeNote(e.target.value)}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                if (!changeNote.trim()) {
-                  toast.error("Descreva a alteração antes de enviar.");
-                  return;
-                }
-                changesMut.mutate();
-              }}
-              disabled={changesMut.isPending}
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Pedir alterações
-            </Button>
-          </div>
         </div>
       )}
     </div>

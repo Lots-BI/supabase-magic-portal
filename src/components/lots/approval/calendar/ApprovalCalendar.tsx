@@ -30,6 +30,7 @@ export function ApprovalCalendar({
   readOnly = false,
   clientMode = false,
   ready = true,
+  compact = false,
 }: {
   cadastroClienteId?: number;
   estrategiaId?: string;
@@ -40,6 +41,7 @@ export function ApprovalCalendar({
   clientMode?: boolean;
   /** Quando false (portal cliente sem acesso), não dispara a query. */
   ready?: boolean;
+  compact?: boolean;
 }) {
   const staffFn = useServerFn(getCalendarCards);
   const clientFn = useServerFn(getClientCalendarCards);
@@ -124,23 +126,25 @@ export function ApprovalCalendar({
           </Button>
         </div>
         <p className="text-sm font-medium capitalize">{title}</p>
-        <div className="flex rounded-lg border border-border p-0.5">
-          {(["month", "week", "day"] as const).map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => setView(v)}
-              className={cn(
-                "rounded-md px-3 py-1 text-xs font-medium transition-colors",
-                view === v
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {v === "month" ? "Mês" : v === "week" ? "Semana" : "Dia"}
-            </button>
-          ))}
-        </div>
+        {compact ? null : (
+          <div className="flex rounded-lg border border-border p-0.5">
+            {(["month", "week", "day"] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setView(v)}
+                className={cn(
+                  "rounded-md px-3 py-1 text-xs font-medium transition-colors",
+                  view === v
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {v === "month" ? "Mês" : v === "week" ? "Semana" : "Dia"}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {calendarQ.isLoading && <ApprovalPanelSkeleton rows={8} />}
@@ -152,21 +156,22 @@ export function ApprovalCalendar({
         </p>
       )}
 
-      {calendarQ.data && view === "month" && (
+      {calendarQ.data && (compact || view === "month") && (
         <MonthGrid
           cursor={cursor}
           byDay={byDay}
           pillarMap={pillarMap}
           onOpenCard={onOpenCard}
           onCreateDay={readOnly ? undefined : onCreateDay}
+          compact={compact}
         />
       )}
 
-      {calendarQ.data && view === "week" && (
+      {calendarQ.data && !compact && view === "week" && (
         <WeekGrid cursor={cursor} byDay={byDay} pillarMap={pillarMap} onOpenCard={onOpenCard} />
       )}
 
-      {calendarQ.data && view === "day" && (
+      {calendarQ.data && !compact && view === "day" && (
         <DayList
           iso={anchor}
           cards={byDay.get(anchor) ?? []}
@@ -176,7 +181,9 @@ export function ApprovalCalendar({
         />
       )}
 
-      {readOnly && <p className="text-xs text-muted-foreground">Visualização somente leitura.</p>}
+      {readOnly && !compact && (
+        <p className="text-xs text-muted-foreground">Visualização somente leitura.</p>
+      )}
     </div>
   );
 }
@@ -209,11 +216,7 @@ function CalendarCardChip({
       )}
       <span className="truncate">
         {statusMeta.emoji} {card.titulo}
-        {card.publish_status === "published"
-          ? " ✓"
-          : card.publish_status === "failed"
-            ? " ⚠"
-            : ""}
+        {card.publish_status === "published" ? " ✓" : card.publish_status === "failed" ? " ⚠" : ""}
       </span>
     </button>
   );
@@ -225,12 +228,14 @@ function MonthGrid({
   pillarMap,
   onOpenCard,
   onCreateDay,
+  compact = false,
 }: {
   cursor: Date;
   byDay: Map<string, ContentCard[]>;
   pillarMap: Record<string, PillarSummary>;
   onOpenCard: (id: string, status?: ContentCardStatus) => void;
   onCreateDay?: (isoDate: string) => void;
+  compact?: boolean;
 }) {
   const days = useMemo(() => buildMonthDays(cursor), [cursor]);
   const todayIso = isoDay(new Date());
@@ -254,7 +259,8 @@ function MonthGrid({
           <div
             key={idx}
             className={cn(
-              "group/day relative min-h-[100px] border-b border-r border-border p-1.5 last:border-r-0",
+              "group/day relative border-b border-r border-border p-1.5 last:border-r-0",
+              compact ? "min-h-[44px]" : "min-h-[100px]",
               !inMonth && "bg-muted/20",
               inMonth && "bg-background",
             )}
@@ -281,17 +287,29 @@ function MonthGrid({
               ) : null}
             </div>
             <div className="mt-1 space-y-1">
-              {posts.slice(0, 3).map((card) => (
-                <CalendarCardChip
-                  key={card.id}
-                  card={card}
-                  pillarMap={pillarMap}
-                  onOpen={() => onOpenCard(card.id, card.status)}
-                />
-              ))}
-              {posts.length > 3 && (
+              {compact
+                ? null
+                : posts
+                    .slice(0, 3)
+                    .map((card) => (
+                      <CalendarCardChip
+                        key={card.id}
+                        card={card}
+                        pillarMap={pillarMap}
+                        onOpen={() => onOpenCard(card.id, card.status)}
+                      />
+                    ))}
+              {!compact && posts.length > 3 && (
                 <p className="px-1 text-[10px] text-muted-foreground">+{posts.length - 3}</p>
               )}
+              {compact && posts.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenCard(posts[0]!.id, posts[0]!.status)}
+                  className="mt-0.5 h-1.5 w-1.5 rounded-full bg-foreground/70"
+                  aria-label={posts[0]!.titulo}
+                />
+              ) : null}
             </div>
           </div>
         );
@@ -392,9 +410,7 @@ function DayList({
                     <p className="text-xs text-muted-foreground">
                       {KANBAN_COLUMN_META[card.status].emoji} {card.plataforma}
                       {card.hora_publicacao ? ` · ${card.hora_publicacao.slice(0, 5)}` : ""}
-                      {publishConfirmationLabel(card)
-                        ? ` · ${publishConfirmationLabel(card)}`
-                        : ""}
+                      {publishConfirmationLabel(card) ? ` · ${publishConfirmationLabel(card)}` : ""}
                     </p>
                   </div>
                 </button>

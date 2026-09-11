@@ -365,7 +365,7 @@ export function ProductionWorkspace({ cardId, backTo }: { cardId: string; backTo
           title={pendingRequired.length > 0 ? `Pendente: ${pendingLabels}` : undefined}
         >
           <Send className="mr-2 h-4 w-4" />
-          Enviar para aprovação com horário
+          Pedir ok
         </Button>
         {pendingRequired.length > 0 && (
           <p className="flex items-center gap-1 text-xs text-muted-foreground">

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
@@ -26,6 +27,7 @@ import {
   commentCard,
   duplicateCard,
   getContentCard,
+  markMaterialsDownloadedFn,
   moveCard,
   updateCard,
   listEditorialPillars,
@@ -39,11 +41,12 @@ import { MobileStatusPicker } from "../kanban/MobileStatusPicker";
 import { KANBAN_COLUMN_META } from "../kanban/kanban-meta";
 import { MediaPreview } from "@/components/lots/MediaPreview/MediaPreview";
 import { assetsForPublishPreview, buildPreviewContext } from "@/lib/media-preview";
-import { Copy, Archive, MessageSquare } from "lucide-react";
+import { Copy, Archive, MessageSquare, Play } from "lucide-react";
 import { PillarBadge } from "../shared/PillarBadge";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
 import { ApprovalConfirmDialog } from "../shared/ApprovalConfirmDialog";
 import { PublishedIgMetrics } from "./PublishedIgMetrics";
+import { BrDateTimeFields, horaToDbValue } from "../shared/BrDateTimeFields";
 
 export function CardDetailDrawer({
   cardId,
@@ -57,6 +60,7 @@ export function CardDetailDrawer({
   onMutated: () => void;
 }) {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const getFn = useServerFn(getContentCard);
   const updateFn = useServerFn(updateCard);
   const moveFn = useServerFn(moveCard);
@@ -64,6 +68,7 @@ export function CardDetailDrawer({
   const duplicateFn = useServerFn(duplicateCard);
   const commentFn = useServerFn(commentCard);
   const pillarsFn = useServerFn(listEditorialPillars);
+  const markFn = useServerFn(markMaterialsDownloadedFn);
 
   const detailQ = useQuery({
     queryKey: ["content-card", cardId],
@@ -201,6 +206,20 @@ export function CardDetailDrawer({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const startProductionMut = useMutation({
+    mutationFn: () => markFn({ data: { id: cardId } }),
+    onSuccess: (next: { id: string }) => {
+      toast.success("Em produção.");
+      onMutated();
+      onClose();
+      void navigate({
+        to: "/admin/aprovacoes/producao/$cardId",
+        params: { cardId: next.id },
+      });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const toggleChecklist = (itemId: string) => {
     if (!card) return;
     const checklist = card.checklist.map((item) =>
@@ -262,7 +281,7 @@ export function CardDetailDrawer({
           )}
 
           {card && (
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-4">
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-4 pb-24">
               <div className="mb-4 flex flex-wrap gap-2">
                 <div className="hidden sm:block">
                   <Select
@@ -309,7 +328,10 @@ export function CardDetailDrawer({
                 </Button>
               </div>
 
-              <Tabs defaultValue="conteudo" className="min-h-0 flex-1">
+              <Tabs
+                defaultValue={card.status === "aguardando_material" ? "arquivos" : "conteudo"}
+                className="min-h-0 flex-1"
+              >
                 <TabsList className="mb-4 w-full justify-start">
                   <TabsTrigger value="conteudo">Conteúdo</TabsTrigger>
                   <TabsTrigger value="arquivos">Arquivos</TabsTrigger>
@@ -493,6 +515,20 @@ export function CardDetailDrawer({
                   </div>
                 </TabsContent>
               </Tabs>
+              {card.status === "aguardando_material" ? (
+                <div className="sticky bottom-0 -mx-6 mt-4 border-t border-border bg-background px-6 py-3">
+                  <Button
+                    type="button"
+                    size="lg"
+                    className="h-12 w-full bg-[color:var(--success)] text-white hover:bg-[color:var(--success)]/90"
+                    onClick={() => startProductionMut.mutate()}
+                    disabled={startProductionMut.isPending}
+                  >
+                    <Play className="mr-2 h-4 w-4" />
+                    Começar peça
+                  </Button>
+                </div>
+              ) : null}
             </div>
           )}
         </DialogContent>

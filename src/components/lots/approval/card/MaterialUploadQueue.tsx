@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, Upload, X } from "lucide-react";
+import { Camera, Loader2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,10 @@ export function MaterialUploadQueue({
   createTicket,
   confirm,
   onDone,
+  variant = "button",
+  capture,
+  accept = MATERIAL_ACCEPT,
+  empty,
 }: {
   label?: string;
   createTicket: (file: File) => Promise<MaterialUploadTicket>;
@@ -38,6 +42,10 @@ export function MaterialUploadQueue({
     fileSize: number;
   }) => Promise<unknown>;
   onDone?: () => void;
+  variant?: "button" | "camera";
+  capture?: boolean;
+  accept?: string;
+  empty?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -52,10 +60,7 @@ export function MaterialUploadQueue({
     const { file, mimeType } = await validateMaterialFile(original);
     const id = `${file.name}-${file.size}-${Date.now()}`;
     const controller = new AbortController();
-    setJobs((prev) => [
-      ...prev,
-      { id, file, progress: 0, status: "uploading", controller },
-    ]);
+    setJobs((prev) => [...prev, { id, file, progress: 0, status: "uploading", controller }]);
     try {
       const ticket = await createTicket(file);
       await uploadMaterialBytes({
@@ -88,30 +93,48 @@ export function MaterialUploadQueue({
     if (inputRef.current) inputRef.current.value = "";
   };
 
+  const camera = variant === "camera";
+
   return (
     <div className="space-y-3">
       <input
         ref={inputRef}
         type="file"
-        multiple
-        accept={MATERIAL_ACCEPT}
+        multiple={!capture}
+        accept={accept}
+        capture={capture ? "environment" : undefined}
         className="hidden"
         onChange={(e) => void handleFiles(e.target.files)}
       />
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
+      {camera ? (
+        <button
           type="button"
-          variant="outline"
           disabled={busy}
           onClick={() => inputRef.current?.click()}
+          className={cn(
+            "flex min-h-[160px] w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-muted/30 text-muted-foreground",
+            empty && !busy && "animate-pulse border-foreground/40",
+          )}
         >
-          {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-          {busy ? "Enviando…" : label}
-        </Button>
-        <p className="text-xs text-muted-foreground">
-          Original, sem compressão · até 5 GB · vídeos grandes vão em partes
-        </p>
-      </div>
+          {busy ? <Loader2 className="h-10 w-10 animate-spin" /> : <Camera className="h-10 w-10" />}
+        </button>
+      ) : (
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy}
+            onClick={() => inputRef.current?.click()}
+          >
+            {busy ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Upload className="mr-2 h-4 w-4" />
+            )}
+            {busy ? "Enviando…" : label}
+          </Button>
+        </div>
+      )}
       {jobs.length > 0 && (
         <ul className="space-y-2">
           {jobs.map((job) => (
@@ -134,10 +157,7 @@ export function MaterialUploadQueue({
                   </Button>
                 ) : null}
               </div>
-              <Progress
-                className="mt-2"
-                value={job.status === "done" ? 100 : job.progress}
-              />
+              <Progress className="mt-2" value={job.status === "done" ? 100 : job.progress} />
               <p
                 className={cn(
                   "mt-1 text-[11px]",

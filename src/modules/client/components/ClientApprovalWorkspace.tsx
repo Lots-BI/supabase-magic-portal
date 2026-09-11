@@ -4,19 +4,12 @@ import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { SectionCard } from "@/components/lots/SectionCard";
-import { EmptyState } from "@/components/lots/EmptyState";
 import { ApprovalPanelSkeleton } from "@/components/lots/approval/shared/ApprovalPanelSkeleton";
-import { KanbanBoardView } from "@/components/lots/approval/kanban/KanbanBoard";
 import { ClientCardDetailDrawer } from "@/components/lots/approval/card/ClientCardDetailDrawer";
 import { buildPillarMap } from "@/modules/approval/services/group-cards-by-date";
-import {
-  ApprovalWorkspaceTabs,
-  type ApprovalTab,
-} from "@/components/lots/approval/shared/ApprovalWorkspaceTabs";
 import { ApprovalCalendar } from "@/components/lots/approval/calendar/ApprovalCalendar";
-import { EditorialPillarsPanel } from "@/components/lots/approval/pillars/EditorialPillarsPanel";
-import { LibraryPanel } from "@/components/lots/approval/library/LibraryPanel";
-import { ClipboardList } from "lucide-react";
+import { ClientSuaVezQueue } from "@/components/lots/approval/shared/ClientSuaVezQueue";
+import { clientTurnCards, flattenKanbanCards } from "@/modules/approval/services/workflow-stamps";
 import { Button } from "@/components/ui/button";
 import { useClientScope } from "@/modules/client/context";
 import {
@@ -44,7 +37,6 @@ export function ClientApprovalWorkspace({ initialCardId }: { initialCardId?: str
   const accessFn = useServerFn(checkScopedPortalAccessFn);
   const boardFn = useServerFn(getScopedKanbanBoardFn);
   const pillarsFn = useServerFn(listScopedEditorialPillarsFn);
-  const [tab, setTab] = useState<ApprovalTab>("calendar");
   const [openCardId, setOpenCardId] = useState<string | null>(initialCardId ?? null);
 
   useEffect(() => {
@@ -64,7 +56,7 @@ export function ClientApprovalWorkspace({ initialCardId }: { initialCardId?: str
   const boardQ = useQuery({
     queryKey: ["client-aprovacoes", "kanban", scope.scopeQueryKey],
     queryFn: () => boardFn({ data: { scope: scope.scopeInput } }),
-    enabled: portalReady && tab === "kanban",
+    enabled: portalReady,
   });
 
   const pillarsQ = useQuery({
@@ -74,22 +66,13 @@ export function ClientApprovalWorkspace({ initialCardId }: { initialCardId?: str
   });
 
   const pillarMap = useMemo(() => buildPillarMap(pillarsQ.data ?? []), [pillarsQ.data]);
+  const suaVez = useMemo(() => clientTurnCards(flattenKanbanCards(boardQ.data)), [boardQ.data]);
 
   const thumbMap = useMemo(() => {
     const map: Record<string, string | null> = {};
-    if (!boardQ.data) return map;
-    for (const col of boardQ.data.columns) {
-      for (const card of col.cards) {
-        map[card.id] = card.capa_url;
-      }
-    }
+    for (const card of suaVez) map[card.id] = card.capa_url;
     return map;
-  }, [boardQ.data]);
-
-  const totalCards = useMemo(
-    () => boardQ.data?.columns.reduce((sum, col) => sum + col.cards.length, 0) ?? 0,
-    [boardQ.data],
-  );
+  }, [suaVez]);
 
   if (accessQ.isLoading) return <ApprovalPanelSkeleton rows={4} />;
 
@@ -100,17 +83,9 @@ export function ClientApprovalWorkspace({ initialCardId }: { initialCardId?: str
         : "Não foi possível validar o acesso ao portal.";
     return (
       <div className="space-y-6">
-        <PageHeader
-          eyebrow="Social"
-          title="Conteúdos"
-          description="Não foi possível abrir o workspace do cliente."
-        />
+        <PageHeader eyebrow="Social" title="Conteúdos" />
         <SectionCard title="Acesso">
-          <p className="text-sm text-destructive">
-            Não foi possível abrir seus conteúdos. Entre novamente ou fale com a agência para
-            liberar o acesso.
-          </p>
-          {msg ? <p className="mt-2 text-xs text-muted-foreground">{msg}</p> : null}
+          <p className="text-sm text-destructive">{msg}</p>
         </SectionCard>
       </div>
     );
@@ -119,20 +94,10 @@ export function ClientApprovalWorkspace({ initialCardId }: { initialCardId?: str
   if (!isStaffPreview && accessQ.data?.role === "staff_redirect") {
     return (
       <div className="space-y-6">
-        <PageHeader
-          eyebrow="Social"
-          title="Conteúdos"
-          description="Este ambiente é destinado a clientes. Use o painel administrativo para produção."
-        />
-        <SectionCard title="Acesso administrativo">
-          <p className="mb-4 text-sm text-muted-foreground">
-            Você está autenticado como equipe interna. O workflow de produção fica em Conteúdos
-            (admin).
-          </p>
-          <Button asChild>
-            <Link to="/admin/aprovacoes">Ir para Conteúdos (admin)</Link>
-          </Button>
-        </SectionCard>
+        <PageHeader eyebrow="Social" title="Conteúdos" />
+        <Button asChild>
+          <Link to="/admin/aprovacoes">Conteúdos</Link>
+        </Button>
       </div>
     );
   }
@@ -140,64 +105,50 @@ export function ClientApprovalWorkspace({ initialCardId }: { initialCardId?: str
   if (!portalReady) {
     return (
       <div className="space-y-6">
-        <PageHeader eyebrow="Social" title="Conteúdos" description="Aguardando permissão…" />
+        <PageHeader eyebrow="Social" title="Conteúdos" />
         <ApprovalPanelSkeleton rows={4} />
       </div>
     );
   }
 
-  const description = isStaffPreview
-    ? `Visualização do cliente ${scope.clienteNome ?? scope.clienteSlug} — somente leitura.`
-    : "Calendário, fila e aprovação de conteúdos — acompanhe e valide o que a agência preparou.";
+  const brand = scope.clienteNome ?? scope.clienteSlug ?? "";
 
   return (
     <div className="space-y-7">
-      <PageHeader eyebrow="Social" title="Conteúdos" description={description} />
+      <PageHeader
+        eyebrow="Social"
+        title="Conteúdos"
+        description={isStaffPreview ? brand : undefined}
+      />
 
-      <ApprovalWorkspaceTabs value={tab} onChange={setTab} variant="client" />
+      {boardQ.isLoading && <ApprovalPanelSkeleton rows={6} />}
 
-      {tab === "kanban" && boardQ.isLoading && <ApprovalPanelSkeleton rows={6} />}
-
-      {tab === "kanban" && boardQ.isError && (
+      {boardQ.isError && (
         <p className="text-sm text-destructive">
-          Não foi possível carregar a fila.
+          Não foi possível carregar.
           {boardQ.error instanceof Error ? ` ${boardQ.error.message}` : ""}
         </p>
       )}
 
-      {tab === "kanban" && !boardQ.isLoading && !boardQ.isError && totalCards === 0 && (
-        <SectionCard eyebrow="Workflow" title="Seu pipeline">
-          <EmptyState
-            icon={ClipboardList}
-            title="Nenhum conteúdo no momento"
-            description="Quando a agência enviar materiais para aprovação, eles aparecerão aqui no Kanban."
-          />
-        </SectionCard>
+      {!boardQ.isLoading && !boardQ.isError && suaVez.length > 0 && (
+        <ClientSuaVezQueue cards={suaVez} thumbMap={thumbMap} onOpenCard={setOpenCardId} />
       )}
 
-      {tab === "kanban" && boardQ.data && totalCards > 0 && (
-        <KanbanBoardView
-          board={boardQ.data}
-          pillarMap={pillarMap}
-          thumbMap={thumbMap}
-          onOpenCard={setOpenCardId}
-          readOnly
-        />
+      {!boardQ.isLoading && !boardQ.isError && suaVez.length === 0 && (
+        <div className="relative min-h-[52vh]">
+          <p className="font-display text-4xl font-semibold tracking-tight">{brand}</p>
+          <div className="absolute bottom-0 right-0 w-[min(100%,280px)] scale-90 origin-bottom-right opacity-90">
+            <ApprovalCalendar
+              pillarMap={pillarMap}
+              onOpenCard={setOpenCardId}
+              readOnly
+              clientMode
+              ready={portalReady}
+              compact
+            />
+          </div>
+        </div>
       )}
-
-      {tab === "calendar" && (
-        <ApprovalCalendar
-          pillarMap={pillarMap}
-          onOpenCard={setOpenCardId}
-          readOnly
-          clientMode
-          ready={portalReady}
-        />
-      )}
-
-      {tab === "pillars" && <EditorialPillarsPanel readOnly clientMode ready={portalReady} />}
-
-      {tab === "library" && <LibraryPanel readOnly clientMode ready={portalReady} />}
 
       {openCardId && (
         <ClientCardDetailDrawer

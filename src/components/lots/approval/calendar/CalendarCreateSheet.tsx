@@ -39,6 +39,7 @@ export function CalendarCreateSheet({
   cadastroClienteId,
   clienteNome,
   defaultDate,
+  suggestedTime,
   onCreated,
 }: {
   open: boolean;
@@ -46,6 +47,7 @@ export function CalendarCreateSheet({
   cadastroClienteId: number;
   clienteNome: string;
   defaultDate: string;
+  suggestedTime?: string | null;
   onCreated: (cardId: string) => void;
 }) {
   const createFn = useServerFn(createCard);
@@ -63,8 +65,8 @@ export function CalendarCreateSheet({
     setFormato("estatico");
     setLinha(LINHAS_EDITORIAIS[0] ?? "Institucional");
     setTema("");
-    setHora("16:00");
-  }, [open, defaultDate]);
+    setHora(suggestedTime?.slice(0, 5) || "16:00");
+  }, [open, defaultDate, suggestedTime]);
 
   const mut = useMutation({
     mutationFn: async () => {
@@ -97,12 +99,7 @@ export function CalendarCreateSheet({
   });
 
   const canSubmit =
-    !!titulo.trim() &&
-    !!tema.trim() &&
-    !!data &&
-    !!linha &&
-    isValidTime24h(hora) &&
-    !mut.isPending;
+    !!titulo.trim() && !!tema.trim() && !!data && !!linha && isValidTime24h(hora) && !mut.isPending;
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
