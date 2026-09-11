@@ -28,12 +28,9 @@ export function GlobalSearch({ isAdmin = false }: { isAdmin?: boolean }) {
   const { data: clientes = [] } = useQuery({
     queryKey: ["search-clientes"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("vw_clientes_ativos")
-        .select("cliente")
-        .order("cliente");
+      const { data, error } = await supabase.rpc("portfolio_clientes_ativos");
       if (error) throw error;
-      return (data ?? []).map((r: { cliente: string }) => r.cliente);
+      return (data ?? []).map((r: { cliente: string }) => r.cliente).sort((a, b) => a.localeCompare(b, "pt-BR"));
     },
     staleTime: 5 * 60_000,
     enabled: open,

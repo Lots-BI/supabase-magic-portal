@@ -19,6 +19,14 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ## [Não lançado]
 
+### Corrigido
+
+- **Timeout dos dashboards (2026-09-11):** `/dashboard` e `/admin` falhavam com
+  `canceling statement due to statement timeout` — RLS avaliava `has_role` em cada
+  linha Hub/Make. Migration **64**: RPCs `portfolio_*` e `dashboard_*` passam a
+  `SECURITY DEFINER` (o recorte do usuário continua no SQL). Busca global deixa de
+  ler `vw_clientes_ativos`.
+
 ### Adicionado
 
 - **Runtime `/api/*` no TanStack Start (2026-09-11):** crons Hub, publicação agendada,
