@@ -16,6 +16,7 @@ import { consentedAudienceHashes } from "./custom-audience";
 import { loadCrmRanking, type CrmRankingRow } from "./ranking.server";
 import { recomputeAndStoreStats } from "./ingest/persist-signal.server";
 import { syncCrmCommentsForCadastro } from "./ingest/sync-comments.server";
+import { syncCrmDirectForCadastro } from "./ingest/sync-direct.server";
 import { resolveCrmInstagramTarget } from "./ingest/resolve-crm-instagram-target.server";
 import { periodRange } from "@/lib/metrics";
 import type { PeriodDays } from "@/components/lots/PeriodToggle";
@@ -166,8 +167,10 @@ export const getCrmCoverageFn = createServerFn({ method: "GET" })
             : key === "comments"
               ? "Ainda não coletamos comentadores nesta conta."
               : key === "ingest_api"
-                ? "Gere um token nesta tela e envie eventos (ManyChat, n8n, Typeform, site)."
-                : "Próximo coletor."),
+                ? "Opcional para formulário do site. Direct Instagram entra pela Graph, no Lots."
+                : key === "dm"
+                  ? "Direct: caso de uso Mensagens no app Meta + Relogin. Sem ManyChat."
+                  : "Próximo coletor."),
         label: COLLECTOR_LABEL[key],
       };
     });
@@ -480,7 +483,22 @@ export const syncCrmCommentsFn = createServerFn({ method: "POST" })
     const role = await assertAdminOrClientScope(context, data.cadastroClienteId);
     if (role === "cliente") throw new Error("Forbidden");
     const admin = getSupabaseAdmin();
-    return syncCrmCommentsForCadastro(admin, data.cadastroClienteId);
+    const comments = await syncCrmCommentsForCadastro(admin, data.cadastroClienteId);
+    try {
+      const direct = await syncCrmDirectForCadastro(admin, data.cadastroClienteId);
+      return { ...comments, direct };
+    } catch (error) {
+      return {
+        ...comments,
+        direct: {
+          ok: false,
+          conversationsScanned: 0,
+          messagesFetched: 0,
+          peopleTouched: 0,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      };
+    }
   });
 
 export const setCrmPersonVipFn = createServerFn({ method: "POST" })

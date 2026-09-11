@@ -38,6 +38,20 @@ flowchart LR
 - Entrypoint SSR redirecionado para `src/server.ts` (via `tanstackStart.server.entry`), que
   envolve a renderização com tratamento de erro robusto.
 
+## Rotas HTTP `/api/*`
+
+O preset Lovable **não monta** `server/routes` (Nitro) no Vercel. Os jobs oficiais estão em
+`src/routes/api/**` (TanStack Start `server.handlers`).
+
+| Rota | Quem chama |
+| ---- | ---------- |
+| `GET /api/health` | prova de vida |
+| `GET /api/cron/*` | GitHub Actions + `CRON_SECRET` |
+| `GET\|POST /api/webhooks/meta` | App Meta |
+| `POST /api/crm/v1/interactions` | formulário do site (opcional) |
+
+Arquivos em `server/routes/api/` ficam como espelho legado. Dev local (`vite dev`) atende as mesmas URLs.
+
 ## Scripts (`package.json`)
 
 | Script      | Comando                         | Uso                       |

@@ -56,11 +56,11 @@ async function upsertCollector(
 
 async function ensureBaselineCollectors(supabase: SupabaseClient, cadastroClienteId: number) {
   const planned: Record<string, string> = {
-    dm: "Direct Instagram — webhook Meta (App Review de mensagens).",
+    dm: "Direct Instagram pela Graph no Lots — caso de uso Mensagens no App Dashboard, depois Relogin. Sem ManyChat.",
     lead_ads: "Lead Ads — webhook leadgen (App Review leads_retrieval).",
     whatsapp: "WhatsApp Cloud — plugin Hub ainda não ligado; mapper pronto.",
     gbp_reviews: "Avaliações do Google Business — planejado.",
-    ingest_api: "POST /api/crm/v1/interactions — ManyChat, n8n, Typeform, site.",
+    ingest_api: "Opcional: formulário do site. Direct e comentário entram pela Graph no Lots.",
   };
   const { data: existing } = await supabase
     .from("crm_collector_state")

@@ -27,9 +27,10 @@ Não é o pipeline comercial da agência (`agency_leads`). É a audiência da ma
 
 ## Coleta
 
-1. **API** `POST /api/crm/v1/interactions` — ManyChat, n8n, Typeform, site. Ver [crm-ingest-api.md](../07-integrations/crm-ingest-api.md).
-2. Cron `instagram-crm-comments-sync` + **Puxar comentários**. Scope OAuth `instagram_manage_comments`. Token antigo não ganha permissão — **Refazer login**.
-3. Webhook Meta: `GET|POST /api/webhooks/meta` (HMAC `META_APP_SECRET`). Direct / Lead Ads / WhatsApp nativos entram quando o App Review estiver ligado. Ver [meta-crm-webhooks.md](../07-integrations/meta-crm-webhooks.md).
+1. **Graph Instagram no Lots** — comentários (já no OAuth) e Direct (caso de uso Mensagens no App Dashboard + `META_REQUEST_IG_MESSAGES_SCOPE=1` + Relogin). Sem ManyChat e sem n8n.
+2. Cron `instagram-crm-comments-sync` (comentários + Direct) depois do sync de mídia. Botão **Puxar Instagram**.
+3. Webhook Meta: `GET|POST /api/webhooks/meta`.
+4. **Opcional** `POST /api/crm/v1/interactions` — só formulário do próprio site. Ver [crm-ingest-api.md](../07-integrations/crm-ingest-api.md).
 
 A Graph **não** entrega e-mail, telefone ou endereço de comentador, nem quem curtiu. Custom Audience só hasheia e-mail/telefone consentidos — nunca IGSID. O texto de um comentário ou DM **não** vira `field_facts`.
 

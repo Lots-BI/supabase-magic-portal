@@ -21,6 +21,20 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-09-11-lots-runtime",
+    date: "2026-09-11",
+    title: "CRM: Direct no Lots, sem ManyChat",
+    summary:
+      "Comentários e Direct Instagram entram na caixa de entrada pela Graph. A agência não precisa de ManyChat nem n8n.",
+    bullets: [
+      "No CRM, **Puxar Instagram** lê comentários e conversas da conta conectada.",
+      "Responder Direct na ficha da pessoa (quando houver IGSID).",
+      "Para ligar Direct: caso de uso Mensagens no app Meta, Relogin da conexão.",
+    ],
+    audience: "all",
+    tags: ["CRM", "Novidade"],
+  },
+  {
     id: "2026-09-11-crm-inbox",
     date: "2026-09-11",
     title: "CRM: caixa de entrada da audiência",
@@ -28,7 +42,7 @@ export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
       "A aba CRM passou a ser a caixa de entrada de quem falou com a marca — WhatsApp, formulário, Direct ou comentário. Sem e-mail inventado no texto.",
     bullets: [
       "Menu **Dados** → **CRM**. A lista abre em **Caixa de entrada**.",
-      "A agência pode ligar ManyChat, n8n ou Typeform na mesma ficha (token na tela, só admin).",
+      "A agência pode ligar um formulário do site na mesma ficha (token na tela, só admin).",
       "E-mail e telefone só entram se o canal enviar o campo — nunca extraídos da mensagem.",
     ],
     audience: "all",

@@ -1,18 +1,9 @@
 import { defineEventHandler } from "h3";
-import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
-import { runDuePublishes } from "@/modules/approval/jobs/publish-due.server";
 import { assertCronAuth } from "../../../lib/cron-auth";
+import { runConteudosPublishDueCron } from "@/modules/runtime/cron-jobs.server";
 
-/** Cron frequente — publica cards aprovados cujo horário já chegou. */
+/** Legado Nitro — runtime oficial é src/routes/api/cron/*.ts */
 export default defineEventHandler(async (event) => {
   assertCronAuth(event);
-  const startedAt = new Date().toISOString();
-  const summary = await runDuePublishes(getSupabaseAdmin());
-
-  return {
-    ok: summary.failed === 0,
-    startedAt,
-    finishedAt: new Date().toISOString(),
-    ...summary,
-  };
+  return runConteudosPublishDueCron();
 });

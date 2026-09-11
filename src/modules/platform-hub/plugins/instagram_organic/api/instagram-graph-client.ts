@@ -8,6 +8,10 @@ import type {
   InstagramAccountInsightsResponseV1,
   InstagramCommentListResponseV1,
   InstagramCommentV1,
+  InstagramConversationListResponseV1,
+  InstagramConversationMessageV1,
+  InstagramConversationMessagesResponseV1,
+  InstagramConversationV1,
 } from "./instagram-api.types";
 import {
   insightMetricsCoreForProductType,
@@ -420,11 +424,87 @@ export class InstagramGraphClient {
     if (!id) throw new Error("Graph não retornou id da mensagem");
     return { id };
   }
+
+  async listConversations(
+    accessToken: string,
+    igUserId: string,
+    maxPages = 3,
+  ): Promise<{ items: InstagramConversationV1[]; unsupported: boolean }> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${igUserId}/conversations`;
+    try {
+      const { items } = await paginateCursorPages({
+        maxPages,
+        fetchPage: async (after) => {
+          const response = await this.config.httpClient.request(url, {
+            searchParams: {
+              access_token: accessToken,
+              platform: "instagram",
+              fields: "id,updated_time,participants",
+              limit: "25",
+              after,
+            },
+          });
+          const body = await response.json<InstagramConversationListResponseV1>();
+          if (body.error?.message) throw new Error(body.error.message);
+          return {
+            data: body.data ?? [],
+            nextCursor: body.paging?.cursors?.after,
+          };
+        },
+      });
+      return { items, unsupported: false };
+    } catch (error) {
+      if (isMessagesPermissionError(error)) {
+        return { items: [], unsupported: true };
+      }
+      throw error;
+    }
+  }
+
+  async listConversationMessages(
+    accessToken: string,
+    conversationId: string,
+    maxPages = 3,
+  ): Promise<InstagramConversationMessageV1[]> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${conversationId}/messages`;
+    try {
+      const { items } = await paginateCursorPages({
+        maxPages,
+        fetchPage: async (after) => {
+          const response = await this.config.httpClient.request(url, {
+            searchParams: {
+              access_token: accessToken,
+              fields: "id,created_time,from,message",
+              limit: "40",
+              after,
+            },
+          });
+          const body = await response.json<InstagramConversationMessagesResponseV1>();
+          if (body.error?.message) throw new Error(body.error.message);
+          return {
+            data: body.data ?? [],
+            nextCursor: body.paging?.cursors?.after,
+          };
+        },
+      });
+      return items;
+    } catch (error) {
+      if (isMessagesPermissionError(error)) return [];
+      throw error;
+    }
+  }
 }
 
 function isCommentsPermissionError(error: unknown): boolean {
   const text = typeof error === "string" ? error : error instanceof Error ? error.message : String(error);
   return /(#10)\b|(#200)\b|instagram_manage_comments|permission|not authorized|oauth exception/i.test(
+    text,
+  );
+}
+
+function isMessagesPermissionError(error: unknown): boolean {
+  const text = typeof error === "string" ? error : error instanceof Error ? error.message : String(error);
+  return /(#10)\b|(#200)\b|instagram_manage_messages|pages_messaging|permission|not authorized|oauth exception/i.test(
     text,
   );
 }
