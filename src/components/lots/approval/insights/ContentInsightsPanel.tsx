@@ -8,6 +8,16 @@ import {
 } from "@/modules/approval/services/build-content-insights";
 import { getInstagramPostThumbUrlFn } from "@/modules/instagram-posts/instagram-posts.server";
 
+const FULL_DAY_NAMES = [
+  "Segunda-feira",
+  "Terça-feira",
+  "Quarta-feira",
+  "Quinta-feira",
+  "Sexta-feira",
+  "Sábado",
+  "Domingo",
+];
+
 function maxAvg(values: Array<{ avg: number }>): number {
   return Math.max(0, ...values.map((row) => row.avg));
 }
@@ -15,6 +25,10 @@ function maxAvg(values: Array<{ avg: number }>): number {
 function formatScore(value: number): string {
   if (value >= 1000) return `${Math.round(value / 100) / 10} mil`;
   return Math.round(value).toLocaleString("pt-BR");
+}
+
+function pluralize(count: number, singular: string, plural: string): string {
+  return `${count.toLocaleString("pt-BR")} ${count === 1 ? singular : plural}`;
 }
 
 function InsightThumb({
@@ -92,7 +106,9 @@ export function ContentInsightsPanel({
       <div className="space-y-3">
         <p className="text-sm font-semibold">Melhores postagens</p>
         {insights.top7.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Ainda não há publicações para este cliente.</p>
+          <p className="text-sm text-muted-foreground">
+            Ainda não há publicações para este cliente.
+          </p>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
             {insights.top7.map((row) => (
@@ -118,20 +134,48 @@ export function ContentInsightsPanel({
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Melhores dias
           </p>
+          {insights.bestDay ? (
+            <p className="text-sm leading-snug text-foreground">
+              <strong>{FULL_DAY_NAMES[insights.bestDay.weekday]}</strong> é o melhor dia — média de{" "}
+              {formatScore(insights.bestDay.avg)} interações em{" "}
+              {pluralize(insights.bestDay.count, "publicação", "publicações")}.
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Ainda não há publicações suficientes para apontar o melhor dia.
+            </p>
+          )}
           <div className="grid grid-cols-7 items-end gap-1.5">
-            {insights.days.map((day) => (
-              <div key={day.label} className="flex min-w-0 flex-col items-center gap-1">
-                <div className="flex h-16 w-full items-end rounded-md bg-muted/60">
-                  <div
-                    className="w-full rounded-md bg-foreground/80"
-                    style={{ height: `${Math.max(day.avg > 0 ? 12 : 0, (day.avg / dayMax) * 100)}%` }}
-                  />
+            {insights.days.map((day) => {
+              const isBest = day.count > 0 && day.weekday === insights.bestDay?.weekday;
+              return (
+                <div
+                  key={day.label}
+                  className="flex min-w-0 flex-col items-center gap-1"
+                  title={`${day.label}: média de ${formatScore(day.avg)} interações em ${pluralize(day.count, "publicação", "publicações")}`}
+                >
+                  <div className="flex h-16 w-full items-end rounded-md bg-muted/60">
+                    <div
+                      className={cn(
+                        "w-full rounded-md",
+                        isBest ? "bg-primary" : "bg-foreground/80",
+                      )}
+                      style={{
+                        height: `${Math.max(day.avg > 0 ? 12 : 0, (day.avg / dayMax) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <span
+                    className={cn(
+                      "text-[10px] font-medium uppercase",
+                      isBest ? "font-semibold text-foreground" : "text-muted-foreground",
+                    )}
+                  >
+                    {day.label}
+                  </span>
                 </div>
-                <span className="text-[10px] font-medium uppercase text-muted-foreground">
-                  {day.label}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -139,22 +183,48 @@ export function ContentInsightsPanel({
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Melhores horários
           </p>
+          {insights.bestHourBand ? (
+            <p className="text-sm leading-snug text-foreground">
+              <strong>{insights.bestHourBand.label}</strong> é o melhor horário — média de{" "}
+              {formatScore(insights.bestHourBand.avg)} interações em{" "}
+              {pluralize(insights.bestHourBand.count, "publicação", "publicações")}.
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Ainda não há publicações suficientes para apontar o melhor horário.
+            </p>
+          )}
           <div className="grid grid-cols-8 items-end gap-1.5">
-            {insights.hours.map((band) => (
-              <div key={band.start} className="flex min-w-0 flex-col items-center gap-1">
-                <div className="flex h-16 w-full items-end rounded-md bg-muted/60">
-                  <div
-                    className="w-full rounded-md bg-foreground/70"
-                    style={{
-                      height: `${Math.max(band.avg > 0 ? 12 : 0, (band.avg / hourMax) * 100)}%`,
-                    }}
-                  />
+            {insights.hours.map((band) => {
+              const isBest = band.count > 0 && band.start === insights.bestHourBand?.start;
+              return (
+                <div
+                  key={band.start}
+                  className="flex min-w-0 flex-col items-center gap-1"
+                  title={`${band.label}: média de ${formatScore(band.avg)} interações em ${pluralize(band.count, "publicação", "publicações")}`}
+                >
+                  <div className="flex h-16 w-full items-end rounded-md bg-muted/60">
+                    <div
+                      className={cn(
+                        "w-full rounded-md",
+                        isBest ? "bg-primary" : "bg-foreground/70",
+                      )}
+                      style={{
+                        height: `${Math.max(band.avg > 0 ? 12 : 0, (band.avg / hourMax) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <span
+                    className={cn(
+                      "text-[10px] font-medium tabular-nums",
+                      isBest ? "font-semibold text-foreground" : "text-muted-foreground",
+                    )}
+                  >
+                    {band.start}h
+                  </span>
                 </div>
-                <span className="text-[10px] font-medium tabular-nums text-muted-foreground">
-                  {band.start}h
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

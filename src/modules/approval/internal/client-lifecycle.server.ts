@@ -1,7 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { contentCardRepository } from "../repositories/content-card.repository.server";
 import { contentCardEventRepository } from "../repositories/content-card-event.repository.server";
-import { contentCardAttachmentRepository } from "../repositories/content-card-attachment.repository.server";
 import type { LifecycleActor } from "./card-lifecycle.server";
 import { assertCardAction } from "../permissions/resolve-card-action";
 import { assertCardInClientAccess } from "./client-access.server";
@@ -30,18 +29,15 @@ async function appendClientEvent(
     const card = await contentCardRepository.findById(supabase, cardId);
     if (card) {
       const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { insertAppNotifications } = await import(
-        "@/modules/notifications/insert-app-notifications.server"
-      );
+      const { insertAppNotifications } =
+        await import("@/modules/notifications/insert-app-notifications.server");
       const recipients = new Set<string>();
       if (card.responsavel_user_id) recipients.add(card.responsavel_user_id);
       if (card.created_by) recipients.add(card.created_by);
       recipients.delete(actor.userId);
       const kind = eventType === "approved" ? "aprovacao" : "reprovacao";
       const title =
-        eventType === "approved"
-          ? `Aprovação: ${card.titulo}`
-          : `Alteração pedida: ${card.titulo}`;
+        eventType === "approved" ? `Aprovação: ${card.titulo}` : `Alteração pedida: ${card.titulo}`;
       try {
         await insertAppNotifications(
           getSupabaseAdmin(),
@@ -76,11 +72,6 @@ export async function clientApproveCard(
   if (card.status === "aguardando_aprovacao") {
     if (!canClientTransitionStatus(card.status, "aguardando_material")) {
       throw new Error("Transição de aprovação inválida.");
-    }
-    const attachments = await contentCardAttachmentRepository.listByCardId(supabase, card.id);
-    const hasMaterial = attachments.some((a) => a.media_role === "cliente_material");
-    if (!hasMaterial) {
-      throw new Error("Anexe as mídias gravadas a partir do roteiro antes de aprovar.");
     }
     const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
     const updated = await contentCardRepository.update(getSupabaseAdmin(), card.id, {
@@ -131,16 +122,13 @@ export async function clientRequestChanges(
   const card = await contentCardRepository.findById(supabase, input.card_id);
   if (!card) throw new Error("Card não encontrado");
   await assertCardInClientAccess(supabase, actor.userId, card.cadastro_cliente_id);
-  const mensagem =
-    input.mensagem?.trim() || roteiroHtmlToPlain(input.roteiro).slice(0, 2000);
+  const mensagem = input.mensagem?.trim() || roteiroHtmlToPlain(input.roteiro).slice(0, 2000);
   if (!mensagem) {
     throw new Error("Descreva a alteração solicitada.");
   }
 
   const roteiroPatch =
-    input.roteiro != null && !isRoteiroHtmlEmpty(input.roteiro)
-      ? { roteiro: input.roteiro }
-      : {};
+    input.roteiro != null && !isRoteiroHtmlEmpty(input.roteiro) ? { roteiro: input.roteiro } : {};
 
   if (card.status === "aguardando_aprovacao") {
     const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");

@@ -1,6 +1,6 @@
 # Platform Hub — Documentação operacional (auto)
 
-> Gerado automaticamente em 2026-08-02T05:08:49.314Z · contract 1.0.0
+> Gerado automaticamente em 2026-09-28T21:23:46.950Z · contract 1.0.0
 
 ## Rotas administrativas
 
@@ -38,6 +38,13 @@
 ### google_business
 
 - **Capabilities:** gbp:metrics:collect
+- **Providers:** make_passive, official_api
+
+**Fluxo operador:** Catálogo → Conectar → OAuth ou credenciais → Selecionar identidades → Sync.
+
+### instagram_organic
+
+- **Capabilities:** instagram_organic:metrics:collect, instagram_organic:profile:collect, instagram_organic:content:publish, instagram_organic:crm:comments
 - **Providers:** make_passive, official_api
 
 **Fluxo operador:** Catálogo → Conectar → OAuth ou credenciais → Selecionar identidades → Sync.

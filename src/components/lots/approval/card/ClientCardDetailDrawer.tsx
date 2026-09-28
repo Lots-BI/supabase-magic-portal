@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -117,15 +117,29 @@ export function ClientCardDetailDrawer({
   });
 
   const card = detailQ.data?.card;
-  const awaitingRoteiro = card?.status === "aguardando_aprovacao" && canMutate;
-  const awaitingFinal = card?.status === "aguardando_aprovacao_final" && canMutate;
-  const awaitingMaterial = card?.status === "aguardando_material" && canMutate;
+  /**
+   * Baseado só no status — a prévia "Ver como cliente" (canMutate=false) mostra
+   * exatamente os mesmos controles do cliente real; só a ação de fato é bloqueada.
+   */
+  const awaitingRoteiro = card?.status === "aguardando_aprovacao";
+  const awaitingFinal = card?.status === "aguardando_aprovacao_final";
+  const awaitingMaterial = card?.status === "aguardando_material";
   const canAct = awaitingRoteiro || awaitingFinal;
+  const previewOnly = !canMutate;
   const clientMaterials = (detailQ.data?.attachments ?? []).filter(
     (a) => a.mediaRole === "cliente_material",
   );
   const hasClientMaterial = clientMaterials.length > 0;
-  const needsCapture = awaitingRoteiro || awaitingMaterial;
+  /** Mídias só são pedidas depois que o roteiro já foi aprovado. */
+  const needsCapture = awaitingMaterial;
+
+  const loadedCardId = card?.id;
+  const loadedCardRoteiro = card?.roteiro;
+  const loadedCardCopyText = card?.copy_text;
+  useEffect(() => {
+    if (!loadedCardId || !awaitingRoteiro) return;
+    setEditHtml(loadedCardRoteiro || loadedCardCopyText || "");
+  }, [loadedCardId, loadedCardRoteiro, loadedCardCopyText, awaitingRoteiro]);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["client-content-card", scopeKey, cardId] });
@@ -190,12 +204,17 @@ export function ClientCardDetailDrawer({
   const displayIds = new Set(displayAssets.map((asset) => asset.id));
   const extraClientMaterials = clientMaterials.filter((asset) => !displayIds.has(asset.id));
 
-  const approveDisabled =
-    approveMut.isPending || changesMut.isPending || (awaitingRoteiro && !hasClientMaterial);
+  const approveDisabled = approveMut.isPending || changesMut.isPending;
+
+  function guardPreview(): boolean {
+    if (!previewOnly) return false;
+    toast.info("Pré-visualização — ações não são registradas.");
+    return true;
+  }
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-[-50%] translate-y-[-50%] flex-col gap-0 overflow-hidden rounded-none p-0 sm:h-auto sm:max-h-[min(100dvh-1rem,920px)] sm:w-[calc(100vw-1.5rem)] sm:max-w-lg sm:rounded-2xl [&>button]:right-3 [&>button]:top-3">
+      <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-[-50%] translate-y-[-50%] flex-col gap-0 overflow-hidden rounded-none p-0 sm:h-auto sm:max-h-[94dvh] sm:w-[calc(100vw-2rem)] sm:max-w-5xl sm:rounded-2xl [&>button]:right-3 [&>button]:top-3">
         <DialogHeader className="sr-only">
           <DialogTitle>{card?.titulo ?? "Conteúdo"}</DialogTitle>
           <DialogDescription>
@@ -214,7 +233,21 @@ export function ClientCardDetailDrawer({
             <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 pb-28 pt-12">
               {displayAssets.length > 0 ? <CardAttachedMedia assets={displayAssets} /> : null}
 
-              {changeOpen && canAct ? (
+              {awaitingRoteiro ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Leia o roteiro com atenção. Quer mudar algo? Edite direto aqui e toque em{" "}
+                    <strong>Enviar alteração</strong>.
+                  </p>
+                  <RoteiroHtmlEditor
+                    resetKey={card.id}
+                    html={card.roteiro || card.copy_text}
+                    editable
+                    minHeightClass="min-h-[50vh]"
+                    onChange={setEditHtml}
+                  />
+                </div>
+              ) : changeOpen && canAct ? (
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">
                     Edite o roteiro com o que precisa mudar e envie a alteração.
@@ -223,12 +256,12 @@ export function ClientCardDetailDrawer({
                     resetKey={`${card.id}-edit`}
                     html={editHtml}
                     editable
-                    minHeightClass="min-h-[280px]"
+                    minHeightClass="min-h-[40vh]"
                     onChange={setEditHtml}
                   />
                 </div>
               ) : (
-                <RoteiroHtmlView html={card.roteiro || card.copy_text} />
+                <RoteiroHtmlView html={card.roteiro || card.copy_text} className="min-h-[40vh]" />
               )}
 
               {awaitingFinal && card.legenda?.trim() ? <CaptionBlock value={card.legenda} /> : null}
@@ -238,15 +271,21 @@ export function ClientCardDetailDrawer({
               )}
 
               {needsCapture ? (
-                <MaterialUploadQueue
-                  variant="camera"
-                  capture
-                  empty={!hasClientMaterial}
-                  accept={card.formato === "reels" ? "video/*" : MATERIAL_ACCEPT}
-                  createTicket={materialQueue.createTicket}
-                  confirm={materialQueue.confirm}
-                  onDone={materialQueue.onDone}
-                />
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold">
+                    Roteiro aprovado. Agora envie as mídias gravadas.
+                  </p>
+                  <MaterialUploadQueue
+                    variant="camera"
+                    capture
+                    empty={!hasClientMaterial}
+                    disabled={previewOnly}
+                    accept={card.formato === "reels" ? "video/*" : MATERIAL_ACCEPT}
+                    createTicket={materialQueue.createTicket}
+                    confirm={materialQueue.confirm}
+                    onDone={materialQueue.onDone}
+                  />
+                </div>
               ) : null}
 
               {extraClientMaterials.length > 0 ? (
@@ -263,7 +302,7 @@ export function ClientCardDetailDrawer({
                 </ul>
               ) : null}
 
-              {changeOpen && canAct ? (
+              {awaitingRoteiro || (changeOpen && canAct) ? (
                 <p className="text-xs text-muted-foreground">
                   A agência recebe o roteiro editado e volta com a versão ajustada.
                 </p>
@@ -276,7 +315,10 @@ export function ClientCardDetailDrawer({
                   type="button"
                   size="lg"
                   className="h-14 flex-1 bg-[color:var(--success)] text-white hover:bg-[color:var(--success)]/90 disabled:bg-muted disabled:text-muted-foreground"
-                  onClick={() => approveMut.mutate()}
+                  onClick={() => {
+                    if (guardPreview()) return;
+                    approveMut.mutate();
+                  }}
                   disabled={approveDisabled}
                 >
                   <CheckCircle2 className="mr-2 h-5 w-5" />
@@ -289,21 +331,28 @@ export function ClientCardDetailDrawer({
                     "h-14 flex-1 bg-[color:var(--warning)] text-foreground hover:bg-[color:var(--warning)]/90",
                   )}
                   onClick={() => {
+                    if (awaitingRoteiro) {
+                      if (isRoteiroHtmlEmpty(editHtml)) return;
+                      if (guardPreview()) return;
+                      changesMut.mutate();
+                      return;
+                    }
                     if (!changeOpen) {
                       setEditHtml(card.roteiro || card.copy_text || "");
                       setChangeOpen(true);
                       return;
                     }
                     if (isRoteiroHtmlEmpty(editHtml)) return;
+                    if (guardPreview()) return;
                     changesMut.mutate();
                   }}
                   disabled={
                     changesMut.isPending ||
                     approveMut.isPending ||
-                    (changeOpen && isRoteiroHtmlEmpty(editHtml))
+                    ((awaitingRoteiro || changeOpen) && isRoteiroHtmlEmpty(editHtml))
                   }
                 >
-                  {changeOpen ? "Enviar alteração" : "Mudar"}
+                  {awaitingRoteiro || changeOpen ? "Enviar alteração" : "Mudar"}
                 </Button>
               </div>
             ) : null}

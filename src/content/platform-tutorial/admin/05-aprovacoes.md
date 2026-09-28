@@ -26,11 +26,15 @@ Toque no dia = criar (linha editorial + horário). No Motorola, **+** no canto. 
 
 ## Insights (só admin)
 
-Depois do cliente escolhido: top 7 pubs, melhores dias e faixas de hora em Brasília, selo da linha editorial do card. Pub sem card = selo vazio.
+Depois do cliente escolhido: top 7 pubs, frase com o melhor dia e a melhor faixa de horário (com média de interações e quantas publicações entraram na conta), barra vencedora destacada, selo da linha editorial do card. Pub sem card = selo vazio.
 
 ## Cliente
 
-O cliente vê só a fila **Sua vez**. Aprova com verde, pede mudança no âmbar, grava na câmera.
+O cliente vê só a fila **Sua vez**. No roteiro, lê e edita numa janela grande (o mesmo editor do admin); aprova com verde sem precisar gravar nada ainda. Só depois de aprovar é que a tela pede as mídias, pela câmera.
+
+## Ver como cliente
+
+No topo do admin, **Ver como cliente** abre `/cliente/{slug}/aprovacoes` — a mesma tela que o cliente vê, com os mesmos cartazes e o mesmo roteiro. Com um cliente já selecionado em Conteúdos, o atalho vai direto para esse cliente, sem precisar buscar de novo. Um aviso no topo lembra que é só pré-visualização: os botões aparecem, mas nenhuma ação é registrada. **Voltar ao admin** retorna para `/admin/aprovacoes`.
 
 ## Rotas de workspace (por baixo)
 

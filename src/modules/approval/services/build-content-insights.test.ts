@@ -74,4 +74,41 @@ describe("buildContentInsights", () => {
     expect(insights.peakHour).toBe("15:00");
     expect(insights.sampleSize).toBe(2);
   });
+
+  it("aponta o melhor dia e a melhor faixa de horário (com desempate por volume)", () => {
+    const posts = [
+      // Quinta (2026-09-10), 19h BRT — banda 18h–21h, duas publicações fortes.
+      post({
+        id: "thu-1",
+        metrics: { total_interactions: 50 },
+        published_at: "2026-09-10T22:00:00.000Z",
+      }),
+      post({
+        id: "thu-2",
+        metrics: { total_interactions: 50 },
+        published_at: "2026-09-10T22:30:00.000Z",
+      }),
+      // Segunda (2026-09-07), 9h BRT — banda 9h–12h, uma publicação fraca.
+      post({
+        id: "mon-1",
+        metrics: { total_interactions: 5 },
+        published_at: "2026-09-07T12:00:00.000Z",
+      }),
+    ];
+    const insights = buildContentInsights(posts);
+
+    expect(insights.bestDay?.label).toBe("Qui");
+    expect(insights.bestDay?.avg).toBe(50);
+    expect(insights.bestDay?.count).toBe(2);
+
+    expect(insights.bestHourBand?.label).toBe("18h–21h");
+    expect(insights.bestHourBand?.avg).toBe(50);
+    expect(insights.bestHourBand?.count).toBe(2);
+  });
+
+  it("bestDay e bestHourBand ficam null sem amostra", () => {
+    const insights = buildContentInsights([]);
+    expect(insights.bestDay).toBeNull();
+    expect(insights.bestHourBand).toBeNull();
+  });
 });

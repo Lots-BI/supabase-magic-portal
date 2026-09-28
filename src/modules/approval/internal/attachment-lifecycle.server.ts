@@ -9,10 +9,7 @@ import type { LifecycleActor } from "./card-lifecycle.server";
 import { capaUrlToAsset, type MediaAsset } from "@/lib/media-preview";
 import { assertCardAction } from "../permissions/resolve-card-action";
 import { assertCardInClientAccess } from "./client-access.server";
-import {
-  assertAllowedMaterial,
-  resolveUploadMime,
-} from "../services/material-upload";
+import { assertAllowedMaterial, resolveUploadMime } from "../services/material-upload";
 import { persistMediaRole, resolveUploadMediaRole } from "../services/resolve-media-role";
 
 const EDITORIAL_BUCKET = "editorial-media";
@@ -48,7 +45,11 @@ async function signedUrlFor(
 ): Promise<string> {
   const { data, error } = await storageAdmin()
     .storage.from(EDITORIAL_BUCKET)
-    .createSignedUrl(path, opts?.ttl ?? SIGNED_URL_TTL, opts?.download ? { download: opts.download } : undefined);
+    .createSignedUrl(
+      path,
+      opts?.ttl ?? SIGNED_URL_TTL,
+      opts?.download ? { download: opts.download } : undefined,
+    );
   if (error || !data?.signedUrl) throw new Error(error?.message ?? "URL de mídia indisponível");
   return data.signedUrl;
 }
@@ -82,8 +83,8 @@ async function assertActorCanUploadCard(
   if (!card) throw new Error("Card não encontrado");
   if (actor.role === "cliente") {
     await assertCardInClientAccess(supabase, actor.userId, card.cadastro_cliente_id);
-    if (card.status !== "aguardando_aprovacao" && card.status !== "aguardando_material") {
-      throw new Error("Envie as mídias quando o roteiro estiver com você para aprovação.");
+    if (card.status !== "aguardando_material") {
+      throw new Error("Envie as mídias depois de aprovar o roteiro.");
     }
   }
 }
@@ -136,8 +137,7 @@ export async function applyAttachmentCoversToCards(
   const urls = new Map<string, string>();
   await Promise.all(
     [...bestByCard.entries()].map(async ([cardId, row]) => {
-      const path =
-        row.kind === "video" ? (row.poster_path ?? row.storage_path) : row.storage_path;
+      const path = row.kind === "video" ? (row.poster_path ?? row.storage_path) : row.storage_path;
       try {
         urls.set(cardId, await signedUrlFor(path));
       } catch {

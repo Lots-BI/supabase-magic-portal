@@ -74,6 +74,24 @@ describe("workflow stamps", () => {
     expect(clientTurnCards(cards).map((c) => c.id)).toEqual(["b", "d"]);
   });
 
+  it("aguardando_material é vez do cliente até ele enviar as mídias", () => {
+    const cards = [
+      card({ id: "a", status: "roteiro" }),
+      card({
+        id: "b",
+        status: "aguardando_material",
+        checklist: [{ id: "material_recebido", label: "Material", done: false }],
+      }),
+      card({
+        id: "c",
+        status: "aguardando_material",
+        checklist: [{ id: "material_recebido", label: "Material", done: true }],
+      }),
+    ];
+    expect(clientTurnCards(cards).map((c) => c.id)).toEqual(["b"]);
+    expect(agencyTurnCards(cards).map((c) => c.id)).toEqual(["a", "c"]);
+  });
+
   it("nomeia a ação da agência", () => {
     expect(agencyActionKind("roteiro")).toBe("escrever");
     expect(agencyActionKind("aguardando_material")).toBe("baixar");

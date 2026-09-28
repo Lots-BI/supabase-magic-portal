@@ -215,7 +215,7 @@ function AuthenticatedLayout() {
       label: "Social",
       items: [
         {
-          to: "/aprovacoes",
+          to: clienteSlug ? `/cliente/${clienteSlug}/aprovacoes` : "/aprovacoes",
           label: "Conteúdos",
           icon: ClipboardCheck,
         },

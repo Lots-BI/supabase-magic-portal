@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { Eye } from "lucide-react";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { ApprovalPanelSkeleton } from "@/components/lots/approval/shared/ApprovalPanelSkeleton";
@@ -120,6 +121,25 @@ export function ClientApprovalWorkspace({ initialCardId }: { initialCardId?: str
         title="Conteúdos"
         description={isStaffPreview ? brand : undefined}
       />
+
+      {isStaffPreview && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[color:var(--warning)]/40 bg-[color:var(--warning)]/10 px-4 py-3">
+          <p className="flex items-center gap-2 text-sm text-foreground">
+            <Eye className="h-4 w-4 shrink-0" />
+            Pré-visualização exatamente como <strong>{brand}</strong> vê. Ações aqui não são
+            registradas.
+          </p>
+          <Button variant="outline" size="sm" asChild>
+            {scope.cadastroClienteId ? (
+              <Link to="/admin/aprovacoes" search={{ cliente: scope.cadastroClienteId }}>
+                Voltar ao admin
+              </Link>
+            ) : (
+              <Link to="/admin/aprovacoes">Voltar ao admin</Link>
+            )}
+          </Button>
+        </div>
+      )}
 
       {boardQ.isLoading && <ApprovalPanelSkeleton rows={6} />}
 

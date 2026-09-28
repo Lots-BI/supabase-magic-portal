@@ -32,6 +32,7 @@ export function MaterialUploadQueue({
   capture,
   accept = MATERIAL_ACCEPT,
   empty,
+  disabled,
 }: {
   label?: string;
   createTicket: (file: File) => Promise<MaterialUploadTicket>;
@@ -46,11 +47,21 @@ export function MaterialUploadQueue({
   capture?: boolean;
   accept?: string;
   empty?: boolean;
+  /** Mostra o mesmo controle, mas o clique só avisa — não abre o seletor de arquivo. */
+  disabled?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
 
   const busy = jobs.some((j) => j.status === "uploading");
+
+  const handleTriggerClick = () => {
+    if (disabled) {
+      toast.info("Pré-visualização — ações não são registradas.");
+      return;
+    }
+    inputRef.current?.click();
+  };
 
   const patchJob = (id: string, patch: Partial<Job>) => {
     setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, ...patch } : j)));
@@ -110,7 +121,7 @@ export function MaterialUploadQueue({
         <button
           type="button"
           disabled={busy}
-          onClick={() => inputRef.current?.click()}
+          onClick={handleTriggerClick}
           className={cn(
             "flex min-h-[160px] w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-muted/30 text-muted-foreground",
             empty && !busy && "animate-pulse border-foreground/40",
@@ -120,12 +131,7 @@ export function MaterialUploadQueue({
         </button>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy}
-            onClick={() => inputRef.current?.click()}
-          >
+          <Button type="button" variant="outline" disabled={busy} onClick={handleTriggerClick}>
             {busy ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
