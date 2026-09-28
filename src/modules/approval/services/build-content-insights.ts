@@ -28,6 +28,10 @@ export type ContentInsights = {
   top7: InsightTopPost[];
   days: InsightDayBar[];
   hours: InsightHourBand[];
+  /** Dia da semana com maior média de interações (null sem amostra). */
+  bestDay: InsightDayBar | null;
+  /** Faixa de 3h com maior média de interações (null sem amostra). */
+  bestHourBand: InsightHourBand | null;
   peakHour: string | null;
   sampleSize: number;
 };
@@ -78,6 +82,21 @@ function formatHourLabel(hour: number): string {
   return `${String(hour).padStart(2, "0")}:00`;
 }
 
+/**
+ * Escolhe a barra com maior média de interações. Em empate, prevalece quem
+ * tem mais publicações na amostra (mais confiável que uma média de 1 post).
+ */
+function pickBest<T extends { avg: number; count: number }>(rows: T[]): T | null {
+  let best: T | null = null;
+  for (const row of rows) {
+    if (row.count === 0) continue;
+    if (!best || row.avg > best.avg || (row.avg === best.avg && row.count > best.count)) {
+      best = row;
+    }
+  }
+  return best;
+}
+
 export function buildContentInsights(posts: IgMediaRow[], limit = 7): ContentInsights {
   const ranked = [...posts]
     .map((post) => ({ post, score: interactionScore(post.metrics) }))
@@ -115,28 +134,34 @@ export function buildContentInsights(posts: IgMediaRow[], limit = 7): ContentIns
     }
   }
 
+  const days = DAY_LABELS_MON_FIRST.map((label, idx) => {
+    const bucket = dayBuckets[idx]!;
+    return {
+      weekday: idx,
+      label,
+      avg: bucket.count > 0 ? bucket.sum / bucket.count : 0,
+      count: bucket.count,
+    };
+  });
+
+  const hours = HOUR_BAND_STARTS.map((start, idx) => {
+    const bucket = hourBuckets[idx]!;
+    const end = start + 3;
+    return {
+      start,
+      end,
+      label: `${start}h–${end}h`,
+      avg: bucket.count > 0 ? bucket.sum / bucket.count : 0,
+      count: bucket.count,
+    };
+  });
+
   return {
     top7: ranked.slice(0, limit),
-    days: DAY_LABELS_MON_FIRST.map((label, idx) => {
-      const bucket = dayBuckets[idx]!;
-      return {
-        weekday: idx,
-        label,
-        avg: bucket.count > 0 ? bucket.sum / bucket.count : 0,
-        count: bucket.count,
-      };
-    }),
-    hours: HOUR_BAND_STARTS.map((start, idx) => {
-      const bucket = hourBuckets[idx]!;
-      const end = start + 2;
-      return {
-        start,
-        end,
-        label: `${formatHourLabel(start)}–${formatHourLabel(end)}`,
-        avg: bucket.count > 0 ? bucket.sum / bucket.count : 0,
-        count: bucket.count,
-      };
-    }),
+    days,
+    hours,
+    bestDay: pickBest(days),
+    bestHourBand: pickBest(hours),
     peakHour,
     sampleSize: ranked.length,
   };

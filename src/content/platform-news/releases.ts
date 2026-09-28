@@ -21,6 +21,21 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-09-28-conteudos-roteiro-aprovacao",
+    date: "2026-09-28",
+    title: "Conteúdos: aprovar o roteiro não exige mais mídia no mesmo passo",
+    summary:
+      "Agora você aprova o roteiro primeiro e só depois a tela pede as mídias gravadas. O roteiro também abre numa janela grande e editável, e os insights mostram direto qual é o melhor dia e horário para postar.",
+    bullets: [
+      "**Aprovar** o roteiro não depende mais de anexar mídia — a câmera aparece só depois, já na vez de enviar.",
+      "Roteiro em janela grande, com o mesmo editor do admin: leia e edite sem passo extra.",
+      "Insights: frase direta com o melhor dia e a melhor faixa de horário, com média de interações e volume de posts.",
+      "Admin: **Ver como cliente** agora abre a aba Conteúdos, igual ao que o cliente vê.",
+    ],
+    audience: "all",
+    tags: ["Conteúdos", "Novidade"],
+  },
+  {
     id: "2026-09-11-lots-runtime",
     date: "2026-09-11",
     title: "CRM: Direct no Lots, sem ManyChat",

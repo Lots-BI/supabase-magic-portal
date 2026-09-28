@@ -17,12 +17,6 @@ vi.mock("./client-access.server", () => ({
   assertCardInClientAccess: vi.fn(async () => undefined),
 }));
 
-vi.mock("../repositories/content-card-attachment.repository.server", () => ({
-  contentCardAttachmentRepository: {
-    listByCardId: vi.fn(async () => [{ media_role: "cliente_material" }]),
-  },
-}));
-
 const adminClient = { __admin: true };
 
 vi.mock("@/integrations/supabase/client.server", () => ({
@@ -35,7 +29,6 @@ vi.mock("@/modules/notifications/insert-app-notifications.server", () => ({
 
 import { contentCardRepository } from "../repositories/content-card.repository.server";
 import { contentCardEventRepository } from "../repositories/content-card-event.repository.server";
-import { contentCardAttachmentRepository } from "../repositories/content-card-attachment.repository.server";
 import { clientApproveCard, clientRequestChanges } from "./client-lifecycle.server";
 
 const actor = { userId: "u1", email: "client@test.com", role: "cliente" as const };
@@ -78,15 +71,18 @@ describe("client-lifecycle", () => {
     expect(result.status).toBe("aguardando_material");
   });
 
-  it("rejects approve roteiro without media", async () => {
-    vi.mocked(contentCardAttachmentRepository.listByCardId).mockResolvedValueOnce([]);
+  it("approves roteiro even without media anexada (mídia vem depois)", async () => {
     vi.mocked(contentCardRepository.findById).mockResolvedValue({
       ...baseCard,
       status: "aguardando_aprovacao",
     } as never);
-    await expect(clientApproveCard(supabase, actor, { card_id: "c1" })).rejects.toThrow(
-      /Anexe as mídias/,
-    );
+    vi.mocked(contentCardRepository.update).mockResolvedValue({
+      ...baseCard,
+      status: "aguardando_material",
+    } as never);
+
+    const result = await clientApproveCard(supabase, actor, { card_id: "c1" });
+    expect(result.status).toBe("aguardando_material");
   });
 
   it("rejects approve when not awaiting approval", async () => {
@@ -141,7 +137,10 @@ describe("client-lifecycle", () => {
     expect(contentCardRepository.update).toHaveBeenCalledWith(
       adminClient,
       "c1",
-      expect.objectContaining({ status: "alteracoes_roteiro", roteiro: "<p>Novo gancho e CTA</p>" }),
+      expect.objectContaining({
+        status: "alteracoes_roteiro",
+        roteiro: "<p>Novo gancho e CTA</p>",
+      }),
     );
     expect(contentCardEventRepository.append).toHaveBeenCalledWith(
       supabase,

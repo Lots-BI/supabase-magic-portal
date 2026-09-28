@@ -1,6 +1,6 @@
 {
   "contractVersion": "1.0.0",
-  "generatedAt": "2026-08-02T05:08:48.981Z",
+  "generatedAt": "2026-09-28T21:23:45.749Z",
   "plugins": [
     {
       "key": "example",
@@ -55,6 +55,23 @@
       ]
     },
     {
+      "key": "instagram_organic",
+      "capabilities": [
+        "instagram_organic:metrics:collect",
+        "instagram_organic:profile:collect",
+        "instagram_organic:content:publish",
+        "instagram_organic:crm:comments"
+      ],
+      "providers": [
+        "make_passive",
+        "official_api"
+      ],
+      "ingestProfiles": [
+        "entity-upsert",
+        "metrics-timeseries"
+      ]
+    },
+    {
       "key": "meta_ads",
       "capabilities": [
         "meta:metrics:collect"
@@ -99,6 +116,10 @@
     "ga4:metrics:collect",
     "gbp:metrics:collect",
     "google_ads:metrics:collect",
+    "instagram_organic:content:publish",
+    "instagram_organic:crm:comments",
+    "instagram_organic:metrics:collect",
+    "instagram_organic:profile:collect",
     "meta:metrics:collect",
     "tiktok:metrics:collect",
     "youtube:metrics:collect"
@@ -149,6 +170,41 @@
       "format": "int"
     },
     {
+      "plugin": "instagram_organic",
+      "key": "views",
+      "format": "int"
+    },
+    {
+      "plugin": "instagram_organic",
+      "key": "reach",
+      "format": "int"
+    },
+    {
+      "plugin": "instagram_organic",
+      "key": "likes",
+      "format": "int"
+    },
+    {
+      "plugin": "instagram_organic",
+      "key": "comments",
+      "format": "int"
+    },
+    {
+      "plugin": "instagram_organic",
+      "key": "saves",
+      "format": "int"
+    },
+    {
+      "plugin": "instagram_organic",
+      "key": "shares",
+      "format": "int"
+    },
+    {
+      "plugin": "instagram_organic",
+      "key": "total_interactions",
+      "format": "int"
+    },
+    {
       "plugin": "meta_ads",
       "key": "impressions",
       "format": "int"
@@ -167,6 +223,16 @@
       "plugin": "meta_ads",
       "key": "spend",
       "format": "currency_micros"
+    },
+    {
+      "plugin": "meta_ads",
+      "key": "results",
+      "format": "int"
+    },
+    {
+      "plugin": "meta_ads",
+      "key": "conversions",
+      "format": "int"
     },
     {
       "plugin": "tiktok",
@@ -223,6 +289,14 @@
       "version": "v1"
     },
     {
+      "plugin": "instagram_organic",
+      "version": "v1"
+    },
+    {
+      "plugin": "instagram_organic",
+      "version": "v22.0"
+    },
+    {
       "plugin": "meta_ads",
       "version": "v1"
     },
@@ -265,6 +339,10 @@
       "key": "generic-freshness"
     },
     {
+      "plugin": "instagram_organic",
+      "key": "generic-freshness"
+    },
+    {
       "plugin": "meta_ads",
       "key": "generic-freshness"
     },
@@ -293,6 +371,10 @@
     {
       "plugin": "google_business",
       "supported": false
+    },
+    {
+      "plugin": "instagram_organic",
+      "supported": true
     },
     {
       "plugin": "meta_ads",
