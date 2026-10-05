@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { executeInstagramPublishPlan, formatInstagramPublishError } from "./execute-instagram-publish";
+import {
+  executeInstagramPublishPlan,
+  formatInstagramPublishError,
+} from "./execute-instagram-publish";
 import type { InstagramPublishGraphPort } from "./execute-instagram-publish";
 
 function mockGraph(overrides?: Partial<InstagramPublishGraphPort>): InstagramPublishGraphPort {
@@ -79,8 +82,8 @@ describe("executeInstagramPublishPlan", () => {
 
 describe("formatInstagramPublishError", () => {
   it("prefixes permission errors", () => {
-    expect(formatInstagramPublishError(new Error("(#10) Application does not have permission"))).toMatch(
-      /^missing_publish_scope:/,
-    );
+    expect(
+      formatInstagramPublishError(new Error("(#10) Application does not have permission")),
+    ).toMatch(/^missing_publish_scope:/);
   });
 });

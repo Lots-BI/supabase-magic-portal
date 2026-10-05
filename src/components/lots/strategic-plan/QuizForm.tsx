@@ -152,12 +152,7 @@ export function QuizForm({
               {s.label}
             </span>
             {i < STEPS.length - 1 && (
-              <div
-                className={cn(
-                  "h-px flex-1",
-                  step > s.id ? "bg-primary/40" : "bg-border",
-                )}
-              />
+              <div className={cn("h-px flex-1", step > s.id ? "bg-primary/40" : "bg-border")} />
             )}
           </div>
         ))}
@@ -286,8 +281,8 @@ export function QuizForm({
                   onChange={(e) => setField("cienteCustosInfra", e.target.checked)}
                 />
                 <span className="text-sm text-foreground">
-                  Estou ciente de que domínio, hospedagem e outras infraestruturas podem ter
-                  custos adicionais fora do fee da agência.
+                  Estou ciente de que domínio, hospedagem e outras infraestruturas podem ter custos
+                  adicionais fora do fee da agência.
                   {errors.cienteCustosInfra && (
                     <span className="mt-1 block text-[11.5px] text-destructive">
                       {errors.cienteCustosInfra}

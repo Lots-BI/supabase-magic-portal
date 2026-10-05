@@ -14,7 +14,16 @@ export const INTENT_LEXICON = {
     "whatsapp",
   ],
   question: ["horário", "horario", "funciona", "como", "onde", "quando", "tem", "ainda"],
-  complaint: ["péssimo", "pessimo", "não gostei", "nao gostei", "atraso", "reclama", "horrível", "horrivel"],
+  complaint: [
+    "péssimo",
+    "pessimo",
+    "não gostei",
+    "nao gostei",
+    "atraso",
+    "reclama",
+    "horrível",
+    "horrivel",
+  ],
 } as const;
 
 export type IntentLexiconHit = {

@@ -16,12 +16,7 @@ import {
 import { InstagramPostCard } from "./InstagramPostCard";
 import { InstagramPostReport } from "./InstagramPostReport";
 import { StatCard } from "@/components/lots/StatCard";
-import {
-  engagementRate,
-  POSTS_KPI_KEYS,
-  POSTS_KPI_LABELS,
-  summarizePosts,
-} from "./format-metrics";
+import { engagementRate, POSTS_KPI_KEYS, POSTS_KPI_LABELS, summarizePosts } from "./format-metrics";
 
 const PRODUCT_FILTERS = [
   { value: "all", label: "Todos" },
@@ -72,13 +67,7 @@ export function InstagramPostsPage({
   });
 
   const previousQuery = useQuery({
-    queryKey: [
-      "instagram-posts",
-      cadastroClienteId,
-      period.prevFrom,
-      period.prevTo,
-      productFilter,
-    ],
+    queryKey: ["instagram-posts", cadastroClienteId, period.prevFrom, period.prevTo, productFilter],
     queryFn: () =>
       listInstagramPostsFn({
         data: {
@@ -109,7 +98,8 @@ export function InstagramPostsPage({
 
   const rawPosts = postsQuery.data?.posts;
   const posts = useMemo(
-    () => (rawPosts ?? []).map((post) => ({ ...post, cliente_slug: post.cliente_slug ?? clienteSlug })),
+    () =>
+      (rawPosts ?? []).map((post) => ({ ...post, cliente_slug: post.cliente_slug ?? clienteSlug })),
     [rawPosts, clienteSlug],
   );
   const currentTotals = useMemo(() => summarizePosts(posts), [posts]);
@@ -184,9 +174,7 @@ export function InstagramPostsPage({
             label={POSTS_KPI_LABELS[key]}
             value={currentTotals[key]}
             delta={
-              previousQuery.isFetched
-                ? pctDelta(currentTotals[key], previousTotals[key])
-                : null
+              previousQuery.isFetched ? pctDelta(currentTotals[key], previousTotals[key]) : null
             }
             description={`Vs ${formatBR(period.prevFrom)} – ${formatBR(period.prevTo)}`}
             emphasis="compact"
@@ -233,12 +221,7 @@ export function InstagramPostsPage({
         </div>
       )}
 
-      <InstagramPostReport
-        post={selected}
-        posts={posts}
-        isAdmin={isAdmin}
-        onClose={closeReport}
-      />
+      <InstagramPostReport post={selected} posts={posts} isAdmin={isAdmin} onClose={closeReport} />
     </div>
   );
 }

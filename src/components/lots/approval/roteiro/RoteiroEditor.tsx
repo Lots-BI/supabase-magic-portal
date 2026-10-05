@@ -282,7 +282,11 @@ export function RoteiroEditor({
           }}
         />
       ) : (
-        <RoteiroHtmlEditor resetKey={card.id} html={card.roteiro || card.copy_text} editable={false} />
+        <RoteiroHtmlEditor
+          resetKey={card.id}
+          html={card.roteiro || card.copy_text}
+          editable={false}
+        />
       )}
 
       {showStaffCta && (

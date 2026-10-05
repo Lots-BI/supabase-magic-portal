@@ -49,9 +49,7 @@ async function mapPool<T, R>(
       results[index] = await fn(items[index]!);
     }
   }
-  await Promise.all(
-    Array.from({ length: Math.min(concurrency, items.length) }, () => worker()),
-  );
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, () => worker()));
   return results;
 }
 

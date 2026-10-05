@@ -25,10 +25,7 @@ type TokenRow = {
   revoked_at: string | null;
 };
 
-async function resolveIngestToken(
-  supabase: SupabaseClient,
-  bearer: string,
-): Promise<TokenRow> {
+async function resolveIngestToken(supabase: SupabaseClient, bearer: string): Promise<TokenRow> {
   const hash = hashCrmIngestToken(bearer.trim());
   const { data, error } = await supabase
     .from("crm_ingest_tokens")

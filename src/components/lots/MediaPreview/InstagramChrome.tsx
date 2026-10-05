@@ -76,7 +76,9 @@ export function InstagramChrome({
                 </p>
               )}
               {hashtags.length > 0 && (
-                <p className="text-[13px] leading-relaxed text-secondary-300">{hashtags.join(" ")}</p>
+                <p className="text-[13px] leading-relaxed text-secondary-300">
+                  {hashtags.join(" ")}
+                </p>
               )}
             </div>
           )}

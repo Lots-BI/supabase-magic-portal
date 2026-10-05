@@ -281,10 +281,7 @@ export class InstagramGraphClient {
     return { status_code: body.status_code };
   }
 
-  async getMediaPermalink(
-    accessToken: string,
-    mediaId: string,
-  ): Promise<string | undefined> {
+  async getMediaPermalink(accessToken: string, mediaId: string): Promise<string | undefined> {
     const url = `${graphBaseUrl(this.graphVersion)}/${mediaId}`;
     const response = await this.config.httpClient.request(url, {
       searchParams: {
@@ -418,7 +415,11 @@ export class InstagramGraphClient {
         message: JSON.stringify({ text: message }),
       },
     });
-    const body = await response.json<{ message_id?: string; id?: string; error?: { message?: string } }>();
+    const body = await response.json<{
+      message_id?: string;
+      id?: string;
+      error?: { message?: string };
+    }>();
     if (body.error?.message) throw new Error(body.error.message);
     const id = body.message_id ?? body.id;
     if (!id) throw new Error("Graph não retornou id da mensagem");
@@ -496,14 +497,16 @@ export class InstagramGraphClient {
 }
 
 function isCommentsPermissionError(error: unknown): boolean {
-  const text = typeof error === "string" ? error : error instanceof Error ? error.message : String(error);
+  const text =
+    typeof error === "string" ? error : error instanceof Error ? error.message : String(error);
   return /(#10)\b|(#200)\b|instagram_manage_comments|permission|not authorized|oauth exception/i.test(
     text,
   );
 }
 
 function isMessagesPermissionError(error: unknown): boolean {
-  const text = typeof error === "string" ? error : error instanceof Error ? error.message : String(error);
+  const text =
+    typeof error === "string" ? error : error instanceof Error ? error.message : String(error);
   return /(#10)\b|(#200)\b|instagram_manage_messages|pages_messaging|permission|not authorized|oauth exception/i.test(
     text,
   );

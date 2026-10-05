@@ -68,7 +68,9 @@ export const listDashboardAccountsFn = createServerFn({ method: "GET" })
           cad ? hubByCadastro.get(cad.id) : [],
         ),
         lastData:
-          ativo.ultima_data_recebida != null ? String(ativo.ultima_data_recebida).slice(0, 10) : null,
+          ativo.ultima_data_recebida != null
+            ? String(ativo.ultima_data_recebida).slice(0, 10)
+            : null,
       });
     }
 

@@ -248,7 +248,9 @@ describe("MetaOAuthService", () => {
       {
         match: (url) => url.includes("/debug_token"),
         respond: () => ({
-          body: { data: { is_valid: true, scopes: ["instagram_content_publish", "pages_manage_posts"] } },
+          body: {
+            data: { is_valid: true, scopes: ["instagram_content_publish", "pages_manage_posts"] },
+          },
         }),
       },
     ]);

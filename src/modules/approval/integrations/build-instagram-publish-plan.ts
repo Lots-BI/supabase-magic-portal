@@ -47,9 +47,9 @@ export function buildInstagramPublishPlan(
     return {
       type: "carousel",
       caption: trimmedCaption,
-      items: usable.slice(0, 10).map((item) =>
-        isVideo(item) ? { video_url: item.url } : { image_url: item.url },
-      ),
+      items: usable
+        .slice(0, 10)
+        .map((item) => (isVideo(item) ? { video_url: item.url } : { image_url: item.url })),
     };
   }
 

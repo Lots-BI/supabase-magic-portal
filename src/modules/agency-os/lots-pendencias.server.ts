@@ -386,7 +386,9 @@ export async function syncLotsPendencias(): Promise<void> {
   const editadas = new Set(
     (abertas ?? []).filter((row) => row.editada).map((row) => row.chave as string),
   );
-  const ladoAtual = new Map((abertas ?? []).map((row) => [row.chave as string, row.lado as string]));
+  const ladoAtual = new Map(
+    (abertas ?? []).map((row) => [row.chave as string, row.lado as string]),
+  );
   const paraCliente = drafts
     .filter((item) => item.lado === "cliente" && ladoAtual.get(item.chave) === "admin")
     .map((item) => item.chave);

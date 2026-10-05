@@ -34,10 +34,7 @@ describe("buildOperationalReport", () => {
       clienteSlug: "acme",
       period,
       platformRows: {
-        meta_ads: [
-          metaRow("2026-08-25", 80, 4),
-          metaRow("2026-09-05", 120, 10),
-        ],
+        meta_ads: [metaRow("2026-08-25", 80, 4), metaRow("2026-09-05", 120, 10)],
       },
       postsCurrent: [],
       postsPrevious: [],

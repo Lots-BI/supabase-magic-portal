@@ -94,10 +94,12 @@ export function groupPeopleByProfile<T extends { lastKind: string | null }>(peop
     list.push(person);
     buckets.set(id, list);
   }
-  return PROFILE_GROUPS.filter((group) => (buckets.get(group.id)?.length ?? 0) > 0).map((group) => ({
-    ...group,
-    people: buckets.get(group.id) ?? [],
-  }));
+  return PROFILE_GROUPS.filter((group) => (buckets.get(group.id)?.length ?? 0) > 0).map(
+    (group) => ({
+      ...group,
+      people: buckets.get(group.id) ?? [],
+    }),
+  );
 }
 
 export function kindLabel(kind: string): string {

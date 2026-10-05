@@ -28,7 +28,9 @@ function TermsOfServicePage() {
         <header className="space-y-4">
           <LotsBIWordmark size="lg" />
           <div className="space-y-2">
-            <h1 className="font-display text-3xl font-semibold tracking-tight">Termos de serviço</h1>
+            <h1 className="font-display text-3xl font-semibold tracking-tight">
+              Termos de serviço
+            </h1>
             <p className="text-sm text-muted-foreground">Atualizados em {UPDATED_ON}.</p>
           </div>
           <p className="text-sm leading-relaxed text-muted-foreground">
@@ -53,15 +55,17 @@ function TermsOfServicePage() {
           <ul>
             <li>A pessoa guarda o próprio e-mail e a própria senha.</li>
             <li>A atividade feita com essa conta é de responsabilidade de quem entrou.</li>
-            <li>O acesso pode ser recusado ou encerrado se o convite acabar ou o uso for indevido.</li>
+            <li>
+              O acesso pode ser recusado ou encerrado se o convite acabar ou o uso for indevido.
+            </li>
           </ul>
         </Section>
 
         <Section title="3. Contas conectadas">
           <p>
-            Google Ads, Google Analytics, YouTube, Google Business Profile, Meta, Instagram e
-            TikTok só são consultados depois que alguém com poder sobre aquela conta autoriza a
-            conexão. A pessoa confirma que pode conceder esse acesso em nome da marca.
+            Google Ads, Google Analytics, YouTube, Google Business Profile, Meta, Instagram e TikTok
+            só são consultados depois que alguém com poder sobre aquela conta autoriza a conexão. A
+            pessoa confirma que pode conceder esse acesso em nome da marca.
           </p>
           <p>
             Desconectar no {BRAND_NAME} encerra novas consultas e novos envios. O que já foi
@@ -87,7 +91,11 @@ function TermsOfServicePage() {
           </p>
           <p>
             O uso das APIs do Google também segue os{" "}
-            <a className="underline underline-offset-2" href={GOOGLE_API_TERMS_URL} rel="noreferrer">
+            <a
+              className="underline underline-offset-2"
+              href={GOOGLE_API_TERMS_URL}
+              rel="noreferrer"
+            >
               Termos de Serviço das APIs do Google
             </a>
             .

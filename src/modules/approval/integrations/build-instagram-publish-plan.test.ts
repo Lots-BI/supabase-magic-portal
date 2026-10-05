@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildInstagramPublishPlan,
-  captionForCard,
-} from "./build-instagram-publish-plan";
+import { buildInstagramPublishPlan, captionForCard } from "./build-instagram-publish-plan";
 
 const image = (url: string) => ({ url, kind: "image" as const, mime_type: "image/jpeg" });
 const video = (url: string) => ({ url, kind: "video" as const, mime_type: "video/mp4" });

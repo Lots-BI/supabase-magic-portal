@@ -69,7 +69,10 @@ async function resolveMediaUuid(
 function commentFromPayload(payload: Record<string, unknown>): CrmGraphComment | null {
   const id = typeof payload.id === "string" ? payload.id : null;
   if (!id) return null;
-  const from = payload.from && typeof payload.from === "object" ? (payload.from as Record<string, unknown>) : {};
+  const from =
+    payload.from && typeof payload.from === "object"
+      ? (payload.from as Record<string, unknown>)
+      : {};
   return {
     id,
     text: typeof payload.text === "string" ? payload.text : null,
@@ -171,7 +174,10 @@ async function ingestOneEvent(
       text: typeof message.text === "string" ? message.text : null,
       timestamp:
         typeof event.payload.timestamp === "string" || typeof event.payload.timestamp === "number"
-          ? new Date(Number(event.payload.timestamp) * (String(event.payload.timestamp).length < 12 ? 1000 : 1)).toISOString()
+          ? new Date(
+              Number(event.payload.timestamp) *
+                (String(event.payload.timestamp).length < 12 ? 1000 : 1),
+            ).toISOString()
           : new Date().toISOString(),
       from: {
         id: typeof sender.id === "string" ? sender.id : undefined,
@@ -246,10 +252,16 @@ export async function ingestWhatsappWebhookPayload(
   let ingested = 0;
   for (const event of events) {
     const cadastroClienteId = await resolveCadastroByExternalId(supabase, event.entryId);
-    const claimed = await claimReceipt(supabase, "whatsapp", event.externalId, event.field, cadastroClienteId);
+    const claimed = await claimReceipt(
+      supabase,
+      "whatsapp",
+      event.externalId,
+      event.field,
+      cadastroClienteId,
+    );
     if (!claimed || !cadastroClienteId) continue;
     const contacts = Array.isArray((event.payload as { contacts?: unknown }).contacts)
-      ? ((event.payload as { contacts: { wa_id?: string }[] }).contacts)
+      ? (event.payload as { contacts: { wa_id?: string }[] }).contacts
       : [];
     const waId = contacts[0]?.wa_id;
     const mapped = mapWhatsappInbound({

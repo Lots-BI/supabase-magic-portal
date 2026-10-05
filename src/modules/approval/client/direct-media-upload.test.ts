@@ -23,9 +23,9 @@ describe("direct-media-upload", () => {
   });
 
   it("não trata JWT inválido como formato", () => {
-    expect(mapStorageError('{"statusCode":"400","error":"InvalidJwt","message":"Invalid JWT"}')).toBe(
-      "O envio expirou. Toque em enviar de novo.",
-    );
+    expect(
+      mapStorageError('{"statusCode":"400","error":"InvalidJwt","message":"Invalid JWT"}'),
+    ).toBe("O envio expirou. Toque em enviar de novo.");
   });
 
   it("completa URL assinada relativa com token", () => {

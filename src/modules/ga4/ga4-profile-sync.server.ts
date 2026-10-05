@@ -7,7 +7,10 @@ import {
   addDaysToDateStr,
   todayInSaoPaulo,
 } from "@/modules/platform-hub/plugins/instagram_organic/api/date-utils";
-import { groupIntoContiguousRanges, listMissingDates } from "@/modules/instagram-posts/instagram-profile-gap-finder";
+import {
+  groupIntoContiguousRanges,
+  listMissingDates,
+} from "@/modules/instagram-posts/instagram-profile-gap-finder";
 import { syncAllActivePluginConnections } from "@/modules/platform-hub-bridges/ph-persistence/sync-all-active-connections";
 
 export const GA4_LOOKBACK_DAYS = 89;

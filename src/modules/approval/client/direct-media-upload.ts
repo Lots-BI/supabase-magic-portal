@@ -29,7 +29,11 @@ export function storageTusEndpoint(supabaseUrl: string): string {
   return `${trimmed}/storage/v1/upload/resumable`;
 }
 
-export function resolveSignedUploadUrl(signedUrl: string, supabaseUrl: string, token: string): string {
+export function resolveSignedUploadUrl(
+  signedUrl: string,
+  supabaseUrl: string,
+  token: string,
+): string {
   const base = signedUrl.startsWith("http")
     ? signedUrl
     : `${supabaseUrl.replace(/\/$/, "")}${signedUrl.startsWith("/") ? "" : "/"}${signedUrl}`;
@@ -102,12 +106,9 @@ async function uploadViaSignedPut(
   }
   if (signal?.aborted) throw new Error("Envio cancelado.");
   onProgress?.(20);
-  const { error } = await supabase.storage.from(EDITORIAL_MEDIA_BUCKET).uploadToSignedUrl(
-    ticket.path,
-    ticket.token,
-    file,
-    { contentType: mimeType },
-  );
+  const { error } = await supabase.storage
+    .from(EDITORIAL_MEDIA_BUCKET)
+    .uploadToSignedUrl(ticket.path, ticket.token, file, { contentType: mimeType });
   if (error) throw new Error(mapStorageError(error.message));
   onProgress?.(100);
 }

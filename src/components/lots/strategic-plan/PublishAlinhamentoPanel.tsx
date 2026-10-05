@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  getAlinhamentoJourney,
-  publishAlinhamentoPlan,
-} from "@/lib/strategic-plan.functions";
+import { getAlinhamentoJourney, publishAlinhamentoPlan } from "@/lib/strategic-plan.functions";
 import { Field, TextArea, TextInput } from "@/components/lots/FormField";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";

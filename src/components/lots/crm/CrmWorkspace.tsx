@@ -167,18 +167,16 @@ function IngestTokenPanel({ cadastroClienteId }: { cadastroClienteId: number }) 
           <p className="mb-1 text-xs text-muted-foreground">Rótulo</p>
           <Input value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} />
         </div>
-        <Button
-          size="sm"
-          onClick={() => createMut.mutate()}
-          disabled={createMut.isPending}
-        >
+        <Button size="sm" onClick={() => createMut.mutate()} disabled={createMut.isPending}>
           <KeyRound className="mr-1.5 h-3.5 w-3.5" />
           Gerar token
         </Button>
       </div>
       {plainOnce ? (
         <div className="mb-3 rounded-md border border-border bg-muted/40 p-3">
-          <p className="text-xs text-muted-foreground">Copie agora. Não armazenamos o valor em claro.</p>
+          <p className="text-xs text-muted-foreground">
+            Copie agora. Não armazenamos o valor em claro.
+          </p>
           <div className="mt-2 flex items-center gap-2">
             <Input readOnly value={plainOnce} className="font-mono text-xs" />
             <Button
@@ -201,9 +199,13 @@ function IngestTokenPanel({ cadastroClienteId }: { cadastroClienteId: number }) 
           {tokens.map((token: CrmIngestTokenRow) => (
             <li key={token.id} className="flex items-center justify-between gap-3 py-2">
               <div className="min-w-0">
-                <p className={token.revokedAt ? "text-muted-foreground line-through" : "font-medium"}>
+                <p
+                  className={token.revokedAt ? "text-muted-foreground line-through" : "font-medium"}
+                >
                   {token.label}{" "}
-                  <span className="font-mono text-xs text-muted-foreground">{token.tokenPrefix}…</span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {token.tokenPrefix}…
+                  </span>
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {token.revokedAt
@@ -331,7 +333,9 @@ export function CrmWorkspace({
             ) : null}
             {canWrite ? (
               <Button size="sm" onClick={() => syncMut.mutate()} disabled={syncMut.isPending}>
-                <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", syncMut.isPending && "animate-spin")} />
+                <RefreshCw
+                  className={cn("mr-1.5 h-3.5 w-3.5", syncMut.isPending && "animate-spin")}
+                />
                 Puxar Instagram
               </Button>
             ) : null}
@@ -503,7 +507,9 @@ function RankingTable({
       {loading ? (
         <p className="text-sm text-muted-foreground">Calculando coortes…</p>
       ) : rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Ainda não há posts com pessoas identificadas.</p>
+        <p className="text-sm text-muted-foreground">
+          Ainda não há posts com pessoas identificadas.
+        </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -524,7 +530,12 @@ function RankingTable({
                       {row.captionExcerpt || row.pillarTitulo || "Publicação"}
                     </p>
                     {row.permalink ? (
-                      <a href={row.permalink} target="_blank" rel="noreferrer" className="text-xs underline">
+                      <a
+                        href={row.permalink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs underline"
+                      >
                         Ver
                       </a>
                     ) : null}
@@ -748,7 +759,8 @@ function PersonDrawer({
                   <li key={s.id} className="border-l-2 border-border pl-3 text-sm">
                     <p className="text-xs text-muted-foreground">
                       {kindLabel(s.kind)}
-                      {placeLabel(s.place) ? ` · ${placeLabel(s.place)}` : ""} · {formatWhen(s.occurredAt)}
+                      {placeLabel(s.place) ? ` · ${placeLabel(s.place)}` : ""} ·{" "}
+                      {formatWhen(s.occurredAt)}
                     </p>
                     {s.body ? <p className="mt-0.5">{s.body}</p> : null}
                     {s.pilarTitulo || s.tema ? (
@@ -831,7 +843,9 @@ function PersonDrawer({
                       toast.success("Direct enviado.");
                       invalidate();
                     } catch (error) {
-                      toast.error(error instanceof Error ? error.message : "Falha ao enviar Direct.");
+                      toast.error(
+                        error instanceof Error ? error.message : "Falha ao enviar Direct.",
+                      );
                     }
                   }}
                 >
@@ -932,7 +946,11 @@ function PersonDrawer({
                     <span className="text-xs text-muted-foreground">{formatWhen(n.createdAt)}</span>
                   </p>
                 ))}
-                <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Nota interna" />
+                <Textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Nota interna"
+                />
                 <Button
                   size="sm"
                   variant="secondary"

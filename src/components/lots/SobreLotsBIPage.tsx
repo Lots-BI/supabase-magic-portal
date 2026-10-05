@@ -72,8 +72,8 @@ export function SobreLotsBIPage() {
             </p>
             <p className="text-sm leading-relaxed text-muted-foreground">
               O {BRAND_NAME} reúne o que antes ficava espalhado: campanhas de anúncio, presença
-              orgânica e tráfego do site. A ideia é simples — abrir o portal e entender como a
-              marca está performando, com números que a agência já opera.
+              orgânica e tráfego do site. A ideia é simples — abrir o portal e entender como a marca
+              está performando, com números que a agência já opera.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -117,8 +117,8 @@ export function SobreLotsBIPage() {
             Plataformas que o Lots BI lê
           </h2>
           <p className="max-w-2xl text-xs leading-relaxed text-muted-foreground">
-            Cada card é um dashboard real da plataforma. A sua marca só vê os que estão
-            conectados — este mosaico mostra o recorte completo.
+            Cada card é um dashboard real da plataforma. A sua marca só vê os que estão conectados —
+            este mosaico mostra o recorte completo.
           </p>
         </header>
         {FAMILIES.map((family, index) => {
@@ -174,7 +174,13 @@ export function SobreLotsBIPage() {
                         >
                           {entry.label}
                         </h4>
-                        <p className={cn("relative z-[1] mt-1 text-xs leading-relaxed", theme.title, "opacity-80")}>
+                        <p
+                          className={cn(
+                            "relative z-[1] mt-1 text-xs leading-relaxed",
+                            theme.title,
+                            "opacity-80",
+                          )}
+                        >
                           {entry.description}
                         </p>
                       </article>

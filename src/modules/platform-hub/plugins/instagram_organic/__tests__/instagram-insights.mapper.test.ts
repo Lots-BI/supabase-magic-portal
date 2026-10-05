@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { insightMetricsForProductType, mapInsightsToMetrics } from "../api/instagram-insights.mapper";
+import {
+  insightMetricsForProductType,
+  mapInsightsToMetrics,
+} from "../api/instagram-insights.mapper";
 
 describe("instagram-insights.mapper", () => {
   it("selects metrics by product type", () => {

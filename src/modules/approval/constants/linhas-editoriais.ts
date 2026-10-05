@@ -185,8 +185,7 @@ export const LINHAS_EDITORIAIS_CATEGORIES = [
       },
       {
         value: "Promoções e Cupons",
-        description:
-          "Ações promocionais de curto prazo, relâmpago ou sazonais (Black Friday).",
+        description: "Ações promocionais de curto prazo, relâmpago ou sazonais (Black Friday).",
       },
     ],
   },
@@ -268,8 +267,7 @@ export const LINHAS_EDITORIAIS_CATEGORIES = [
       },
       {
         value: "Motivação Diária",
-        description:
-          "Reflexões matinais ou mensagens de incentivo para a rotina da audiência.",
+        description: "Reflexões matinais ou mensagens de incentivo para a rotina da audiência.",
       },
     ],
   },
@@ -287,13 +285,11 @@ export const LINHAS_EDITORIAIS_CATEGORIES = [
       },
       {
         value: "Spotlight / Destaque do Membro",
-        description:
-          "Contar a história de um seguidor ou aluno destaque da sua comunidade.",
+        description: "Contar a história de um seguidor ou aluno destaque da sua comunidade.",
       },
       {
         value: "Reviews Orgânicos",
-        description:
-          "Prints de comentários elogiosos deixados no Google, site ou redes sociais.",
+        description: "Prints de comentários elogiosos deixados no Google, site ou redes sociais.",
       },
     ],
   },

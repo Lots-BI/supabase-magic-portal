@@ -6,10 +6,7 @@ import { FetchHttpClient } from "@/modules/platform-hub/plugins/_internal/http/f
 import { InstagramGraphClient } from "@/modules/platform-hub/plugins/instagram_organic/api/instagram-graph-client";
 import { INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY } from "@/modules/platform-hub/plugins/instagram_organic/instagram-credential-keys";
 import type { InstagramPublishTarget } from "./execute-instagram-publish";
-import {
-  selectPagePublishToken,
-  type MetaManagedPage,
-} from "./select-page-publish-token";
+import { selectPagePublishToken, type MetaManagedPage } from "./select-page-publish-token";
 
 export class InstagramPublishSetupError extends Error {
   constructor(

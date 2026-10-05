@@ -18,9 +18,7 @@ export function selectPagePublishToken(
   fallbackPageId?: string | null,
 ): PagePublishToken {
   const byIg = pages.find((page) => page.instagram_business_account?.id === igUserId);
-  const byPage = fallbackPageId
-    ? pages.find((page) => page.id === fallbackPageId)
-    : undefined;
+  const byPage = fallbackPageId ? pages.find((page) => page.id === fallbackPageId) : undefined;
   const match = byIg ?? byPage;
   if (!match) {
     throw new Error(

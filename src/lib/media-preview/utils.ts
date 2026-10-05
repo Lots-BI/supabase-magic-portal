@@ -75,10 +75,7 @@ const DISPLAY_ROLE_RANK: Record<string, number> = {
 };
 
 /** Qualquer mídia visual anexada, para o cartaz / sheet do cliente. */
-export function assetsForCardDisplay(
-  assets: MediaAsset[],
-  preferFinal = false,
-): MediaAsset[] {
+export function assetsForCardDisplay(assets: MediaAsset[], preferFinal = false): MediaAsset[] {
   const visual = assets.filter((asset) => asset.kind === "image" || asset.kind === "video");
   if (visual.length === 0) return [];
   const agency = visual.filter((asset) => asset.mediaRole !== "cliente_material");

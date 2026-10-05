@@ -2,10 +2,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { queryOptions } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { GenericKanbanBoard } from "@/components/lots/kanban/GenericKanbanBoard";
-import {
-  MiniDashboardCard,
-  priorityTypeIcon,
-} from "@/components/lots/agency-os/MiniDashboardCard";
+import { MiniDashboardCard, priorityTypeIcon } from "@/components/lots/agency-os/MiniDashboardCard";
 import { getProductionKanban, moveAgencyProject } from "@/modules/agency-os/agency-os.server";
 import { agencyOsKeys } from "@/modules/agency-os/query-keys";
 import type { AgencyProject, AgencyProjectStatus } from "@/modules/agency-os/types/operations";

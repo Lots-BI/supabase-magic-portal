@@ -89,7 +89,13 @@ export function rankMediaByReturn(
     if (rest.some((s) => s.igMediaId && s.igMediaId !== firstSignal.igMediaId)) {
       bucket.returned.add(personId);
     }
-    if (isStillActive(firstSignal.occurredAt, rest.map((s) => s.occurredAt), windowDays)) {
+    if (
+      isStillActive(
+        firstSignal.occurredAt,
+        rest.map((s) => s.occurredAt),
+        windowDays,
+      )
+    ) {
       bucket.active.add(personId);
     }
     byMedia.set(firstSignal.igMediaId, bucket);
@@ -106,8 +112,10 @@ export function rankMediaByReturn(
         firstTouchPeople,
         returnedPeople,
         activeInWindow,
-        returnRate: firstTouchPeople === 0 ? 0 : Math.round((returnedPeople / firstTouchPeople) * 100),
-        activeRate: firstTouchPeople === 0 ? 0 : Math.round((activeInWindow / firstTouchPeople) * 100),
+        returnRate:
+          firstTouchPeople === 0 ? 0 : Math.round((returnedPeople / firstTouchPeople) * 100),
+        activeRate:
+          firstTouchPeople === 0 ? 0 : Math.round((activeInWindow / firstTouchPeople) * 100),
       };
     })
     .sort((a, b) => b.returnRate - a.returnRate || b.firstTouchPeople - a.firstTouchPeople);

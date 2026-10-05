@@ -37,10 +37,10 @@ function PrivacyPolicyPage() {
             <p className="text-sm text-muted-foreground">Atualizada em {UPDATED_ON}.</p>
           </div>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Esta página explica como o {BRAND_NAME} ({BRAND_URL}) trata dados pessoais de quem
-            entra na plataforma e de quem autoriza a conexão de contas de anúncio, analytics e
-            vídeo. O texto vale para a Lei Geral de Proteção de Dados (Lei nº 13.709/2018) e para
-            o uso das APIs do Google, inclusive YouTube.
+            Esta página explica como o {BRAND_NAME} ({BRAND_URL}) trata dados pessoais de quem entra
+            na plataforma e de quem autoriza a conexão de contas de anúncio, analytics e vídeo. O
+            texto vale para a Lei Geral de Proteção de Dados (Lei nº 13.709/2018) e para o uso das
+            APIs do Google, inclusive YouTube.
           </p>
         </header>
 
@@ -57,8 +57,8 @@ function PrivacyPolicyPage() {
 
         <Section title="2. O que a plataforma faz">
           <p>
-            O {BRAND_NAME} reúne métricas de marketing, o fluxo de aprovação de conteúdo e, quando
-            a conta autoriza, a publicação em canais conectados. O acesso é por convite ou pedido
+            O {BRAND_NAME} reúne métricas de marketing, o fluxo de aprovação de conteúdo e, quando a
+            conta autoriza, a publicação em canais conectados. O acesso é por convite ou pedido
             analisado pela equipe. Cada pessoa vê as marcas ligadas à própria conta.
           </p>
         </Section>
@@ -82,8 +82,8 @@ function PrivacyPolicyPage() {
           </ul>
           <h3 className="font-display text-base font-semibold">Contas conectadas</h3>
           <p>
-            Nada disso é lido antes da pessoa autorizar o acesso na tela da plataforma (Google,
-            Meta ou TikTok).
+            Nada disso é lido antes da pessoa autorizar o acesso na tela da plataforma (Google, Meta
+            ou TikTok).
           </p>
           <ul>
             <li>
@@ -94,17 +94,17 @@ function PrivacyPolicyPage() {
               <strong>Google Analytics 4.</strong> Leitura das métricas da propriedade escolhida.
             </li>
             <li>
-              <strong>YouTube.</strong> Leitura do canal, dos vídeos e do analytics. Envio de
-              vídeos que a equipe preparou no {BRAND_NAME} e o responsável autorizou publicar.
+              <strong>YouTube.</strong> Leitura do canal, dos vídeos e do analytics. Envio de vídeos
+              que a equipe preparou no {BRAND_NAME} e o responsável autorizou publicar.
             </li>
             <li>
               <strong>Google Business Profile.</strong> Leitura e gestão das métricas do perfil,
               quando essa conexão está ativa.
             </li>
             <li>
-              <strong>Meta e Instagram.</strong> Leitura de anúncios, páginas e insights.
-              Publicação de conteúdo aprovado. Comentários da marca para o CRM. Mensagens e leads
-              só entram se esses recursos estiverem ligados na conexão.
+              <strong>Meta e Instagram.</strong> Leitura de anúncios, páginas e insights. Publicação
+              de conteúdo aprovado. Comentários da marca para o CRM. Mensagens e leads só entram se
+              esses recursos estiverem ligados na conexão.
             </li>
             <li>
               <strong>TikTok.</strong> Leitura de métricas de anúncio. Essa conexão não publica no
@@ -173,8 +173,8 @@ function PrivacyPolicyPage() {
             <a className="underline underline-offset-2" href={YOUTUBE_TERMS_URL} rel="noreferrer">
               {YOUTUBE_TERMS_URL}
             </a>
-            . Ao conectar um canal do YouTube no {BRAND_NAME}, a pessoa concorda com esses termos
-            e com os{" "}
+            . Ao conectar um canal do YouTube no {BRAND_NAME}, a pessoa concorda com esses termos e
+            com os{" "}
             <Link to="/termos" className="underline underline-offset-2">
               termos de serviço
             </Link>{" "}
@@ -200,12 +200,10 @@ function PrivacyPolicyPage() {
               Usuários da mesma organização e da mesma marca, no limite do acesso configurado.
             </li>
             <li>
-              Prestadores que hospedam o serviço: Supabase (autenticação, banco e arquivos) e
-              Vercel (aplicação). Os tokens de conexão ficam criptografados no banco.
+              Prestadores que hospedam o serviço: Supabase (autenticação, banco e arquivos) e Vercel
+              (aplicação). Os tokens de conexão ficam criptografados no banco.
             </li>
-            <li>
-              Google, Meta e TikTok, somente na chamada das APIs que a conta autorizou.
-            </li>
+            <li>Google, Meta e TikTok, somente na chamada das APIs que a conta autorizou.</li>
             <li>Autoridade pública, quando a lei exigir.</li>
           </ul>
           <p>

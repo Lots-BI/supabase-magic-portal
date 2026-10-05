@@ -90,7 +90,10 @@ export async function syncCrmDirectForCadastro(
         from: message.from,
       });
       if (!mapped) continue;
-      const kind = message.from?.id && message.from.id === target.igUserId ? "brand_reply" : mapped.signal.kind;
+      const kind =
+        message.from?.id && message.from.id === target.igUserId
+          ? "brand_reply"
+          : mapped.signal.kind;
       const { personId } = await persistCrmSignal(
         supabase,
         cadastroClienteId,

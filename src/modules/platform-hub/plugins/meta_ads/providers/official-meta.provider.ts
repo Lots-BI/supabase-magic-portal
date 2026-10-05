@@ -100,10 +100,7 @@ export function createOfficialMetaProvider(config: OfficialMetaProviderConfig): 
 
         const mapped = mapMetaInsightsToMetricRows(insights, { campaignObjectives });
         const coveredDates = insights.map((row) => row.date_start).filter(Boolean);
-        const rows = [
-          ...mapped,
-          ...markerRowsForUncoveredDates(window, coveredDates),
-        ];
+        const rows = [...mapped, ...markerRowsForUncoveredDates(window, coveredDates)];
         timer.finish({
           campaignsCount: countDistinctCampaigns(insights),
           metricsCount: rows.length,

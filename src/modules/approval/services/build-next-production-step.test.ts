@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildNextProductionStep,
-  syncAutoChecklist,
-} from "./build-next-production-step";
+import { buildNextProductionStep, syncAutoChecklist } from "./build-next-production-step";
 import { buildProductionChecklist } from "./build-production-checklist";
 
 describe("buildNextProductionStep", () => {

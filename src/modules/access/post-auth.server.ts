@@ -167,7 +167,10 @@ export const postAuthOnLoginSuccess = createServerFn({ method: "GET" })
       } catch {
         return {
           ok: true as const,
-          path: resolvePostAuthDestination(access.isOperational || access.isGlobalAdmin, data?.redirect),
+          path: resolvePostAuthDestination(
+            access.isOperational || access.isGlobalAdmin,
+            data?.redirect,
+          ),
         };
       }
     }

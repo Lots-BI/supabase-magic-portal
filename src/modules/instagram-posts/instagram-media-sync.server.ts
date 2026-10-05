@@ -15,7 +15,9 @@ export async function syncInstagramMediaConnection(
   const stack = await createAdminHubStack(supabase);
   const id = asConnectionId(connectionId);
   const identities = await stack.identityService.list(id);
-  const provider = stack.registry.getPlugin("instagram_organic").adapter.getProvider("official_api");
+  const provider = stack.registry
+    .getPlugin("instagram_organic")
+    .adapter.getProvider("official_api");
 
   let envelope;
   try {

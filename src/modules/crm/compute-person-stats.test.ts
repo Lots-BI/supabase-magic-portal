@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { computePersonStats } from "./compute-person-stats";
 import type { CrmSignalInput } from "./types";
 
-function signal(partial: Partial<CrmSignalInput> & Pick<CrmSignalInput, "externalId" | "occurredAt">): CrmSignalInput {
+function signal(
+  partial: Partial<CrmSignalInput> & Pick<CrmSignalInput, "externalId" | "occurredAt">,
+): CrmSignalInput {
   return {
     kind: "comment",
     place: "feed",

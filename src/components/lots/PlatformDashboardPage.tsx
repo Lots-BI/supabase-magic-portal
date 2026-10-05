@@ -76,13 +76,17 @@ function PlatformResolved({
             {def.key === "instagram" && ref.cadastroId != null && (
               <MetricsSyncButton
                 queryKey="instagram"
-                syncFn={() => syncInstagramProfileFn({ data: { cadastroClienteId: ref.cadastroId! } })}
+                syncFn={() =>
+                  syncInstagramProfileFn({ data: { cadastroClienteId: ref.cadastroId! } })
+                }
               />
             )}
             {def.key === "meta_ads" && ref.cadastroId != null && (
               <MetricsSyncButton
                 queryKey="meta_ads"
-                syncFn={() => syncMetaAdsCampaignsFn({ data: { cadastroClienteId: ref.cadastroId! } })}
+                syncFn={() =>
+                  syncMetaAdsCampaignsFn({ data: { cadastroClienteId: ref.cadastroId! } })
+                }
               />
             )}
           </div>

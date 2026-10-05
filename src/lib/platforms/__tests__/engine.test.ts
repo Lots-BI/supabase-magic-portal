@@ -47,9 +47,7 @@ describe("platformViewSelect", () => {
     expect(platformViewSelect(googleAdsDef).split(",")).not.toContain("ctr");
     expect(platformViewSelect(ga4Def).split(",")).not.toContain("engagement_rate");
     expect(platformViewSelect(metaAdsDef).split(",")).not.toContain("ctr");
-    expect(metaAdsDef.metrics.find((m) => m.key === "unique_clicks")?.aggregation.kind).toBe(
-      "max",
-    );
+    expect(metaAdsDef.metrics.find((m) => m.key === "unique_clicks")?.aggregation.kind).toBe("max");
     expect(metaAdsDef.metrics.find((m) => m.key === "reach")?.aggregation.kind).toBe("max");
   });
 });

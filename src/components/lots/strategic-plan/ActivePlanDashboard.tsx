@@ -116,7 +116,11 @@ export function ActivePlanDashboard({
 
         <SectionCard title="Orçamento Mensal" description="Divisão clara dos investimentos.">
           <div className="space-y-3">
-            <BudgetRow icon={<Wallet className="h-3.5 w-3.5" />} label="Fee da agência" value={fee} />
+            <BudgetRow
+              icon={<Wallet className="h-3.5 w-3.5" />}
+              label="Fee da agência"
+              value={fee}
+            />
             <BudgetRow label="Verba de tráfego" value={trafego} />
             <BudgetRow label="Custos de infra / dev" value={infra} />
             <div className="border-t border-border pt-3">
@@ -151,12 +155,7 @@ export function ActivePlanDashboard({
             </span>
           </div>
         ) : (
-          <Button
-            size="sm"
-            className="gap-1.5"
-            disabled={approving}
-            onClick={onApprove}
-          >
+          <Button size="sm" className="gap-1.5" disabled={approving} onClick={onApprove}>
             <FileSignature className="h-3.5 w-3.5" />
             {approving ? "Registrando…" : "Aprovar Plano / Assinar"}
           </Button>
@@ -166,15 +165,7 @@ export function ActivePlanDashboard({
   );
 }
 
-function BudgetRow({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: number;
-  icon?: ReactNode;
-}) {
+function BudgetRow({ label, value, icon }: { label: string; value: number; icon?: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 text-sm">
       <span className="flex items-center gap-2 text-muted-foreground">

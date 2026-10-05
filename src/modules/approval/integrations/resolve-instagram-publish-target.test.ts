@@ -11,7 +11,10 @@ function mockSupabase(tables: Record<string, unknown[]>) {
         eq: () => unknown;
         order: () => unknown;
         limit: () => Promise<typeof result>;
-        then: (resolve: (value: typeof result) => unknown, reject?: (reason: unknown) => unknown) => Promise<unknown>;
+        then: (
+          resolve: (value: typeof result) => unknown,
+          reject?: (reason: unknown) => unknown,
+        ) => Promise<unknown>;
       } = {
         select: () => chain,
         eq: () => chain,

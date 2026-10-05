@@ -20,9 +20,9 @@ export function PendingPlan({ clienteNome }: { clienteNome: string }) {
       />
 
       <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-        Recebemos suas informações! Nossa equipe está analisando seu momento atual e construindo
-        um Plano Estratégico sob medida. Você será notificado assim que o escopo estiver pronto
-        para aprovação.
+        Recebemos suas informações! Nossa equipe está analisando seu momento atual e construindo um
+        Plano Estratégico sob medida. Você será notificado assim que o escopo estiver pronto para
+        aprovação.
       </p>
 
       <div className="mt-10 flex items-center gap-2">

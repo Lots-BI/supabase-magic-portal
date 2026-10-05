@@ -8,9 +8,7 @@ import { PLATFORM_RELEASES, type PlatformReleaseAudience } from "@/content/platf
 
 export function listPlatformReleases(audience: "client" | "admin"): typeof PLATFORM_RELEASES {
   if (audience === "admin") return PLATFORM_RELEASES;
-  return PLATFORM_RELEASES.filter(
-    (item) => item.audience === "all" || item.audience === "client",
-  );
+  return PLATFORM_RELEASES.filter((item) => item.audience === "all" || item.audience === "client");
 }
 
 export function latestPlatformRelease(

@@ -1,11 +1,7 @@
 import { type Period } from "@/lib/period";
 import { PLATFORM_FAMILY, type Totals } from "@/lib/metrics";
 import { getPlatformDef } from "@/lib/platforms/registry";
-import {
-  aggregatePeriod,
-  pctDelta,
-  type Row,
-} from "@/lib/platforms/engine";
+import { aggregatePeriod, pctDelta, type Row } from "@/lib/platforms/engine";
 import type { Platform } from "@/lib/metrics";
 import { KANBAN_COLUMNS } from "@/modules/approval/workflow/column-config";
 import { FORMAT_LABEL, type ContentFormato } from "@/modules/approval/types/content-card";
@@ -118,13 +114,18 @@ export function buildOperationalReport(input: BuildOperationalReportInput): Oper
     const def = getPlatformDef(key);
     if (!def) continue;
     const rows = input.platformRows[key] ?? [];
-    const hasData = rows.some((row) => row.data >= input.period.from && row.data <= input.period.to);
+    const hasData = rows.some(
+      (row) => row.data >= input.period.from && row.data <= input.period.to,
+    );
     if (!hasData) continue;
 
     const agg = aggregatePeriod(def, rows, input.period);
     const metrics = spotlightMetrics(def, agg);
     const campaigns = [...agg.campaigns]
-      .sort((a, b) => (b.totals.spend ?? b.totals.results ?? 0) - (a.totals.spend ?? a.totals.results ?? 0))
+      .sort(
+        (a, b) =>
+          (b.totals.spend ?? b.totals.results ?? 0) - (a.totals.spend ?? a.totals.results ?? 0),
+      )
       .slice(0, CAMPAIGN_CAP)
       .map((campaign) => ({
         name: campaign.campanha,
@@ -134,8 +135,7 @@ export function buildOperationalReport(input: BuildOperationalReportInput): Oper
       }));
 
     const family = PLATFORM_FAMILY[key as Platform] ?? "analytics";
-    const dailyMetricKey =
-      metrics[0]?.key ?? def.heroMetrics[0] ?? def.metrics[0]?.key ?? null;
+    const dailyMetricKey = metrics[0]?.key ?? def.heroMetrics[0] ?? def.metrics[0]?.key ?? null;
 
     platforms.push({
       key,
@@ -147,10 +147,7 @@ export function buildOperationalReport(input: BuildOperationalReportInput): Oper
       lastDay: agg.lastSync,
       metrics,
       campaigns,
-      daily: slimDaily(agg.daily, [
-        dailyMetricKey,
-        family === "paid" ? "spend" : null,
-      ]),
+      daily: slimDaily(agg.daily, [dailyMetricKey, family === "paid" ? "spend" : null]),
       dailyMetricKey,
     });
   }
@@ -285,15 +282,18 @@ function pickHeroes(
 
   const metaSpend = byKey("meta_ads", "spend");
   const googleSpend = byKey("google_ads", "spend");
-  const spendValue = (metaSpend?.value ?? 0) + (googleSpend?.value ?? 0) || (overviewCurrent?.spend ?? 0);
-  const spendPrev = (metaSpend?.previous ?? 0) + (googleSpend?.previous ?? 0) || (overviewPrevious?.spend ?? 0);
+  const spendValue =
+    (metaSpend?.value ?? 0) + (googleSpend?.value ?? 0) || (overviewCurrent?.spend ?? 0);
+  const spendPrev =
+    (metaSpend?.previous ?? 0) + (googleSpend?.previous ?? 0) || (overviewPrevious?.spend ?? 0);
 
   const metaResults = byKey("meta_ads", "results");
   const googleConv = byKey("google_ads", "conversions");
   const resultsValue =
     (metaResults?.value ?? 0) + (googleConv?.value ?? 0) || (overviewCurrent?.conversions ?? 0);
   const resultsPrev =
-    (metaResults?.previous ?? 0) + (googleConv?.previous ?? 0) || (overviewPrevious?.conversions ?? 0);
+    (metaResults?.previous ?? 0) + (googleConv?.previous ?? 0) ||
+    (overviewPrevious?.conversions ?? 0);
 
   const igViews = byKey("instagram", "views");
   const igReach = byKey("instagram", "reach");
@@ -306,18 +306,26 @@ function pickHeroes(
 
   const heroes: ReportMetric[] = [];
   if (hasActivity(spendValue, spendPrev)) {
-    heroes.push(metricRow("hero_spend", "Investimento", spendValue, spendPrev, "currency", true, "metric"));
+    heroes.push(
+      metricRow("hero_spend", "Investimento", spendValue, spendPrev, "currency", true, "metric"),
+    );
   }
   if (hasActivity(resultsValue, resultsPrev)) {
-    heroes.push(metricRow("hero_results", "Resultados", resultsValue, resultsPrev, "int", true, "metric"));
+    heroes.push(
+      metricRow("hero_results", "Resultados", resultsValue, resultsPrev, "int", true, "metric"),
+    );
   }
   if (igViews && hasActivity(igViews.value, igViews.previous)) {
     heroes.push({ ...igViews, key: "hero_ig_views", label: "Visualizações" });
   } else if (hasActivity(reachValue, reachPrev)) {
-    heroes.push(metricRow("hero_ig_reach", "Alcance", reachValue, reachPrev, "int", true, "metric"));
+    heroes.push(
+      metricRow("hero_ig_reach", "Alcance", reachValue, reachPrev, "int", true, "metric"),
+    );
   }
   if (hasActivity(sessionsValue, sessionsPrev)) {
-    heroes.push(metricRow("hero_sessions", "Sessões", sessionsValue, sessionsPrev, "int", true, "metric"));
+    heroes.push(
+      metricRow("hero_sessions", "Sessões", sessionsValue, sessionsPrev, "int", true, "metric"),
+    );
   }
   return heroes.slice(0, HERO_CAP);
 }
@@ -416,7 +424,9 @@ function buildHeadline(
     return `${formatReportValue("int", sessions.value)} sessões no site.`;
   }
   if (posts && posts.count > 0) {
-    return posts.count === 1 ? "1 publicação no recorte." : `${posts.count} publicações no recorte.`;
+    return posts.count === 1
+      ? "1 publicação no recorte."
+      : `${posts.count} publicações no recorte.`;
   }
   if (content && content.planned > 0) {
     return content.planned === 1
@@ -469,7 +479,12 @@ function buildMix(platforms: ReportPlatformSection[]): ReportMixSlice[] {
     .map((platform) => {
       const spend = platform.metrics.find((metric) => metric.key === "spend");
       return spend && spend.value > 0
-        ? { key: platform.key, label: platform.label, value: spend.value, format: "currency" as const }
+        ? {
+            key: platform.key,
+            label: platform.label,
+            value: spend.value,
+            format: "currency" as const,
+          }
         : null;
     })
     .filter((slice): slice is ReportMixSlice => slice != null);

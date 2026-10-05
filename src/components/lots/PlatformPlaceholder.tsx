@@ -10,11 +10,7 @@ interface PlatformPlaceholderProps {
   platformId: string;
 }
 
-export function PlatformPlaceholder({
-  icon: Icon,
-  title,
-  platformId,
-}: PlatformPlaceholderProps) {
+export function PlatformPlaceholder({ icon: Icon, title, platformId }: PlatformPlaceholderProps) {
   return (
     <div className="space-y-6">
       <PageHeader

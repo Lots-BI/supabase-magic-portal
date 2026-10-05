@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  attachContentCardsToPosts,
-  editorialExcerpt,
-} from "./attach-content-cards";
+import { attachContentCardsToPosts, editorialExcerpt } from "./attach-content-cards";
 import type { IgMediaRow } from "./types";
 
 function post(overrides: Partial<IgMediaRow> = {}): IgMediaRow {
@@ -54,11 +51,7 @@ describe("attachContentCardsToPosts", () => {
   };
 
   it("liga pelo Graph id quando a FK ainda está vazia", () => {
-    const [linked] = attachContentCardsToPosts(
-      [post()],
-      [card],
-      { "pilar-1": "Autoridade" },
-    );
+    const [linked] = attachContentCardsToPosts([post()], [card], { "pilar-1": "Autoridade" });
     expect(linked.content_card_id).toBe("card-1");
     expect(linked.contentCard?.titulo).toBe("Peça de setembro");
     expect(linked.contentCard?.pilarTitulo).toBe("Autoridade");

@@ -176,7 +176,13 @@ function MaterialInboxCard({
                   {m.fileSize ? ` · ${formatBytes(m.fileSize)}` : ""}
                 </span>
                 {m.downloadUrl ? (
-                  <Button type="button" variant="outline" size="sm" className="h-8 shrink-0" asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 shrink-0"
+                    asChild
+                  >
                     <a href={m.downloadUrl} download={m.fileName ?? undefined}>
                       <Download className="mr-1 h-3.5 w-3.5" />
                       Baixar

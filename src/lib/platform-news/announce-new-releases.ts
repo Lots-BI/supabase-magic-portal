@@ -68,11 +68,7 @@ export function announceUnseenPlatformReleases(): number {
   if (announced.size === 0) {
     writeIdSet(ANNOUNCED_KEY, new Set(releases.map((r) => r.id)));
     const latest = releases[0];
-    pushNewsNotification(
-      `platform-news-${latest.id}`,
-      "Há novidades na plataforma",
-      latest.title,
-    );
+    pushNewsNotification(`platform-news-${latest.id}`, "Há novidades na plataforma", latest.title);
     maybeNativeNotify(latest.title, latest.summary);
     return 1;
   }

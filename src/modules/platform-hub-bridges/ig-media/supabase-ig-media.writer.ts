@@ -25,11 +25,7 @@ async function cacheThumbnail(
     if (!response.ok) return null;
     const buffer = await response.arrayBuffer();
     const contentType = response.headers.get("content-type") ?? "image/jpeg";
-    const ext = contentType.includes("png")
-      ? "png"
-      : contentType.includes("webp")
-        ? "webp"
-        : "jpg";
+    const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
     const storagePath = `${cadastroClienteId}/${igMediaId}.${ext}`;
 
     const { error } = await supabase.storage.from(THUMB_BUCKET).upload(storagePath, buffer, {

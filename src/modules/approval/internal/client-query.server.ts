@@ -5,7 +5,10 @@ import { contentCardEventRepository } from "../repositories/content-card-event.r
 import { editorialPillarRepository } from "../repositories/editorial-pillar.repository.server";
 import { buildKanbanBoard } from "../services/build-kanban-board";
 import { buildCardTimeline } from "../services/build-card-timeline";
-import { applyAttachmentCoversToCards, listCardAttachmentsWithUrls } from "./attachment-lifecycle.server";
+import {
+  applyAttachmentCoversToCards,
+  listCardAttachmentsWithUrls,
+} from "./attachment-lifecycle.server";
 import { loadPublishedIgForCard, type CardDetail } from "./card-query.server";
 
 export async function getClientKanbanBoard(supabase: SupabaseClient, scope: ClientAccessScope) {

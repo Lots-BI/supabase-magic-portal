@@ -12,15 +12,8 @@ export interface InstagramPublishGraphPort {
     igUserId: string,
     params: Record<string, string>,
   ): Promise<{ id: string }>;
-  getContainerStatus(
-    accessToken: string,
-    containerId: string,
-  ): Promise<{ status_code?: string }>;
-  publishMedia(
-    accessToken: string,
-    igUserId: string,
-    creationId: string,
-  ): Promise<{ id: string }>;
+  getContainerStatus(accessToken: string, containerId: string): Promise<{ status_code?: string }>;
+  publishMedia(accessToken: string, igUserId: string, creationId: string): Promise<{ id: string }>;
   getMediaPermalink?(accessToken: string, mediaId: string): Promise<string | undefined>;
 }
 
@@ -64,10 +57,7 @@ async function waitUntilContainerReady(
   options: { sleep: (ms: number) => Promise<void>; maxPolls: number; pollIntervalMs: number },
 ): Promise<void> {
   for (let attempt = 0; attempt < options.maxPolls; attempt += 1) {
-    const { status_code: status } = await graph.getContainerStatus(
-      target.accessToken,
-      containerId,
-    );
+    const { status_code: status } = await graph.getContainerStatus(target.accessToken, containerId);
     if (!status || status === "FINISHED" || status === "PUBLISHED") return;
     if (status === "ERROR" || status === "EXPIRED") {
       throw new Error(`Container Instagram ${status.toLowerCase()}: processamento recusado.`);
@@ -114,7 +104,12 @@ export async function executeInstagramPublishPlan(input: {
     containerId = await createAndWait(
       graph,
       target,
-      { media_type: "REELS", video_url: plan.video_url, caption: plan.caption, share_to_feed: "true" },
+      {
+        media_type: "REELS",
+        video_url: plan.video_url,
+        caption: plan.caption,
+        share_to_feed: "true",
+      },
       wait,
     );
   } else {

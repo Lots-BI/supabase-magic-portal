@@ -121,7 +121,8 @@ function identitiesFromComment(comment: InstagramCommentV1): {
   const igsid = normalizeIdentityValue("igsid", comment.from?.id);
   const identities: CrmIdentityInput[] = [];
   if (igsid) identities.push({ kind: "igsid", value: igsid, source: "instagram_comment" });
-  if (username) identities.push({ kind: "ig_username", value: username, source: "instagram_comment" });
+  if (username)
+    identities.push({ kind: "ig_username", value: username, source: "instagram_comment" });
   return {
     identities,
     displayName: username ? `@${username}` : `IG ${igsid?.slice(0, 8) ?? comment.id.slice(0, 6)}`,
@@ -153,7 +154,13 @@ export async function syncCrmCommentsForCadastro(
   const target = await resolveCrmInstagramTarget(supabase, cadastroClienteId);
   if ("error" in target) {
     await upsertCollector(supabase, cadastroClienteId, "comments", "scope_missing", target.detail);
-    return { ok: false, commentsFetched: 0, peopleTouched: 0, mediaScanned: 0, error: target.detail };
+    return {
+      ok: false,
+      commentsFetched: 0,
+      peopleTouched: 0,
+      mediaScanned: 0,
+      error: target.detail,
+    };
   }
 
   const cutoff = new Date(Date.now() - MEDIA_LOOKBACK_DAYS * 86_400_000).toISOString();
@@ -239,7 +246,14 @@ export async function syncCrmCommentsForCadastro(
       });
       const { identities, displayName } = identitiesFromComment(comment);
       if (identities.length === 0) continue;
-      await persistSignal(supabase, cadastroClienteId, brandUsername, mapped, identities, displayName);
+      await persistSignal(
+        supabase,
+        cadastroClienteId,
+        brandUsername,
+        mapped,
+        identities,
+        displayName,
+      );
       fetchedHere += 1;
       peopleTouched += 1;
     }

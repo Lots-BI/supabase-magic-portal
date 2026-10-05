@@ -142,7 +142,9 @@ export const getClientOperationalReportFn = createServerFn({ method: "GET" })
         .order("data", { ascending: true }),
       context.supabase
         .from("vw_ig_media_dashboard")
-        .select("id, published_at, media_product_type, permalink, caption, metrics, content_card_id")
+        .select(
+          "id, published_at, media_product_type, permalink, caption, metrics, content_card_id",
+        )
         .eq("cadastro_cliente_id", data.cadastroClienteId)
         .gte("published_at", `${period.prevFrom}T00:00:00.000Z`)
         .lte("published_at", `${period.to}T23:59:59.999Z`)
@@ -196,7 +198,9 @@ export const getClientOperationalReportFn = createServerFn({ method: "GET" })
         row.content_card_id != null ? (cardTitles.get(String(row.content_card_id)) ?? null) : null,
     }));
 
-    const postsCurrent = allMedia.filter((row) => inDateRange(row.published_at, period.from, period.to));
+    const postsCurrent = allMedia.filter((row) =>
+      inDateRange(row.published_at, period.from, period.to),
+    );
     const postsPrevious = allMedia.filter((row) =>
       inDateRange(row.published_at, period.prevFrom, period.prevTo),
     );
@@ -208,7 +212,9 @@ export const getClientOperationalReportFn = createServerFn({ method: "GET" })
       data_publicacao: String(row.data_publicacao).slice(0, 10),
       publish_status: row.publish_status != null ? String(row.publish_status) : null,
     }));
-    const cardsCurrent = allCards.filter((row) => inDateRange(row.data_publicacao, period.from, period.to));
+    const cardsCurrent = allCards.filter((row) =>
+      inDateRange(row.data_publicacao, period.from, period.to),
+    );
     const cardsPrevious = allCards.filter((row) =>
       inDateRange(row.data_publicacao, period.prevFrom, period.prevTo),
     );

@@ -251,7 +251,10 @@ export const listCrmPeopleFn = createServerFn({ method: "GET" })
     if (data.hasPii) query = query.gt("pii_completeness", 0);
     if (data.mine) query = query.eq("owner_user_id", context.userId);
     if (data.q?.trim()) {
-      const q = data.q.trim().replace(/^@/, "").replace(/[%*,()]/g, "");
+      const q = data.q
+        .trim()
+        .replace(/^@/, "")
+        .replace(/[%*,()]/g, "");
       if (q) query = query.or(`display_name.ilike.%${q}%,ig_username.ilike.%${q}%`);
     }
 
@@ -353,7 +356,9 @@ export const getCrmPersonFn = createServerFn({ method: "GET" })
       ]);
 
     const mediaIds = [
-      ...new Set((signals ?? []).map((s) => s.ig_media_id).filter((id): id is string => Boolean(id))),
+      ...new Set(
+        (signals ?? []).map((s) => s.ig_media_id).filter((id): id is string => Boolean(id)),
+      ),
     ];
     const mediaGaps: CrmPersonDetail["mediaGaps"] = [];
     if (mediaIds.length > 0) {
@@ -516,7 +521,10 @@ export const setCrmPersonVipFn = createServerFn({ method: "POST" })
     });
     if (!ok) throw new Error("Forbidden");
     const admin = getSupabaseAdmin();
-    const { error } = await admin.from("crm_people").update({ is_vip: data.isVip }).eq("id", data.personId);
+    const { error } = await admin
+      .from("crm_people")
+      .update({ is_vip: data.isVip })
+      .eq("id", data.personId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -658,7 +666,10 @@ export const exportCrmPeopleFn = createServerFn({ method: "GET" })
 
     const [{ data: identities }, { data: facts }] = await Promise.all([
       context.supabase.from("crm_identities").select("person_id, kind, value").in("person_id", ids),
-      context.supabase.from("crm_field_facts").select("person_id, field, value").in("person_id", ids),
+      context.supabase
+        .from("crm_field_facts")
+        .select("person_id, field, value")
+        .in("person_id", ids),
     ]);
     const idByPerson = new Map<string, { kind: string; value: string }[]>();
     for (const row of identities ?? []) {
@@ -757,7 +768,10 @@ export const mergeCrmPeopleFn = createServerFn({ method: "POST" })
         .eq("kind", ident.kind)
         .eq("value", ident.value);
     }
-    await admin.from("crm_identities").update({ person_id: data.intoId }).eq("person_id", data.fromId);
+    await admin
+      .from("crm_identities")
+      .update({ person_id: data.intoId })
+      .eq("person_id", data.fromId);
     const { data: fromFacts } = await admin
       .from("crm_field_facts")
       .select("field, source")
@@ -778,8 +792,14 @@ export const mergeCrmPeopleFn = createServerFn({ method: "POST" })
       }
     }
     await admin.from("crm_signals").update({ person_id: data.intoId }).eq("person_id", data.fromId);
-    await admin.from("crm_field_facts").update({ person_id: data.intoId }).eq("person_id", data.fromId);
-    await admin.from("crm_person_notes").update({ person_id: data.intoId }).eq("person_id", data.fromId);
+    await admin
+      .from("crm_field_facts")
+      .update({ person_id: data.intoId })
+      .eq("person_id", data.fromId);
+    await admin
+      .from("crm_person_notes")
+      .update({ person_id: data.intoId })
+      .eq("person_id", data.fromId);
     await admin
       .from("crm_people")
       .update({
@@ -971,4 +991,3 @@ export const revokeCrmIngestTokenFn = createServerFn({ method: "POST" })
     if (!row) throw new Error("Token não encontrado ou já revogado.");
     return { ok: true };
   });
-

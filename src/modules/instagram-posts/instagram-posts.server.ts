@@ -6,10 +6,7 @@ import { resolveIsAdmin } from "@/lib/owner-admin";
 import { assertClientPortalAccess } from "@/modules/approval/internal/client-access.server";
 import { syncInstagramMediaConnection } from "./instagram-media-sync.server";
 import { syncInstagramProfileConnection } from "./instagram-profile-sync.server";
-import {
-  attachContentCardsToPosts,
-  type ContentCardAttachRow,
-} from "./attach-content-cards";
+import { attachContentCardsToPosts, type ContentCardAttachRow } from "./attach-content-cards";
 import type { IgMediaMetrics, IgMediaRow } from "./types";
 
 const SYNC_COOLDOWN_MS = 2 * 60 * 1000;
@@ -203,11 +200,7 @@ export const listInstagramPostsFn = createServerFn({ method: "GET" })
     }
 
     const connection = await findInstagramConnection(data.cadastroClienteId);
-    const withCards = await attachEditorialCards(
-      context.supabase,
-      data.cadastroClienteId,
-      posts,
-    );
+    const withCards = await attachEditorialCards(context.supabase, data.cadastroClienteId, posts);
 
     return {
       posts: withCards,

@@ -38,7 +38,8 @@ export function PlatformNewsPage({ audience }: { audience: "client" | "admin" })
               key={item.id}
               className={cn(
                 "relative rounded-2xl border border-border bg-card p-5 sm:p-6",
-                index === 0 && "border-primary/25 bg-gradient-to-br from-primary/5 via-card to-card",
+                index === 0 &&
+                  "border-primary/25 bg-gradient-to-br from-primary/5 via-card to-card",
               )}
             >
               {index === 0 && (
@@ -78,8 +79,8 @@ export function PlatformNewsPage({ audience }: { audience: "client" | "admin" })
 
       <p className="text-xs text-muted-foreground">
         Esta página é atualizada após cada entrega relevante. Dúvidas sobre uma novidade? Fale com
-        sua equipe Lots ou consulte o{" "}
-        {audience === "client" ? "Tutorial" : "Knowledge Center"} no menu lateral.
+        sua equipe Lots ou consulte o {audience === "client" ? "Tutorial" : "Knowledge Center"} no
+        menu lateral.
       </p>
     </div>
   );

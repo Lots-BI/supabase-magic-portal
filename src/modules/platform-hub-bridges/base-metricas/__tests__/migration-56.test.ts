@@ -13,7 +13,9 @@ describe("56_portfolio_overview_single_pass.sql", () => {
       sql.indexOf("CREATE OR REPLACE VIEW public.vw_overview_cliente"),
       sql.indexOf("CREATE OR REPLACE VIEW public.vw_clientes_ativos"),
     );
-    expect(overviewChunk).toContain("SUM(valor) FILTER (WHERE plataforma = 'meta_ads' AND metrica = 'spend')");
+    expect(overviewChunk).toContain(
+      "SUM(valor) FILTER (WHERE plataforma = 'meta_ads' AND metrica = 'spend')",
+    );
     expect(overviewChunk).not.toContain("UNION ALL");
     expect(sql).not.toContain("AS MATERIALIZED");
     expect(sql).toContain("CREATE OR REPLACE FUNCTION public.portfolio_overview");

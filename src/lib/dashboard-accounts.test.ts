@@ -4,7 +4,10 @@ import { mergeDashboardPlatforms } from "./dashboard-accounts";
 describe("mergeDashboardPlatforms", () => {
   it("mantém plataformas do Make e acrescenta Meta Ads conectado no Hub", () => {
     expect(
-      mergeDashboardPlatforms(["instagram", "google_ads", "ga4"], ["meta_ads", "instagram_organic"]),
+      mergeDashboardPlatforms(
+        ["instagram", "google_ads", "ga4"],
+        ["meta_ads", "instagram_organic"],
+      ),
     ).toEqual(expect.arrayContaining(["instagram", "google_ads", "ga4", "meta_ads"]));
   });
 

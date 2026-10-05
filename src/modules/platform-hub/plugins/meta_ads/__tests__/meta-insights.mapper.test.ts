@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { mapMetaInsightsToMetricRows, markerRowsForUncoveredDates, pickResultsValue } from "../api/meta-insights.mapper";
+import {
+  mapMetaInsightsToMetricRows,
+  markerRowsForUncoveredDates,
+  pickResultsValue,
+} from "../api/meta-insights.mapper";
 import type { MetaInsightRowV1 } from "../api/meta-api.types";
 
 const base: MetaInsightRowV1 = {
@@ -194,8 +198,12 @@ describe("mapMetaInsightsToMetricRows", () => {
         ...base,
         date_start: "2026-09-09",
         date_stop: "2026-09-09",
-        actions: [{ action_type: "onsite_conversion.messaging_conversation_started_7d", value: "1" }],
-        results: [{ indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" }],
+        actions: [
+          { action_type: "onsite_conversion.messaging_conversation_started_7d", value: "1" },
+        ],
+        results: [
+          { indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" },
+        ],
       },
       {
         ...base,
@@ -205,7 +213,9 @@ describe("mapMetaInsightsToMetricRows", () => {
           { action_type: "onsite_conversion.messaging_conversation_started_7d", value: "1" },
           { action_type: "onsite_conversion.messaging_first_reply", value: "1" },
         ],
-        results: [{ indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" }],
+        results: [
+          { indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" },
+        ],
       },
     ]);
     const of = (date: string, key: string) =>
@@ -214,9 +224,9 @@ describe("mapMetaInsightsToMetricRows", () => {
     expect(of("2026-09-09", "messaging_conversations_started")).toBe(0);
     expect(of("2026-09-10", "results")).toBe(1);
     expect(of("2026-09-10", "messaging_conversations_started")).toBe(1);
-    expect(
-      rows.filter((r) => r.metricKey === "results").reduce((sum, r) => sum + r.value, 0),
-    ).toBe(1);
+    expect(rows.filter((r) => r.metricKey === "results").reduce((sum, r) => sum + r.value, 0)).toBe(
+      1,
+    );
   });
 
   it("mantém duas conversas com 1ª resposta em dias seguidos", () => {
@@ -229,7 +239,9 @@ describe("mapMetaInsightsToMetricRows", () => {
           { action_type: "onsite_conversion.messaging_conversation_started_7d", value: "1" },
           { action_type: "onsite_conversion.messaging_first_reply", value: "1" },
         ],
-        results: [{ indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" }],
+        results: [
+          { indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" },
+        ],
       },
       {
         ...base,
@@ -239,7 +251,9 @@ describe("mapMetaInsightsToMetricRows", () => {
           { action_type: "onsite_conversion.messaging_conversation_started_7d", value: "1" },
           { action_type: "onsite_conversion.messaging_first_reply", value: "1" },
         ],
-        results: [{ indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" }],
+        results: [
+          { indicator: "actions:onsite_conversion.messaging_conversation_started_7d", value: "1" },
+        ],
       },
     ]);
     expect(rows.find((r) => r.date === "2026-09-09" && r.metricKey === "results")?.value).toBe(1);
@@ -249,10 +263,9 @@ describe("mapMetaInsightsToMetricRows", () => {
 
 describe("markerRowsForUncoveredDates", () => {
   it("marca dias sem insight para o gap-finder não repetir o intervalo", () => {
-    const rows = markerRowsForUncoveredDates(
-      { from: "2026-09-01", to: "2026-09-03" },
-      ["2026-09-02"],
-    );
+    const rows = markerRowsForUncoveredDates({ from: "2026-09-01", to: "2026-09-03" }, [
+      "2026-09-02",
+    ]);
     expect(rows.filter((r) => r.date === "2026-09-01")).toHaveLength(2);
     expect(rows.filter((r) => r.date === "2026-09-02")).toHaveLength(0);
     expect(rows.find((r) => r.metricKey === "results" && r.date === "2026-09-03")?.value).toBe(0);

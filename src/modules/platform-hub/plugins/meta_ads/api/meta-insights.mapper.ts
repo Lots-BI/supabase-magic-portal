@@ -1,9 +1,5 @@
 import type { MetricRowV1 } from "../../../../../../contracts/ingest/profiles/metrics-timeseries.v1";
-import type {
-  MetaActionValueV1,
-  MetaInsightRowV1,
-  MetaResultStatV1,
-} from "./meta-api.types";
+import type { MetaActionValueV1, MetaInsightRowV1, MetaResultStatV1 } from "./meta-api.types";
 
 const DELIVERY_FIELDS = ["impressions", "reach", "clicks", "spend"] as const;
 
@@ -67,11 +63,7 @@ const FALLBACK_RESULT_ACTION_TYPES = [
   "link_click",
 ] as const;
 
-const SALES_OBJECTIVES = new Set([
-  "OUTCOME_SALES",
-  "CONVERSIONS",
-  "PRODUCT_CATALOG_SALES",
-]);
+const SALES_OBJECTIVES = new Set(["OUTCOME_SALES", "CONVERSIONS", "PRODUCT_CATALOG_SALES"]);
 
 const LEAD_OBJECTIVES = new Set(["OUTCOME_LEADS", "LEAD_GENERATION"]);
 
@@ -219,10 +211,7 @@ function pickConversionLikeResults(insight: MetaInsightRowV1, byType: Map<string
  * o expõe. Sem objective, só conta conversão de negócio (nunca LPV/clique) —
  * campanha OUTCOME_SALES sem venda no dia deve ficar 0, não 100+ page views.
  */
-export function pickResultsValue(
-  insight: MetaInsightRowV1,
-  objective = "",
-): number {
+export function pickResultsValue(insight: MetaInsightRowV1, objective = ""): number {
   const official = pickOfficialResultsList(insight.results, insight.objective_results);
   if (official > 0) return official;
 

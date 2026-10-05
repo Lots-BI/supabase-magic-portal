@@ -196,7 +196,10 @@ export function buildPostReport(post: IgMediaRow, posts: readonly IgMediaRow[]):
 }
 
 function names(rows: MetricComparison[], limit = 3): string {
-  return rows.slice(0, limit).map((row) => row.label.toLowerCase()).join(", ");
+  return rows
+    .slice(0, limit)
+    .map((row) => row.label.toLowerCase())
+    .join(", ");
 }
 
 function buildHeadline(

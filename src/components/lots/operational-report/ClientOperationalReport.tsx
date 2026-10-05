@@ -9,10 +9,7 @@ import { BarChartLots } from "@/components/lots/charts/BarChartLots";
 import { DonutChartLots } from "@/components/lots/charts/DonutChartLots";
 import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import { DeltaPill } from "@/components/lots/DeltaPill";
-import {
-  PlatformBrandMark,
-  dashboardBrandTheme,
-} from "@/components/lots/PlatformBrandMark";
+import { PlatformBrandMark, dashboardBrandTheme } from "@/components/lots/PlatformBrandMark";
 import { cn } from "@/lib/utils";
 import { formatBR, resolvePeriod, type PeriodInput, type PeriodPreset } from "@/lib/period";
 import type { CommonMetric } from "@/lib/metrics";
@@ -73,7 +70,9 @@ export function ClientOperationalReport({
         <DashboardSkeleton kpiCount={4} />
       ) : query.isError ? (
         <div className="lots-surface p-5 text-sm text-danger">
-          {query.error instanceof Error ? query.error.message : "Não foi possível montar o relatório."}
+          {query.error instanceof Error
+            ? query.error.message
+            : "Não foi possível montar o relatório."}
         </div>
       ) : query.data ? (
         <ReportCanvas report={query.data} />
@@ -84,10 +83,7 @@ export function ClientOperationalReport({
 
 function ReportCanvas({ report }: { report: OperationalReport }) {
   const empty =
-    report.heroes.length === 0 &&
-    report.platforms.length === 0 &&
-    !report.posts &&
-    !report.content;
+    report.heroes.length === 0 && report.platforms.length === 0 && !report.posts && !report.content;
   const campaigns = report.platforms.flatMap((platform) =>
     platform.campaigns.map((campaign) => ({ ...campaign, platform: platform.label })),
   );
@@ -215,7 +211,10 @@ function ReportCanvas({ report }: { report: OperationalReport }) {
       )}
       <RelatorioNotas
         cadastroClienteId={cadastroClienteId}
-        platforms={report.platforms.map((platform) => ({ key: platform.key, label: platform.label }))}
+        platforms={report.platforms.map((platform) => ({
+          key: platform.key,
+          label: platform.label,
+        }))}
         periodoInicio={report.period.from}
         periodoFim={report.period.to}
       />
@@ -321,13 +320,7 @@ const PLATFORM_TO = {
   google_business: "/cliente/$cliente/google-business",
 } as const;
 
-function PlatformTile({
-  platform,
-  slug,
-}: {
-  platform: ReportPlatformSection;
-  slug: string;
-}) {
+function PlatformTile({ platform, slug }: { platform: ReportPlatformSection; slug: string }) {
   const theme = dashboardBrandTheme(platform.key);
   const to = PLATFORM_TO[platform.key as keyof typeof PLATFORM_TO] ?? "/cliente/$cliente/instagram";
   const spark = sparkValues(platform);
@@ -400,17 +393,30 @@ function PostsCanvas({
         />
         <div className="relative z-[1] flex items-start justify-between gap-3">
           <div>
-            <p className={cn("text-[10.5px] font-semibold uppercase tracking-[0.14em] opacity-80", theme.title)}>
+            <p
+              className={cn(
+                "text-[10.5px] font-semibold uppercase tracking-[0.14em] opacity-80",
+                theme.title,
+              )}
+            >
               Publicações
             </p>
-            <p className={cn("mt-2 font-display text-4xl font-semibold tabular-nums leading-none", theme.title)}>
+            <p
+              className={cn(
+                "mt-2 font-display text-4xl font-semibold tabular-nums leading-none",
+                theme.title,
+              )}
+            >
               {posts.count}
             </p>
           </div>
           <Link
             to="/cliente/$cliente/publicacoes"
             params={{ cliente: slug }}
-            className={cn("lots-focus grid h-10 w-10 place-items-center rounded-2xl", theme.markWrap)}
+            className={cn(
+              "lots-focus grid h-10 w-10 place-items-center rounded-2xl",
+              theme.markWrap,
+            )}
           >
             <ArrowUpRight className={cn("h-4 w-4", theme.arrow)} />
           </Link>
@@ -463,7 +469,12 @@ function MiniStat({
       >
         {label}
       </p>
-      <p className={cn("mt-1 font-display text-xl font-semibold tabular-nums", inverted && "text-white")}>
+      <p
+        className={cn(
+          "mt-1 font-display text-xl font-semibold tabular-nums",
+          inverted && "text-white",
+        )}
+      >
         {value}
       </p>
     </div>
@@ -564,7 +575,9 @@ function Sparkline({ values, className }: { values: number[]; className?: string
     const y = 26 - ((value - min) / span) * 24;
     return { x, y };
   });
-  const line = coords.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
+  const line = coords
+    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
+    .join(" ");
   const area = `M 0 28 ${coords.map((point) => `L ${point.x} ${point.y}`).join(" ")} L 100 28 Z`;
 
   return (
@@ -575,7 +588,14 @@ function Sparkline({ values, className }: { values: number[]; className?: string
       aria-hidden
     >
       <path d={area} fill="currentColor" className="opacity-20" />
-      <path d={line} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d={line}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

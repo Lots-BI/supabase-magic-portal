@@ -7,10 +7,7 @@ import { contentCardRepository } from "../repositories/content-card.repository.s
 import { contentCardAttachmentRepository } from "../repositories/content-card-attachment.repository.server";
 import { contentCardEventRepository } from "../repositories/content-card-event.repository.server";
 import { createEditorialSignedUrl } from "../internal/attachment-lifecycle.server";
-import {
-  buildInstagramPublishPlan,
-  captionForCard,
-} from "./build-instagram-publish-plan";
+import { buildInstagramPublishPlan, captionForCard } from "./build-instagram-publish-plan";
 import {
   executeInstagramPublishPlan,
   formatInstagramPublishError,
@@ -102,7 +99,8 @@ export async function publishCardWithClient(
       db,
       card.cadastro_cliente_id,
     );
-    const signUrl = deps.signUrl ?? ((path: string) => createEditorialSignedUrl(path, PUBLISH_URL_TTL_SECONDS));
+    const signUrl =
+      deps.signUrl ?? ((path: string) => createEditorialSignedUrl(path, PUBLISH_URL_TTL_SECONDS));
     const media = await Promise.all(
       finals.map(async (attachment) => ({
         url: await signUrl(attachment.storage_path),

@@ -18,9 +18,9 @@ describe("environment", () => {
   });
 
   it("detecta production no domínio oficial", () => {
-    expect(
-      detectLotsEnvironment("https://lotsbi.leandromajr.com", { nodeEnv: "production" }),
-    ).toBe("production");
+    expect(detectLotsEnvironment("https://lotsbi.leandromajr.com", { nodeEnv: "production" })).toBe(
+      "production",
+    );
   });
 
   it("resolve URL esperada por ambiente", () => {

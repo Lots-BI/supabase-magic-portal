@@ -42,9 +42,7 @@ function toDatetimeLocalValue(card: ContentCard): string {
   return `${card.data_publicacao}T${hora}`;
 }
 
-function instagramPostUrl(
-  card: ContentCard,
-): string | null {
+function instagramPostUrl(card: ContentCard): string | null {
   const permalink = card.integration_metadata?.instagram_permalink;
   if (typeof permalink === "string" && permalink.startsWith("http")) return permalink;
   if (!card.external_post_id) return null;
@@ -212,7 +210,8 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
             </p>
             <p>
               Confirme o caso de uso <span className="font-medium">Instagram Content Publish</span>{" "}
-              (Facebook Login — não é <span className="font-medium">instagram_business_content_publish</span>
+              (Facebook Login — não é{" "}
+              <span className="font-medium">instagram_business_content_publish</span>
               ). Depois, em{" "}
               <Link to="/admin/conexoes" className="underline">
                 Conexões
@@ -285,8 +284,8 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
         <Alert>
           <AlertTitle>Aguardando o cliente aprovar</AlertTitle>
           <AlertDescription>
-            A peça já foi enviada com a data e hora da criação. Quando o cliente clicar em
-            Aprovar, o sistema agenda internamente e publica no Instagram nesse horário.
+            A peça já foi enviada com a data e hora da criação. Quando o cliente clicar em Aprovar,
+            o sistema agenda internamente e publica no Instagram nesse horário.
           </AlertDescription>
         </Alert>
       ) : null}

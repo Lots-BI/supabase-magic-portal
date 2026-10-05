@@ -73,8 +73,7 @@ export function ConnectionWizardView({
 
   const resumeQuery = useQuery({
     queryKey: hubAdminKeys.connection(resumeConnectionId ?? ""),
-    queryFn: () =>
-      getHubConnectionDetail({ data: { connectionId: resumeConnectionId! } }),
+    queryFn: () => getHubConnectionDetail({ data: { connectionId: resumeConnectionId! } }),
     enabled: Boolean(resumeConnectionId),
   });
 
@@ -126,8 +125,7 @@ export function ConnectionWizardView({
     onSuccess: async (result) => {
       const target = new URL(result.redirectAfter, window.location.origin);
       const sameDestination =
-        window.location.pathname === target.pathname &&
-        window.location.search === target.search;
+        window.location.pathname === target.pathname && window.location.search === target.search;
       if (sameDestination) {
         await resumeQuery.refetch();
         const stepParam = target.searchParams.get("step");
@@ -215,11 +213,7 @@ export function ConnectionWizardView({
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              className="w-full lots-focus"
-              disabled={!cadastroId}
-              onClick={() => setStep(1)}
-            >
+            <Button className="w-full lots-focus" disabled={!cadastroId} onClick={() => setStep(1)}>
               Continuar
             </Button>
           </div>

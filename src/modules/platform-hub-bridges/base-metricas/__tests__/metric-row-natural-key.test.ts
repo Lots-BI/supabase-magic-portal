@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  excludeExistingMetricRows,
-  metricRowNaturalKey,
-} from "../metric-row-natural-key";
+import { excludeExistingMetricRows, metricRowNaturalKey } from "../metric-row-natural-key";
 
 describe("excludeExistingMetricRows", () => {
   it("mantém results/conversions quando spend/clicks já existem no mesmo dia", () => {

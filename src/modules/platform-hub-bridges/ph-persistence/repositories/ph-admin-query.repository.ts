@@ -121,9 +121,8 @@ export class PhAdminQueryRepository {
   }
 
   private async listIngestLag(pluginKeys: string[]): Promise<HubIngestPlatformLagV1[]> {
-    const { addDaysToDateStr, todayInSaoPaulo } = await import(
-      "@/modules/platform-hub/plugins/instagram_organic/api/date-utils"
-    );
+    const { addDaysToDateStr, todayInSaoPaulo } =
+      await import("@/modules/platform-hub/plugins/instagram_organic/api/date-utils");
     const cutoff = addDaysToDateStr(todayInSaoPaulo(), -2);
     const wanted = new Set(pluginKeys);
     const catalog: Array<{ pluginKey: string; label: string; match: string }> = [

@@ -47,10 +47,6 @@ export function groupRowsForReplaceDays(
   });
 }
 
-export function replaceDayKey(row: {
-  cliente: string;
-  plataforma: string;
-  data: string;
-}): string {
+export function replaceDayKey(row: { cliente: string; plataforma: string; data: string }): string {
   return `${row.cliente}\u0001${row.plataforma}\u0001${row.data}`;
 }

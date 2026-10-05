@@ -32,7 +32,8 @@ export async function fetchClientPerformance(
   const spend30d = rows.reduce((acc, r) => acc + (r.meta_spend ?? 0) + (r.google_spend ?? 0), 0);
   const sessions30d = rows.reduce((acc, r) => acc + (r.ga4_sessions ?? 0), 0);
   const leads30d = rows.reduce(
-    (acc, r) => acc + (r.meta_results ?? 0) + (r.google_conversions ?? 0) + (r.ga4_conversions ?? 0),
+    (acc, r) =>
+      acc + (r.meta_results ?? 0) + (r.google_conversions ?? 0) + (r.ga4_conversions ?? 0),
     0,
   );
   const clicks30d = rows.reduce((acc, r) => acc + (r.total_clicks ?? 0), 0);

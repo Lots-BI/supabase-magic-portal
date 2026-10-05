@@ -49,10 +49,9 @@ export async function resolveCrmInstagramTarget(
     return { error: "missing_connection", detail: "A conexão Instagram não tem perfil vinculado." };
   }
 
-  const token = await createCredentialAccess(new SupabaseCredentialVault(supabase)).retrieveOAuthToken(
-    asConnectionId(connection.id),
-    INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY,
-  );
+  const token = await createCredentialAccess(
+    new SupabaseCredentialVault(supabase),
+  ).retrieveOAuthToken(asConnectionId(connection.id), INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY);
   if (!token?.accessToken) {
     return { error: "missing_token", detail: "Reconecte o Instagram em Conexões." };
   }

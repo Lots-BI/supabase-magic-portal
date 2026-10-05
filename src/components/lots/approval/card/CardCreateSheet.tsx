@@ -161,7 +161,9 @@ export function CardCreateSheet({
           <div className="space-y-2">
             <Label>Pilar (opcional)</Label>
             {(pillarsQ.data ?? []).length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhum pilar ativo — pode criar sem pilar.</p>
+              <p className="text-sm text-muted-foreground">
+                Nenhum pilar ativo — pode criar sem pilar.
+              </p>
             ) : (
               <Select
                 value={pilarId || "__none__"}

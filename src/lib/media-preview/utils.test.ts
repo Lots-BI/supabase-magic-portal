@@ -11,11 +11,7 @@ const asset = (id: string, mediaRole?: string): MediaAsset => ({
 
 describe("assetsForPublishPreview", () => {
   it("uses only the agency final for publish preview", () => {
-    const assets = [
-      asset("c", "cliente_material"),
-      asset("f", "final"),
-      asset("p", "preview"),
-    ];
+    const assets = [asset("c", "cliente_material"), asset("f", "final"), asset("p", "preview")];
     expect(assetsForPublishPreview(assets, "final").map((a) => a.id)).toEqual(["f"]);
   });
 

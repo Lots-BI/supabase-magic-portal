@@ -36,10 +36,7 @@ const STORY_METRICS = [
   "link_clicks",
 ] as const;
 
-function concatMetrics(
-  core: readonly string[],
-  extra: readonly string[],
-): readonly string[] {
+function concatMetrics(core: readonly string[], extra: readonly string[]): readonly string[] {
   return [...core, ...extra];
 }
 

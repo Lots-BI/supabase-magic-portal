@@ -19,10 +19,7 @@ export type ContentCardAttachRow = {
   external_post_id: string | null;
 };
 
-export function editorialExcerpt(
-  htmlOrText: string | null | undefined,
-  max = 180,
-): string | null {
+export function editorialExcerpt(htmlOrText: string | null | undefined, max = 180): string | null {
   if (!htmlOrText) return null;
   const plain = htmlOrText
     .replace(/<[^>]*>/g, " ")

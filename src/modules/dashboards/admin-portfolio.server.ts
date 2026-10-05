@@ -49,7 +49,8 @@ function mapOverview(row: Record<string, unknown>): OverviewRow {
 function mapAtivo(row: Record<string, unknown>): PortfolioClienteAtivo {
   return {
     cliente: String(row.cliente),
-    ultima_data_recebida: row.ultima_data_recebida != null ? String(row.ultima_data_recebida).slice(0, 10) : null,
+    ultima_data_recebida:
+      row.ultima_data_recebida != null ? String(row.ultima_data_recebida).slice(0, 10) : null,
     ultima_ingestao: row.ultima_ingestao != null ? String(row.ultima_ingestao) : null,
     plataformas_ativas: Array.isArray(row.plataformas_ativas)
       ? row.plataformas_ativas.map(String)

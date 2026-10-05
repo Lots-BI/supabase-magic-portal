@@ -120,7 +120,11 @@ describe("shouldRetryInsightsWithoutOfficialResults", () => {
     ).toBe(true);
     expect(
       shouldRetryInsightsWithoutOfficialResults(
-        new HttpClientError("HTTP 400", 400, "Tried accessing nonexisting field (objective_results)"),
+        new HttpClientError(
+          "HTTP 400",
+          400,
+          "Tried accessing nonexisting field (objective_results)",
+        ),
       ),
     ).toBe(true);
     expect(

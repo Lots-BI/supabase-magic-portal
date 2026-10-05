@@ -37,7 +37,9 @@ describe("resolvePersonStitch", () => {
     const people = [
       {
         id: "p1",
-        identities: [{ kind: "messenger_psid" as const, value: "psid-9", source: "ingest_api:messenger" }],
+        identities: [
+          { kind: "messenger_psid" as const, value: "psid-9", source: "ingest_api:messenger" },
+        ],
       },
     ];
     const match = resolvePersonStitch({

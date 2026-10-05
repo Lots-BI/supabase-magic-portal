@@ -53,7 +53,11 @@ export function createRegistrationCredentialAccess(
     case "meta_ads": {
       const env = metaOAuthEnv();
       if (!env) return base;
-      const oauth = new MetaOAuthService({ ...env, defaultScopes: metaAdsOauthScopes() }, http, base);
+      const oauth = new MetaOAuthService(
+        { ...env, defaultScopes: metaAdsOauthScopes() },
+        http,
+        base,
+      );
       return createRefreshingCredentialAccess(vault, {
         credentialKey: META_OAUTH_CREDENTIAL_KEY,
         refreshAccessToken: (id) => oauth.refreshAccessToken(id),

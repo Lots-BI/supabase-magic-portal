@@ -11,16 +11,16 @@ const SUPABASE_URL = process.env.OFFICIAL_SUPABASE_URL ?? process.env.SUPABASE_U
 const SERVICE_KEY = process.env.OFFICIAL_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
 const PILOT_CONNECTION_ID = process.env.IG_GATE_B_CONNECTION_ID?.trim();
 
-function fail(message: string) {
+function fail(message) {
   console.error(`❌ ${message}`);
   process.exit(1);
 }
 
-function ok(message: string) {
+function ok(message) {
   console.log(`✅ ${message}`);
 }
 
-async function graphGet(path: string, token: string, params: Record<string, string> = {}) {
+async function graphGet(path, token, params = {}) {
   const url = new URL(`https://graph.facebook.com/v22.0/${path}`);
   url.searchParams.set("access_token", token);
   for (const [key, value] of Object.entries(params)) {
@@ -63,10 +63,7 @@ async function main() {
   await runForConnection(supabase, PILOT_CONNECTION_ID);
 }
 
-async function runForConnection(
-  supabase: ReturnType<typeof createClient>,
-  connectionId: string,
-) {
+async function runForConnection(supabase, connectionId) {
   const token =
     process.env.IG_GATE_B_ACCESS_TOKEN?.trim() ?? process.env.GATE_A_META_ACCESS_TOKEN?.trim();
   if (!token) fail("Defina IG_GATE_B_ACCESS_TOKEN ou GATE_A_META_ACCESS_TOKEN");

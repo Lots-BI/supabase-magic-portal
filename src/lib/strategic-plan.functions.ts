@@ -1492,9 +1492,7 @@ export const publishAlinhamentoPlan = createServerFn({ method: "POST" })
 
 export const approveAlinhamentoPlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({ cadastro_cliente_id: z.number().int() }).parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ cadastro_cliente_id: z.number().int() }).parse(d))
   .handler(async ({ data, context }) => {
     const { data: existing, error: e0 } = await context.supabase
       .from("plano_alinhamentos")

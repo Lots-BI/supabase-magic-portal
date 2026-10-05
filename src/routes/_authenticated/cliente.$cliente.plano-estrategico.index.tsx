@@ -33,11 +33,5 @@ function ClientePlanoBootstrap({ slug }: { slug: string }) {
     return <div className="text-sm text-muted-foreground">Cliente não encontrado.</div>;
   }
 
-  return (
-    <StrategicPlanJourney
-      slug={slug}
-      clienteNome={ref.nome}
-      cadastroId={ref.cadastroId}
-    />
-  );
+  return <StrategicPlanJourney slug={slug} clienteNome={ref.nome} cadastroId={ref.cadastroId} />;
 }

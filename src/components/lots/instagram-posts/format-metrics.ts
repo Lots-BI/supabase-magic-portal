@@ -127,11 +127,7 @@ export function formatMetricValue(key: string, value: number): string {
 export function engagementRate(metrics: IgMediaMetrics): number | null {
   const interactions = metrics.total_interactions;
   const denominator = metrics.views ?? metrics.reach;
-  if (
-    typeof interactions !== "number" ||
-    typeof denominator !== "number" ||
-    denominator <= 0
-  ) {
+  if (typeof interactions !== "number" || typeof denominator !== "number" || denominator <= 0) {
     return null;
   }
   return (interactions / denominator) * 100;

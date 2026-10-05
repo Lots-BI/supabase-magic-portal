@@ -56,7 +56,10 @@ describe("mapIngestInteraction", () => {
       channel: "form",
       externalId: "tf-1",
       identities: [{ kind: "email", value: "Ana@Marca.com" }],
-      facts: [{ field: "email", value: "Ana@Marca.com" }, { field: "full_name", value: "Ana" }],
+      facts: [
+        { field: "email", value: "Ana@Marca.com" },
+        { field: "full_name", value: "Ana" },
+      ],
     });
     expect("error" in mapped).toBe(false);
     if ("error" in mapped) return;

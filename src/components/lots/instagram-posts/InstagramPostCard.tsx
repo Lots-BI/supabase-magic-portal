@@ -5,13 +5,7 @@ import type { IgMediaRow } from "@/modules/instagram-posts/types";
 import { formatMetricValue, formatProductTypeLabel, pickDisplayMetrics } from "./format-metrics";
 import { getInstagramPostThumbUrlFn } from "@/modules/instagram-posts/instagram-posts.server";
 
-export function InstagramPostCard({
-  post,
-  onOpen,
-}: {
-  post: IgMediaRow;
-  onOpen: () => void;
-}) {
+export function InstagramPostCard({ post, onOpen }: { post: IgMediaRow; onOpen: () => void }) {
   const [thumbUrl, setThumbUrl] = useState<string | null>(
     post.thumbnail_url ?? post.media_url ?? null,
   );

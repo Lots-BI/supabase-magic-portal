@@ -7,12 +7,7 @@ import type { IgContentCardLink, IgMediaRow } from "@/modules/instagram-posts/ty
 import { FORMAT_LABEL, type ContentFormato } from "@/modules/approval/types/content-card";
 import { KANBAN_COLUMNS } from "@/modules/approval/workflow/column-config";
 import { formatCardSchedule } from "@/components/lots/approval/kanban/kanban-meta";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { ChartFrame } from "@/components/lots/charts/ChartFrame";
@@ -22,9 +17,7 @@ import {
   getInstagramPostThumbUrlFn,
   listInstagramPostHistoryFn,
 } from "@/modules/instagram-posts/instagram-posts.server";
-import {
-  formatMetricValue,
-} from "./format-metrics";
+import { formatMetricValue } from "./format-metrics";
 import { bandLabel, buildPostReport, type PerformanceBand } from "./post-report";
 
 export function InstagramPostReport({
@@ -38,10 +31,7 @@ export function InstagramPostReport({
   isAdmin?: boolean;
   onClose: () => void;
 }) {
-  const report = useMemo(
-    () => (post ? buildPostReport(post, posts) : null),
-    [post, posts],
-  );
+  const report = useMemo(() => (post ? buildPostReport(post, posts) : null), [post, posts]);
 
   const [thumbUrl, setThumbUrl] = useState<string | null>(null);
   useEffect(() => {
@@ -125,7 +115,9 @@ export function InstagramPostReport({
               <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary-600">
                 Leitura
               </p>
-              <p className="mt-1 font-display text-lg font-semibold leading-snug">{report.headline}</p>
+              <p className="mt-1 font-display text-lg font-semibold leading-snug">
+                {report.headline}
+              </p>
               <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
                 {report.bullets.map((line) => (
                   <li key={line}>{line}</li>
@@ -157,7 +149,11 @@ export function InstagramPostReport({
         <div className="grid gap-3 sm:grid-cols-2">
           <SectionCard
             eyebrow="O que performou bem"
-            title={report.strengths.length > 0 ? `${report.strengths.length} métrica(s)` : "Nenhum destaque positivo"}
+            title={
+              report.strengths.length > 0
+                ? `${report.strengths.length} métrica(s)`
+                : "Nenhum destaque positivo"
+            }
             description={
               report.sampleSize > 0
                 ? `Vs ${report.cohortLabel}.`
@@ -165,7 +161,10 @@ export function InstagramPostReport({
             }
             bodyClassName="px-0 py-0 sm:px-0 sm:py-0"
           >
-            <CalloutList rows={report.strengths} empty="Nada claramente acima da média neste recorte." />
+            <CalloutList
+              rows={report.strengths}
+              empty="Nada claramente acima da média neste recorte."
+            />
           </SectionCard>
           <SectionCard
             eyebrow="O que ficou abaixo"
@@ -181,7 +180,10 @@ export function InstagramPostReport({
             }
             bodyClassName="px-0 py-0 sm:px-0 sm:py-0"
           >
-            <CalloutList rows={report.weaknesses} empty="Nada claramente abaixo da média neste recorte." />
+            <CalloutList
+              rows={report.weaknesses}
+              empty="Nada claramente abaixo da média neste recorte."
+            />
           </SectionCard>
         </div>
 
@@ -384,7 +386,14 @@ function CalloutList({
   rows,
   empty,
 }: {
-  rows: Array<{ key: string; label: string; value: number; deltaPct: number | null; rank: number | null; cohortSize: number }>;
+  rows: Array<{
+    key: string;
+    label: string;
+    value: number;
+    deltaPct: number | null;
+    rank: number | null;
+    cohortSize: number;
+  }>;
   empty: string;
 }) {
   if (rows.length === 0) {
@@ -446,11 +455,14 @@ function VsAverageBars({
   );
 }
 
-function pivotHistory(
-  points: Array<{ metricKey: string; value: number; collectedAt: string }>,
-): {
+function pivotHistory(points: Array<{ metricKey: string; value: number; collectedAt: string }>): {
   dates: Array<Record<string, number | string>>;
-  series: Array<{ key: string; label: string; metric: "reach" | "impressions"; tone: "primary" | "secondary" | "success" }>;
+  series: Array<{
+    key: string;
+    label: string;
+    metric: "reach" | "impressions";
+    tone: "primary" | "secondary" | "success";
+  }>;
 } {
   const wanted = ["views", "reach", "total_interactions"] as const;
   const dayFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" });
@@ -469,7 +481,12 @@ function pivotHistory(
   const present = new Set(dates.flatMap((row) => Object.keys(row).filter((k) => k !== "date")));
   const series = (
     [
-      { key: "views", label: "Visualizações", metric: "impressions" as const, tone: "primary" as const },
+      {
+        key: "views",
+        label: "Visualizações",
+        metric: "impressions" as const,
+        tone: "primary" as const,
+      },
       { key: "reach", label: "Alcance", metric: "reach" as const, tone: "secondary" as const },
       {
         key: "total_interactions",
