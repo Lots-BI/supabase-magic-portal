@@ -30,7 +30,9 @@ export function GlobalSearch({ isAdmin = false }: { isAdmin?: boolean }) {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("portfolio_clientes_ativos");
       if (error) throw error;
-      return (data ?? []).map((r: { cliente: string }) => r.cliente).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      return (data ?? [])
+        .map((r: { cliente: string }) => r.cliente)
+        .sort((a, b) => a.localeCompare(b, "pt-BR"));
     },
     staleTime: 5 * 60_000,
     enabled: open,

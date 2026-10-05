@@ -121,7 +121,9 @@ export function DashboardsHub({
               <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary-600">
                 Relatório
               </p>
-              <p className="mt-1 font-display text-base font-semibold">O que aconteceu no período</p>
+              <p className="mt-1 font-display text-base font-semibold">
+                O que aconteceu no período
+              </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Números principais e gráficos. Canal sem coleta neste recorte não aparece.
               </p>

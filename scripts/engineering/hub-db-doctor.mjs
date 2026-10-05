@@ -106,7 +106,11 @@ export async function runHubDbDoctor(options = {}) {
   console.log("═".repeat(52));
 
   if (!url || !serviceRole) {
-    line(false, "Banco conectado", "OFFICIAL_SUPABASE_URL / OFFICIAL_SERVICE_ROLE_KEY ausentes no .env");
+    line(
+      false,
+      "Banco conectado",
+      "OFFICIAL_SUPABASE_URL / OFFICIAL_SERVICE_ROLE_KEY ausentes no .env",
+    );
     results.failures.push("missing env");
     printSummary(results);
     return results;
@@ -144,7 +148,11 @@ export async function runHubDbDoctor(options = {}) {
     if (error) missingTables.push(`${table}: ${error.message}`);
   }
   if (missingTables.length === 0) {
-    results.tables = line(true, "Tabelas encontradas", `${REQUIRED_TABLES.length}/${REQUIRED_TABLES.length}`);
+    results.tables = line(
+      true,
+      "Tabelas encontradas",
+      `${REQUIRED_TABLES.length}/${REQUIRED_TABLES.length}`,
+    );
   } else {
     results.tables = line(
       false,
@@ -180,12 +188,12 @@ export async function runHubDbDoctor(options = {}) {
     results.failures.push("missing anon key for RLS/policy probe");
   } else {
     for (const table of RLS_TABLES) {
-      const { error: anonReadError, data: anonRows } = await anon
-        .from(table)
-        .select("*")
-        .limit(1);
+      const { error: anonReadError, data: anonRows } = await anon.from(table).select("*").limit(1);
 
-      if (anonReadError && !/jwt|auth|permission|row-level security/i.test(anonReadError.message ?? "")) {
+      if (
+        anonReadError &&
+        !/jwt|auth|permission|row-level security/i.test(anonReadError.message ?? "")
+      ) {
         rlsOk = false;
         results.failures.push(`anon read ${table}: ${anonReadError.message}`);
       } else if (Array.isArray(anonRows) && anonRows.length > 0) {
@@ -208,10 +216,7 @@ export async function runHubDbDoctor(options = {}) {
       rlsOk = false;
       const detail = anonInsertError?.message ?? "insert anon permitido (inesperado)";
       results.failures.push(`anon insert ph_connections: ${detail}`);
-      await admin
-        .from("ph_connections")
-        .delete()
-        .eq("id", "00000000-0000-0000-0000-000000000099");
+      await admin.from("ph_connections").delete().eq("id", "00000000-0000-0000-0000-000000000099");
     }
 
     const policyNames = Object.values(EXPECTED_POLICIES).flat();
@@ -284,7 +289,11 @@ export async function runHubDbDoctor(options = {}) {
       if (deleteError) results.failures.push(`writer rollback delete: ${deleteError.message}`);
     }
   }
-  results.writer = line(writerOk, "Writer OK", writerOk ? "probe insert/read/delete em base_metricas_hub" : "");
+  results.writer = line(
+    writerOk,
+    "Writer OK",
+    writerOk ? "probe insert/read/delete em base_metricas_hub" : "",
+  );
 
   results.serviceRole = line(serviceRoleOk, "Service role OK");
 
@@ -328,7 +337,8 @@ function printSummary(results) {
   }
 }
 
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+const isMain =
+  process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
 if (isMain) {
   const results = await runHubDbDoctor();
   const pass =

@@ -20,6 +20,7 @@ import { PeriodToggle, type PeriodDays } from "@/components/lots/PeriodToggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -32,6 +33,16 @@ import {
 import { cn } from "@/lib/utils";
 import { crmKeys } from "@/modules/crm/query-keys";
 import type { CrmPeopleView } from "@/modules/crm/inbox";
+import {
+  clampIntent,
+  COLLECTOR_STATUS_LABEL,
+  fieldLabel,
+  formatIdentityValue,
+  groupPeopleByProfile,
+  identityLabel,
+  kindLabel,
+  placeLabel,
+} from "@/modules/crm/present";
 import {
   addCrmPersonNoteFn,
   assignCrmPersonFn,
@@ -71,6 +82,25 @@ function formatWhen(iso: string | null) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean).slice(0, 2);
+  const letters = parts.map((part) => part[0]?.toUpperCase() ?? "").join("");
+  return letters || "?";
+}
+
+function HeatMeter({ score, compact = false }: { score: number; compact?: boolean }) {
+  const value = clampIntent(score);
+  return (
+    <div className={cn("shrink-0", compact ? "w-16" : "w-28")}>
+      <div className="mb-1 flex items-baseline justify-between gap-2">
+        <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Calor</span>
+        <span className="text-sm font-semibold tabular-nums">{value}</span>
+      </div>
+      <Progress value={value} className="h-1.5" />
+    </div>
+  );
 }
 
 function downloadCsv(csv: string, filename: string) {
@@ -262,7 +292,7 @@ export function CrmWorkspace({
       <PageHeader
         eyebrow="Dados"
         title="CRM"
-        description={`Caixa de entrada da audiência de ${clienteNome} — Direct e comentários entram pela Graph no Lots, sem ManyChat. E-mail só se o canal entregar o campo.`}
+        description={`Audiência de ${clienteNome}. Cada pessoa que fala com a marca vira uma ficha. Abra a ficha para ver a trajetória e o calor de 0 a 100.`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <PeriodToggle value={days} onChange={setDays} />
@@ -329,8 +359,8 @@ export function CrmWorkspace({
       </div>
 
       <SectionCard
-        title="Caixa de entrada"
-        description="Quem falou com a marca e ainda não teve resposta da marca neste recorte."
+        title="Pessoas"
+        description="Separadas pelo canal do último contato. Caixa de entrada = ainda sem resposta da marca."
       >
         <Tabs value={view} onValueChange={(v) => setView(v as CrmPeopleView)} className="mb-4">
           <TabsList>
@@ -377,35 +407,60 @@ export function CrmWorkspace({
             }
           />
         ) : (
-          <ul className="divide-y divide-border">
-            {people.map((person) => (
-              <li key={person.id}>
-                <button
-                  type="button"
-                  onClick={() => setOpenId(person.id)}
-                  className="flex w-full items-start justify-between gap-3 py-3 text-left hover:bg-muted/40"
-                >
-                  <div className="min-w-0">
-                    <p className="font-medium">
-                      {person.displayName}
-                      {person.isVip ? (
-                        <Star className="ml-1 inline h-3.5 w-3.5 text-amber-500" />
-                      ) : null}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {person.signalCount} sinal(is) · {person.churnLabel} · intenção{" "}
-                      {person.intentScore}
-                      {person.ownerNome ? ` · ${person.ownerNome}` : ""}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">{person.nextAction}</p>
-                  </div>
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    {formatWhen(person.lastSignalAt)}
-                  </span>
-                </button>
-              </li>
+          <div className="space-y-6">
+            {groupPeopleByProfile(people).map((group) => (
+              <section key={group.id}>
+                <div className="mb-1 flex items-baseline justify-between gap-3">
+                  <h3 className="text-sm font-semibold">{group.label}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    {group.hint} · {group.people.length}
+                  </p>
+                </div>
+                <ul className="divide-y divide-border">
+                  {group.people.map((person) => (
+                    <li key={person.id}>
+                      <button
+                        type="button"
+                        onClick={() => setOpenId(person.id)}
+                        className="flex w-full items-center gap-3 py-3 text-left hover:bg-muted/40"
+                      >
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
+                          {initials(person.displayName)}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium">
+                            {person.displayName}
+                            {person.igUsername ? (
+                              <span className="ml-1.5 font-normal text-muted-foreground">
+                                @{person.igUsername.replace(/^@/, "")}
+                              </span>
+                            ) : null}
+                            {person.isVip ? (
+                              <Star className="ml-1 inline h-3.5 w-3.5 text-amber-500" />
+                            ) : null}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {kindLabel(person.lastKind ?? "")} · {person.signalCount} interações ·{" "}
+                            {person.churnLabel}
+                            {person.ownerNome ? ` · ${person.ownerNome}` : ""}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                            {person.nextAction}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          <HeatMeter score={person.intentScore} compact />
+                          <span className="text-right text-[11px] text-muted-foreground">
+                            {formatWhen(person.lastSignalAt)}
+                          </span>
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
+          </div>
         )}
       </SectionCard>
 
@@ -524,7 +579,7 @@ function CoverageChips({
               STATUS_TONE[chip.status] ?? STATUS_TONE.planned,
             )}
           >
-            {chip.label}
+            {chip.label} · {COLLECTOR_STATUS_LABEL[chip.status] ?? chip.status}
           </span>
         ))}
       </div>
@@ -601,25 +656,33 @@ function PersonDrawer({
         <SheetHeader>
           <SheetTitle>{detail?.person.displayName ?? "Pessoa"}</SheetTitle>
           <SheetDescription>
-            {detail?.person.churnLabel} · {detail?.person.signalCount} interações · intenção{" "}
-            {detail?.person.intentScore}
-            {detail?.person.ownerNome ? ` · dono ${detail.person.ownerNome}` : ""}
+            {detail
+              ? `${detail.person.churnLabel} · ${detail.person.signalCount} interações${
+                  detail.person.ownerNome ? ` · dono ${detail.person.ownerNome}` : ""
+                }`
+              : "Ficha da pessoa"}
           </SheetDescription>
         </SheetHeader>
         {!detail ? (
           <p className="mt-4 text-sm text-muted-foreground">Carregando ficha…</p>
         ) : (
           <div className="mt-4 space-y-5 pb-8">
+            <HeatMeter score={detail.person.intentScore} />
+            <p className="text-sm">
+              Entrou em {formatWhen(detail.person.firstSignalAt)}. Último contato em{" "}
+              {formatWhen(detail.person.lastSignalAt)}.
+            </p>
             <p className="text-sm text-muted-foreground">{detail.person.nextAction}</p>
 
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Identidades
+                Quem é
               </h3>
               <ul className="mt-1 space-y-1 text-sm">
                 {detail.identities.map((id) => (
                   <li key={`${id.kind}-${id.value}`}>
-                    <span className="text-muted-foreground">{id.kind}:</span> {id.value}
+                    <span className="text-muted-foreground">{identityLabel(id.kind)}:</span>{" "}
+                    {formatIdentityValue(id.kind, id.value)}
                   </li>
                 ))}
               </ul>
@@ -627,18 +690,18 @@ function PersonDrawer({
 
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Dados pessoais
+                Dados que a pessoa entregou
               </h3>
               {detail.facts.length === 0 ? (
                 <p className="mt-1 text-sm text-muted-foreground">
-                  A Graph não entrega e-mail nem endereço de quem comentou. Esses campos só
-                  aparecem se um formulário, WhatsApp ou a API de ingestão enviar o fato.
+                  Comentário e Direct do Instagram não trazem e-mail, telefone, endereço nem foto.
+                  Esses dados só entram se um formulário, o WhatsApp ou a API enviar o campo.
                 </p>
               ) : (
                 <ul className="mt-1 space-y-1 text-sm">
                   {detail.facts.map((f) => (
                     <li key={`${f.field}-${f.source}`}>
-                      {f.field}: {f.value}{" "}
+                      {fieldLabel(f.field)}: {f.value}{" "}
                       <span className="text-muted-foreground">({f.source})</span>
                     </li>
                   ))}
@@ -649,14 +712,16 @@ function PersonDrawer({
             <div className="flex flex-wrap gap-2">
               {Object.entries(detail.kindCounts).map(([k, n]) => (
                 <Badge key={k} variant="secondary">
-                  {k} {n}
+                  {kindLabel(k)} {n}
                 </Badge>
               ))}
-              {Object.entries(detail.placeCounts).map(([k, n]) => (
-                <Badge key={`p-${k}`} variant="outline">
-                  {k} {n}
-                </Badge>
-              ))}
+              {Object.entries(detail.placeCounts)
+                .filter(([k]) => placeLabel(k))
+                .map(([k, n]) => (
+                  <Badge key={`p-${k}`} variant="outline">
+                    {placeLabel(k)} {n}
+                  </Badge>
+                ))}
             </div>
 
             {Object.keys(detail.pillarAffinity).length > 0 ? (
@@ -670,13 +735,20 @@ function PersonDrawer({
 
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Timeline
+                Trajetória
               </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Do contato mais antigo desta ficha até o mais recente.
+                {detail.person.signalCount > detail.signals.length
+                  ? ` Há ${detail.person.signalCount} interações; aqui estão as ${detail.signals.length} mais recentes.`
+                  : ""}
+              </p>
               <ul className="mt-2 space-y-3">
-                {detail.signals.map((s) => (
+                {[...detail.signals].reverse().map((s) => (
                   <li key={s.id} className="border-l-2 border-border pl-3 text-sm">
                     <p className="text-xs text-muted-foreground">
-                      {s.kind} · {s.place} · {formatWhen(s.occurredAt)}
+                      {kindLabel(s.kind)}
+                      {placeLabel(s.place) ? ` · ${placeLabel(s.place)}` : ""} · {formatWhen(s.occurredAt)}
                     </p>
                     {s.body ? <p className="mt-0.5">{s.body}</p> : null}
                     {s.pilarTitulo || s.tema ? (

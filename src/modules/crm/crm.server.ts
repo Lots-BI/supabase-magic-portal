@@ -88,6 +88,7 @@ export type CrmPersonListRow = {
   heatScore: number;
   recencyDays: number;
   piiCompleteness: number;
+  firstSignalAt: string | null;
   lastSignalAt: string | null;
   lastKind: string | null;
   ownerUserId: string | null;
@@ -133,6 +134,7 @@ function mapListRow(row: Record<string, unknown>): CrmPersonListRow {
     heatScore: stats.heatScore,
     recencyDays: stats.recencyDays,
     piiCompleteness: stats.piiCompleteness,
+    firstSignalAt: (row.first_signal_at as string | null) ?? stats.firstSignalAt,
     lastSignalAt: stats.lastSignalAt,
     lastKind,
     ownerUserId: (row.owner_user_id as string | null) ?? null,
