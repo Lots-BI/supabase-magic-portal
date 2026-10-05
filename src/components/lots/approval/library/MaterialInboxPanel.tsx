@@ -22,6 +22,7 @@ import type { MediaAsset } from "@/lib/media-preview";
 type InboxItem = {
   card: ContentCard;
   materials: MediaAsset[];
+  baixado?: boolean;
 };
 
 export function MaterialInboxPanel({ cadastroClienteId }: { cadastroClienteId: number }) {
@@ -38,9 +39,10 @@ export function MaterialInboxPanel({ cadastroClienteId }: { cadastroClienteId: n
 
   const markMut = useMutation({
     mutationFn: (id: string) => markFn({ data: { id } }),
-    onSuccess: (card) => {
+    onSuccess: (card: { id: string }) => {
       toast.success("Mídias baixadas — conteúdo em produção.");
       qc.invalidateQueries({ queryKey: ["approval", "materials", cadastroClienteId] });
+      qc.invalidateQueries({ queryKey: ["lots-pendencias"] });
       qc.invalidateQueries({ queryKey: ["approval", "kanban", cadastroClienteId] });
       qc.invalidateQueries({ queryKey: ["approval", "calendar", cadastroClienteId] });
       void navigate({
@@ -129,7 +131,18 @@ function MaterialInboxCard({
     <li className="rounded-xl border border-border bg-card p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-medium text-foreground">{card.titulo}</p>
+          <p className="font-medium text-foreground">
+            {card.titulo}
+            {item.baixado ? (
+              <span className="ml-2 text-[11px] font-medium uppercase tracking-wide text-primary">
+                Baixado
+              </span>
+            ) : materials.length > 0 ? (
+              <span className="ml-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                Não baixado
+              </span>
+            ) : null}
+          </p>
           <p className="text-xs text-muted-foreground">
             {statusLabel} · {card.plataforma}
             {card.formato ? ` · ${card.formato}` : ""} ·{" "}

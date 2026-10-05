@@ -9,12 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermosRouteImport } from './routes/termos'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as CriarContaRouteImport } from './routes/criar-conta'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthIndexRouteImport } from './routes/auth/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as AuthenticatedTarefasRouteImport } from './routes/_authenticated/tarefas'
+import { Route as AuthenticatedSolicitarAcessoRouteImport } from './routes/_authenticated/solicitar-acesso'
 import { Route as AuthenticatedSobreRouteImport } from './routes/_authenticated/sobre'
 import { Route as AuthenticatedPlanoEstrategicoRouteImport } from './routes/_authenticated/plano-estrategico'
 import { Route as AuthenticatedNovidadesRouteImport } from './routes/_authenticated/novidades'
@@ -28,6 +33,7 @@ import { Route as OauthTiktokCallbackRouteImport } from './routes/oauth/tiktok/c
 import { Route as OauthMetaCallbackRouteImport } from './routes/oauth/meta/callback'
 import { Route as OauthGoogleCallbackRouteImport } from './routes/oauth/google/callback'
 import { Route as ApiWebhooksMetaRouteImport } from './routes/api/webhooks/meta'
+import { Route as ApiCronTaskDueAlertsRouteImport } from './routes/api/cron/task-due-alerts'
 import { Route as ApiCronMetaAdsCampaignsSyncRouteImport } from './routes/api/cron/meta-ads-campaigns-sync'
 import { Route as ApiCronInstagramProfileSyncRouteImport } from './routes/api/cron/instagram-profile-sync'
 import { Route as ApiCronInstagramMediaSyncRouteImport } from './routes/api/cron/instagram-media-sync'
@@ -37,9 +43,12 @@ import { Route as ApiCronGa4ProfileSyncRouteImport } from './routes/api/cron/ga4
 import { Route as ApiCronConteudosPublishDueRouteImport } from './routes/api/cron/conteudos-publish-due'
 import { Route as AuthenticatedTutorialSplatRouteImport } from './routes/_authenticated/tutorial/$'
 import { Route as AuthenticatedClienteClienteRouteImport } from './routes/_authenticated/cliente.$cliente'
+import { Route as AuthenticatedAdminTarefasRouteImport } from './routes/_authenticated/admin/tarefas'
+import { Route as AuthenticatedAdminSolicitacoesRouteImport } from './routes/_authenticated/admin/solicitacoes'
 import { Route as AuthenticatedAdminServicosRouteImport } from './routes/_authenticated/admin/servicos'
 import { Route as AuthenticatedAdminRelatoriosRouteImport } from './routes/_authenticated/admin/relatorios'
 import { Route as AuthenticatedAdminPlanoEstrategicoRouteImport } from './routes/_authenticated/admin/plano-estrategico'
+import { Route as AuthenticatedAdminOrganizacoesRouteImport } from './routes/_authenticated/admin/organizacoes'
 import { Route as AuthenticatedAdminEditorialRouteImport } from './routes/_authenticated/admin/editorial'
 import { Route as AuthenticatedAdminDebugRouteImport } from './routes/_authenticated/admin/debug'
 import { Route as AuthenticatedAdminCrmRouteImport } from './routes/_authenticated/admin/crm'
@@ -94,6 +103,21 @@ import { Route as AuthenticatedAdminAprovacoesRoteiroCardIdRouteImport } from '.
 import { Route as AuthenticatedAdminAprovacoesProducaoCardIdRouteImport } from './routes/_authenticated/admin/aprovacoes_.producao.$cardId'
 import { Route as AuthenticatedAdminAprovacoesAgendarCardIdRouteImport } from './routes/_authenticated/admin/aprovacoes_.agendar.$cardId'
 
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CriarContaRoute = CriarContaRouteImport.update({
+  id: '/criar-conta',
+  path: '/criar-conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -123,6 +147,17 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedTarefasRoute = AuthenticatedTarefasRouteImport.update({
+  id: '/tarefas',
+  path: '/tarefas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSolicitarAcessoRoute =
+  AuthenticatedSolicitarAcessoRouteImport.update({
+    id: '/solicitar-acesso',
+    path: '/solicitar-acesso',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSobreRoute = AuthenticatedSobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
@@ -191,6 +226,11 @@ const ApiWebhooksMetaRoute = ApiWebhooksMetaRouteImport.update({
   path: '/api/webhooks/meta',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronTaskDueAlertsRoute = ApiCronTaskDueAlertsRouteImport.update({
+  id: '/api/cron/task-due-alerts',
+  path: '/api/cron/task-due-alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCronMetaAdsCampaignsSyncRoute =
   ApiCronMetaAdsCampaignsSyncRouteImport.update({
     id: '/api/cron/meta-ads-campaigns-sync',
@@ -244,6 +284,18 @@ const AuthenticatedClienteClienteRoute =
     path: '/cliente/$cliente',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminTarefasRoute =
+  AuthenticatedAdminTarefasRouteImport.update({
+    id: '/tarefas',
+    path: '/tarefas',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminSolicitacoesRoute =
+  AuthenticatedAdminSolicitacoesRouteImport.update({
+    id: '/solicitacoes',
+    path: '/solicitacoes',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminServicosRoute =
   AuthenticatedAdminServicosRouteImport.update({
     id: '/servicos',
@@ -260,6 +312,12 @@ const AuthenticatedAdminPlanoEstrategicoRoute =
   AuthenticatedAdminPlanoEstrategicoRouteImport.update({
     id: '/plano-estrategico',
     path: '/plano-estrategico',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminOrganizacoesRoute =
+  AuthenticatedAdminOrganizacoesRouteImport.update({
+    id: '/organizacoes',
+    path: '/organizacoes',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminEditorialRoute =
@@ -581,6 +639,9 @@ const AuthenticatedAdminAprovacoesAgendarCardIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
+  '/criar-conta': typeof CriarContaRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/tutorial': typeof AuthenticatedTutorialRouteRouteWithChildren
   '/aprovacoes': typeof AuthenticatedAprovacoesRoute
@@ -588,6 +649,8 @@ export interface FileRoutesByFullPath {
   '/novidades': typeof AuthenticatedNovidadesRoute
   '/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
   '/sobre': typeof AuthenticatedSobreRoute
+  '/solicitar-acesso': typeof AuthenticatedSolicitarAcessoRoute
+  '/tarefas': typeof AuthenticatedTarefasRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/': typeof AuthIndexRoute
@@ -602,9 +665,12 @@ export interface FileRoutesByFullPath {
   '/admin/crm': typeof AuthenticatedAdminCrmRoute
   '/admin/debug': typeof AuthenticatedAdminDebugRouteWithChildren
   '/admin/editorial': typeof AuthenticatedAdminEditorialRoute
+  '/admin/organizacoes': typeof AuthenticatedAdminOrganizacoesRoute
   '/admin/plano-estrategico': typeof AuthenticatedAdminPlanoEstrategicoRoute
   '/admin/relatorios': typeof AuthenticatedAdminRelatoriosRoute
   '/admin/servicos': typeof AuthenticatedAdminServicosRoute
+  '/admin/solicitacoes': typeof AuthenticatedAdminSolicitacoesRoute
+  '/admin/tarefas': typeof AuthenticatedAdminTarefasRoute
   '/cliente/$cliente': typeof AuthenticatedClienteClienteRouteWithChildren
   '/tutorial/$': typeof AuthenticatedTutorialSplatRoute
   '/api/cron/conteudos-publish-due': typeof ApiCronConteudosPublishDueRoute
@@ -614,6 +680,7 @@ export interface FileRoutesByFullPath {
   '/api/cron/instagram-media-sync': typeof ApiCronInstagramMediaSyncRoute
   '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
   '/api/cron/meta-ads-campaigns-sync': typeof ApiCronMetaAdsCampaignsSyncRoute
+  '/api/cron/task-due-alerts': typeof ApiCronTaskDueAlertsRoute
   '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
   '/oauth/meta/callback': typeof OauthMetaCallbackRoute
@@ -665,11 +732,16 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/criar-conta': typeof CriarContaRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/aprovacoes': typeof AuthenticatedAprovacoesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/novidades': typeof AuthenticatedNovidadesRoute
   '/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
   '/sobre': typeof AuthenticatedSobreRoute
+  '/solicitar-acesso': typeof AuthenticatedSolicitarAcessoRoute
+  '/tarefas': typeof AuthenticatedTarefasRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth': typeof AuthIndexRoute
@@ -681,9 +753,12 @@ export interface FileRoutesByTo {
   '/admin/central': typeof AuthenticatedAdminCentralRouteWithChildren
   '/admin/crm': typeof AuthenticatedAdminCrmRoute
   '/admin/editorial': typeof AuthenticatedAdminEditorialRoute
+  '/admin/organizacoes': typeof AuthenticatedAdminOrganizacoesRoute
   '/admin/plano-estrategico': typeof AuthenticatedAdminPlanoEstrategicoRoute
   '/admin/relatorios': typeof AuthenticatedAdminRelatoriosRoute
   '/admin/servicos': typeof AuthenticatedAdminServicosRoute
+  '/admin/solicitacoes': typeof AuthenticatedAdminSolicitacoesRoute
+  '/admin/tarefas': typeof AuthenticatedAdminTarefasRoute
   '/tutorial/$': typeof AuthenticatedTutorialSplatRoute
   '/api/cron/conteudos-publish-due': typeof ApiCronConteudosPublishDueRoute
   '/api/cron/ga4-profile-sync': typeof ApiCronGa4ProfileSyncRoute
@@ -692,6 +767,7 @@ export interface FileRoutesByTo {
   '/api/cron/instagram-media-sync': typeof ApiCronInstagramMediaSyncRoute
   '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
   '/api/cron/meta-ads-campaigns-sync': typeof ApiCronMetaAdsCampaignsSyncRoute
+  '/api/cron/task-due-alerts': typeof ApiCronTaskDueAlertsRoute
   '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
   '/oauth/meta/callback': typeof OauthMetaCallbackRoute
@@ -745,6 +821,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteRouteWithChildren
+  '/criar-conta': typeof CriarContaRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/tutorial': typeof AuthenticatedTutorialRouteRouteWithChildren
   '/_authenticated/aprovacoes': typeof AuthenticatedAprovacoesRoute
@@ -752,6 +831,8 @@ export interface FileRoutesById {
   '/_authenticated/novidades': typeof AuthenticatedNovidadesRoute
   '/_authenticated/plano-estrategico': typeof AuthenticatedPlanoEstrategicoRoute
   '/_authenticated/sobre': typeof AuthenticatedSobreRoute
+  '/_authenticated/solicitar-acesso': typeof AuthenticatedSolicitarAcessoRoute
+  '/_authenticated/tarefas': typeof AuthenticatedTarefasRoute
   '/api/health': typeof ApiHealthRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/': typeof AuthIndexRoute
@@ -766,9 +847,12 @@ export interface FileRoutesById {
   '/_authenticated/admin/crm': typeof AuthenticatedAdminCrmRoute
   '/_authenticated/admin/debug': typeof AuthenticatedAdminDebugRouteWithChildren
   '/_authenticated/admin/editorial': typeof AuthenticatedAdminEditorialRoute
+  '/_authenticated/admin/organizacoes': typeof AuthenticatedAdminOrganizacoesRoute
   '/_authenticated/admin/plano-estrategico': typeof AuthenticatedAdminPlanoEstrategicoRoute
   '/_authenticated/admin/relatorios': typeof AuthenticatedAdminRelatoriosRoute
   '/_authenticated/admin/servicos': typeof AuthenticatedAdminServicosRoute
+  '/_authenticated/admin/solicitacoes': typeof AuthenticatedAdminSolicitacoesRoute
+  '/_authenticated/admin/tarefas': typeof AuthenticatedAdminTarefasRoute
   '/_authenticated/cliente/$cliente': typeof AuthenticatedClienteClienteRouteWithChildren
   '/_authenticated/tutorial/$': typeof AuthenticatedTutorialSplatRoute
   '/api/cron/conteudos-publish-due': typeof ApiCronConteudosPublishDueRoute
@@ -778,6 +862,7 @@ export interface FileRoutesById {
   '/api/cron/instagram-media-sync': typeof ApiCronInstagramMediaSyncRoute
   '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
   '/api/cron/meta-ads-campaigns-sync': typeof ApiCronMetaAdsCampaignsSyncRoute
+  '/api/cron/task-due-alerts': typeof ApiCronTaskDueAlertsRoute
   '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
   '/oauth/meta/callback': typeof OauthMetaCallbackRoute
@@ -832,6 +917,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/criar-conta'
+    | '/privacidade'
+    | '/termos'
     | '/admin'
     | '/tutorial'
     | '/aprovacoes'
@@ -839,6 +927,8 @@ export interface FileRouteTypes {
     | '/novidades'
     | '/plano-estrategico'
     | '/sobre'
+    | '/solicitar-acesso'
+    | '/tarefas'
     | '/api/health'
     | '/auth/callback'
     | '/auth/'
@@ -853,9 +943,12 @@ export interface FileRouteTypes {
     | '/admin/crm'
     | '/admin/debug'
     | '/admin/editorial'
+    | '/admin/organizacoes'
     | '/admin/plano-estrategico'
     | '/admin/relatorios'
     | '/admin/servicos'
+    | '/admin/solicitacoes'
+    | '/admin/tarefas'
     | '/cliente/$cliente'
     | '/tutorial/$'
     | '/api/cron/conteudos-publish-due'
@@ -865,6 +958,7 @@ export interface FileRouteTypes {
     | '/api/cron/instagram-media-sync'
     | '/api/cron/instagram-profile-sync'
     | '/api/cron/meta-ads-campaigns-sync'
+    | '/api/cron/task-due-alerts'
     | '/api/webhooks/meta'
     | '/oauth/google/callback'
     | '/oauth/meta/callback'
@@ -916,11 +1010,16 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/criar-conta'
+    | '/privacidade'
+    | '/termos'
     | '/aprovacoes'
     | '/dashboard'
     | '/novidades'
     | '/plano-estrategico'
     | '/sobre'
+    | '/solicitar-acesso'
+    | '/tarefas'
     | '/api/health'
     | '/auth/callback'
     | '/auth'
@@ -932,9 +1031,12 @@ export interface FileRouteTypes {
     | '/admin/central'
     | '/admin/crm'
     | '/admin/editorial'
+    | '/admin/organizacoes'
     | '/admin/plano-estrategico'
     | '/admin/relatorios'
     | '/admin/servicos'
+    | '/admin/solicitacoes'
+    | '/admin/tarefas'
     | '/tutorial/$'
     | '/api/cron/conteudos-publish-due'
     | '/api/cron/ga4-profile-sync'
@@ -943,6 +1045,7 @@ export interface FileRouteTypes {
     | '/api/cron/instagram-media-sync'
     | '/api/cron/instagram-profile-sync'
     | '/api/cron/meta-ads-campaigns-sync'
+    | '/api/cron/task-due-alerts'
     | '/api/webhooks/meta'
     | '/oauth/google/callback'
     | '/oauth/meta/callback'
@@ -995,6 +1098,9 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/criar-conta'
+    | '/privacidade'
+    | '/termos'
     | '/_authenticated/admin'
     | '/_authenticated/tutorial'
     | '/_authenticated/aprovacoes'
@@ -1002,6 +1108,8 @@ export interface FileRouteTypes {
     | '/_authenticated/novidades'
     | '/_authenticated/plano-estrategico'
     | '/_authenticated/sobre'
+    | '/_authenticated/solicitar-acesso'
+    | '/_authenticated/tarefas'
     | '/api/health'
     | '/auth/callback'
     | '/auth/'
@@ -1016,9 +1124,12 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/crm'
     | '/_authenticated/admin/debug'
     | '/_authenticated/admin/editorial'
+    | '/_authenticated/admin/organizacoes'
     | '/_authenticated/admin/plano-estrategico'
     | '/_authenticated/admin/relatorios'
     | '/_authenticated/admin/servicos'
+    | '/_authenticated/admin/solicitacoes'
+    | '/_authenticated/admin/tarefas'
     | '/_authenticated/cliente/$cliente'
     | '/_authenticated/tutorial/$'
     | '/api/cron/conteudos-publish-due'
@@ -1028,6 +1139,7 @@ export interface FileRouteTypes {
     | '/api/cron/instagram-media-sync'
     | '/api/cron/instagram-profile-sync'
     | '/api/cron/meta-ads-campaigns-sync'
+    | '/api/cron/task-due-alerts'
     | '/api/webhooks/meta'
     | '/oauth/google/callback'
     | '/oauth/meta/callback'
@@ -1082,6 +1194,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  CriarContaRoute: typeof CriarContaRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
+  TermosRoute: typeof TermosRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiCronConteudosPublishDueRoute: typeof ApiCronConteudosPublishDueRoute
   ApiCronGa4ProfileSyncRoute: typeof ApiCronGa4ProfileSyncRoute
@@ -1090,6 +1205,7 @@ export interface RootRouteChildren {
   ApiCronInstagramMediaSyncRoute: typeof ApiCronInstagramMediaSyncRoute
   ApiCronInstagramProfileSyncRoute: typeof ApiCronInstagramProfileSyncRoute
   ApiCronMetaAdsCampaignsSyncRoute: typeof ApiCronMetaAdsCampaignsSyncRoute
+  ApiCronTaskDueAlertsRoute: typeof ApiCronTaskDueAlertsRoute
   ApiWebhooksMetaRoute: typeof ApiWebhooksMetaRoute
   OauthGoogleCallbackRoute: typeof OauthGoogleCallbackRoute
   OauthMetaCallbackRoute: typeof OauthMetaCallbackRoute
@@ -1099,6 +1215,27 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/criar-conta': {
+      id: '/criar-conta'
+      path: '/criar-conta'
+      fullPath: '/criar-conta'
+      preLoaderRoute: typeof CriarContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -1140,6 +1277,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/health'
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/tarefas': {
+      id: '/_authenticated/tarefas'
+      path: '/tarefas'
+      fullPath: '/tarefas'
+      preLoaderRoute: typeof AuthenticatedTarefasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/solicitar-acesso': {
+      id: '/_authenticated/solicitar-acesso'
+      path: '/solicitar-acesso'
+      fullPath: '/solicitar-acesso'
+      preLoaderRoute: typeof AuthenticatedSolicitarAcessoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/sobre': {
       id: '/_authenticated/sobre'
@@ -1232,6 +1383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWebhooksMetaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/task-due-alerts': {
+      id: '/api/cron/task-due-alerts'
+      path: '/api/cron/task-due-alerts'
+      fullPath: '/api/cron/task-due-alerts'
+      preLoaderRoute: typeof ApiCronTaskDueAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/cron/meta-ads-campaigns-sync': {
       id: '/api/cron/meta-ads-campaigns-sync'
       path: '/api/cron/meta-ads-campaigns-sync'
@@ -1295,6 +1453,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClienteClienteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/tarefas': {
+      id: '/_authenticated/admin/tarefas'
+      path: '/tarefas'
+      fullPath: '/admin/tarefas'
+      preLoaderRoute: typeof AuthenticatedAdminTarefasRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/solicitacoes': {
+      id: '/_authenticated/admin/solicitacoes'
+      path: '/solicitacoes'
+      fullPath: '/admin/solicitacoes'
+      preLoaderRoute: typeof AuthenticatedAdminSolicitacoesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/servicos': {
       id: '/_authenticated/admin/servicos'
       path: '/servicos'
@@ -1314,6 +1486,13 @@ declare module '@tanstack/react-router' {
       path: '/plano-estrategico'
       fullPath: '/admin/plano-estrategico'
       preLoaderRoute: typeof AuthenticatedAdminPlanoEstrategicoRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/organizacoes': {
+      id: '/_authenticated/admin/organizacoes'
+      path: '/organizacoes'
+      fullPath: '/admin/organizacoes'
+      preLoaderRoute: typeof AuthenticatedAdminOrganizacoesRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/editorial': {
@@ -1766,9 +1945,12 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminCrmRoute: typeof AuthenticatedAdminCrmRoute
   AuthenticatedAdminDebugRoute: typeof AuthenticatedAdminDebugRouteWithChildren
   AuthenticatedAdminEditorialRoute: typeof AuthenticatedAdminEditorialRoute
+  AuthenticatedAdminOrganizacoesRoute: typeof AuthenticatedAdminOrganizacoesRoute
   AuthenticatedAdminPlanoEstrategicoRoute: typeof AuthenticatedAdminPlanoEstrategicoRoute
   AuthenticatedAdminRelatoriosRoute: typeof AuthenticatedAdminRelatoriosRoute
   AuthenticatedAdminServicosRoute: typeof AuthenticatedAdminServicosRoute
+  AuthenticatedAdminSolicitacoesRoute: typeof AuthenticatedAdminSolicitacoesRoute
+  AuthenticatedAdminTarefasRoute: typeof AuthenticatedAdminTarefasRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminAprovacoesDashboardRoute: typeof AuthenticatedAdminAprovacoesDashboardRoute
   AuthenticatedAdminClientesIdRoute: typeof AuthenticatedAdminClientesIdRoute
@@ -1803,10 +1985,13 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminCrmRoute: AuthenticatedAdminCrmRoute,
     AuthenticatedAdminDebugRoute: AuthenticatedAdminDebugRouteWithChildren,
     AuthenticatedAdminEditorialRoute: AuthenticatedAdminEditorialRoute,
+    AuthenticatedAdminOrganizacoesRoute: AuthenticatedAdminOrganizacoesRoute,
     AuthenticatedAdminPlanoEstrategicoRoute:
       AuthenticatedAdminPlanoEstrategicoRoute,
     AuthenticatedAdminRelatoriosRoute: AuthenticatedAdminRelatoriosRoute,
     AuthenticatedAdminServicosRoute: AuthenticatedAdminServicosRoute,
+    AuthenticatedAdminSolicitacoesRoute: AuthenticatedAdminSolicitacoesRoute,
+    AuthenticatedAdminTarefasRoute: AuthenticatedAdminTarefasRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdminAprovacoesDashboardRoute:
       AuthenticatedAdminAprovacoesDashboardRoute,
@@ -1936,6 +2121,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNovidadesRoute: typeof AuthenticatedNovidadesRoute
   AuthenticatedPlanoEstrategicoRoute: typeof AuthenticatedPlanoEstrategicoRoute
   AuthenticatedSobreRoute: typeof AuthenticatedSobreRoute
+  AuthenticatedSolicitarAcessoRoute: typeof AuthenticatedSolicitarAcessoRoute
+  AuthenticatedTarefasRoute: typeof AuthenticatedTarefasRoute
   AuthenticatedAccountSecurityRoute: typeof AuthenticatedAccountSecurityRoute
   AuthenticatedClienteClienteRoute: typeof AuthenticatedClienteClienteRouteWithChildren
   AuthenticatedAprovacoesRoteiroCardIdRoute: typeof AuthenticatedAprovacoesRoteiroCardIdRoute
@@ -1949,6 +2136,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNovidadesRoute: AuthenticatedNovidadesRoute,
   AuthenticatedPlanoEstrategicoRoute: AuthenticatedPlanoEstrategicoRoute,
   AuthenticatedSobreRoute: AuthenticatedSobreRoute,
+  AuthenticatedSolicitarAcessoRoute: AuthenticatedSolicitarAcessoRoute,
+  AuthenticatedTarefasRoute: AuthenticatedTarefasRoute,
   AuthenticatedAccountSecurityRoute: AuthenticatedAccountSecurityRoute,
   AuthenticatedClienteClienteRoute:
     AuthenticatedClienteClienteRouteWithChildren,
@@ -1977,6 +2166,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRouteRoute: AuthRouteRouteWithChildren,
+  CriarContaRoute: CriarContaRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
+  TermosRoute: TermosRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiCronConteudosPublishDueRoute: ApiCronConteudosPublishDueRoute,
   ApiCronGa4ProfileSyncRoute: ApiCronGa4ProfileSyncRoute,
@@ -1985,6 +2177,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCronInstagramMediaSyncRoute: ApiCronInstagramMediaSyncRoute,
   ApiCronInstagramProfileSyncRoute: ApiCronInstagramProfileSyncRoute,
   ApiCronMetaAdsCampaignsSyncRoute: ApiCronMetaAdsCampaignsSyncRoute,
+  ApiCronTaskDueAlertsRoute: ApiCronTaskDueAlertsRoute,
   ApiWebhooksMetaRoute: ApiWebhooksMetaRoute,
   OauthGoogleCallbackRoute: OauthGoogleCallbackRoute,
   OauthMetaCallbackRoute: OauthMetaCallbackRoute,

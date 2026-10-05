@@ -33,8 +33,7 @@ export type CardDetail = {
   publishedIg: PublishedIgSnapshot | null;
 };
 
-const IG_MEDIA_SELECT =
-  "id, ig_media_id, media_product_type, metrics, permalink, last_synced_at";
+const IG_MEDIA_SELECT = "id, ig_media_id, media_product_type, metrics, permalink, last_synced_at";
 
 function mapPublishedIg(
   row: Record<string, unknown>,
@@ -56,7 +55,11 @@ export async function loadPublishedIgForCard(
   card: Pick<ContentCard, "id" | "cadastro_cliente_id" | "external_post_id">,
 ): Promise<PublishedIgSnapshot | null> {
   const [{ data: cadastro }, byFk] = await Promise.all([
-    supabase.from("cadastro_clientes").select("slug").eq("id", card.cadastro_cliente_id).maybeSingle(),
+    supabase
+      .from("cadastro_clientes")
+      .select("slug")
+      .eq("id", card.cadastro_cliente_id)
+      .maybeSingle(),
     supabase
       .from("ig_media")
       .select(IG_MEDIA_SELECT)
@@ -112,6 +115,7 @@ export async function getCardDetail(
 export type MaterialInboxItem = {
   card: ContentCard;
   materials: MediaAsset[];
+  baixado: boolean;
 };
 
 /** Slots do calendário + mídias do cliente, organizados para download da agência. */
@@ -146,7 +150,11 @@ export async function listMaterialInbox(
     for (const row of rows) {
       materials.push(await attachmentToMediaAsset(row));
     }
-    items.push({ card, materials });
+    items.push({
+      card,
+      materials,
+      baixado: rows.length > 0 && rows.every((row) => Boolean(row.downloaded_at)),
+    });
   }
   return items;
 }

@@ -360,6 +360,7 @@ export type Database = {
           completed_on_date: string | null
           created_at: string
           created_by: string | null
+          aba: string | null
           descricao: string | null
           due_at: string | null
           id: string
@@ -376,6 +377,7 @@ export type Database = {
           completed_on_date?: string | null
           created_at?: string
           created_by?: string | null
+          aba?: string | null
           descricao?: string | null
           due_at?: string | null
           id?: string
@@ -392,6 +394,7 @@ export type Database = {
           completed_on_date?: string | null
           created_at?: string
           created_by?: string | null
+          aba?: string | null
           descricao?: string | null
           due_at?: string | null
           id?: string

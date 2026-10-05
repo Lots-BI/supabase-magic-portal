@@ -20,8 +20,13 @@ export type ContentCardAttachment = {
   poster_path: string | null;
   legacy_media_id: string | null;
   created_at: string;
+  downloaded_at: string | null;
 };
 
-export type ContentCardAttachmentInsert = Omit<ContentCardAttachment, "id" | "created_at"> & {
+export type ContentCardAttachmentInsert = Omit<
+  ContentCardAttachment,
+  "id" | "created_at" | "downloaded_at"
+> & {
   id?: string;
+  downloaded_at?: string | null;
 };

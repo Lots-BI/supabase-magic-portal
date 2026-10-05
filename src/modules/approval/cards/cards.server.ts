@@ -18,9 +18,14 @@ import {
   schedulePublish,
   markPublishNowQueued,
   markMaterialsDownloaded,
+  markPublishedManually,
   refreshCardChecklist,
 } from "../internal/card-lifecycle.server";
-import { getKanbanBoardForClient, getCardDetail, listMaterialInbox } from "../internal/card-query.server";
+import {
+  getKanbanBoardForClient,
+  getCardDetail,
+  listMaterialInbox,
+} from "../internal/card-query.server";
 import {
   uploadCardAttachment,
   deleteCardAttachment,
@@ -260,6 +265,32 @@ export const listMaterialInboxFn = createServerFn({ method: "GET" })
     return listMaterialInbox(context.supabase, data.cadastro_cliente_id);
   });
 
+export const markPublishedManuallyFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const actor = await actorFromContext(context);
+    return markPublishedManually(context.supabase, actor, data.id);
+  });
+
+export const listPublishQueueFn = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ cadastro_cliente_id: z.number().int().positive() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertStaffAccess(context);
+    const { data: rows, error } = await context.supabase
+      .from("content_cards")
+      .select("id, titulo, status, data_publicacao, publish_error, publish_status")
+      .eq("cadastro_cliente_id", data.cadastro_cliente_id)
+      .or("status.eq.agendado,publish_error.not.is.null")
+      .neq("status", "arquivado")
+      .order("data_publicacao", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (rows ?? []).filter((row) => row.status !== "publicado" || row.publish_error);
+  });
+
 export const markMaterialsDownloadedFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
@@ -289,6 +320,27 @@ export const publishNowFn = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const actor = await actorFromContext(context);
     const { getPublisher } = await import("../integrations/get-publisher.server");
+    const { publishPlatformError, resolvePublishPlatform } =
+      await import("../integrations/publish-platform");
+    const { data: card } = await context.supabase
+      .from("content_cards")
+      .select("plataforma")
+      .eq("id", data.card_id)
+      .maybeSingle();
+    const platform = resolvePublishPlatform((card as { plataforma?: string } | null)?.plataforma);
+    if (platform === "youtube") {
+      const { publishYouTubeCard } = await import("../integrations/publish-youtube-card.server");
+      const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await publishYouTubeCard(getSupabaseAdmin(), data.card_id);
+      return getCardDetail(context.supabase, data.card_id);
+    }
+    if (platform !== "instagram") {
+      throw new Error(
+        platform === "tiktok"
+          ? "A conexão TikTok é de anúncios. Ela coleta métricas e não publica vídeo no perfil."
+          : publishPlatformError((card as { plataforma?: string } | null)?.plataforma),
+      );
+    }
     await markPublishNowQueued(context.supabase, actor, data.card_id);
     const publisher = getPublisher();
     try {

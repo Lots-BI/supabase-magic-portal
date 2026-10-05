@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
 import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { bootstrapSupabase, supabase } from "@/integrations/supabase/client";
 import { resolveBlockedRedirect } from "@/modules/access/services/resolve-blocked-redirect";
 import { useSignOut } from "@/modules/auth";
 import { assertAccessActive } from "@/lib/access.functions.server";
 import { checkIsAdmin } from "@/lib/admin.functions";
+import { checkIsOrgOperator } from "@/modules/access/organization.server";
+import { getAcquisitionGate } from "@/modules/access/access-application.server";
 import { AppShell, type NavGroup } from "@/components/lots/AppShell";
 import { usePlatformLiveSync } from "@/modules/core/realtime/use-platform-live-sync";
 import { AuthDiagnosticsBanner } from "@/components/lots/infra/AuthDiagnosticsBanner";
 import { NotificationCenter } from "@/components/lots/NotificationCenter";
+import { TaskDueBrowserAlert } from "@/components/lots/admin/TaskDueBrowserAlert";
 import { PlatformNewsAnnouncer } from "@/components/lots/platform-news/PlatformNewsAnnouncer";
 import { useClientNavAccount } from "@/components/lots/dashboards-nav";
 import { BRAND_NAME } from "@/lib/brand";
@@ -26,6 +28,7 @@ import {
   Bug,
   FileBarChart,
   ClipboardCheck,
+  ListTodo,
   BookOpen,
   Compass,
   Palette,
@@ -36,6 +39,8 @@ import {
   Plug,
   Newspaper,
   Info,
+  ShieldCheck,
+  FileText,
 } from "lucide-react";
 import { lazy, Suspense } from "react";
 
@@ -57,15 +62,23 @@ export const Route = createFileRoute("/_authenticated")({
 
     const isOwner = isPlatformOwnerEmail(data.user.email);
     let isAdmin = isOwner;
+    let isOrgOperator = isOwner;
     if (!isOwner) {
-      const result = await context.queryClient.fetchQuery({
-        queryKey: ["me", "isAdmin"],
-        queryFn: () => checkIsAdmin(),
-      });
-      isAdmin = !!result?.isAdmin;
+      const [adminResult, orgResult] = await Promise.all([
+        context.queryClient.fetchQuery({
+          queryKey: ["me", "isAdmin"],
+          queryFn: () => checkIsAdmin(),
+        }),
+        context.queryClient.fetchQuery({
+          queryKey: ["me", "isOrgOperator"],
+          queryFn: () => checkIsOrgOperator(),
+        }),
+      ]);
+      isAdmin = !!adminResult?.isAdmin;
+      isOrgOperator = !!orgResult?.isOrgOperator;
     }
 
-    if (location.pathname.startsWith("/admin") && !isAdmin) {
+    if (location.pathname.startsWith("/admin") && !isAdmin && !isOrgOperator) {
       throw redirect({ to: "/dashboard" });
     }
 
@@ -86,7 +99,33 @@ export const Route = createFileRoute("/_authenticated")({
       throw redirect({ to: blocked.to, search: blocked.search });
     }
 
-    return { user: data.user, isAdmin };
+    if (!isOwner) {
+      let acquisition: { gate: "allow" | "form" | "wait" } = { gate: "allow" };
+      try {
+        acquisition = await context.queryClient.fetchQuery({
+          queryKey: ["me", "acquisition-gate"],
+          queryFn: () => getAcquisitionGate(),
+        });
+      } catch {
+        acquisition = { gate: "allow" };
+      }
+      const onRequest = location.pathname === "/solicitar-acesso";
+      if (acquisition.gate !== "allow" && !onRequest) {
+        throw redirect({ to: "/solicitar-acesso" });
+      }
+      if (acquisition.gate === "allow" && onRequest) {
+        throw redirect({ to: isAdmin || isOrgOperator ? "/admin" : "/dashboard" });
+      }
+    } else if (location.pathname === "/solicitar-acesso") {
+      throw redirect({ to: "/admin" });
+    }
+
+    return {
+      user: data.user,
+      isAdmin,
+      isOrgOperator: isAdmin || isOrgOperator,
+      isPlatformOwner: isOwner,
+    };
   },
   component: AuthenticatedLayout,
 });
@@ -113,7 +152,7 @@ function ShellImpersonateSlot() {
 
 function AuthenticatedLayout() {
   usePlatformLiveSync();
-  const { user, isAdmin } = Route.useRouteContext();
+  const { user, isAdmin, isOrgOperator } = Route.useRouteContext();
   const isOwner = isPlatformOwnerEmail(user.email);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const inAdmin = pathname.startsWith("/admin");
@@ -121,7 +160,7 @@ function AuthenticatedLayout() {
   const clienteSlug = clienteSlugMatch?.[1];
   const isClientBrandbook = /^\/cliente\/[^/]+\/brandbook\/?$/.test(pathname);
   const signOut = useSignOut(user.email);
-  const clientNav = useClientNavAccount(pathname, !(inAdmin && isAdmin));
+  const clientNav = useClientNavAccount(pathname, !(inAdmin && isOrgOperator));
   const clientDashboards = clientNav.nav;
   const diretrizesSlug = clientNav.slug ?? clienteSlug;
 
@@ -130,6 +169,7 @@ function AuthenticatedLayout() {
       label: "Dados",
       items: [
         { to: "/admin", label: "Visão geral", icon: LayoutDashboard, prefixMatch: false },
+        { to: "/admin/tarefas", label: "Tarefas", icon: ListTodo },
         { to: "/admin/crm", label: "CRM", icon: Contact2 },
         { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
         ...(FEATURE_PLANO_ESTRATEGICO_NAV
@@ -149,24 +189,34 @@ function AuthenticatedLayout() {
       items: [
         { to: "/admin/clientes", label: "Clientes", icon: Users },
         { to: "/admin/usuarios", label: "Usuários", icon: UserCircle2 },
-        { to: "/admin/servicos", label: "Serviços", icon: Briefcase },
+        ...(isOwner
+          ? [
+              { to: "/admin/organizacoes", label: "Organizações", icon: Building2 },
+              { to: "/admin/solicitacoes", label: "Pedidos de acesso", icon: UserCircle2 },
+            ]
+          : []),
+        ...(isAdmin ? [{ to: "/admin/servicos", label: "Serviços", icon: Briefcase }] : []),
       ],
     },
     {
       label: "Plataforma",
       items: [
         { to: "/admin/conexoes", label: "Conexões", icon: Plug, prefixMatch: false },
-        { to: "/admin/branding", label: "Branding", icon: Palette },
+        ...(isAdmin ? [{ to: "/admin/branding", label: "Branding", icon: Palette }] : []),
         { to: "/novidades", label: "Novidades", icon: Sparkles },
       ],
     },
-    {
-      label: "Diagnóstico",
-      items: [
-        { to: "/admin/debug", label: "Painel operacional", icon: Bug },
-        { to: "/admin/debug/views", label: "Auditoria de views", icon: Bug },
-      ],
-    },
+    ...(isAdmin
+      ? [
+          {
+            label: "Diagnóstico",
+            items: [
+              { to: "/admin/debug", label: "Painel operacional", icon: Bug },
+              { to: "/admin/debug/views", label: "Auditoria de views", icon: Bug },
+            ],
+          } as NavGroup,
+        ]
+      : []),
     {
       label: "Ajuda",
       items: [
@@ -175,6 +225,8 @@ function AuthenticatedLayout() {
           : []),
         { to: "/admin/tutorial", label: "Tutorial", icon: GraduationCap },
         { to: "/admin/knowledge", label: "Knowledge Center", icon: BookOpen },
+        { to: "/privacidade", label: "Privacidade", icon: ShieldCheck },
+        { to: "/termos", label: "Termos", icon: FileText },
       ],
     },
     ...(FEATURE_ADMIN_CENTRAL_NAV
@@ -194,6 +246,7 @@ function AuthenticatedLayout() {
       label: "Dados",
       items: [
         clientDashboards,
+        { to: "/tarefas", label: "Tarefas", icon: ListTodo },
         ...(diretrizesSlug
           ? [
               {
@@ -255,9 +308,13 @@ function AuthenticatedLayout() {
     },
     {
       label: "Sobre Lots BI",
-      items: [{ to: "/sobre", label: "O que é", icon: Info }],
+      items: [
+        { to: "/sobre", label: "O que é", icon: Info },
+        { to: "/privacidade", label: "Privacidade", icon: ShieldCheck },
+        { to: "/termos", label: "Termos", icon: FileText },
+      ],
     },
-    ...(isAdmin
+    ...(isOrgOperator
       ? [
           {
             label: "Acesso interno",
@@ -267,8 +324,8 @@ function AuthenticatedLayout() {
       : []),
   ];
 
-  const groups = inAdmin && isAdmin ? adminGroups : clientGroups;
-  const variant: "admin" | "client" = inAdmin && isAdmin ? "admin" : "client";
+  const groups = inAdmin && isOrgOperator ? adminGroups : clientGroups;
+  const variant: "admin" | "client" = inAdmin && isOrgOperator ? "admin" : "client";
 
   return (
     <AppShell
@@ -313,6 +370,7 @@ function AuthenticatedLayout() {
         </div>
       }
     >
+      <TaskDueBrowserAlert />
       <PlatformNewsAnnouncer enabled={!isAdmin} />
       {inAdmin && isAdmin && <AuthDiagnosticsBanner />}
       <Outlet />

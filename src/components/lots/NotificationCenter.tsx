@@ -33,6 +33,7 @@ const KIND_LABEL: Record<AppNotification["kind"], string> = {
   usuario: "Usuário",
   cliente: "Cliente",
   alerta: "Alerta",
+  tarefa: "Tarefa",
 };
 
 function formatWhen(iso: string) {
@@ -71,8 +72,7 @@ export function NotificationCenter() {
 
   const serverItems = serverQuery.data ?? [];
   const items = mergeNotifications(serverItems, localItems);
-  const unread =
-    serverItems.filter((n) => !n.read).length + localUnread;
+  const unread = serverItems.filter((n) => !n.read).length + localUnread;
 
   const markOne = useMutation({
     mutationFn: async (id: string) => {

@@ -65,6 +65,16 @@ export function createCredentialAccess(vault: CredentialVaultPortV1): Credential
         version: CREDENTIAL_VAULT_CONTRACT_VERSION,
         data: serializeOAuthTokenBundle(bundle),
       });
+      if (!bundle.expiresAt) return;
+      try {
+        const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
+        await getSupabaseAdmin()
+          .from("ph_connections")
+          .update({ token_expires_at: bundle.expiresAt })
+          .eq("id", String(connectionId));
+      } catch {
+        // A fila segue sem a data se o ambiente ainda não tem a coluna.
+      }
     },
     async deleteCredential(connectionId, key) {
       await vault.delete(connectionId, key);

@@ -150,8 +150,10 @@ export async function moveContentCard(
     status: input.status,
     kanban_ordem: input.kanban_ordem,
   };
-  if (input.status === "publicado" && !existing.published_at) {
-    patch.published_at = new Date().toISOString();
+  if (input.status === "publicado") {
+    if (!existing.published_at) patch.published_at = new Date().toISOString();
+    patch.publish_error = null;
+    patch.publish_status = "published";
   }
   if (input.status === "arquivado") {
     if (!existing.archived_at) patch.archived_at = new Date().toISOString();
@@ -179,9 +181,35 @@ export async function markMaterialsDownloaded(
   if (existing.status !== "aguardando_material") {
     throw new Error("Só é possível ir para produção depois de receber o material do cliente.");
   }
+  await supabase
+    .from("content_card_attachments")
+    .update({ downloaded_at: new Date().toISOString() })
+    .eq("card_id", cardId)
+    .eq("media_role", "cliente_material");
   return moveContentCard(supabase, actor, {
     id: cardId,
     status: "producao",
+    kanban_ordem: existing.kanban_ordem,
+  });
+}
+
+export async function markPublishedManually(
+  supabase: SupabaseClient,
+  actor: LifecycleActor,
+  cardId: string,
+): Promise<ContentCard> {
+  assertAction(actor.role, "move");
+  const existing = await contentCardRepository.findById(supabase, cardId);
+  if (!existing) throw new Error("Card não encontrado");
+  if (existing.status === "publicado") {
+    return contentCardRepository.update(supabase, cardId, {
+      publish_error: null,
+      publish_status: "published",
+    });
+  }
+  return moveContentCard(supabase, actor, {
+    id: cardId,
+    status: "publicado",
     kanban_ordem: existing.kanban_ordem,
   });
 }

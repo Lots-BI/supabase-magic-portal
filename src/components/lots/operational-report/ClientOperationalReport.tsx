@@ -18,6 +18,7 @@ import { formatBR, resolvePeriod, type PeriodInput, type PeriodPreset } from "@/
 import type { CommonMetric } from "@/lib/metrics";
 import type { ValueFormat } from "@/lib/platforms/types";
 import { getClientOperationalReportFn } from "@/modules/operational-report/operational-report.server";
+import { RelatorioNotas } from "@/components/lots/operational-report/RelatorioNotas";
 import { formatReportValue } from "@/modules/operational-report/format";
 import type {
   OperationalReport,
@@ -212,6 +213,12 @@ function ReportCanvas({ report }: { report: OperationalReport }) {
           ))}
         </section>
       )}
+      <RelatorioNotas
+        cadastroClienteId={cadastroClienteId}
+        platforms={report.platforms.map((platform) => ({ key: platform.key, label: platform.label }))}
+        periodoInicio={report.period.from}
+        periodoFim={report.period.to}
+      />
 
       {(report.posts || report.content) && (
         <section className={cn("grid gap-3", report.posts && report.content && "lg:grid-cols-2")}>

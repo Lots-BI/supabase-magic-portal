@@ -8,12 +8,9 @@ import { syncAllGa4ProfileConnections } from "@/modules/ga4/ga4-profile-sync.ser
 import { syncAllCrmComments } from "@/modules/crm/ingest/sync-comments.server";
 import { syncAllCrmDirect } from "@/modules/crm/ingest/sync-direct.server";
 import { runDuePublishes } from "@/modules/approval/jobs/publish-due.server";
+import { syncDueTaskAlerts } from "@/modules/agency-os/tasks-sheet.server";
 
-async function withTimeline(
-  title: string,
-  failed: number,
-  total: number,
-) {
+async function withTimeline(title: string, failed: number, total: number) {
   if (failed <= 0) return;
   const stack = await createAdminHubStack(getSupabaseAdmin());
   await stack.timeline.append({
@@ -34,13 +31,21 @@ function envelope<T extends { failed: number; total: number }>(summary: T) {
 
 export async function runInstagramMediaCron() {
   const summary = await syncAllInstagramMediaConnections(getSupabaseAdmin());
-  await withTimeline(`Cron Instagram media: ${summary.failed} falha(s)`, summary.failed, summary.total);
+  await withTimeline(
+    `Cron Instagram media: ${summary.failed} falha(s)`,
+    summary.failed,
+    summary.total,
+  );
   return envelope(summary);
 }
 
 export async function runInstagramProfileCron() {
   const summary = await syncAllInstagramProfileConnections(getSupabaseAdmin());
-  await withTimeline(`Cron Instagram perfil: ${summary.failed} falha(s)`, summary.failed, summary.total);
+  await withTimeline(
+    `Cron Instagram perfil: ${summary.failed} falha(s)`,
+    summary.failed,
+    summary.total,
+  );
   return envelope(summary);
 }
 
@@ -95,6 +100,16 @@ export async function runCrmIngestCron() {
     finishedAt: new Date().toISOString(),
     ...comments,
     direct,
+  };
+}
+
+export async function runTaskDueAlertsCron() {
+  const alerts = await syncDueTaskAlerts();
+  return {
+    ok: true,
+    startedAt: new Date().toISOString(),
+    finishedAt: new Date().toISOString(),
+    due: alerts.length,
   };
 }
 

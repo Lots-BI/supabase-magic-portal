@@ -18,6 +18,7 @@ import {
   getScopedKanbanBoardFn,
   listScopedEditorialPillarsFn,
 } from "@/modules/client/scoped-portal.functions";
+import { listMaterialStatus } from "@/modules/approval/library/content-library.server";
 
 function invalidateScopedViews(
   qc: ReturnType<typeof useQueryClient>,
@@ -150,6 +151,10 @@ export function ClientApprovalWorkspace({ initialCardId }: { initialCardId?: str
         </p>
       )}
 
+      {scope.cadastroClienteId ? (
+        <MaterialStatus cadastroClienteId={scope.cadastroClienteId} />
+      ) : null}
+
       {!boardQ.isLoading && !boardQ.isError && suaVez.length > 0 && (
         <ClientSuaVezQueue cards={suaVez} thumbMap={thumbMap} onOpenCard={setOpenCardId} />
       )}
@@ -179,5 +184,29 @@ export function ClientApprovalWorkspace({ initialCardId }: { initialCardId?: str
         />
       )}
     </div>
+  );
+}
+
+function MaterialStatus({ cadastroClienteId }: { cadastroClienteId: number }) {
+  const listFn = useServerFn(listMaterialStatus);
+  const status = useQuery({
+    queryKey: ["material-status", cadastroClienteId],
+    queryFn: () => listFn({ data: { cadastroClienteId } }),
+  });
+  const rows = status.data ?? [];
+  if (rows.length === 0) return null;
+  return (
+    <SectionCard title="Mídias" eyebrow="Biblioteca">
+      <ul className="space-y-2 text-sm">
+        {rows.map((row) => (
+          <li key={row.cardId} className="flex items-center justify-between gap-3">
+            <span>{row.titulo}</span>
+            <span className={row.baixado ? "text-primary" : "text-muted-foreground"}>
+              {row.baixado ? "Baixado" : "Não baixado"}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </SectionCard>
   );
 }

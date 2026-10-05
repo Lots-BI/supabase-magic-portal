@@ -91,7 +91,14 @@ export function AuthPage({
           });
           return;
         }
-        await navigateAfterLogin(search.redirect);
+        try {
+          await navigateAfterLogin(search.redirect);
+        } catch (err) {
+          if (!cancelled) {
+            setError(err instanceof Error ? err.message : "Não foi possível abrir a plataforma.");
+            setPhase("ready");
+          }
+        }
         return;
       }
 
@@ -339,9 +346,24 @@ export function AuthPage({
       >
         Esqueci minha senha
       </button>
+      <button
+        type="button"
+        onClick={() => router.navigate({ to: "/criar-conta" })}
+        className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
+      >
+        Pedir acesso à {BRAND_NAME}
+      </button>
       <p className="text-center text-xs text-muted-foreground">
-        Acesso mediante convite da equipe {BRAND_NAME}. Em caso de dúvida, fale com seu gestor de
-        conta.
+        O pedido é analisado antes de abrir a plataforma. Quem já tem conta entra acima.
+      </p>
+      <p className="text-center text-xs text-muted-foreground">
+        <a href="/privacidade" className="underline underline-offset-2 hover:text-foreground">
+          Política de privacidade
+        </a>
+        {" · "}
+        <a href="/termos" className="underline underline-offset-2 hover:text-foreground">
+          Termos de serviço
+        </a>
       </p>
     </AuthShell>
   );

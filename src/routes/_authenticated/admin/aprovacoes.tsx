@@ -22,6 +22,8 @@ import { ClienteCombobox } from "@/components/lots/approval/shared/ClienteCombob
 import { ApprovalAgencyQueue } from "@/components/lots/approval/shared/ApprovalAgencyQueue";
 import { AgencyNowStrip } from "@/components/lots/approval/shared/AgencyNowStrip";
 import { ContentInsightsPanel } from "@/components/lots/approval/insights/ContentInsightsPanel";
+import { BibliotecaPanel } from "@/components/lots/approval/library/BibliotecaPanel";
+import { PublishQueuePanel } from "@/components/lots/approval/publish/PublishQueuePanel";
 import type { ContentCardStatus } from "@/modules/approval/types/content-card";
 import { isoDay } from "@/modules/approval/services/calendar-date-utils";
 import { agencyTurnCards, flattenKanbanCards } from "@/modules/approval/services/workflow-stamps";
@@ -42,7 +44,9 @@ const LAST_CLIENT_KEY = "lots.admin.aprovacoes.cliente";
 let lastPublishTickAt = 0;
 
 const aprovacoesSearchSchema = z.object({
-  tab: z.enum(["calendar", "kanban", "materials", "library", "pillars"]).optional(),
+  tab: z
+    .enum(["calendar", "kanban", "materials", "library", "pillars", "biblioteca", "publicar"])
+    .optional(),
   estrategia: z.string().uuid().optional(),
   cliente: z.coerce.number().int().positive().optional().catch(undefined),
   card: z.string().uuid().optional().catch(undefined),
@@ -136,6 +140,7 @@ function AprovacoesAdminPage() {
       to: "/admin/aprovacoes",
       search: {
         estrategia: search.estrategia,
+        tab: search.tab,
         ...(id != null ? { cliente: id } : {}),
       },
       replace: true,
@@ -272,6 +277,39 @@ function AprovacoesAdminPage() {
       )}
 
       {clienteId ? (
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              ["calendar", "Calendário"],
+              ["biblioteca", "Biblioteca"],
+              ["publicar", "Publicar"],
+            ] as const
+          ).map(([tab, label]) => (
+            <Button
+              key={tab}
+              type="button"
+              variant={(search.tab ?? "calendar") === tab ? "default" : "outline"}
+              onClick={() =>
+                void navigate({
+                  to: "/admin/aprovacoes",
+                  search: { ...search, tab, cliente: clienteId },
+                })
+              }
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+      ) : null}
+
+      {clienteId && search.tab === "biblioteca" ? (
+        <BibliotecaPanel cadastroClienteId={clienteId} />
+      ) : null}
+      {clienteId && search.tab === "publicar" ? (
+        <PublishQueuePanel cadastroClienteId={clienteId} />
+      ) : null}
+
+      {clienteId && (search.tab ?? "calendar") === "calendar" ? (
         <div className="min-w-0 space-y-6">
           <Suspense fallback={<ApprovalPanelSkeleton rows={8} />}>
             <ApprovalCalendar

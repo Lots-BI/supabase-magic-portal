@@ -93,6 +93,7 @@ export function mapContentCardAttachmentRow(row: ContentCardAttachmentRow): Cont
     poster_path: row.poster_path != null ? String(row.poster_path) : null,
     legacy_media_id: row.legacy_media_id != null ? String(row.legacy_media_id) : null,
     created_at: String(row.created_at),
+    downloaded_at: row.downloaded_at != null ? String(row.downloaded_at) : null,
   };
 }
 

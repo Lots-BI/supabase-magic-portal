@@ -8,7 +8,8 @@ export type NotificationKind =
   | "coleta_falha"
   | "usuario"
   | "cliente"
-  | "alerta";
+  | "alerta"
+  | "tarefa";
 
 export interface AppNotification {
   id: string;

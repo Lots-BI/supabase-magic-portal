@@ -76,6 +76,7 @@ export class MetaOAuthService {
     if (bundle.accessToken) {
       const validation = await this.validateAccessToken(bundle.accessToken);
       if (validation.scopes?.length) bundle.scopes = validation.scopes;
+      if (validation.expiresAt) bundle.expiresAt = validation.expiresAt;
     }
     await this.credentialAccess.storeOAuthToken(
       params.connectionId,

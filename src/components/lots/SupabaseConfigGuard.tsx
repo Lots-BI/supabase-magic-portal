@@ -1,9 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { bootstrapSupabase } from "@/integrations/supabase/client";
 import { LotsBIWordmark } from "@/components/lots/LotsMark";
 import { BRAND_NAME } from "@/lib/brand";
 
 type GateState = "loading" | "ready" | "error";
+
+/** Páginas legais precisam aparecer no HTML, sem esperar o Supabase. */
+const PUBLIC_WITHOUT_SUPABASE = new Set(["/privacidade", "/termos"]);
 
 /**
  * Garante Supabase inicializado antes de renderizar rotas.
@@ -11,6 +15,8 @@ type GateState = "loading" | "ready" | "error";
  * Fallback: runtime secrets via getPublicSupabaseConfig (server fn).
  */
 export function SupabaseBootstrapGate({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const skipGate = PUBLIC_WITHOUT_SUPABASE.has(pathname);
   const [state, setState] = useState<GateState>("loading");
   const [error, setError] = useState<string | null>(null);
 
@@ -30,6 +36,8 @@ export function SupabaseBootstrapGate({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, []);
+
+  if (skipGate) return <>{children}</>;
 
   if (state === "loading") {
     return (
