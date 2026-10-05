@@ -1,113 +1,125 @@
-# O que ainda é humano
+# O que ainda falta para uma organização operar os próprios clientes
 
-Conferido em 03/10/2026. Nenhum segredo entra neste arquivo.
+Conferido em 05/10/2026 no site público, no código da `main` (`822c70b`) e no que o produto já faz com os clientes da Lots. Nenhum segredo entra neste arquivo. Google Cloud, TikTok, Meta, a lista de URLs do Supabase e o centro de API do Google Ads continuam fora desta verificação: os passos dessas telas seguem até você confirmar na própria tela.
 
-A verificação de hoje olhou o banco, o `.env` local (só se o valor existe, sem ler o conteúdo), o endereço que o código usa na hora de conectar, e o JavaScript que o site [lotsbi.leandromajr.com](https://lotsbi.leandromajr.com) está servindo. Não foi possível abrir daqui o Google Cloud, a Vercel, o TikTok, a Meta nem a tela de URLs do Supabase. O que depende dessas telas continua como passo seu.
+Uma organização de fora deve cadastrar os clientes dela, convidar quem opera e quem acompanha, conectar as contas de mídia desses clientes e usar conteúdos, tarefas, CRM, relatórios, diretrizes e dashboards só nesse conjunto. O que a Lots faz hoje com os clientes da Lots, essa agência faz com os dela. Checkout, nota fiscal e pagamento ficam com a Lots.
 
-## Já conferido — não refaça
+## Já está no ar
 
-- No Supabase do projeto já existem as tabelas de organizações, membros e pedidos de acesso. As SQL 65, 66 e 67, e o ajuste de desempenho que destrava o seu login, já foram aplicadas. Não rode de novo.
-- No `.env` local, estas três linhas já têm valor: `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` e `GOOGLE_ADS_DEVELOPER_TOKEN`. Não apague e não cole de novo.
-- `META_APP_ID` e `META_APP_SECRET` também já têm valor no `.env` local.
-- `APP_URL` no `.env` local é `http://localhost:8080`. É essa origem que o app manda no OAuth desta máquina. A porta 5173 está fechada. A 8081 responde, mas o app não usa ela no retorno do Google.
-- `TIKTOK_APP_ID` e `TIKTOK_APP_SECRET` existem no `.env` e estão vazios. É o esperado enquanto o app do TikTok não nasce.
-- `CRON_SECRET` não está no `.env`. Continua assim. Ele fica só nos secrets do GitHub Actions, no mesmo nome que os crons atuais já usam, junto com `APP_URL`.
-- Você já ativou no Google Cloud a Google Ads API, a Google Analytics Data API e a YouTube Data API v3, e já colocou o client OAuth e o developer token na Vercel. A lista da Vercel não pôde ser reaberta hoje. No próximo deploy, essas três variáveis precisam continuar em Production. Não crie nomes novos.
+- [lotsbi.leandromajr.com](https://lotsbi.leandromajr.com) publica a `main`. A página de entrar carrega `/assets/index-WZxEQJWk.js`. O pacote de setembro (`auth-DE33EX3e.js`) saiu do ar.
+- Quem ainda não tem organização pede acesso em `/criar-conta` e completa os dados em `/solicitar-acesso`. Aprovar o pedido cria a organização e torna essa pessoa dona dela. A fila é `/admin/solicitacoes`, só na conta da Lots.
+- O dono dessa organização entra no painel e vê só os clientes da organização dele: visão geral, tarefas, CRM, relatórios, conteúdos, diretrizes, clientes, usuários e conexões.
+- Convidar como **Cliente** abre o portal daquele cliente. Convidar como **Administrador** cria outro dono da mesma organização. Isso não cria administrador global da plataforma.
+- As tabelas de organizações, membros e pedidos já existem no Supabase. Há uma organização. As SQL 65, 66 e 67, e o ajuste que destrava o login, já foram aplicadas. Não rode de novo.
+- No `.env` local, Google e Meta já têm valor. `TIKTOK_APP_ID` e `TIKTOK_APP_SECRET` estão vazios. `APP_URL` local é `http://localhost:8080`. `CRON_SECRET` fica só nos secrets do GitHub.
+- Em Production, `APP_URL` precisa continuar `https://lotsbi.leandromajr.com`, sem barra no final, junto com `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` e `GOOGLE_ADS_DEVELOPER_TOKEN`.
 
-## O que o site no ar ainda não tem
+## 1. Aprovar a organização
 
-O JavaScript de login em produção ainda é o pacote antigo `auth-DE33EX3e.js`. Esse pacote não tem pedido de acesso, organizações, upload de YouTube nem os crons novos. O código novo está neste computador, ainda fora da `main`. Enquanto não for publicado, o endereço público não usa nada disso. Conectar Google Ads, GA4 ou YouTube no site no ar continua no código antigo.
+Isto é o que abre a porta. Sem esta aprovação a pessoa fica na tela de pedido e não cadastra cliente.
 
-Faça os passos abaixo nesta ordem.
+1. A agência abre `https://lotsbi.leandromajr.com/auth` e escolhe pedir acesso.
+2. Cria e-mail e senha em `/criar-conta`.
+3. Em `/solicitar-acesso`, informa nome, documento e WhatsApp e envia.
+4. Você entra com a conta da Lots e abre `/admin/solicitacoes`.
+5. Aprova o pedido. O sistema cria a organização e grava essa pessoa como dona.
+6. Ela entra de novo. O destino é o painel. Rejeitar devolve o pedido sem criar organização.
 
-## 1. Publicar o código novo
+O cadastro público do Supabase continua desligado. A conta nasce por este fluxo.
 
-Sem este passo, os passos 2 a 6 não mudam o site público.
+## 2. O que essa organização já faz com os clientes dela
 
-1. Confirme que `.env` não entra no commit. Ele não deve ser enviado.
-2. Publique a branch que contém organizações, pedido de acesso, YouTube com escopo de upload e os workflows `tiktok-campaigns-sync-cron.yml` e `youtube-channel-sync-cron.yml`.
-3. O deploy da Vercel que atende [lotsbi.leandromajr.com](https://lotsbi.leandromajr.com) precisa ser esse código. A Vercel publica a `main`.
-4. Depois do deploy, abra `https://lotsbi.leandromajr.com/auth` e confira se a tela de entrar oferece pedir acesso. Se a frase não aparecer, o site ainda está no pacote antigo.
-5. Na Vercel, em Production, confirme que continuam presentes, com valor:
-   - `GOOGLE_OAUTH_CLIENT_ID`
-   - `GOOGLE_OAUTH_CLIENT_SECRET`
-   - `GOOGLE_ADS_DEVELOPER_TOKEN`
-   - `APP_URL` = `https://lotsbi.leandromajr.com` (sem barra no final)
-6. Os workflows novos só disparam na `main`, ou quando alguém os dispara à mão. Eles chamam `APP_URL` + `CRON_SECRET` que já existem nos secrets do GitHub. Não invente `TIKTOK_CRON_SECRET` nem outro nome.
+Depois do passo 1, na própria conta:
 
-## 2. Redirect do Google — o retorno que o botão Conectar usa
+1. **Clientes** → cadastra o cliente. O cadastro fica na organização dela.
+2. **Usuários** → convida a pessoa do cliente (tipo Cliente, com o cliente vinculado) ou outra pessoa da agência (tipo Administrador).
+3. **Conexões** → conecta a conta daquele cliente.
+4. Opera conteúdos, tarefas, CRM, relatórios e diretrizes nesse cliente.
+5. A pessoa convidada como Cliente vê o portal daquele cliente: aprovações, publicações, Instagram, Meta Ads, Google Ads, GA4, Google Business quando houver dados, relatório, CRM e diretrizes.
 
-Política de privacidade, página inicial e termos são a tela de consentimento. Podem ficar como estão. Elas não são o endereço para onde o Google devolve o navegador.
+Ela não vê clientes de outra organização, nem Pedidos de acesso, nem Organizações, nem Serviços, Branding, diagnóstico ou AI Workspace. Plano estratégico e Central estão ocultos para todo mundo, inclusive para a Lots.
 
-O Lots BI monta o retorno assim: o valor de `APP_URL` mais `/oauth/google/callback`. Hoje isso são exatamente estas duas URLs:
+Dois clientes com o mesmo nome em organizações diferentes são recusados. O nome precisa ser distinto.
+
+## 3. Google — retorno e tela de permissão, uma vez para todas as organizações
+
+O botão Conectar de Google Ads, GA4 e YouTube usa o mesmo retorno: `APP_URL` + `/oauth/google/callback`.
 
 - Produção: `https://lotsbi.leandromajr.com/oauth/google/callback`
 - Este computador: `http://localhost:8080/oauth/google/callback`
 
-Google Ads, GA4 e YouTube usam o mesmo retorno. Uma URI serve para os três.
-
 1. Abra [Google Cloud Console](https://console.cloud.google.com/) no projeto do client OAuth.
 2. **APIs e serviços** → **Credenciais**.
-3. Abra o ID do cliente do tipo **Aplicativo da Web**. É o client cujo ID está em `GOOGLE_OAUTH_CLIENT_ID`.
-4. Em **URIs de redirecionamento autorizados**, adicione as duas URLs acima, cada uma no próprio campo.
-5. Sem barra no final, sem `?`, com `https` na de produção e `http` na local.
-6. Salvar.
+3. Abra o ID do cliente do tipo **Aplicativo da Web** cujo ID está em `GOOGLE_OAUTH_CLIENT_ID`.
+4. Em **URIs de redirecionamento autorizados**, salve as duas URLs, cada uma no próprio campo. Sem barra no final e sem `?`.
+5. Salvar.
 
-Se a URI não estiver nessa lista, o botão Conectar responde `redirect_uri_mismatch`.
+Política de privacidade, página inicial e termos são a tela de consentimento. Podem ficar como estão.
 
-Para testar na sua máquina, abra `http://localhost:8080`, não a 8081 e não a 5173. O `.env` aponta o retorno para a 8080.
-
-Enquanto a tela de permissão OAuth estiver em **Testando**:
+Para uma organização de fora conectar o Gmail do cliente dela, a tela de permissão precisa estar **Em produção**. Enquanto estiver **Testando**, só entra o Gmail que estiver em **Usuários de teste**.
 
 1. **APIs e serviços** → **Tela de permissão OAuth**.
-2. Em **Usuários de teste**, adicione o Gmail de cada pessoa que vai clicar em Conectar.
-3. Salvar.
+2. Se o status for Testando e a agência de fora for usar o próprio Gmail, publique a tela (**Publicar app**).
+3. Enquanto continuar em Testando, cada Gmail que clicar em Conectar tem de estar em **Usuários de teste**.
 
-Sem esse Gmail na lista, o Google recusa o login mesmo com a senha certa.
+GA4 e YouTube usam este client. Eles não usam o developer token de anúncios.
 
-## 3. YouTube — reconectar depois que o código novo estiver no ar
+## 4. YouTube — reconectar o canal que já existia
 
-O código novo pede o escopo `youtube.upload`, além de leitura. Uma conexão feita antes disso só lê números e não envia vídeo.
+O código pede `youtube.upload` além da leitura. Conexão antiga só lê números.
 
-1. Só faça isto depois do passo 1, com o site já no código novo.
-2. No cliente, abra a conexão do YouTube e conecte de novo com o mesmo fluxo do Google.
-3. Aceite a permissão nova no Gmail que está em usuários de teste.
-4. O upload grava o vídeo como público e recusa arquivo acima de 64 MB.
+1. No cliente, abra a conexão do YouTube e conecte de novo.
+2. Aceite a permissão no Gmail que a tela de permissão deixar passar.
+3. O upload grava o vídeo como público e recusa arquivo acima de 64 MB.
 
-GA4 não usa o developer token de anúncios. YouTube também não. Os dois usam o client OAuth do passo 2.
+Ainda não existe página de métricas do YouTube no portal do cliente. A coleta do canal e o envio de vídeo já estão no fluxo de conexão.
 
-## 4. Google Ads — token ainda em modo teste
+## 5. Google Ads — token em modo teste
 
-Você informou que o developer token está em modo teste. Esta verificação não abre o centro de API do Google Ads, então trate como ainda em teste até você ver o status na tela.
+O developer token foi informado como modo teste. Esta verificação não abre o [Google Ads API Center](https://ads.google.com/aw/apicenter). Trate como teste até a tela mostrar outro status.
 
-Nesse modo o Lots BI só enxerga contas de anúncio de teste do Google. A conta real de um cliente não aparece.
+Nesse modo a plataforma só lê contas de anúncio de teste do Google. A conta real do cliente de uma organização de fora não aparece.
 
-1. Abra [Google Ads API Center](https://ads.google.com/aw/apicenter) na conta gestora (MCC) em que o token foi emitido.
-2. Veja o status do developer token.
+1. Abra o API Center na conta gestora (MCC) em que o token foi emitido.
+2. Veja o status.
 3. Se estiver **Test**, peça acesso **Basic** (ou Standard, se o Google oferecer) e espere a aprovação.
-4. Não gere outro token. O valor que já está na Vercel e no `.env` continua. Quando o status mudar, o mesmo token passa a ler contas reais.
-5. Enquanto esperar, o teste honesto é uma conta de anúncios de teste do Google, não a conta de um cliente.
+4. Não gere outro token. O valor da Vercel e do `.env` continua. Quando o status mudar, o mesmo token lê contas reais.
 
-## 5. TikTok — quando o SMS chegar
+## 6. TikTok — app, quando o SMS chegar
 
-O código usa a API de anúncios (`ads.read`). Essa credencial coleta métricas de campanha. Ela não publica vídeo no perfil. Se um card estiver marcado como TikTok, a publicação falha de propósito com essa explicação. Não crie um app de criadores para contornar isso.
+A API de anúncios (`ads.read`) coleta métricas de campanha. Ela não publica vídeo no perfil. Card marcado como TikTok falha a publicação de propósito. Não crie um app de criadores para contornar isso.
 
-1. Abra [TikTok Marketing API](https://business-api.tiktok.com/portal) na conta de anúncios.
-2. Crie o app. Se a tela pedir SMS e o código não chegar, pare aqui. Sem o app, não há ID nem secret.
-3. No app, no campo de redirect / callback, salve exatamente:
+O painel do cliente em TikTok ainda é uma página vazia. A conexão e a coleta no hub já existem; a página de métricas do cliente ainda não.
+
+1. Abra [TikTok Marketing API](https://business-api.tiktok.com/portal).
+2. Crie o app. Se a tela pedir SMS e o código não chegar, pare aqui.
+3. No redirect / callback, salve:
    - `https://lotsbi.leandromajr.com/oauth/tiktok/callback`
    - `http://localhost:8080/oauth/tiktok/callback`
-4. Copie o App ID para `TIKTOK_APP_ID` em dois lugares: Vercel Production e a linha já existente no `.env` local. Sem aspas e sem espaço antes do `=`.
+4. Copie o App ID para `TIKTOK_APP_ID` na Vercel Production e na linha já existente do `.env` local. Sem aspas e sem espaço antes do `=`.
 5. Copie o Secret para `TIKTOK_APP_SECRET` nos mesmos dois lugares.
-6. Redeploy na Vercel para o site público ler as variáveis novas.
-7. Reinicie o `npm run dev` para o computador local ler o `.env`.
+6. Redeploy na Vercel.
+7. Reinicie o `npm run dev` neste computador.
 8. Não commite o `.env`.
 
-Os crons de coleta só passam a ser chamados depois do passo 1, porque o workflow mora na `main`.
+Os workflows de coleta já estão na `main` e chamam `APP_URL` + `CRON_SECRET`. A rota responde no site publicado. O botão Conectar do TikTok passa a funcionar depois deste passo.
 
-## 6. Confira as URLs de login do Supabase
+## 7. Meta — app ativo para negócio de fora
 
-A lista de Redirect URLs do Auth não pôde ser lida daqui. Você já cadastrou produção e `http://localhost:5173/auth/callback`. A 5173 não é a porta deste computador. Acrescente a 8080 se ela não estiver na lista. Não apague as que já funcionam em produção.
+Hoje só conta de testador do app conecta anúncio ou Instagram. A organização de fora precisa do app **Ativo**.
+
+1. Abra [developers.facebook.com](https://developers.facebook.com/) no app cujo ID já está em `META_APP_ID`. Não crie outro app.
+2. **Configurações** → **Básico**. Domínio `lotsbi.leandromajr.com` e a URL da política de privacidade.
+3. **Facebook Login** → **Configurações** → **URIs de redirecionamento OAuth válidos**:
+   - `https://lotsbi.leandromajr.com/oauth/meta/callback`
+   - `http://localhost:8080/oauth/meta/callback` para teste nesta máquina
+4. Em cada produto usado (Facebook Login, Instagram, Marketing API), conclua a **App Review** dos usos que o cliente de fora precisa: anúncios, Instagram e publicação.
+5. Mude o app de **Em desenvolvimento** para **Ativo**.
+6. Mantenha `META_APP_ID` e `META_APP_SECRET`.
+
+## 8. URLs de login do Supabase
+
+A lista de Redirect URLs não pôde ser lida daqui. Produção e `http://localhost:5173/auth/callback` já foram cadastradas antes. A porta deste computador é a 8080.
 
 1. Supabase → **Authentication** → **URL Configuration**.
 2. **Site URL:** `https://lotsbi.leandromajr.com`
@@ -115,45 +127,33 @@ A lista de Redirect URLs do Auth não pôde ser lida daqui. Você já cadastrou 
    - `https://lotsbi.leandromajr.com/auth/callback`
    - `https://lotsbi.leandromajr.com/auth`
    - `http://localhost:8080/auth/callback`
-4. Salvar.
+4. Salvar. Não apague as URLs de produção que já funcionam.
 
-O convite local volta para `http://localhost:8080/auth/callback` porque é o `APP_URL` do `.env`. O convite do site no ar volta para `https://lotsbi.leandromajr.com/auth/callback` quando a Vercel tem esse `APP_URL`.
+O convite enviado pelo site no ar volta para `https://lotsbi.leandromajr.com/auth/callback`.
 
-## 7. Depois — app da Meta ativo
+## 9. E-mail do convite
 
-Faça quando um negócio de fora precisar autorizar anúncio ou Instagram. Até lá, só conta de testador do app consegue conectar.
-
-1. Abra [developers.facebook.com](https://developers.facebook.com/) no app cujo ID já está em `META_APP_ID`. Não crie outro app.
-2. **Configurações** → **Básico**. Domínio `lotsbi.leandromajr.com` e a URL da política de privacidade.
-3. **Facebook Login** → **Configurações** → **URIs de redirecionamento OAuth válidos**:
-   - `https://lotsbi.leandromajr.com/oauth/meta/callback`
-   - `http://localhost:8080/oauth/meta/callback` se for testar nesta máquina
-4. Em cada produto usado (Facebook Login, Instagram, Marketing API), conclua a **App Review** dos usos que o cliente de fora precisa: anúncios, Instagram e publicação.
-5. Mude o app de **Em desenvolvimento** para **Ativo**.
-6. Não troque `META_APP_ID` nem `META_APP_SECRET` se o site já usa esse app.
-
-## 8. Depois — e-mail próprio
-
-Só depois do app da Meta. Até lá o convite continua saindo pelo Supabase.
+O convite continua saindo pelo Supabase. Para o dono da organização convidar o cliente com remetente do produto:
 
 1. Crie o envio transacional (Resend ou Postmark) no domínio do produto.
-2. Supabase → **Authentication** → **Emails** → **SMTP Settings**. Ligue o SMTP com host, porta, usuário e senha que o provedor mostrar.
+2. Supabase → **Authentication** → **Emails** → **SMTP Settings**. Ligue o SMTP com host, porta, usuário e senha do provedor.
 3. O remetente tem de ser um endereço desse domínio.
-4. Envie um convite de teste para um e-mail seu. O link deve abrir `https://lotsbi.leandromajr.com/auth/callback`.
+4. Envie um convite de teste. O link abre `https://lotsbi.leandromajr.com/auth/callback`.
 
-## O que não se resolve nestas telas
+## O que o código ainda não iguala
 
-Isto é código, não console:
+Isto não se resolve nas telas acima:
 
-- A tela de novo usuário ainda só oferece Cliente e Administrador. Gestor de tráfego e social media existem no banco, mas a tela não deixa escolhê-los.
-- TikTok no painel do cliente ainda é uma página vazia. YouTube ainda não tem página de métricas do cliente. A coleta no hub é outra coisa: ela já está escrita e passa a rodar no passo 1 e no passo 5.
-- Checkout, nota fiscal e pagamento ficam como estão. Não faça nada nessa parte.
+- A tela de novo usuário só oferece Cliente e Administrador. Gestor, gestor de tráfego e social media existem no banco e operam o painel, mas a tela não deixa escolhê-los. Administrador, neste convite, é outro dono da organização.
+- TikTok no portal do cliente é página vazia. YouTube não tem página de métricas do cliente. Google Business tem dashboard, mas o assistente de conexão não oferece essa plataforma.
+- Checkout, nota fiscal e pagamento continuam só com a Lots.
 
 ## O que devolver no chat
 
 Sem colar segredo.
 
-- Passo 1 feito: o login público mostra pedir acesso.
-- Passo 2: as duas URIs de callback do Google salvas (produção e `localhost:8080`), e o Gmail de teste incluído se o app seguir em Testando.
-- Passo 4: o status que a tela do developer token mostrar (Test, Basic ou Standard).
-- Passo 5: quando o SMS funcionar, diga só que ID, secret e os dois redirects do TikTok foram salvos e que a Vercel foi republicada.
+- Passo 1: o primeiro pedido aprovado e o nome da organização que apareceu.
+- Passo 3: as duas URIs do Google salvas, e se a tela de permissão está Em produção ou ainda em Testando.
+- Passo 5: o status do developer token (Test, Basic ou Standard).
+- Passo 6: quando o SMS funcionar, diga só que ID, secret e os dois redirects do TikTok foram salvos e que a Vercel foi republicada.
+- Passo 7: quando o app da Meta estiver Ativo.

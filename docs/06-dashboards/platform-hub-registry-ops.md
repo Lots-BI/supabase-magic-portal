@@ -1,16 +1,16 @@
 # Platform Hub — Documentação operacional (auto)
 
-> Gerado automaticamente em 2026-10-05T14:37:33.724Z · contract 1.0.0
+> Gerado automaticamente em 2026-10-05T19:05:22.555Z · contract 1.0.0
 
 ## Rotas administrativas
 
-| Rota | Função |
-|------|--------|
-| `/admin/conexoes` | Painel operacional |
-| `/admin/conexoes/nova` | Assistente de conexão |
-| `/admin/conexoes/:id` | Detalhe, credenciais, diagnóstico |
-| `/admin/conexoes/health` | Health dashboard |
-| `/admin/conexoes/migracao` | Migração Make → Official |
+| Rota                       | Função                            |
+| -------------------------- | --------------------------------- |
+| `/admin/conexoes`          | Painel operacional                |
+| `/admin/conexoes/nova`     | Assistente de conexão             |
+| `/admin/conexoes/:id`      | Detalhe, credenciais, diagnóstico |
+| `/admin/conexoes/health`   | Health dashboard                  |
+| `/admin/conexoes/migracao` | Migração Make → Official          |
 
 ## Plataformas (Registry)
 

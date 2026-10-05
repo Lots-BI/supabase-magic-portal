@@ -209,6 +209,13 @@ function ReportCanvas({ report }: { report: OperationalReport }) {
           ))}
         </section>
       )}
+      {(report.posts || report.content) && (
+        <section className={cn("grid gap-3", report.posts && report.content && "lg:grid-cols-2")}>
+          {report.posts && <PostsCanvas posts={report.posts} slug={report.clienteSlug} />}
+          {report.content && <ContentCanvas content={report.content} slug={report.clienteSlug} />}
+        </section>
+      )}
+
       <RelatorioNotas
         cadastroClienteId={report.cadastroClienteId}
         platforms={report.platforms}
@@ -217,13 +224,6 @@ function ReportCanvas({ report }: { report: OperationalReport }) {
         periodoFim={report.period.to}
         periodoLabel={report.period.label}
       />
-
-      {(report.posts || report.content) && (
-        <section className={cn("grid gap-3", report.posts && report.content && "lg:grid-cols-2")}>
-          {report.posts && <PostsCanvas posts={report.posts} slug={report.clienteSlug} />}
-          {report.content && <ContentCanvas content={report.content} slug={report.clienteSlug} />}
-        </section>
-      )}
     </div>
   );
 }

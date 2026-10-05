@@ -95,7 +95,20 @@ export type CrmPersonListRow = {
   ownerNome: string | null;
   nextAction: string;
   nextActionCode: string;
+  placeCounts: Record<string, number>;
+  pillarAffinity: Record<string, number>;
+  mediaDistinct: number;
 };
+
+function countRecord(value: unknown): Record<string, number> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const counts: Record<string, number> = {};
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    const count = Number(raw);
+    if (Number.isFinite(count) && count > 0) counts[key] = count;
+  }
+  return counts;
+}
 
 function mapListRow(row: Record<string, unknown>): CrmPersonListRow {
   const churn = String(row.churn_state ?? "novo");
@@ -141,6 +154,9 @@ function mapListRow(row: Record<string, unknown>): CrmPersonListRow {
     ownerNome: (row.owner_nome as string | null) ?? null,
     nextAction: action.label,
     nextActionCode: action.code,
+    placeCounts: countRecord(row.place_counts),
+    pillarAffinity: countRecord(row.pillar_affinity),
+    mediaDistinct: Number(row.media_distinct ?? 0),
   };
 }
 

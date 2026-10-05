@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { clampIntent, formatIdentityValue, groupPeopleByProfile, profileGroupId } from "./present";
+import {
+  clampIntent,
+  formatIdentityValue,
+  groupPeopleByProfile,
+  personListTitle,
+  profileGroupId,
+} from "./present";
 
 describe("profileGroupId", () => {
   it("separa comentário, direct, whatsapp e formulário", () => {
@@ -31,6 +37,19 @@ describe("formatIdentityValue", () => {
     expect(formatIdentityValue("ig_username", "ana")).toBe("@ana");
     expect(formatIdentityValue("ig_username", "@ana")).toBe("@ana");
     expect(formatIdentityValue("email", "ana@marca.com")).toBe("ana@marca.com");
+  });
+});
+
+describe("personListTitle", () => {
+  it("não repete o @ quando o nome já é o username", () => {
+    expect(personListTitle("@rodrigorobertoantena", "rodrigorobertoantena")).toBe(
+      "@rodrigorobertoantena",
+    );
+    expect(personListTitle("@dlgn8.9", "@dlgn8.9")).toBe("@dlgn8.9");
+  });
+
+  it("mantém nome e @ quando são pessoas diferentes na mesma ficha", () => {
+    expect(personListTitle("Ana Silva", "anasilva")).toBe("Ana Silva · @anasilva");
   });
 });
 

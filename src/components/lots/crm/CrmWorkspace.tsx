@@ -3,9 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
+  ChevronDown,
   Contact2,
   RefreshCw,
-  Search,
   Star,
   MessageCircle,
   Download,
@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Sheet,
@@ -41,8 +42,21 @@ import {
   groupPeopleByProfile,
   identityLabel,
   kindLabel,
+  personListTitle,
   placeLabel,
 } from "@/modules/crm/present";
+import { explainIntent } from "@/modules/crm/score-intent";
+import type { CrmSignalInput } from "@/modules/crm/types";
+import {
+  applyCrmPeopleFilters,
+  collectOwners,
+  crmFiltersAreActive,
+  DEFAULT_CRM_PEOPLE_FILTERS,
+  pillarOptions,
+  placeOptions,
+  type CrmPeopleFilters,
+} from "@/modules/crm/people-filters";
+import { CrmPeopleToolbar } from "@/components/lots/crm/CrmPeopleToolbar";
 import {
   addCrmPersonNoteFn,
   assignCrmPersonFn,
@@ -84,8 +98,22 @@ function formatWhen(iso: string | null) {
   });
 }
 
+function formatAgo(iso: string | null) {
+  if (!iso) return "—";
+  const delta = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(delta) || delta < 0) return formatWhen(iso);
+  const minutes = Math.floor(delta / 60_000);
+  if (minutes < 1) return "agora";
+  if (minutes < 60) return `há ${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `há ${hours} h`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "há 1 dia";
+  return `há ${days} dias`;
+}
+
 function initials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean).slice(0, 2);
+  const parts = name.replace(/@/g, "").trim().split(/\s+/).filter(Boolean).slice(0, 2);
   const letters = parts.map((part) => part[0]?.toUpperCase() ?? "").join("");
   return letters || "?";
 }
@@ -250,6 +278,7 @@ export function CrmWorkspace({
   const qc = useQueryClient();
   const [days, setDays] = useState<PeriodDays>(30);
   const [q, setQ] = useState("");
+  const [filters, setFilters] = useState<CrmPeopleFilters>(DEFAULT_CRM_PEOPLE_FILTERS);
   const [view, setView] = useState<CrmPeopleView>("inbox");
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -284,9 +313,34 @@ export function CrmWorkspace({
   });
 
   const people = peopleQuery.data ?? [];
+  const visible = applyCrmPeopleFilters(people, filters);
   const active7 = people.filter((p) => p.recencyDays <= 7).length;
   const recurring = people.filter((p) => p.churnState === "recorrente").length;
   const withPii = people.filter((p) => p.piiCompleteness > 0).length;
+  const filtersActive = crmFiltersAreActive(filters);
+  const cardAll = filters.recency === "all" && filters.churn === "all" && filters.contact === "all";
+  const cardActive7 = filters.recency === "7";
+  const cardRecurring = filters.churn === "recorrente";
+  const cardContact = filters.contact === "with";
+
+  const toggleCard = (card: "all" | "active7" | "recurring" | "contact") => {
+    if (card === "all") {
+      setFilters({ ...filters, recency: "all", churn: "all", contact: "all" });
+      return;
+    }
+    if (card === "active7") {
+      setFilters({ ...filters, recency: filters.recency === "7" ? "all" : "7" });
+      return;
+    }
+    if (card === "recurring") {
+      setFilters({
+        ...filters,
+        churn: filters.churn === "recorrente" ? "all" : "recorrente",
+      });
+      return;
+    }
+    setFilters({ ...filters, contact: filters.contact === "with" ? "all" : "with" });
+  };
   const commentsChip = coverageQuery.data?.collectors.find((c) => c.key === "comments");
 
   return (
@@ -343,22 +397,44 @@ export function CrmWorkspace({
         }
       />
 
-      <CoverageChips
-        collectors={coverageQuery.data?.collectors ?? []}
-        gap={coverageQuery.data?.gap}
-        lastRanAt={coverageQuery.data?.lastRanAt ?? null}
-        connectionsHref={connectionsHref}
-        commentsStatus={commentsChip?.status}
-      />
+      {commentsChip?.status === "scope_missing" ? (
+        <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:text-amber-100">
+          Falta a permissão de comentários do Instagram.{" "}
+          <a href={connectionsHref} className="underline">
+            Refazer login
+          </a>
+        </p>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="Pessoas no recorte" value={people.length} icon={Contact2} />
-        <StatCard label="Ativas em 7 dias" value={active7} icon={RefreshCw} />
-        <StatCard label="Recorrentes" value={recurring} icon={Star} />
-        <StatCard
+        <FilterStat
+          active={cardAll}
+          onClick={() => toggleCard("all")}
+          label="Pessoas na lista"
+          value={people.length}
+          icon={Contact2}
+        />
+        <FilterStat
+          active={cardActive7}
+          onClick={() => toggleCard("active7")}
+          label="Ativas em 7 dias"
+          value={active7}
+          icon={RefreshCw}
+        />
+        <FilterStat
+          active={cardRecurring}
+          onClick={() => toggleCard("recurring")}
+          label="Recorrentes"
+          value={recurring}
+          icon={Star}
+        />
+        <FilterStat
+          active={cardContact}
+          onClick={() => toggleCard("contact")}
           label="Com e-mail/telefone"
           value={withPii}
-          hint="Só fato enviado pelo canal (form, WhatsApp, Lead Ads)"
+          hint="Só fato enviado pelo canal"
+          icon={Contact2}
         />
       </div>
 
@@ -373,17 +449,22 @@ export function CrmWorkspace({
             <TabsTrigger value="all">Todas</TabsTrigger>
           </TabsList>
         </Tabs>
-        <div className="mb-4 flex items-center gap-2">
-          <div className="relative min-w-0 flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar nome, @username ou telefone"
-              className="pl-8"
-            />
-          </div>
-        </div>
+        <CrmPeopleToolbar
+          query={q}
+          onQueryChange={setQ}
+          filters={filters}
+          onFiltersChange={setFilters}
+          owners={collectOwners(people)}
+          places={placeOptions(people)}
+          pillars={pillarOptions(people)}
+          shown={visible.length}
+          total={people.length}
+          filtersActive={filtersActive}
+          onClear={() => {
+            setQ("");
+            setFilters(DEFAULT_CRM_PEOPLE_FILTERS);
+          }}
+        />
         {peopleQuery.isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando audiência…</p>
         ) : people.length === 0 ? (
@@ -410,67 +491,57 @@ export function CrmWorkspace({
               </Button>
             }
           />
+        ) : visible.length === 0 ? (
+          <EmptyState
+            icon={Contact2}
+            compact
+            title="Nenhuma pessoa com esses filtros"
+            description="O recorte deste período tem gente, mas a combinação de canal, calor, situação e contato não encontrou ninguém."
+            action={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setQ("");
+                  setFilters(DEFAULT_CRM_PEOPLE_FILTERS);
+                }}
+              >
+                Limpar filtros
+              </Button>
+            }
+          />
         ) : (
-          <div className="space-y-6">
-            {groupPeopleByProfile(people).map((group) => (
-              <section key={group.id}>
-                <div className="mb-1 flex items-baseline justify-between gap-3">
-                  <h3 className="text-sm font-semibold">{group.label}</h3>
-                  <p className="text-xs text-muted-foreground">
-                    {group.hint} · {group.people.length}
-                  </p>
-                </div>
-                <ul className="divide-y divide-border">
-                  {group.people.map((person) => (
-                    <li key={person.id}>
-                      <button
-                        type="button"
-                        onClick={() => setOpenId(person.id)}
-                        className="flex w-full items-center gap-3 py-3 text-left hover:bg-muted/40"
-                      >
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
-                          {initials(person.displayName)}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-medium">
-                            {person.displayName}
-                            {person.igUsername ? (
-                              <span className="ml-1.5 font-normal text-muted-foreground">
-                                @{person.igUsername.replace(/^@/, "")}
-                              </span>
-                            ) : null}
-                            {person.isVip ? (
-                              <Star className="ml-1 inline h-3.5 w-3.5 text-amber-500" />
-                            ) : null}
-                          </p>
-                          <p className="truncate text-xs text-muted-foreground">
-                            {kindLabel(person.lastKind ?? "")} · {person.signalCount} interações ·{" "}
-                            {person.churnLabel}
-                            {person.ownerNome ? ` · ${person.ownerNome}` : ""}
-                          </p>
-                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                            {person.nextAction}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 flex-col items-end gap-1">
-                          <HeatMeter score={person.intentScore} compact />
-                          <span className="text-right text-[11px] text-muted-foreground">
-                            {formatWhen(person.lastSignalAt)}
-                          </span>
-                        </div>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
+          <PeopleList people={visible} view={view} onOpen={setOpenId} />
         )}
       </SectionCard>
 
-      {canWrite ? <IngestTokenPanel cadastroClienteId={cadastroClienteId} /> : null}
-
-      <RankingTable rows={rankingQuery.data ?? []} days={days} loading={rankingQuery.isLoading} />
+      <Collapsible>
+        <SectionCard
+          title="Coleta e relatório"
+          description="Cobertura, posts que trazem gente de volta e token do formulário do site."
+        >
+          <CollapsibleTrigger className="flex h-11 w-full items-center justify-between text-sm font-medium">
+            Abrir coleta e relatório
+            <ChevronDown className="h-4 w-4" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-6 pt-4">
+            <CoverageChips
+              collectors={coverageQuery.data?.collectors ?? []}
+              gap={coverageQuery.data?.gap}
+              lastRanAt={coverageQuery.data?.lastRanAt ?? null}
+              connectionsHref={connectionsHref}
+              commentsStatus={commentsChip?.status}
+            />
+            <RankingTable
+              rows={rankingQuery.data ?? []}
+              days={days}
+              loading={rankingQuery.isLoading}
+            />
+            {canWrite ? <IngestTokenPanel cadastroClienteId={cadastroClienteId} /> : null}
+          </CollapsibleContent>
+        </SectionCard>
+      </Collapsible>
 
       {syncMut.isError ? (
         <p className="text-sm text-danger">
@@ -486,6 +557,114 @@ export function CrmWorkspace({
         cadastroClienteId={cadastroClienteId}
         days={days}
       />
+    </div>
+  );
+}
+
+function FilterStat({
+  active,
+  onClick,
+  label,
+  value,
+  hint,
+  icon,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  value: number;
+  hint?: string;
+  icon: typeof Contact2;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "min-h-11 rounded-2xl text-left",
+        active && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+      )}
+    >
+      <StatCard label={label} value={value} hint={hint} icon={icon} />
+    </button>
+  );
+}
+
+function PeopleList({
+  people,
+  view,
+  onOpen,
+}: {
+  people: CrmPersonListRow[];
+  view: CrmPeopleView;
+  onOpen: (id: string) => void;
+}) {
+  const groups = groupPeopleByProfile(people);
+  const showHeaders = groups.length > 1;
+  return (
+    <div className="min-w-0 space-y-6">
+      {groups.map((group) => (
+        <section key={group.id} className="min-w-0">
+          {showHeaders ? (
+            <div className="mb-1 flex items-baseline justify-between gap-3">
+              <h3 className="text-sm font-semibold">{group.label}</h3>
+              <p className="text-xs text-muted-foreground">
+                {group.hint} · {group.people.length}
+              </p>
+            </div>
+          ) : null}
+          <ul className="divide-y divide-border">
+            {group.people.map((person) => {
+              const title = personListTitle(person.displayName, person.igUsername);
+              return (
+                <li key={person.id}>
+                  <button
+                    type="button"
+                    onClick={() => onOpen(person.id)}
+                    className="flex min-h-11 w-full min-w-0 flex-col gap-1 rounded-md px-1 py-2 text-left hover:bg-muted/40 sm:flex-row sm:items-center sm:gap-3"
+                  >
+                    <span className="flex min-w-0 flex-1 items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold">
+                        {initials(title)}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex min-w-0 items-center gap-1.5">
+                          <span className="truncate font-medium">{title}</span>
+                          {person.isVip ? (
+                            <Star className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                          ) : null}
+                        </span>
+                        <span className="mt-0.5 flex flex-wrap items-center gap-1.5 sm:hidden">
+                          <Badge variant="secondary">{person.churnLabel}</Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {formatAgo(person.lastSignalAt)}
+                          </span>
+                        </span>
+                        {view !== "inbox" ? (
+                          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                            {person.nextAction}
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="shrink-0 sm:hidden">
+                        <HeatMeter score={person.intentScore} compact />
+                      </span>
+                    </span>
+                    <span className="hidden shrink-0 items-center gap-3 sm:flex">
+                      <Badge variant="secondary">{person.churnLabel}</Badge>
+                      <span className="w-16 text-right text-xs text-muted-foreground">
+                        {formatAgo(person.lastSignalAt)}
+                      </span>
+                      <HeatMeter score={person.intentScore} compact />
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
     </div>
   );
 }
@@ -660,89 +839,75 @@ function PersonDrawer({
   };
 
   const detail = detailQuery.data;
+  const title = detail
+    ? personListTitle(detail.person.displayName, detail.person.igUsername)
+    : "Pessoa";
+  const replyTarget = detail?.signals.find(
+    (signal) => signal.kind === "comment" || signal.kind === "reply",
+  );
+  const activeReplyId = replySignal ?? replyTarget?.id ?? null;
+  const heatReasons = detail
+    ? explainIntent(
+        detail.signals.map((signal): CrmSignalInput => ({
+          kind: signal.kind as CrmSignalInput["kind"],
+          place: signal.place as CrmSignalInput["place"],
+          source: signal.source,
+          externalId: signal.externalId,
+          body: signal.body,
+          occurredAt: signal.occurredAt,
+        })),
+      )
+    : [];
 
   return (
     <Sheet open={Boolean(personId)} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="flex h-[100dvh] w-full flex-col overflow-y-auto sm:max-w-lg">
-        <SheetHeader>
-          <SheetTitle>{detail?.person.displayName ?? "Pessoa"}</SheetTitle>
-          <SheetDescription>
-            {detail
-              ? `${detail.person.churnLabel} · ${detail.person.signalCount} interações${
-                  detail.person.ownerNome ? ` · dono ${detail.person.ownerNome}` : ""
-                }`
-              : "Ficha da pessoa"}
-          </SheetDescription>
-        </SheetHeader>
+      <SheetContent className="flex h-[100dvh] w-full max-w-[100vw] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
+        <div className="shrink-0 space-y-3 border-b border-border px-4 pb-4 pr-12 pt-4">
+          <SheetHeader className="space-y-1 text-left">
+            <SheetTitle className="break-words text-left">{title}</SheetTitle>
+            <SheetDescription className="text-left">
+              {detail
+                ? `${detail.person.churnLabel} · ${detail.person.signalCount} interações${
+                    detail.person.ownerNome ? ` · ${detail.person.ownerNome}` : ""
+                  }`
+                : "Ficha da pessoa"}
+            </SheetDescription>
+          </SheetHeader>
+          {detail ? <HeatMeter score={detail.person.intentScore} /> : null}
+          {detail && canWrite && activeReplyId ? (
+            <div className="space-y-2">
+              <Textarea
+                value={reply}
+                onChange={(e) => setReply(e.target.value)}
+                placeholder="Resposta pública no Instagram"
+                className="min-h-11"
+              />
+              <Button
+                className="h-11"
+                disabled={!reply.trim()}
+                onClick={async () => {
+                  await replyFn({ data: { signalId: activeReplyId, message: reply.trim() } });
+                  setReply("");
+                  setReplySignal(null);
+                  toast.success("Resposta publicada.");
+                  invalidate();
+                }}
+              >
+                <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
+                Responder
+              </Button>
+            </div>
+          ) : null}
+        </div>
         {!detail ? (
-          <p className="mt-4 text-sm text-muted-foreground">Carregando ficha…</p>
+          <p className="px-4 py-4 text-sm text-muted-foreground">Carregando ficha…</p>
         ) : (
-          <div className="mt-4 space-y-5 pb-8">
-            <HeatMeter score={detail.person.intentScore} />
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4 pb-8">
             <p className="text-sm">
               Entrou em {formatWhen(detail.person.firstSignalAt)}. Último contato em{" "}
               {formatWhen(detail.person.lastSignalAt)}.
             </p>
             <p className="text-sm text-muted-foreground">{detail.person.nextAction}</p>
-
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Quem é
-              </h3>
-              <ul className="mt-1 space-y-1 text-sm">
-                {detail.identities.map((id) => (
-                  <li key={`${id.kind}-${id.value}`}>
-                    <span className="text-muted-foreground">{identityLabel(id.kind)}:</span>{" "}
-                    {formatIdentityValue(id.kind, id.value)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Dados que a pessoa entregou
-              </h3>
-              {detail.facts.length === 0 ? (
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Comentário e Direct do Instagram não trazem e-mail, telefone, endereço nem foto.
-                  Esses dados só entram se um formulário, o WhatsApp ou a API enviar o campo.
-                </p>
-              ) : (
-                <ul className="mt-1 space-y-1 text-sm">
-                  {detail.facts.map((f) => (
-                    <li key={`${f.field}-${f.source}`}>
-                      {fieldLabel(f.field)}: {f.value}{" "}
-                      <span className="text-muted-foreground">({f.source})</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(detail.kindCounts).map(([k, n]) => (
-                <Badge key={k} variant="secondary">
-                  {kindLabel(k)} {n}
-                </Badge>
-              ))}
-              {Object.entries(detail.placeCounts)
-                .filter(([k]) => placeLabel(k))
-                .map(([k, n]) => (
-                  <Badge key={`p-${k}`} variant="outline">
-                    {placeLabel(k)} {n}
-                  </Badge>
-                ))}
-            </div>
-
-            {Object.keys(detail.pillarAffinity).length > 0 ? (
-              <p className="text-sm">
-                Pilares:{" "}
-                {Object.entries(detail.pillarAffinity)
-                  .map(([k, n]) => `${k} (${n})`)
-                  .join(", ")}
-              </p>
-            ) : null}
 
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -792,178 +957,210 @@ function PersonDrawer({
               </ul>
             </div>
 
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Quem é
+              </h3>
+              <ul className="mt-1 space-y-1 text-sm">
+                {detail.identities
+                  .filter((id) => id.kind !== "igsid")
+                  .map((id) => (
+                    <li key={`${id.kind}-${id.value}`}>
+                      <span className="text-muted-foreground">{identityLabel(id.kind)}:</span>{" "}
+                      {formatIdentityValue(id.kind, id.value)}
+                    </li>
+                  ))}
+              </ul>
+              {detail.facts.length === 0 ? (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Sem e-mail, telefone ou endereço. Comentário não traz esses dados.
+                </p>
+              ) : (
+                <ul className="mt-2 space-y-1 text-sm">
+                  {detail.facts.map((f) => (
+                    <li key={`${f.field}-${f.source}`}>
+                      {fieldLabel(f.field)}: {f.value}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
             {detail.mediaGaps.some((g) => g.gap > 0) ? (
               <p className="text-xs text-muted-foreground">
-                Algumas peças têm mais comentários no insight do que pessoas no grafo — scope ou
-                limite da API.
+                Algumas publicações têm mais comentários do que a ficha conseguiu identificar.
               </p>
             ) : null}
 
-            {canWrite && replySignal ? (
-              <div className="space-y-2">
-                <Textarea
-                  value={reply}
-                  onChange={(e) => setReply(e.target.value)}
-                  placeholder="Resposta pública no Instagram"
-                />
-                <Button
-                  size="sm"
-                  disabled={!reply.trim()}
-                  onClick={async () => {
-                    await replyFn({ data: { signalId: replySignal, message: reply.trim() } });
-                    setReply("");
-                    setReplySignal(null);
-                    invalidate();
-                  }}
-                >
-                  <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
-                  Publicar resposta
-                </Button>
-              </div>
-            ) : null}
-
-            {canWrite && detail.identities.some((i) => i.kind === "igsid") ? (
-              <div className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Direct
-                </h3>
-                <Textarea
-                  value={dm}
-                  onChange={(e) => setDm(e.target.value)}
-                  placeholder="Mensagem privada (exige App Review de mensagens)"
-                />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={!dm.trim()}
-                  onClick={async () => {
-                    try {
-                      await dmFn({ data: { personId: detail.person.id, message: dm.trim() } });
-                      setDm("");
-                      toast.success("Direct enviado.");
-                      invalidate();
-                    } catch (error) {
-                      toast.error(
-                        error instanceof Error ? error.message : "Falha ao enviar Direct.",
-                      );
-                    }
-                  }}
-                >
-                  Enviar Direct
-                </Button>
-              </div>
-            ) : null}
-
-            {canWrite ? (
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={async () => {
-                    await vipFn({
-                      data: { personId: detail.person.id, isVip: !detail.person.isVip },
-                    });
-                    invalidate();
-                  }}
-                >
-                  {detail.person.isVip ? "Remover VIP" : "Marcar VIP"}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={async () => {
-                    await assignFn({
-                      data: {
-                        personId: detail.person.id,
-                        ownerUserId: detail.person.ownerUserId ? null : undefined,
-                      },
-                    });
-                    invalidate();
-                  }}
-                >
-                  {detail.person.ownerUserId ? "Remover dono" : "Atribuir a mim"}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={async () => {
-                    await ignoreFn({ data: { personId: detail.person.id } });
-                    onClose();
-                    invalidate();
-                  }}
-                >
-                  Ignorar
-                </Button>
-              </div>
-            ) : null}
-
-            {canWrite ? (
-              <div className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Unir com outra pessoa
-                </h3>
-                <Input
-                  value={mergeQ}
-                  onChange={(e) => setMergeQ(e.target.value)}
-                  placeholder="Buscar @ ou nome no mesmo cliente"
-                />
-                <ul className="space-y-1 text-sm">
-                  {(mergeQuery.data ?? [])
-                    .filter((p: CrmPersonListRow) => p.id !== detail.person.id)
-                    .slice(0, 5)
-                    .map((p) => (
-                      <li key={p.id} className="flex items-center justify-between gap-2">
-                        <span>
-                          {p.displayName}
-                          {p.igUsername ? ` (@${p.igUsername})` : ""}
-                        </span>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={async () => {
-                            await mergeFn({ data: { fromId: p.id, intoId: detail.person.id } });
-                            setMergeQ("");
-                            toast.success("Fichas unidas.");
-                            invalidate();
-                          }}
-                        >
-                          Unir nesta
-                        </Button>
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            ) : null}
-
-            {canWrite ? (
-              <div className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Notas da agência
-                </h3>
-                {detail.notes.map((n) => (
-                  <p key={n.id} className="text-sm">
-                    {n.body}{" "}
-                    <span className="text-xs text-muted-foreground">{formatWhen(n.createdAt)}</span>
-                  </p>
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Por que este calor
+              </h3>
+              <ul className="mt-1 space-y-1 text-sm">
+                {heatReasons.map((reason) => (
+                  <li key={reason}>{reason}</li>
                 ))}
-                <Textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Nota interna"
-                />
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={!note.trim()}
-                  onClick={async () => {
-                    await noteFn({ data: { personId: detail.person.id, body: note.trim() } });
-                    setNote("");
-                    invalidate();
-                  }}
-                >
-                  Salvar nota
-                </Button>
-              </div>
+              </ul>
+            </div>
+
+            {canWrite ? (
+              <Collapsible>
+                <CollapsibleTrigger className="flex h-11 w-full items-center justify-between text-sm font-medium">
+                  Mais
+                  <ChevronDown className="h-4 w-4" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-5 pt-3">
+                  {canWrite && detail.identities.some((i) => i.kind === "igsid") ? (
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Direct
+                      </h3>
+                      <Textarea
+                        value={dm}
+                        onChange={(e) => setDm(e.target.value)}
+                        placeholder="Mensagem privada (exige App Review de mensagens)"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={!dm.trim()}
+                        onClick={async () => {
+                          try {
+                            await dmFn({
+                              data: { personId: detail.person.id, message: dm.trim() },
+                            });
+                            setDm("");
+                            toast.success("Direct enviado.");
+                            invalidate();
+                          } catch (error) {
+                            toast.error(
+                              error instanceof Error ? error.message : "Falha ao enviar Direct.",
+                            );
+                          }
+                        }}
+                      >
+                        Enviar Direct
+                      </Button>
+                    </div>
+                  ) : null}
+
+                  {canWrite ? (
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          await vipFn({
+                            data: { personId: detail.person.id, isVip: !detail.person.isVip },
+                          });
+                          invalidate();
+                        }}
+                      >
+                        {detail.person.isVip ? "Remover VIP" : "Marcar VIP"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          await assignFn({
+                            data: {
+                              personId: detail.person.id,
+                              ownerUserId: detail.person.ownerUserId ? null : undefined,
+                            },
+                          });
+                          invalidate();
+                        }}
+                      >
+                        {detail.person.ownerUserId ? "Remover dono" : "Atribuir a mim"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          await ignoreFn({ data: { personId: detail.person.id } });
+                          onClose();
+                          invalidate();
+                        }}
+                      >
+                        Ignorar
+                      </Button>
+                    </div>
+                  ) : null}
+
+                  {canWrite ? (
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Unir com outra pessoa
+                      </h3>
+                      <Input
+                        value={mergeQ}
+                        onChange={(e) => setMergeQ(e.target.value)}
+                        placeholder="Buscar @ ou nome no mesmo cliente"
+                      />
+                      <ul className="space-y-1 text-sm">
+                        {(mergeQuery.data ?? [])
+                          .filter((p: CrmPersonListRow) => p.id !== detail.person.id)
+                          .slice(0, 5)
+                          .map((p) => (
+                            <li key={p.id} className="flex items-center justify-between gap-2">
+                              <span>
+                                {p.displayName}
+                                {p.igUsername ? ` (@${p.igUsername})` : ""}
+                              </span>
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={async () => {
+                                  await mergeFn({
+                                    data: { fromId: p.id, intoId: detail.person.id },
+                                  });
+                                  setMergeQ("");
+                                  toast.success("Fichas unidas.");
+                                  invalidate();
+                                }}
+                              >
+                                Unir nesta
+                              </Button>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  ) : null}
+
+                  {canWrite ? (
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Notas da agência
+                      </h3>
+                      {detail.notes.map((n) => (
+                        <p key={n.id} className="text-sm">
+                          {n.body}{" "}
+                          <span className="text-xs text-muted-foreground">
+                            {formatWhen(n.createdAt)}
+                          </span>
+                        </p>
+                      ))}
+                      <Textarea
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="Nota interna"
+                      />
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={!note.trim()}
+                        onClick={async () => {
+                          await noteFn({ data: { personId: detail.person.id, body: note.trim() } });
+                          setNote("");
+                          invalidate();
+                        }}
+                      >
+                        Salvar nota
+                      </Button>
+                    </div>
+                  ) : null}
+                </CollapsibleContent>
+              </Collapsible>
             ) : null}
 
             {clienteSlug ? (

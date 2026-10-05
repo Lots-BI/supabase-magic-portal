@@ -41,8 +41,10 @@ export function RelatorioNotas({
   });
   const [aberta, setAberta] = useState<string | null>(null);
   const [html, setHtml] = useState("");
+  const [htmlTick, setHtmlTick] = useState(0);
   const [quedaAberta, setQuedaAberta] = useState(false);
   const [quedaHtml, setQuedaHtml] = useState("");
+  const [quedaHtmlTick, setQuedaHtmlTick] = useState(0);
 
   function refresh() {
     void qc.invalidateQueries({ queryKey: ["relatorio-notas", cadastroClienteId] });
@@ -115,7 +117,7 @@ export function RelatorioNotas({
               {abriu ? (
                 <div className="mt-3 space-y-2">
                   <RoteiroHtmlEditor
-                    resetKey={`${platform.key}-${notas.data?.semana}`}
+                    resetKey={`${platform.key}-${notas.data?.semana}-${htmlTick}`}
                     html={html}
                     editable
                     onChange={setHtml}
@@ -126,7 +128,10 @@ export function RelatorioNotas({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => setHtml(draftPlatformAnalise(platform, periodoLabel))}
+                      onClick={() => {
+                        setHtml(draftPlatformAnalise(platform, periodoLabel));
+                        setHtmlTick((tick) => tick + 1);
+                      }}
                     >
                       <Wand2 className="h-4 w-4" />
                       Gerar rascunho
@@ -172,7 +177,7 @@ export function RelatorioNotas({
           {quedaAberta ? (
             <div className="mt-3 space-y-2">
               <RoteiroHtmlEditor
-                resetKey={`queda-${periodoInicio}`}
+                resetKey={`queda-${periodoInicio}-${quedaHtmlTick}`}
                 html={quedaHtml}
                 editable
                 onChange={setQuedaHtml}
@@ -183,7 +188,10 @@ export function RelatorioNotas({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setQuedaHtml(draftQuedaAnalise(movers, periodoLabel))}
+                  onClick={() => {
+                    setQuedaHtml(draftQuedaAnalise(movers, periodoLabel));
+                    setQuedaHtmlTick((tick) => tick + 1);
+                  }}
                 >
                   <Wand2 className="h-4 w-4" />
                   Gerar rascunho

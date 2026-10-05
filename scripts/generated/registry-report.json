@@ -1,58 +1,30 @@
 {
   "contractVersion": "1.0.0",
-  "generatedAt": "2026-10-05T14:37:33.037Z",
+  "generatedAt": "2026-10-05T19:05:21.760Z",
   "plugins": [
     {
       "key": "example",
-      "capabilities": [
-        "example:metrics:collect"
-      ],
-      "providers": [
-        "make_passive",
-        "official_api"
-      ],
-      "ingestProfiles": [
-        "metrics-timeseries"
-      ]
+      "capabilities": ["example:metrics:collect"],
+      "providers": ["make_passive", "official_api"],
+      "ingestProfiles": ["metrics-timeseries"]
     },
     {
       "key": "ga4",
-      "capabilities": [
-        "ga4:metrics:collect"
-      ],
-      "providers": [
-        "make_passive",
-        "official_api"
-      ],
-      "ingestProfiles": [
-        "metrics-timeseries"
-      ]
+      "capabilities": ["ga4:metrics:collect"],
+      "providers": ["make_passive", "official_api"],
+      "ingestProfiles": ["metrics-timeseries"]
     },
     {
       "key": "google_ads",
-      "capabilities": [
-        "google_ads:metrics:collect"
-      ],
-      "providers": [
-        "make_passive",
-        "official_api"
-      ],
-      "ingestProfiles": [
-        "metrics-timeseries"
-      ]
+      "capabilities": ["google_ads:metrics:collect"],
+      "providers": ["make_passive", "official_api"],
+      "ingestProfiles": ["metrics-timeseries"]
     },
     {
       "key": "google_business",
-      "capabilities": [
-        "gbp:metrics:collect"
-      ],
-      "providers": [
-        "make_passive",
-        "official_api"
-      ],
-      "ingestProfiles": [
-        "metrics-timeseries"
-      ]
+      "capabilities": ["gbp:metrics:collect"],
+      "providers": ["make_passive", "official_api"],
+      "ingestProfiles": ["metrics-timeseries"]
     },
     {
       "key": "instagram_organic",
@@ -62,53 +34,26 @@
         "instagram_organic:content:publish",
         "instagram_organic:crm:comments"
       ],
-      "providers": [
-        "make_passive",
-        "official_api"
-      ],
-      "ingestProfiles": [
-        "entity-upsert",
-        "metrics-timeseries"
-      ]
+      "providers": ["make_passive", "official_api"],
+      "ingestProfiles": ["entity-upsert", "metrics-timeseries"]
     },
     {
       "key": "meta_ads",
-      "capabilities": [
-        "meta:metrics:collect"
-      ],
-      "providers": [
-        "make_passive",
-        "official_api"
-      ],
-      "ingestProfiles": [
-        "metrics-timeseries"
-      ]
+      "capabilities": ["meta:metrics:collect"],
+      "providers": ["make_passive", "official_api"],
+      "ingestProfiles": ["metrics-timeseries"]
     },
     {
       "key": "tiktok",
-      "capabilities": [
-        "tiktok:metrics:collect"
-      ],
-      "providers": [
-        "make_passive",
-        "official_api"
-      ],
-      "ingestProfiles": [
-        "metrics-timeseries"
-      ]
+      "capabilities": ["tiktok:metrics:collect"],
+      "providers": ["make_passive", "official_api"],
+      "ingestProfiles": ["metrics-timeseries"]
     },
     {
       "key": "youtube",
-      "capabilities": [
-        "youtube:metrics:collect"
-      ],
-      "providers": [
-        "make_passive",
-        "official_api"
-      ],
-      "ingestProfiles": [
-        "metrics-timeseries"
-      ]
+      "capabilities": ["youtube:metrics:collect"],
+      "providers": ["make_passive", "official_api"],
+      "ingestProfiles": ["metrics-timeseries"]
     }
   ],
   "capabilities": [
@@ -124,10 +69,7 @@
     "tiktok:metrics:collect",
     "youtube:metrics:collect"
   ],
-  "providers": [
-    "make_passive",
-    "official_api"
-  ],
+  "providers": ["make_passive", "official_api"],
   "metricDefinitions": [
     {
       "plugin": "example",
@@ -389,14 +331,8 @@
       "supported": false
     }
   ],
-  "oauthTypes": [
-    "oauth2_google",
-    "oauth2_meta",
-    "oauth2_tiktok"
-  ],
-  "writers": [
-    "base_metricas"
-  ],
+  "oauthTypes": ["oauth2_google", "oauth2_meta", "oauth2_tiktok"],
+  "writers": ["base_metricas"],
   "orphans": {
     "plugins": [],
     "capabilities": [],

@@ -123,6 +123,17 @@ export function formatIdentityValue(kind: string, value: string): string {
   return value;
 }
 
+/** Um único nome na lista. O @ gravado no nome não se repete ao lado do username. */
+export function personListTitle(displayName: string, igUsername: string | null): string {
+  const handle = igUsername?.trim().replace(/^@+/, "") ?? "";
+  const name = displayName.trim();
+  if (!name || name === "@") return handle ? `@${handle}` : "Pessoa";
+  if (!handle) return name;
+  const bare = name.replace(/^@+/, "");
+  if (bare.toLowerCase() === handle.toLowerCase()) return `@${handle}`;
+  return `${name} · @${handle}`;
+}
+
 /** O número de 0 a 100 já exibido na ficha. O heat interno do banco pode passar de 100. */
 export function clampIntent(score: number): number {
   if (!Number.isFinite(score)) return 0;
