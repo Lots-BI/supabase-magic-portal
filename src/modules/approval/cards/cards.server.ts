@@ -320,27 +320,6 @@ export const publishNowFn = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const actor = await actorFromContext(context);
     const { getPublisher } = await import("../integrations/get-publisher.server");
-    const { publishPlatformError, resolvePublishPlatform } =
-      await import("../integrations/publish-platform");
-    const { data: card } = await context.supabase
-      .from("content_cards")
-      .select("plataforma")
-      .eq("id", data.card_id)
-      .maybeSingle();
-    const platform = resolvePublishPlatform((card as { plataforma?: string } | null)?.plataforma);
-    if (platform === "youtube") {
-      const { publishYouTubeCard } = await import("../integrations/publish-youtube-card.server");
-      const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await publishYouTubeCard(getSupabaseAdmin(), data.card_id);
-      return getCardDetail(context.supabase, data.card_id);
-    }
-    if (platform !== "instagram") {
-      throw new Error(
-        platform === "tiktok"
-          ? "A conexão TikTok é de anúncios. Ela coleta métricas e não publica vídeo no perfil."
-          : publishPlatformError((card as { plataforma?: string } | null)?.plataforma),
-      );
-    }
     await markPublishNowQueued(context.supabase, actor, data.card_id);
     const publisher = getPublisher();
     try {
