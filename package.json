@@ -36,7 +36,7 @@
     "check": "npm run validate:engineering && npm run validate:auth-boundaries && npm run validate:approval-boundaries && npm run validate:contracts && npm run validate:architecture && npm run lint && npm run test && npm run build"
   },
   "engines": {
-    "node": ">=22"
+    "node": "24.x"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
