@@ -3,6 +3,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isPlatformOwnerEmail } from "@/lib/platform-owner";
+import {
+  assertCadastroAllowed,
+  assertNomeAvailable,
+  loadCallerAccess,
+  organizationIdForWrite,
+} from "@/modules/access/organization.server";
 import { repairOwnerAdminRole, resolveIsAdmin } from "@/lib/owner-admin";
 import { z } from "zod";
 import { DEBUG_DAILY_VIEW_SAMPLE_SELECT, SERVICOS_SELECT } from "@/lib/db-selects";
@@ -28,6 +34,29 @@ type AuthCtx = {
   userId: string;
   claims?: { email?: string | null };
 };
+
+async function filterUsersInOrgs<T extends { id: string }>(
+  users: T[],
+  organizationIds: string[],
+): Promise<T[]> {
+  if (organizationIds.length === 0) return [];
+  const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: members, error } = await getSupabaseAdmin()
+    .from("organization_members")
+    .select("user_id")
+    .in("organization_id", organizationIds);
+  if (error) throw new Error(error.message);
+  const allowed = new Set(((members ?? []) as { user_id: string }[]).map((row) => row.user_id));
+  return users.filter((user) => allowed.has(user.id));
+}
+
+async function assertCanOperate(ctx: AuthCtx) {
+  const access = await loadCallerAccess(ctx);
+  if (!access.isPlatformOwner && !access.isOperational && !access.isGlobalAdmin) {
+    throw new Error("Forbidden");
+  }
+  return access;
+}
 
 async function assertAdmin(ctx: AuthCtx) {
   const email = ctx.claims?.email ?? undefined;
@@ -58,7 +87,7 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
 export const listClientes = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context);
+    await assertCanOperate(context);
     const { data, error } = await context.supabase
       .from("vw_clientes_admin")
       .select("*")
@@ -71,7 +100,7 @@ export const getCliente = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: number }) => z.object({ id: z.number().int() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    await assertCanOperate(context);
     const { data: cliente, error } = await context.supabase
       .from("cadastro_clientes")
       .select("*")
@@ -165,8 +194,13 @@ export const createCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => clienteFields.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
-    const payload = sanitizeClientePayload(data);
+    await assertCanOperate(context);
+    const organizationId = await organizationIdForWrite(context);
+    if (organizationId) await assertNomeAvailable(data.nome_cliente, organizationId);
+    const payload = sanitizeClientePayload({
+      ...data,
+      ...(organizationId ? { organization_id: organizationId } : {}),
+    });
     const { data: row, error } = await context.supabase
       .from("cadastro_clientes")
       .insert(payload)
@@ -182,7 +216,7 @@ export const updateCliente = createServerFn({ method: "POST" })
     z.object({ id: z.number().int() }).merge(clienteFields.partial()).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    await assertCanOperate(context);
     const { id, ...rest } = data;
     const patch = sanitizeClientePayload(rest);
     const { data: row, error } = await context.supabase
@@ -324,17 +358,21 @@ export const setClienteServicos = createServerFn({ method: "POST" })
 export const listUsers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context);
+    const access = await assertCanOperate(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
     if (error) throw new Error(error.message);
-    return data.users.map((u) => ({ id: u.id, email: u.email, created_at: u.created_at }));
+    let users = data.users;
+    if (access.orgTablesReady && !access.seeAllCadastros) {
+      users = await filterUsersInOrgs(users, access.organizationIds);
+    }
+    return users.map((u) => ({ id: u.id, email: u.email, created_at: u.created_at }));
   });
 
 export const listUsersWithRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context);
+    const access = await assertCanOperate(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [usersRes, rolesRes, accessRes] = await Promise.all([
       supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 }),
@@ -356,7 +394,11 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
       arr.push(a.cliente_nome);
       accessByUser.set(a.user_id, arr);
     });
-    return usersRes.data.users.map((u) => {
+    let users = usersRes.data.users;
+    if (access.orgTablesReady && !access.seeAllCadastros) {
+      users = await filterUsersInOrgs(users, access.organizationIds);
+    }
+    return users.map((u) => {
       const roles = rolesByUser.get(u.id) ?? [];
       const isAdmin = roles.includes("admin");
       const email = u.email ?? "";
@@ -391,7 +433,8 @@ export const grantClientAccess = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    const access = await assertCanOperate(context);
+    assertCadastroAllowed(access, data.cadastro_cliente_id);
     const { data: cliente, error: e1 } = await context.supabase
       .from("cadastro_clientes")
       .select("id, nome_cliente")
@@ -413,7 +456,7 @@ export const revokeClientAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    await assertCanOperate(context);
     const { error } = await context.supabase.from("client_access").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -431,12 +474,15 @@ export const createUserAccount = createServerFn({ method: "POST" })
         mode: z.enum(["invite", "password"]).default("invite"),
         password: z.string().min(8).max(72).optional().nullable(),
         cadastro_cliente_id: z.number().int().optional().nullable(),
+        organization_id: z.string().uuid().optional().nullable(),
         client_origin: z.string().url().optional().nullable(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+    const actor = await assertCanOperate(context);
+    if (data.cadastro_cliente_id) assertCadastroAllowed(actor, data.cadastro_cliente_id);
+    const organizationId = await organizationIdForWrite(context, data.organization_id);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     let userId: string | null = null;
@@ -477,20 +523,39 @@ export const createUserAccount = createServerFn({ method: "POST" })
     const { ensureAccessAccountRow } = await import("@/lib/access.functions.server");
     await ensureAccessAccountRow(userId, inviteSent ? "invite_pending" : "awaiting_password");
 
-    if (data.tipo === "admin" || isPlatformOwnerEmail(data.email)) {
+    if (isPlatformOwnerEmail(data.email) || (data.tipo === "admin" && actor.isPlatformOwner)) {
       const { error: er } = await supabaseAdmin
         .from("user_roles")
         .insert({ user_id: userId, role: "admin" });
       if (er && !/duplicate key/i.test(er.message)) throw new Error(er.message);
     }
 
+    if (organizationId) {
+      const memberRole = data.tipo === "admin" ? "owner" : "cliente";
+      const { error: memberError } = await supabaseAdmin.from("organization_members").insert({
+        organization_id: organizationId,
+        user_id: userId,
+        role: memberRole,
+      });
+      if (memberError && !/duplicate key/i.test(memberError.message)) {
+        throw new Error(memberError.message);
+      }
+    }
+
     if (data.cadastro_cliente_id) {
       const { data: cliente, error: ec } = await supabaseAdmin
         .from("cadastro_clientes")
-        .select("id, nome_cliente")
+        .select(organizationId ? "id, nome_cliente, organization_id" : "id, nome_cliente")
         .eq("id", data.cadastro_cliente_id)
         .maybeSingle();
       if (ec) throw new Error(ec.message);
+      if (
+        organizationId &&
+        cliente &&
+        (cliente as { organization_id?: string | null }).organization_id !== organizationId
+      ) {
+        throw new Error("Cliente não pertence a esta organização.");
+      }
       if (cliente) {
         const { error: ea } = await supabaseAdmin.from("client_access").insert({
           user_id: userId,

@@ -33,6 +33,8 @@ import { Route as OauthTiktokCallbackRouteImport } from './routes/oauth/tiktok/c
 import { Route as OauthMetaCallbackRouteImport } from './routes/oauth/meta/callback'
 import { Route as OauthGoogleCallbackRouteImport } from './routes/oauth/google/callback'
 import { Route as ApiWebhooksMetaRouteImport } from './routes/api/webhooks/meta'
+import { Route as ApiCronYoutubeChannelSyncRouteImport } from './routes/api/cron/youtube-channel-sync'
+import { Route as ApiCronTiktokCampaignsSyncRouteImport } from './routes/api/cron/tiktok-campaigns-sync'
 import { Route as ApiCronTaskDueAlertsRouteImport } from './routes/api/cron/task-due-alerts'
 import { Route as ApiCronMetaAdsCampaignsSyncRouteImport } from './routes/api/cron/meta-ads-campaigns-sync'
 import { Route as ApiCronInstagramProfileSyncRouteImport } from './routes/api/cron/instagram-profile-sync'
@@ -226,6 +228,18 @@ const ApiWebhooksMetaRoute = ApiWebhooksMetaRouteImport.update({
   path: '/api/webhooks/meta',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronYoutubeChannelSyncRoute =
+  ApiCronYoutubeChannelSyncRouteImport.update({
+    id: '/api/cron/youtube-channel-sync',
+    path: '/api/cron/youtube-channel-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiCronTiktokCampaignsSyncRoute =
+  ApiCronTiktokCampaignsSyncRouteImport.update({
+    id: '/api/cron/tiktok-campaigns-sync',
+    path: '/api/cron/tiktok-campaigns-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiCronTaskDueAlertsRoute = ApiCronTaskDueAlertsRouteImport.update({
   id: '/api/cron/task-due-alerts',
   path: '/api/cron/task-due-alerts',
@@ -681,6 +695,8 @@ export interface FileRoutesByFullPath {
   '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
   '/api/cron/meta-ads-campaigns-sync': typeof ApiCronMetaAdsCampaignsSyncRoute
   '/api/cron/task-due-alerts': typeof ApiCronTaskDueAlertsRoute
+  '/api/cron/tiktok-campaigns-sync': typeof ApiCronTiktokCampaignsSyncRoute
+  '/api/cron/youtube-channel-sync': typeof ApiCronYoutubeChannelSyncRoute
   '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
   '/oauth/meta/callback': typeof OauthMetaCallbackRoute
@@ -768,6 +784,8 @@ export interface FileRoutesByTo {
   '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
   '/api/cron/meta-ads-campaigns-sync': typeof ApiCronMetaAdsCampaignsSyncRoute
   '/api/cron/task-due-alerts': typeof ApiCronTaskDueAlertsRoute
+  '/api/cron/tiktok-campaigns-sync': typeof ApiCronTiktokCampaignsSyncRoute
+  '/api/cron/youtube-channel-sync': typeof ApiCronYoutubeChannelSyncRoute
   '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
   '/oauth/meta/callback': typeof OauthMetaCallbackRoute
@@ -863,6 +881,8 @@ export interface FileRoutesById {
   '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
   '/api/cron/meta-ads-campaigns-sync': typeof ApiCronMetaAdsCampaignsSyncRoute
   '/api/cron/task-due-alerts': typeof ApiCronTaskDueAlertsRoute
+  '/api/cron/tiktok-campaigns-sync': typeof ApiCronTiktokCampaignsSyncRoute
+  '/api/cron/youtube-channel-sync': typeof ApiCronYoutubeChannelSyncRoute
   '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
   '/oauth/google/callback': typeof OauthGoogleCallbackRoute
   '/oauth/meta/callback': typeof OauthMetaCallbackRoute
@@ -959,6 +979,8 @@ export interface FileRouteTypes {
     | '/api/cron/instagram-profile-sync'
     | '/api/cron/meta-ads-campaigns-sync'
     | '/api/cron/task-due-alerts'
+    | '/api/cron/tiktok-campaigns-sync'
+    | '/api/cron/youtube-channel-sync'
     | '/api/webhooks/meta'
     | '/oauth/google/callback'
     | '/oauth/meta/callback'
@@ -1046,6 +1068,8 @@ export interface FileRouteTypes {
     | '/api/cron/instagram-profile-sync'
     | '/api/cron/meta-ads-campaigns-sync'
     | '/api/cron/task-due-alerts'
+    | '/api/cron/tiktok-campaigns-sync'
+    | '/api/cron/youtube-channel-sync'
     | '/api/webhooks/meta'
     | '/oauth/google/callback'
     | '/oauth/meta/callback'
@@ -1140,6 +1164,8 @@ export interface FileRouteTypes {
     | '/api/cron/instagram-profile-sync'
     | '/api/cron/meta-ads-campaigns-sync'
     | '/api/cron/task-due-alerts'
+    | '/api/cron/tiktok-campaigns-sync'
+    | '/api/cron/youtube-channel-sync'
     | '/api/webhooks/meta'
     | '/oauth/google/callback'
     | '/oauth/meta/callback'
@@ -1206,6 +1232,8 @@ export interface RootRouteChildren {
   ApiCronInstagramProfileSyncRoute: typeof ApiCronInstagramProfileSyncRoute
   ApiCronMetaAdsCampaignsSyncRoute: typeof ApiCronMetaAdsCampaignsSyncRoute
   ApiCronTaskDueAlertsRoute: typeof ApiCronTaskDueAlertsRoute
+  ApiCronTiktokCampaignsSyncRoute: typeof ApiCronTiktokCampaignsSyncRoute
+  ApiCronYoutubeChannelSyncRoute: typeof ApiCronYoutubeChannelSyncRoute
   ApiWebhooksMetaRoute: typeof ApiWebhooksMetaRoute
   OauthGoogleCallbackRoute: typeof OauthGoogleCallbackRoute
   OauthMetaCallbackRoute: typeof OauthMetaCallbackRoute
@@ -1381,6 +1409,20 @@ declare module '@tanstack/react-router' {
       path: '/api/webhooks/meta'
       fullPath: '/api/webhooks/meta'
       preLoaderRoute: typeof ApiWebhooksMetaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/youtube-channel-sync': {
+      id: '/api/cron/youtube-channel-sync'
+      path: '/api/cron/youtube-channel-sync'
+      fullPath: '/api/cron/youtube-channel-sync'
+      preLoaderRoute: typeof ApiCronYoutubeChannelSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/tiktok-campaigns-sync': {
+      id: '/api/cron/tiktok-campaigns-sync'
+      path: '/api/cron/tiktok-campaigns-sync'
+      fullPath: '/api/cron/tiktok-campaigns-sync'
+      preLoaderRoute: typeof ApiCronTiktokCampaignsSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/cron/task-due-alerts': {
@@ -2178,6 +2220,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCronInstagramProfileSyncRoute: ApiCronInstagramProfileSyncRoute,
   ApiCronMetaAdsCampaignsSyncRoute: ApiCronMetaAdsCampaignsSyncRoute,
   ApiCronTaskDueAlertsRoute: ApiCronTaskDueAlertsRoute,
+  ApiCronTiktokCampaignsSyncRoute: ApiCronTiktokCampaignsSyncRoute,
+  ApiCronYoutubeChannelSyncRoute: ApiCronYoutubeChannelSyncRoute,
   ApiWebhooksMetaRoute: ApiWebhooksMetaRoute,
   OauthGoogleCallbackRoute: OauthGoogleCallbackRoute,
   OauthMetaCallbackRoute: OauthMetaCallbackRoute,

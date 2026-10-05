@@ -61,6 +61,18 @@ export async function runGoogleAdsCron() {
   return envelope(summary);
 }
 
+export async function runTikTokCron() {
+  const summary = await syncAllTikTokCampaignsConnections(getSupabaseAdmin());
+  await withTimeline(`Cron TikTok: ${summary.failed} falha(s)`, summary.failed, summary.total);
+  return envelope(summary);
+}
+
+export async function runYouTubeCron() {
+  const summary = await syncAllYouTubeChannelConnections(getSupabaseAdmin());
+  await withTimeline(`Cron YouTube: ${summary.failed} falha(s)`, summary.failed, summary.total);
+  return envelope(summary);
+}
+
 export async function runGa4Cron() {
   const summary = await syncAllGa4ProfileConnections(getSupabaseAdmin());
   await withTimeline(`Cron GA4: ${summary.failed} falha(s)`, summary.failed, summary.total);

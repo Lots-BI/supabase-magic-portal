@@ -1,10 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isPlatformOwnerEmail } from "@/lib/platform-owner";
 import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
 import { resolveBlockedRedirect } from "@/modules/access/services/resolve-blocked-redirect";
 import { resolvePostAuthDestination } from "@/modules/access/services/resolve-post-auth-destination";
-import { resolveUserIsAdmin } from "@/modules/access/services/resolve-user-context";
 import {
   buildProfileForUserId,
   fetchAuditForUser,
@@ -108,14 +108,22 @@ export const postAuthOnLoginSuccess = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ redirect: z.string().optional() }).optional().parse(d))
   .handler(async ({ data, context }) => {
     const email = context.claims?.email ?? undefined;
+    const owner = isPlatformOwnerEmail(email);
     let profile;
     try {
       profile = await buildProfileForUserId(context.userId);
     } catch {
-      const isAdmin = await resolveUserIsAdmin(email);
+      if (owner) return { ok: true as const, path: "/admin" };
       return {
-        ok: true as const,
-        path: resolvePostAuthDestination(isAdmin, data?.redirect),
+        ok: false as const,
+        blocked: {
+          to: "/auth",
+          search: {
+            view: "link-error",
+            error: "Não foi possível validar seu acesso. Tente novamente.",
+          },
+          signOut: true,
+        },
       };
     }
 
@@ -139,9 +147,33 @@ export const postAuthOnLoginSuccess = createServerFn({ method: "GET" })
       };
     }
 
-    const isAdmin = await resolveUserIsAdmin(email);
+    const { loadCallerAccess } = await import("@/modules/access/organization.server");
+    const access = await loadCallerAccess({
+      supabase: context.supabase,
+      userId: context.userId,
+      claims: context.claims,
+    });
+    if (!owner && !access.isPlatformOwner) {
+      try {
+        const { loadAcquisitionGate } = await import("@/modules/access/access-application.server");
+        const acquisition = await loadAcquisitionGate({
+          supabase: context.supabase,
+          userId: context.userId,
+          claims: context.claims,
+        });
+        if (acquisition.gate !== "allow") {
+          return { ok: true as const, path: "/solicitar-acesso" };
+        }
+      } catch {
+        return {
+          ok: true as const,
+          path: resolvePostAuthDestination(access.isOperational || access.isGlobalAdmin, data?.redirect),
+        };
+      }
+    }
+    const isOperational = access.isOperational || access.isGlobalAdmin || access.isPlatformOwner;
     return {
       ok: true as const,
-      path: resolvePostAuthDestination(isAdmin, data?.redirect),
+      path: resolvePostAuthDestination(isOperational, data?.redirect),
     };
   });

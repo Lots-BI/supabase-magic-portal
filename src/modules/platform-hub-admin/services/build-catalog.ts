@@ -2,13 +2,7 @@ import { createHubRegistry } from "@/modules/platform-hub/public";
 import type { PlatformCatalogItemV1 } from "../types";
 
 export function isHubWizardConnectable(pluginKey: string): boolean {
-  return (
-    pluginKey !== "tiktok" &&
-    pluginKey !== "youtube" &&
-    pluginKey !== "google_business" &&
-    pluginKey !== "google_ads" &&
-    pluginKey !== "ga4"
-  );
+  return pluginKey !== "google_business";
 }
 
 export function buildPlatformCatalog(

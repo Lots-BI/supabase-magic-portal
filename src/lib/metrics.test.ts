@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sumOverview, type OverviewRow } from "@/lib/metrics";
+import { platformBreakdownByCliente, sumOverview, type OverviewRow } from "@/lib/metrics";
 import { dailySeries, aggregate } from "@/lib/platforms/engine";
 import { metaAdsDef } from "@/lib/platforms/meta-ads";
 import type { Period } from "@/lib/period";
@@ -69,6 +69,67 @@ describe("sumOverview", () => {
       },
     ]);
     expect(t.conversions).toBe(13);
+  });
+});
+
+describe("platformBreakdownByCliente", () => {
+  it("separa plataformas e usa o maior alcance do Instagram no período", () => {
+    const rows: OverviewRow[] = [
+      {
+        data: "2026-06-20",
+        cliente: "Acme",
+        meta_spend: 100,
+        google_spend: 40,
+        total_impressions: 0,
+        total_clicks: 0,
+        ga4_sessions: 20,
+        ga4_conversions: 2,
+        instagram_reach: 200,
+        instagram_interactions: 8,
+        meta_results: 4,
+        google_conversions: 1,
+      },
+      {
+        data: "2026-06-21",
+        cliente: "Acme",
+        meta_spend: 50,
+        google_spend: 10,
+        total_impressions: 0,
+        total_clicks: 0,
+        ga4_sessions: 5,
+        ga4_conversions: 1,
+        instagram_reach: 80,
+        instagram_interactions: 3,
+        meta_results: 1,
+        google_conversions: 2,
+      },
+      {
+        data: "2026-06-20",
+        cliente: "Beta",
+        meta_spend: 0,
+        google_spend: 0,
+        total_impressions: 0,
+        total_clicks: 0,
+        ga4_sessions: 0,
+        ga4_conversions: 0,
+        instagram_reach: 900,
+        instagram_interactions: 12,
+      },
+    ];
+
+    const byCliente = new Map(
+      platformBreakdownByCliente(rows).map((row) => [row.cliente, row] as const),
+    );
+    const acme = byCliente.get("Acme");
+    const beta = byCliente.get("Beta");
+
+    expect(acme?.meta).toEqual({ spend: 150, results: 5 });
+    expect(acme?.google).toEqual({ spend: 50, conversions: 3 });
+    expect(acme?.ga4).toEqual({ sessions: 25, conversions: 3 });
+    expect(acme?.instagram).toEqual({ reach: 200, interactions: 11 });
+    expect(acme?.spend).toBe(200);
+    expect(acme?.conversions).toBe(11);
+    expect(beta?.instagram.reach).toBe(900);
   });
 });
 

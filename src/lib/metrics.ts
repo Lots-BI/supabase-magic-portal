@@ -496,6 +496,47 @@ export function aggregateByCliente(rows: OverviewRow[]): ClientAggregate[] {
   });
 }
 
+/** Quebra por plataforma para a visão geral. Alcance do Instagram é o máximo do período. */
+export interface ClientPlatformBreakdown {
+  cliente: string;
+  spend: number;
+  conversions: number;
+  meta: { spend: number; results: number };
+  google: { spend: number; conversions: number };
+  ga4: { sessions: number; conversions: number };
+  instagram: { reach: number; interactions: number };
+}
+
+export function platformBreakdownByCliente(rows: OverviewRow[]): ClientPlatformBreakdown[] {
+  const byCli = new Map<string, OverviewRow[]>();
+  for (const row of rows) {
+    const bucket = byCli.get(row.cliente) ?? [];
+    bucket.push(row);
+    byCli.set(row.cliente, bucket);
+  }
+
+  return Array.from(byCli.entries()).map(([cliente, clientRows]) => {
+    const totals = sumOverview(clientRows);
+    let metaResults = 0;
+    let googleConversions = 0;
+    let ga4Conversions = 0;
+    for (const row of clientRows) {
+      metaResults += row.meta_results ?? 0;
+      googleConversions += row.google_conversions ?? 0;
+      ga4Conversions += row.ga4_conversions ?? 0;
+    }
+    return {
+      cliente,
+      spend: totals.spend,
+      conversions: totals.conversions,
+      meta: { spend: totals.meta_spend, results: metaResults },
+      google: { spend: totals.google_spend, conversions: googleConversions },
+      ga4: { sessions: totals.sessions, conversions: ga4Conversions },
+      instagram: { reach: totals.reach, interactions: totals.engagement },
+    };
+  });
+}
+
 // ----------------------------------------------------------------------------
 // Distribuição por plataforma — para BarChart / DonutChart.
 // Considera SOMENTE plataformas pagas (spend) já que é a métrica monetária

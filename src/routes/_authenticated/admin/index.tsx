@@ -29,6 +29,7 @@ import {
 import { adminPortfolioQuery } from "@/modules/dashboards/admin-portfolio.server";
 import { slugify } from "@/lib/slug";
 import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
+import { PortfolioClientsAccordion } from "@/components/lots/admin/PortfolioClientsAccordion";
 import { getApprovalOpsDashboard } from "@/modules/approval/dashboard/dashboard.server";
 import { getHubAgencyAlerts } from "@/modules/platform-hub-admin/hub-admin.server";
 import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
@@ -80,9 +81,26 @@ function AdminOverview() {
       />
 
       <Suspense fallback={<DashboardSkeleton kpiCount={4} />}>
+        <EmptyOrgHint />
         <OverviewBody days={days} />
       </Suspense>
     </div>
+  );
+}
+
+function EmptyOrgHint() {
+  const { data: clientes } = useSuspenseQuery(clientesAdminQuery);
+  if (clientes.length > 0) return null;
+  return (
+    <SectionCard title="Primeiro cliente">
+      <p className="text-sm text-muted-foreground">
+        Esta organização ainda não tem clientes. Cadastre o primeiro para conectar métricas e
+        conteúdo.
+      </p>
+      <Link to="/admin/clientes/novo" className="mt-3 inline-block text-sm text-primary underline">
+        Cadastrar cliente
+      </Link>
+    </SectionCard>
   );
 }
 
@@ -333,6 +351,8 @@ function OverviewBody({ days }: { days: PeriodDays }) {
           )}
         </ChartFrame>
       </section>
+
+      <PortfolioClientsAccordion current={current} previous={previous} />
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-3">
         <SectionCard

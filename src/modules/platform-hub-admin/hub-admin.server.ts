@@ -7,10 +7,13 @@ import { CREDENTIAL_VAULT_CONTRACT_VERSION } from "../../../contracts/credential
 import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { resolveServerAppUrl } from "@/lib/app-url.server";
+import { actorEmailFromClaims } from "@/modules/agency-os/internal/assert-admin.server";
 import {
-  assertAgencyOsAdmin,
-  actorEmailFromClaims,
-} from "@/modules/agency-os/internal/assert-admin.server";
+  assertCadastroAllowed,
+  assertConnectionAllowed,
+  loadCallerAccess,
+  type CallerAccess,
+} from "@/modules/access/organization.server";
 import { createAdminHubStack } from "@/modules/platform-hub-bridges/ph-persistence";
 import { registerCadastroRecord } from "@/modules/platform-hub-bridges/legacy-cadastro";
 import { FetchHttpClient } from "@/modules/platform-hub/plugins/_internal/http/fetch-http-client";
@@ -50,13 +53,45 @@ async function adminStack() {
   return createAdminHubStack(getSupabaseAdmin());
 }
 
+async function hubAccess(context: {
+  supabase: Parameters<typeof loadCallerAccess>[0]["supabase"];
+  userId: string;
+  claims?: { email?: string | null };
+}): Promise<CallerAccess> {
+  const access = await loadCallerAccess(context);
+  if (!access.isPlatformOwner && !access.isOperational && !access.isGlobalAdmin) {
+    throw new Error("Forbidden");
+  }
+  return access;
+}
+
+function connectionsInScope<T extends { cadastroId: number | null }>(
+  access: CallerAccess,
+  rows: T[],
+): T[] {
+  if (access.seeAllCadastros || (!access.orgTablesReady && access.isGlobalAdmin)) return rows;
+  return rows.filter(
+    (row) => row.cadastroId != null && access.cadastroIds.includes(row.cadastroId),
+  );
+}
+
+async function guardHubTarget(
+  access: CallerAccess,
+  data: { connectionId?: string; cadastroId?: number } | undefined,
+) {
+  if (!data) return;
+  if (typeof data.cadastroId === "number") assertCadastroAllowed(access, data.cadastroId);
+  if (typeof data.connectionId === "string")
+    await assertConnectionAllowed(access, data.connectionId);
+}
+
 export const getHubOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
     const stack = await adminStack();
-    const overview = await stack.adminQueries.getOverview();
-    const connections = await stack.adminQueries.listConnections();
+    const overview = access.seeAllCadastros ? await stack.adminQueries.getOverview() : null;
+    const connections = connectionsInScope(access, await stack.adminQueries.listConnections());
     const stats = new Map<string, { count: number; avgHealth: number | null }>();
     for (const c of connections) {
       const prev = stats.get(c.pluginKey) ?? { count: 0, avgHealth: null };
@@ -74,23 +109,41 @@ export const getHubOverview = createServerFn({ method: "GET" })
       ),
     );
     const timeline = await stack.timeline.listRecent(30);
-    return { overview, connections, catalog, timeline };
+    return {
+      overview: overview ?? {
+        total: connections.length,
+        healthy: connections.filter((row) => row.healthStatus === "healthy").length,
+        degraded: connections.filter((row) => row.healthStatus === "degraded").length,
+        unhealthy: connections.filter((row) => row.healthStatus === "unhealthy").length,
+        unknown: connections.filter((row) => row.healthStatus === "unknown").length,
+        makePassive: connections.filter((row) => row.activeProviderType === "make_passive").length,
+        officialApi: connections.filter((row) => row.activeProviderType === "official_api").length,
+        withError: connections.filter((row) => row.lastError).length,
+        ingestLag: [],
+        ingestLagging: false,
+      },
+      connections,
+      catalog,
+      timeline: access.seeAllCadastros ? timeline : [],
+    };
   });
 
 export const getHubConnections = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => hubConnectionsFiltersSchema.optional().parse(d ?? {}))
   .handler(async ({ data: filters, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    if (filters?.cadastroId) assertCadastroAllowed(access, filters.cadastroId);
     const stack = await adminStack();
-    return stack.adminQueries.listConnections(filters);
+    return connectionsInScope(access, await stack.adminQueries.listConnections(filters));
   });
 
 export const getHubConnectionDetail = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => connectionIdSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     const row = await stack.adminQueries.getConnection(data.connectionId);
     if (!row) throw new Error("Conexão não encontrada");
@@ -115,9 +168,9 @@ export const getHubConnectionDetail = createServerFn({ method: "GET" })
 export const getHubCatalog = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
     const stack = await adminStack();
-    const connections = await stack.adminQueries.listConnections();
+    const connections = connectionsInScope(access, await stack.adminQueries.listConnections());
     const stats = new Map<string, { count: number; avgHealth: number | null }>();
     for (const c of connections) {
       const s = stats.get(c.pluginKey) ?? { count: 0, avgHealth: null };
@@ -133,7 +186,8 @@ export const createHubConnection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => createConnectionWizardSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const supabase = getSupabaseAdmin();
     const { data: cliente } = await supabase
       .from("cadastro_clientes")
@@ -181,7 +235,8 @@ export const startHubOAuth = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => startOAuthSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     const conn = await stack.connectionService.get(asConnectionId(data.connectionId));
     if (!isHubOAuthPlugin(conn.pluginKey)) {
@@ -260,7 +315,8 @@ export const storeHubCredential = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => storeCredentialSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     await stack.credentialVault.store(asConnectionId(data.connectionId), data.credentialKey, {
       version: CREDENTIAL_VAULT_CONTRACT_VERSION,
@@ -279,7 +335,8 @@ export const attachHubIdentity = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => attachIdentitySchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     const connectionId = asConnectionId(data.connectionId);
     if (data.isPrimary) {
@@ -311,7 +368,8 @@ export const syncHubConnection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => connectionIdSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     const connectionId = asConnectionId(data.connectionId);
     await stack.timeline.append({
@@ -375,7 +433,8 @@ export const switchHubProvider = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => switchProviderSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     await stack.connectionService.setActiveProvider(
       asConnectionId(data.connectionId),
@@ -394,7 +453,8 @@ export const updateHubMigrationStage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => updateMigrationStageSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     await stack.adminQueries.updateAdminFields(data.connectionId, {
       migrationStage: data.migrationStage,
@@ -412,7 +472,8 @@ export const runHubDiagnostics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => connectionIdSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     const report = await runConnectionDiagnostics(stack, data.connectionId);
     await stack.timeline.append({
@@ -429,7 +490,8 @@ export const deleteHubConnection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => connectionIdSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     await stack.timeline.append({
       connectionId: data.connectionId,
@@ -445,7 +507,8 @@ export const getClientHubConnections = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ cadastroId: z.number() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     return stack.adminQueries.listConnections({ cadastroId: data.cadastroId });
   });
@@ -454,7 +517,8 @@ export const updateHubConnection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => updateConnectionSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     await stack.adminQueries.updateAdminFields(data.connectionId, {
       ...(data.label ? { label: data.label } : {}),
@@ -475,7 +539,8 @@ export const discoverHubIdentities = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => connectionIdSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     const conn = await stack.connectionService.get(asConnectionId(data.connectionId));
     if (!supportsIdentityDiscovery(conn.pluginKey)) {
@@ -503,7 +568,8 @@ export const batchAttachHubIdentities = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => batchAttachIdentitiesSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     const connectionId = asConnectionId(data.connectionId);
     for (const identity of data.identities) {
@@ -537,7 +603,8 @@ export const listHubCredentials = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => connectionIdSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     const keys = await stack.adminQueries.listCredentialKeys(data.connectionId);
     const enriched = await Promise.all(
@@ -556,7 +623,8 @@ export const revokeHubCredential = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => credentialKeySchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     const connectionId = asConnectionId(data.connectionId);
     const conn = await stack.connectionService.get(connectionId);
@@ -584,7 +652,8 @@ export const testHubCredential = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => credentialKeySchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
+    await guardHubTarget(access, data as { connectionId?: string; cadastroId?: number });
     const stack = await adminStack();
     const connectionId = asConnectionId(data.connectionId);
     const payload = await stack.credentialVault.retrieve(connectionId, data.credentialKey);
@@ -618,21 +687,49 @@ export const testHubCredential = createServerFn({ method: "POST" })
 export const getHubAgencyAlerts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
     const stack = await adminStack();
-    return stack.adminQueries.getAgencyAlerts();
+    const alerts = await stack.adminQueries.getAgencyAlerts();
+    return {
+      unhealthy: connectionsInScope(access, alerts.unhealthy),
+      degraded: connectionsInScope(access, alerts.degraded),
+      disconnected: connectionsInScope(access, alerts.disconnected),
+      lowCoverage: connectionsInScope(access, alerts.lowCoverage),
+      staleSync: connectionsInScope(access, alerts.staleSync),
+    };
   });
 
 export const getHubOperationalSnapshot = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAgencyOsAdmin(context);
+    const access = await hubAccess(context);
     const stack = await adminStack();
-    const [overview, connections, timeline, alerts] = await Promise.all([
-      stack.adminQueries.getOverview(),
+    const [connections, alerts] = await Promise.all([
       stack.adminQueries.listConnections(),
-      stack.timeline.listRecent(20),
       stack.adminQueries.getAgencyAlerts(),
     ]);
-    return { overview, connections, timeline, alerts };
+    const visible = connectionsInScope(access, connections);
+    return {
+      overview: {
+        total: visible.length,
+        healthy: visible.filter((row) => row.healthStatus === "healthy").length,
+        degraded: visible.filter((row) => row.healthStatus === "degraded").length,
+        unhealthy: visible.filter((row) => row.healthStatus === "unhealthy").length,
+        unknown: visible.filter((row) => row.healthStatus === "unknown").length,
+        makePassive: visible.filter((row) => row.activeProviderType === "make_passive").length,
+        officialApi: visible.filter((row) => row.activeProviderType === "official_api").length,
+        withError: visible.filter((row) => row.lastError).length,
+        ingestLag: [],
+        ingestLagging: false,
+      },
+      connections: visible,
+      timeline: [],
+      alerts: {
+        unhealthy: connectionsInScope(access, alerts.unhealthy),
+        degraded: connectionsInScope(access, alerts.degraded),
+        disconnected: connectionsInScope(access, alerts.disconnected),
+        lowCoverage: connectionsInScope(access, alerts.lowCoverage),
+        staleSync: connectionsInScope(access, alerts.staleSync),
+      },
+    };
   });
