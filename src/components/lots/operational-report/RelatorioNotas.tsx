@@ -1,25 +1,35 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { RoteiroHtmlEditor } from "@/components/lots/approval/roteiro/RoteiroHtmlEditor";
+import {
+  draftPlatformAnalise,
+  draftQuedaAnalise,
+} from "@/modules/operational-report/draft-analise";
 import {
   listRelatorioNotas,
   saveRelatorioAnalise,
   saveRelatorioOcorrencia,
 } from "@/modules/operational-report/relatorio-notas.server";
+import type { ReportCallout, ReportPlatformSection } from "@/modules/operational-report/types";
 
 export function RelatorioNotas({
   cadastroClienteId,
   platforms,
+  movers,
   periodoInicio,
   periodoFim,
+  periodoLabel,
 }: {
   cadastroClienteId: number;
-  platforms: { key: string; label: string }[];
+  platforms: ReportPlatformSection[];
+  movers: ReportCallout[];
   periodoInicio: string;
   periodoFim: string;
+  periodoLabel: string;
 }) {
   const qc = useQueryClient();
   const listFn = useServerFn(listRelatorioNotas);
@@ -111,13 +121,24 @@ export function RelatorioNotas({
                     onChange={setHtml}
                     minHeightClass="min-h-[160px]"
                   />
-                  <Button
-                    type="button"
-                    disabled={gravar.isPending}
-                    onClick={() => gravar.mutate(platform.key)}
-                  >
-                    Enviar
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setHtml(draftPlatformAnalise(platform, periodoLabel))}
+                    >
+                      <Wand2 className="h-4 w-4" />
+                      Gerar rascunho
+                    </Button>
+                    <Button
+                      type="button"
+                      disabled={gravar.isPending}
+                      onClick={() => gravar.mutate(platform.key)}
+                    >
+                      Enviar
+                    </Button>
+                  </div>
                 </div>
               ) : null}
             </article>
@@ -157,13 +178,24 @@ export function RelatorioNotas({
                 onChange={setQuedaHtml}
                 minHeightClass="min-h-[160px]"
               />
-              <Button
-                type="button"
-                disabled={gravarQueda.isPending}
-                onClick={() => gravarQueda.mutate()}
-              >
-                Enviar
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setQuedaHtml(draftQuedaAnalise(movers, periodoLabel))}
+                >
+                  <Wand2 className="h-4 w-4" />
+                  Gerar rascunho
+                </Button>
+                <Button
+                  type="button"
+                  disabled={gravarQueda.isPending}
+                  onClick={() => gravarQueda.mutate()}
+                >
+                  Enviar
+                </Button>
+              </div>
             </div>
           ) : null}
         </article>

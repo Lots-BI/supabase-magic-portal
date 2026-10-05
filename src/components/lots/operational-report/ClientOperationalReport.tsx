@@ -210,13 +210,12 @@ function ReportCanvas({ report }: { report: OperationalReport }) {
         </section>
       )}
       <RelatorioNotas
-        cadastroClienteId={cadastroClienteId}
-        platforms={report.platforms.map((platform) => ({
-          key: platform.key,
-          label: platform.label,
-        }))}
+        cadastroClienteId={report.cadastroClienteId}
+        platforms={report.platforms}
+        movers={report.movers}
         periodoInicio={report.period.from}
         periodoFim={report.period.to}
+        periodoLabel={report.period.label}
       />
 
       {(report.posts || report.content) && (
