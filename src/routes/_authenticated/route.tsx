@@ -6,6 +6,7 @@ import { useSignOut } from "@/modules/auth";
 import { assertAccessActive } from "@/lib/access.functions.server";
 import { checkIsAdmin } from "@/lib/admin.functions";
 import { AppShell, type NavGroup } from "@/components/lots/AppShell";
+import { usePlatformLiveSync } from "@/modules/core/realtime/use-platform-live-sync";
 import { AuthDiagnosticsBanner } from "@/components/lots/infra/AuthDiagnosticsBanner";
 import { NotificationCenter } from "@/components/lots/NotificationCenter";
 import { PlatformNewsAnnouncer } from "@/components/lots/platform-news/PlatformNewsAnnouncer";
@@ -111,6 +112,7 @@ function ShellImpersonateSlot() {
 }
 
 function AuthenticatedLayout() {
+  usePlatformLiveSync();
   const { user, isAdmin } = Route.useRouteContext();
   const isOwner = isPlatformOwnerEmail(user.email);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
