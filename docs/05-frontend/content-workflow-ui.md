@@ -3,7 +3,7 @@ title: Content Workflow — UI
 description: Componentes, visualizações e UX do módulo Aprovações (Workflow de Conteúdo).
 status: living
 owner: Engenharia / Produto Lots BI
-last_review: 2026-07-05
+last_review: 2026-10-07
 ---
 
 # Content Workflow — UI
@@ -33,7 +33,15 @@ last_review: 2026-07-05
 ### Calendário (admin)
 
 - Grid mensal — mesmos cards do Kanban
-- Click abre drawer de detalhe
+- Click no dia abre criação (inclui **legenda**); depois o roteiro abre em tela cheia
+- Click no card abre drawer de detalhe (produção abre o workspace); roteiro e
+  legenda no popup são blocos grandes (`CaptionPanel` + `RoteiroHtmlEditor` hero)
+
+### Workspace de produção (`/admin/aprovacoes/producao/$cardId`)
+
+- Seletor de status (mesmas transições do drawer)
+- Botão **Mídia enviada** devolve o card para `aguardando_material` a qualquer momento
+  (`producao` e `alteracoes_design`)
 
 ### Pilares / Stories
 
@@ -52,16 +60,15 @@ last_review: 2026-07-05
 
 Seções:
 
-| Seção       | Campos / ações                                                         |
-| ----------- | ---------------------------------------------------------------------- |
-| Meta        | título, cliente, responsável, rede, formato, data, hora, status, pilar |
-| Conteúdo    | copy, legenda, roteiro, direção de arte, CTA, observações              |
-| Checklist   | inline editável (admin/SM)                                             |
-| Preview     | `SocialPreviewPanel` → `MediaPreview`                                  |
-| Timeline    | `CardTimeline` — eventos cronológicos automáticos                      |
-| Comentários | input + thread (eventos `commented`)                                   |
-| Anexos      | upload na criação + gestão posterior                                   |
-| Histórico   | snapshots legados + diff                                               |
+| Seção       | Campos / ações                                               |
+| ----------- | ------------------------------------------------------------ |
+| Meta        | título, data, hora, status, pilar                            |
+| Conteúdo    | roteiro e legenda em blocos grandes (o que vai à publicação) |
+| Preview     | `MediaPreview` da peça                                       |
+| Timeline    | `CardTimeline` — eventos cronológicos automáticos            |
+| Comentários | input + thread (eventos `commented`)                         |
+| Anexos      | upload na criação + gestão posterior                         |
+| Histórico   | snapshots legados + diff                                     |
 
 ### Preview social
 

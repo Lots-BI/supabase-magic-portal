@@ -37,5 +37,6 @@ describe("syncAutoChecklist", () => {
     expect(synced.find((c) => c.id === "roteiro_aprovado")?.done).toBe(true);
     expect(synced.find((c) => c.id === "media_final")?.done).toBe(true);
     expect(synced.find((c) => c.id === "legenda_cta")?.done).toBe(true);
+    expect(synced.find((c) => c.id === "preview_ok")?.done).toBe(true);
   });
 });

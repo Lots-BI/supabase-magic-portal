@@ -245,7 +245,7 @@ function MonthGrid({
       {WEEKDAY_LABELS.map((w) => (
         <div
           key={w}
-          className="border-b border-r border-border bg-muted/30 px-2 py-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground last:border-r-0"
+          className="border-b border-r border-border bg-muted/30 px-2 py-2.5 text-sm font-semibold uppercase tracking-wide text-muted-foreground last:border-r-0"
         >
           {w}
         </div>
@@ -337,7 +337,7 @@ function WeekGrid({
         const cards = byDay.get(iso) ?? [];
         return (
           <div key={iso} className="rounded-xl border border-border p-2">
-            <p className="mb-2 text-xs font-semibold text-muted-foreground">
+            <p className="mb-2 text-sm font-semibold text-muted-foreground">
               {WEEKDAY_LABELS[d.getDay()]} {d.getDate()}
             </p>
             <div className="space-y-1">

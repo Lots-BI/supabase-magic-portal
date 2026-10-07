@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,6 +9,7 @@ import {
   getContentCard,
   publishNowFn,
   schedulePublishFn,
+  updateCard,
 } from "@/modules/approval/cards/cards.server";
 import { FEATURE_META_CONTENT_PUBLISH } from "@/lib/feature-flags";
 import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
@@ -23,6 +24,7 @@ import { cn } from "@/lib/utils";
 import type { ContentCard } from "@/modules/approval/types/content-card";
 import { adminConteudosCalendarHref } from "@/modules/approval/services/admin-conteudos-href";
 import { PublishedIgMetrics } from "../card/PublishedIgMetrics";
+import { CaptionPanel } from "../shared/CaptionPanel";
 import type { PublishedIgSnapshot } from "@/modules/instagram-posts/types";
 
 type PublishMode = "now" | "schedule";
@@ -59,9 +61,11 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
   const publishNowServerFn = useServerFn(publishNowFn);
   const scheduleServerFn = useServerFn(schedulePublishFn);
   const archiveFn = useServerFn(archiveCard);
+  const updateFn = useServerFn(updateCard);
 
   const [mode, setMode] = useState<PublishMode>("schedule");
   const [scheduledAt, setScheduledAt] = useState("");
+  const [legenda, setLegenda] = useState("");
   const [scopeError, setScopeError] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
 
@@ -78,7 +82,28 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
     if (card) setScheduledAt(toDatetimeLocalValue(card));
   }, [card?.id, card?.scheduled_publish_at, card?.data_publicacao, card?.hora_publicacao]);
 
+  useEffect(() => {
+    if (card) setLegenda(card.legenda ?? "");
+  }, [card?.id, card?.legenda]);
+
   const invalidate = () => qc.invalidateQueries({ queryKey: ["content-card", cardId] });
+  const captionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const persistCaption = useCallback(
+    (value: string) => {
+      updateFn({ data: { id: cardId, legenda: value.trim() || null } })
+        .then(() => invalidate())
+        .catch((e: Error) => toast.error(e.message));
+    },
+    [cardId, updateFn, qc],
+  );
+
+  useEffect(
+    () => () => {
+      if (captionTimeoutRef.current) clearTimeout(captionTimeoutRef.current);
+    },
+    [],
+  );
 
   const handlePublishError = (e: Error) => {
     if (e.message.includes("missing_publish_scope")) {
@@ -186,6 +211,16 @@ export function PublishSchedulePanel({ cardId, backTo }: { cardId: string; backT
             </Button>
           </div>
         }
+      />
+
+      <CaptionPanel
+        value={legenda || card.legenda || ""}
+        editable={card.status !== "arquivado"}
+        onChange={(value) => {
+          setLegenda(value);
+          if (captionTimeoutRef.current) clearTimeout(captionTimeoutRef.current);
+          captionTimeoutRef.current = setTimeout(() => persistCaption(value), 800);
+        }}
       />
 
       {!FEATURE_META_CONTENT_PUBLISH && (

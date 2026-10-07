@@ -1,6 +1,9 @@
 /** Limite por arquivo — original, sem compressão. 5 GB. */
 export const MATERIAL_MAX_BYTES = 5 * 1024 * 1024 * 1024;
 
+/** Máximo de originais do cliente por conteúdo, em um único envio. */
+export const CLIENT_MATERIAL_MAX_FILES = 6;
+
 export const MATERIAL_ACCEPT =
   "image/*,video/*,audio/*,.heic,.heif,.mov,.m4v,.mkv,.avi,.mpeg,.mpg,.3gp,.wav,.mp3,.aac,.m4a,.pdf";
 

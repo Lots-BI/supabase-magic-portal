@@ -24,6 +24,7 @@ export function RoteiroHtmlEditor({
   onChange,
   minHeightClass = "min-h-[280px]",
   className,
+  size = "default",
 }: {
   resetKey: string;
   html: string | null | undefined;
@@ -31,10 +32,12 @@ export function RoteiroHtmlEditor({
   onChange?: (html: string) => void;
   minHeightClass?: string;
   className?: string;
+  size?: "default" | "hero";
 }) {
   const initial = unwrapRoteiroHtml(html);
   const htmlRef = useRef(html);
   htmlRef.current = html;
+  const hero = size === "hero";
 
   const editor = useEditor({
     extensions: ROTEIRO_EXTENSIONS,
@@ -44,8 +47,13 @@ export function RoteiroHtmlEditor({
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm dark:prose-invert max-w-none px-4 py-3 focus:outline-none",
-          minHeightClass,
+          "prose dark:prose-invert max-w-none focus:outline-none",
+          hero
+            ? cn(
+                "prose-lg px-6 py-5 text-xl leading-relaxed sm:px-8 sm:py-8 sm:text-2xl",
+                minHeightClass === "min-h-[280px]" ? "min-h-[50vh]" : minHeightClass,
+              )
+            : cn("prose-sm px-4 py-3", minHeightClass),
         ),
       },
     },
@@ -63,7 +71,18 @@ export function RoteiroHtmlEditor({
   }, [editor, resetKey]);
 
   return (
-    <article className={cn("overflow-hidden rounded-2xl border border-border bg-card", className)}>
+    <article
+      className={cn(
+        "overflow-hidden border border-border bg-card",
+        hero ? "rounded-3xl" : "rounded-2xl",
+        className,
+      )}
+    >
+      {hero ? (
+        <p className="px-6 pt-6 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:px-8">
+          Roteiro
+        </p>
+      ) : null}
       {editor && editable ? <RoteiroToolbar editor={editor} /> : null}
       {editor ? (
         <EditorContent editor={editor} />
@@ -77,23 +96,40 @@ export function RoteiroHtmlEditor({
 export function RoteiroHtmlView({
   html,
   className,
+  size = "default",
 }: {
   html: string | null | undefined;
   className?: string;
+  size?: "default" | "hero";
 }) {
   const inner = unwrapRoteiroHtml(html);
+  const hero = size === "hero";
   return (
-    <article className={cn("rounded-2xl border border-border bg-card px-4 py-3", className)}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+    <article
+      className={cn(
+        "border border-border bg-card",
+        hero ? "rounded-3xl px-6 py-6 sm:px-8 sm:py-8" : "rounded-2xl px-4 py-3",
+        className,
+      )}
+    >
+      <p
+        className={cn(
+          "font-semibold uppercase tracking-[0.16em] text-muted-foreground",
+          hero ? "text-xs" : "text-[11px] tracking-[0.14em]",
+        )}
+      >
         Roteiro
       </p>
       {inner ? (
         <div
-          className="roteiro-html prose prose-sm mt-2 max-w-none dark:prose-invert"
+          className={cn(
+            "roteiro-html mt-3 max-w-none dark:prose-invert",
+            hero ? "prose prose-lg text-xl leading-relaxed sm:text-2xl" : "prose prose-sm",
+          )}
           dangerouslySetInnerHTML={{ __html: inner }}
         />
       ) : (
-        <p className="mt-2 text-sm text-muted-foreground">—</p>
+        <p className={cn("mt-3 text-muted-foreground", hero ? "text-lg" : "text-sm")}>—</p>
       )}
     </article>
   );

@@ -1,14 +1,18 @@
 import type { ContentCardStatus } from "../types/content-card";
 
-/** Transições permitidas no workflow (admin/social_media). Cliente usa subset via permissions. */
+/**
+ * Transições permitidas no workflow (admin/social_media). Cliente usa subset via permissions.
+ * Produção e alterações de design podem voltar para `aguardando_material` a qualquer
+ * momento (mídia enviada) — a agência não fica presa depois de "Começar peça".
+ */
 const ALLOWED_TRANSITIONS: Record<ContentCardStatus, ContentCardStatus[]> = {
   roteiro: ["aguardando_aprovacao", "arquivado"],
   aguardando_aprovacao: ["aguardando_material", "alteracoes_roteiro", "roteiro", "arquivado"],
   alteracoes_roteiro: ["aguardando_aprovacao", "roteiro", "arquivado"],
   aguardando_material: ["producao", "arquivado"],
-  producao: ["aguardando_aprovacao_final", "arquivado"],
+  producao: ["aguardando_material", "aguardando_aprovacao_final", "arquivado"],
   aguardando_aprovacao_final: ["agendado", "alteracoes_design", "producao", "arquivado"],
-  alteracoes_design: ["aguardando_aprovacao_final", "producao", "arquivado"],
+  alteracoes_design: ["aguardando_material", "aguardando_aprovacao_final", "producao", "arquivado"],
   agendado: ["publicado", "producao", "arquivado"],
   publicado: ["arquivado"],
   arquivado: [],

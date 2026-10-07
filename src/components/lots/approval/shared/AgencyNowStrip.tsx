@@ -14,7 +14,7 @@ export function AgencyNowStrip({
 
   return (
     <section className="space-y-3">
-      <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="-mx-1 flex items-start gap-3 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {cards.map((card) => (
           <ContentPosterCard
             key={card.id}

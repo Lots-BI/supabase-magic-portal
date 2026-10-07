@@ -11,6 +11,7 @@ import {
   clientCommentCard,
   clientRequestChanges,
   clientSubmitMaterial,
+  clientUpdateCaption,
 } from "../internal/client-lifecycle.server";
 import {
   listCardAttachmentsWithUrls,
@@ -81,12 +82,29 @@ export const clientApproveCardFn = createServerFn({ method: "POST" })
       .object({
         card_id: z.string().uuid(),
         mensagem: z.string().trim().max(2000).optional().nullable(),
+        legenda: z.string().max(2_200).optional().nullable(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     const actor = await clientActor(context);
     await clientApproveCard(context.supabase, actor, data);
+    return { ok: true };
+  });
+
+export const clientUpdateCaptionFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        card_id: z.string().uuid(),
+        legenda: z.string().max(2_200),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const actor = await clientActor(context);
+    await clientUpdateCaption(context.supabase, actor, data);
     return { ok: true };
   });
 

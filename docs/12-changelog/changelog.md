@@ -3,7 +3,7 @@ title: Changelog
 description: Histórico de mudanças relevantes do Lots BI (produto, dados e infraestrutura).
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-07
 ---
 
 # Changelog
@@ -18,6 +18,48 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 ---
 
 ## [Não lançado]
+
+### Alterado
+
+- **Conteúdos: biblioteca no modo explorador (2026-10-07):** um clique seleciona
+  (ou desmarca) pasta e arquivo; dois cliques abrem. **Download** baixa a pasta
+  inteira, inclusive subpastas.
+
+- **Conteúdos: barrinha do cliente e preview nas pastas (2026-10-07):** a fila
+  do cliente diz _Aprovar Roteiro + Legenda_, _Enviar Material_ ou _Aprovação
+  Final_ (com _alterações_ quando a agência reenvia). O pedido volta no campo
+  **Alterações pedidas**. Pastas da biblioteca mostram miniatura das mídias,
+  como no explorador.
+
+- **Conteúdos: envio de mídia e preview no tamanho do celular (2026-10-07):**
+  depois de aprovar o roteiro o popup do cliente permanece aberto na tela de
+  envio. No computador o seletor de arquivos abre o gerenciador (até 6 arquivos);
+  as mídias só gravam no banco ao tocar em **Enviar mídias**. Preview da peça no
+  tamanho de um celular. Biblioteca com voltar, um clique na pasta e **Download**
+  à esquerda de **Fazer upload**. Status da fila (Baixar / Escrever / Editar) vai
+  numa barrinha acima do cartaz.
+
+- **Conteúdos: biblioteca, download e aprovação da peça (2026-10-07):** ao criar
+  um conteúdo nasce uma pasta na biblioteca (`dd/mm — título`). A mídia do
+  cliente aparece no popup do admin e nessa pasta. O admin seleciona os arquivos
+  e usa **Download** (explorador de pastas). O cliente edita a legenda na
+  aprovação do roteiro, tem a própria biblioteca com upload, e na peça final
+  vê só o preview do Instagram + campo **Pedir alterações**. Checklist da
+  produção foi removido. Migration **78**: `content_library_folders.card_id`.
+
+- **Conteúdos: popup só com o que publica (2026-10-07):** o drawer do card
+  deixa de mostrar copy, direção de arte, CTA e checklist. **Começar peça**
+  fica fixo no rodapé do popup, fora do roteiro.
+
+- **Conteúdos: voltar de produção para mídia enviada (2026-10-07):** o admin pode
+  mover um card de `producao` / `alteracoes_design` para `aguardando_material` a
+  qualquer momento (seletor de status e botão **Mídia enviada** no workspace de
+  produção). A coluna Kanban passa a se chamar Mídia enviada.
+
+- **Conteúdos: legenda na criação e leitura grande (2026-10-07):** o formulário de
+  criar conteúdo tem campo de **Legenda**. Esse texto já entra no card, no popup e
+  na publicação/agendamento (é a legenda do Instagram). Roteiro e legenda aparecem
+  em blocos grandes.
 
 ### Corrigido
 

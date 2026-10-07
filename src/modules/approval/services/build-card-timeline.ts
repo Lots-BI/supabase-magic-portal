@@ -68,3 +68,30 @@ export function latestUnansweredChangeRequest(entries: TimelineEntry[]): Timelin
   }
   return latest;
 }
+
+export function changeRequestKind(entry: TimelineEntry): "roteiro" | "peca" | null {
+  if (entry.eventType !== "changes_requested") return null;
+  if (entry.payload.kind === "peca" || entry.payload.status_para === "alteracoes_design") {
+    return "peca";
+  }
+  if (entry.payload.kind === "roteiro" || entry.payload.status_para === "alteracoes_roteiro") {
+    return "roteiro";
+  }
+  return "roteiro";
+}
+
+/** Pedido do cliente que a agência já reenviou para nova aprovação. */
+export function latestResentChangeRequest(
+  entries: TimelineEntry[],
+  kind: "roteiro" | "peca",
+): TimelineEntry | null {
+  let lastOfKind: TimelineEntry | null = null;
+  let resent: TimelineEntry | null = null;
+  for (const entry of entries) {
+    if (changeRequestKind(entry) === kind) lastOfKind = entry;
+    if (entry.eventType === "approval_requested" && lastOfKind) {
+      resent = lastOfKind;
+    }
+  }
+  return resent;
+}

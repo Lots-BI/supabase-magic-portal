@@ -24,6 +24,7 @@ import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
 import { BrDateTimeFields, horaToDbValue } from "../shared/BrDateTimeFields";
 import { ChangeRequestBanner } from "../shared/ChangeRequestBanner";
 import { RoteiroHtmlEditor } from "./RoteiroHtmlEditor";
+import { CaptionPanel } from "../shared/CaptionPanel";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";
@@ -52,9 +53,12 @@ export function RoteiroEditor({
 
   const [dataPub, setDataPub] = useState("");
   const [horaPub, setHoraPub] = useState("");
+  const [legenda, setLegenda] = useState("");
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scheduleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const captionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const htmlRef = useRef("");
+  const legendaRef = useRef("");
 
   const queryKey = mode === "admin" ? ["content-card", cardId] : ["client-content-card", cardId];
 
@@ -94,6 +98,19 @@ export function RoteiroEditor({
     htmlRef.current = card?.roteiro ?? "";
   }, [card?.id, card?.roteiro]);
 
+  const scheduleCaptionSave = useCallback(
+    (value: string) => {
+      if (mode !== "admin") return;
+      if (captionTimeoutRef.current) clearTimeout(captionTimeoutRef.current);
+      captionTimeoutRef.current = setTimeout(() => {
+        updateFn({ data: { id: cardId, legenda: value.trim() || null } })
+          .then(() => invalidate())
+          .catch((e: Error) => toast.error(e.message));
+      }, SAVE_DEBOUNCE_MS);
+    },
+    [mode, cardId, updateFn, invalidate],
+  );
+
   const persistSchedule = useCallback(
     (date: string, time: string) => {
       if (mode !== "admin") return;
@@ -114,12 +131,15 @@ export function RoteiroEditor({
     if (!card) return;
     setDataPub(card.data_publicacao);
     setHoraPub(card.hora_publicacao?.slice(0, 5) ?? "");
-  }, [card?.id, card?.data_publicacao, card?.hora_publicacao]);
+    setLegenda(card.legenda ?? "");
+    legendaRef.current = card.legenda ?? "";
+  }, [card?.id, card?.data_publicacao, card?.hora_publicacao, card?.legenda]);
 
   useEffect(
     () => () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       if (scheduleTimeoutRef.current) clearTimeout(scheduleTimeoutRef.current);
+      if (captionTimeoutRef.current) clearTimeout(captionTimeoutRef.current);
     },
     [],
   );
@@ -149,10 +169,15 @@ export function RoteiroEditor({
         clearTimeout(scheduleTimeoutRef.current);
         scheduleTimeoutRef.current = null;
       }
+      if (captionTimeoutRef.current) {
+        clearTimeout(captionTimeoutRef.current);
+        captionTimeoutRef.current = null;
+      }
       await updateFn({
         data: {
           id: cardId,
           roteiro: html,
+          legenda: legendaRef.current.trim() || null,
           data_publicacao: dataPub,
           hora_publicacao: hora,
         },
@@ -275,7 +300,8 @@ export function RoteiroEditor({
           resetKey={card.id}
           html={card.roteiro}
           editable
-          minHeightClass="min-h-[420px]"
+          size="hero"
+          minHeightClass="min-h-[50vh]"
           onChange={(html) => {
             htmlRef.current = html;
             scheduleSave(html);
@@ -286,7 +312,22 @@ export function RoteiroEditor({
           resetKey={card.id}
           html={card.roteiro || card.copy_text}
           editable={false}
+          size="hero"
         />
+      )}
+
+      {mode === "admin" ? (
+        <CaptionPanel
+          value={legenda || card.legenda || ""}
+          editable
+          onChange={(value) => {
+            setLegenda(value);
+            legendaRef.current = value;
+            scheduleCaptionSave(value);
+          }}
+        />
+      ) : (
+        <CaptionPanel value={card.legenda ?? ""} />
       )}
 
       {showStaffCta && (

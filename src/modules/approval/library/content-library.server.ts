@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
 import { loadCallerAccess } from "@/modules/access/organization.server";
 import { getClientAccessScope } from "@/modules/approval/internal/client-access.server";
+import { ensureClientCardFolders } from "./card-library-folder.server";
 
 const BUCKET = "editorial-media";
 
@@ -11,31 +12,44 @@ async function importarAnexos(
   admin: ReturnType<typeof getSupabaseAdmin>,
   cadastroClienteId: number,
 ) {
-  const { data: cards, error: cardsError } = await admin
-    .from("content_cards")
-    .select("id")
-    .eq("cadastro_cliente_id", cadastroClienteId);
-  if (cardsError || !cards?.length) return;
+  const folderByCard = await ensureClientCardFolders(admin, cadastroClienteId);
+  if (folderByCard.size === 0) return;
   const { data: anexos, error: anexosError } = await admin
     .from("content_card_attachments")
-    .select("id, file_name, storage_path, mime_type, file_size")
-    .in(
-      "card_id",
-      cards.map((card) => card.id),
-    );
+    .select("id, card_id, file_name, storage_path, mime_type, file_size")
+    .in("card_id", [...folderByCard.keys()]);
   if (anexosError || !anexos?.length) return;
   const { data: ligados } = await admin
     .from("content_library_files")
-    .select("attachment_id")
+    .select("id, attachment_id, folder_id")
     .eq("cadastro_cliente_id", cadastroClienteId)
     .not("attachment_id", "is", null);
-  const ja = new Set((ligados ?? []).map((row) => row.attachment_id as string));
+  const ja = new Map(
+    (ligados ?? [])
+      .filter((row) => row.attachment_id)
+      .map((row) => [row.attachment_id as string, row]),
+  );
+  const mover = (ligados ?? []).filter((row) => {
+    const anexo = anexos.find((item) => item.id === row.attachment_id);
+    const pasta = anexo ? folderByCard.get(anexo.card_id as string) : null;
+    return pasta && row.folder_id !== pasta;
+  });
+  for (const row of mover) {
+    const anexo = anexos.find((item) => item.id === row.attachment_id);
+    const pasta = anexo ? folderByCard.get(anexo.card_id as string) : null;
+    if (!pasta) continue;
+    const { error } = await admin
+      .from("content_library_files")
+      .update({ folder_id: pasta })
+      .eq("id", row.id);
+    if (error) throw new Error(error.message);
+  }
   const novos = anexos.filter((anexo) => anexo.storage_path && !ja.has(anexo.id as string));
   if (novos.length === 0) return;
   const { error } = await admin.from("content_library_files").insert(
     novos.map((anexo) => ({
       cadastro_cliente_id: cadastroClienteId,
-      folder_id: null,
+      folder_id: folderByCard.get(anexo.card_id as string) ?? null,
       attachment_id: anexo.id,
       nome: (anexo.file_name as string | null)?.trim() || "Arquivo enviado",
       storage_path: anexo.storage_path,
@@ -84,7 +98,12 @@ export const listContentLibrary = createServerFn({ method: "GET" })
     if (filesRes.error) throw new Error(filesRes.error.message);
     const files = await Promise.all(
       (filesRes.data ?? []).map(async (file) => {
-        const signed = await admin.storage.from(BUCKET).createSignedUrl(file.storage_path, 3600);
+        const [signed, download] = await Promise.all([
+          admin.storage.from(BUCKET).createSignedUrl(file.storage_path, 3600),
+          admin.storage
+            .from(BUCKET)
+            .createSignedUrl(file.storage_path, 3600, { download: file.nome as string }),
+        ]);
         return {
           id: file.id as string,
           folderId: (file.folder_id as string | null) ?? null,
@@ -92,6 +111,7 @@ export const listContentLibrary = createServerFn({ method: "GET" })
           mimeType: (file.mime_type as string | null) ?? null,
           fileSize: file.file_size != null ? Number(file.file_size) : null,
           url: signed.data?.signedUrl ?? null,
+          downloadUrl: download.data?.signedUrl ?? signed.data?.signedUrl ?? null,
         };
       }),
     );

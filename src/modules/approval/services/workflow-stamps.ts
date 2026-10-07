@@ -45,6 +45,36 @@ export const WORKFLOW_STAMPS: WorkflowStamp[] = [
 
 export type AgencyActionKind = "escrever" | "baixar" | "editar";
 
+export type ClientRevisionFlags = { roteiro?: boolean; peca?: boolean };
+
+/** Barrinha da fila do cliente — o que ele precisa fazer agora. */
+export function clientActionLabel(
+  status: ContentCardStatus,
+  revision?: ClientRevisionFlags,
+): string | null {
+  if (status === "aguardando_aprovacao") {
+    return revision?.roteiro
+      ? "Aprovar Roteiro + Legenda (alterações)"
+      : "Aprovar Roteiro + Legenda";
+  }
+  if (status === "aguardando_material") return "Enviar Material";
+  if (status === "aguardando_aprovacao_final") {
+    return revision?.peca ? "Aprovação Final (Alterações)" : "Aprovação Final";
+  }
+  return null;
+}
+
+export function clientActionBarClass(
+  status: ContentCardStatus,
+  revision?: ClientRevisionFlags,
+): string {
+  const revisao =
+    (status === "aguardando_aprovacao" && revision?.roteiro) ||
+    (status === "aguardando_aprovacao_final" && revision?.peca);
+  if (status === "aguardando_material" || revisao) return "bg-amber-400 text-zinc-950";
+  return "bg-emerald-500 text-white";
+}
+
 export function stampForStatus(status: ContentCardStatus): WorkflowStamp | null {
   return WORKFLOW_STAMPS.find((stamp) => stamp.statuses.includes(status)) ?? null;
 }

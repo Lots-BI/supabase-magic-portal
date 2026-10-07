@@ -9,7 +9,21 @@ import {
 } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronRight, File, Folder, FolderPlus, Upload } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  File,
+  Folder,
+  FolderPlus,
+  Home,
+  Upload,
+} from "lucide-react";
+import {
+  downloadMediaFiles,
+  safePathSegment,
+  type DownloadableFile,
+} from "@/lib/download-media-files";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -31,6 +45,7 @@ type Arquivo = {
   folderId: string | null;
   nome: string;
   url: string | null;
+  downloadUrl?: string | null;
   mimeType: string | null;
 };
 type ItemRef = { kind: "file" | "folder"; id: string };
@@ -39,7 +54,50 @@ function chave(item: ItemRef) {
   return `${item.kind}:${item.id}`;
 }
 
-export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: number }) {
+function dataDaPasta(nome: string): number | null {
+  const match = /^(\d{2})\/(\d{2})/.exec(nome);
+  if (!match) return null;
+  return Number(match[2]) * 100 + Number(match[1]);
+}
+
+function ordenarPastas(a: Pasta, b: Pasta): number {
+  const da = dataDaPasta(a.nome);
+  const db = dataDaPasta(b.nome);
+  if (da != null && db != null && da !== db) return db - da;
+  if (da != null && db == null) return -1;
+  if (db != null && da == null) return 1;
+  return a.nome.localeCompare(b.nome, "pt");
+}
+
+/** Arquivos da pasta e das subpastas, com caminho relativo para gravar no explorador. */
+export function arquivosDaPastaRecursivos(
+  folderId: string,
+  folders: Pasta[],
+  files: Arquivo[],
+  prefix: string,
+): DownloadableFile[] {
+  const diretos = files.filter(
+    (file) => file.folderId === folderId && (file.downloadUrl || file.url),
+  );
+  const itens: DownloadableFile[] = diretos.map((file) => ({
+    url: file.downloadUrl || file.url || "",
+    fileName: file.nome,
+    relativeDir: prefix || undefined,
+  }));
+  for (const sub of folders.filter((folder) => folder.parentId === folderId)) {
+    const next = prefix ? `${prefix}/${safePathSegment(sub.nome)}` : safePathSegment(sub.nome);
+    itens.push(...arquivosDaPastaRecursivos(sub.id, folders, files, next));
+  }
+  return itens;
+}
+
+export function BibliotecaPanel({
+  cadastroClienteId,
+  readOnly = false,
+}: {
+  cadastroClienteId: number;
+  readOnly?: boolean;
+}) {
   const qc = useQueryClient();
   const painelRef = useRef<HTMLElement>(null);
   const listFn = useServerFn(listContentLibrary);
@@ -129,8 +187,30 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
     }
   }
 
-  const pastas = (library.data?.folders ?? []).filter((folder) => folder.parentId === folderId);
+  const pastas = (library.data?.folders ?? [])
+    .filter((folder) => folder.parentId === folderId)
+    .slice()
+    .sort(ordenarPastas);
   const arquivos = (library.data?.files ?? []).filter((file) => file.folderId === folderId);
+  const naRaiz = folderId == null;
+
+  function contarItens(pastaId: string) {
+    const sub = (library.data?.folders ?? []).filter(
+      (folder) => folder.parentId === pastaId,
+    ).length;
+    const files = (library.data?.files ?? []).filter((file) => file.folderId === pastaId).length;
+    const n = sub + files;
+    if (n === 0) return "Vazia";
+    if (n === 1) return "1 item";
+    return `${n} itens`;
+  }
+
+  function voltar() {
+    const atual = (library.data?.folders ?? []).find((folder) => folder.id === folderId);
+    setFolderId(atual?.parentId ?? null);
+    setSelecao([]);
+    setAncora(null);
+  }
   const ordem = useMemo(
     () => [
       ...pastas.map((pasta) => chave({ kind: "folder", id: pasta.id })),
@@ -157,6 +237,11 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
       setAncora(id);
       return;
     }
+    if (selecao.length === 1 && selecao[0] === id) {
+      setSelecao([]);
+      setAncora(null);
+      return;
+    }
     setSelecao([id]);
     setAncora(id);
   }
@@ -177,6 +262,7 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
     event.stopPropagation();
     setAlvo(null);
     setSoltando(false);
+    if (readOnly) return;
     const bruto = event.dataTransfer.getData(ARQUIVO);
     if (bruto) {
       const ids = bruto.split(",").filter(Boolean);
@@ -209,6 +295,17 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
         setRenomeando(null);
         return;
       }
+      if (event.key === "Backspace" && !naRaiz) {
+        event.preventDefault();
+        voltar();
+        return;
+      }
+      if (event.key === "Enter" && selecao.length === 1) {
+        event.preventDefault();
+        const [kind, id] = selecao[0].split(":") as [ItemRef["kind"], string];
+        abrir({ kind, id });
+        return;
+      }
       if (event.key === "F2" && selecao.length === 1) {
         event.preventDefault();
         const [kind, id] = selecao[0].split(":") as [ItemRef["kind"], string];
@@ -217,7 +314,7 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
     }
     painel.addEventListener("keydown", noTeclado);
     return () => painel.removeEventListener("keydown", noTeclado);
-  }, [ordem, selecao]);
+  }, [ordem, selecao, naRaiz, folderId, library.data?.folders]);
 
   const trilha = useMemo(() => {
     const todas = library.data?.folders ?? [];
@@ -233,6 +330,45 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
   }, [folderId, library.data?.folders]);
 
   const unico = selecao.length === 1 ? selecao[0] : null;
+  const arquivosSelecionados = arquivos.filter((file) =>
+    selecao.includes(chave({ kind: "file", id: file.id })),
+  );
+  const pastasSelecionadas = pastas.filter((folder) =>
+    selecao.includes(chave({ kind: "folder", id: folder.id })),
+  );
+  const podeBaixar = arquivosSelecionados.length > 0 || pastasSelecionadas.length > 0;
+
+  async function baixarSelecionados() {
+    const todasPastas = library.data?.folders ?? [];
+    const todosArquivos = library.data?.files ?? [];
+    const prontos: DownloadableFile[] = [
+      ...arquivosSelecionados
+        .filter((file) => file.downloadUrl || file.url)
+        .map((file) => ({
+          url: file.downloadUrl || file.url || "",
+          fileName: file.nome,
+        })),
+      ...pastasSelecionadas.flatMap((pasta) =>
+        arquivosDaPastaRecursivos(
+          pasta.id,
+          todasPastas,
+          todosArquivos,
+          safePathSegment(pasta.nome),
+        ),
+      ),
+    ];
+    if (prontos.length === 0) {
+      toast.error("Nenhum arquivo pronto para download.");
+      return;
+    }
+    try {
+      await downloadMediaFiles(prontos);
+      toast.success(prontos.length === 1 ? "Arquivo salvo." : `${prontos.length} arquivos salvos.`);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      toast.error(error instanceof Error ? error.message : "Não foi possível baixar.");
+    }
+  }
 
   return (
     <section
@@ -255,15 +391,30 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
         setSoltando(false);
         setAlvo(null);
       }}
-      onDrop={(event) => soltar(folderId, event)}
+      onDrop={(event) => {
+        if (readOnly) return;
+        soltar(folderId, event);
+      }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-muted px-4 py-3">
         <nav className="flex min-w-0 flex-wrap items-center gap-1 text-sm" aria-label="Pastas">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            disabled={naRaiz}
+            onClick={voltar}
+            aria-label="Pasta anterior"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
           <button
             type="button"
             className={cn(
-              "rounded-md px-2 py-1 font-medium",
-              alvo === "raiz" ? "bg-primary/15 text-primary" : "text-foreground",
+              "inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-medium",
+              naRaiz ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
+              alvo === "raiz" && "bg-primary/15 text-primary",
             )}
             onClick={() => {
               setFolderId(null);
@@ -277,15 +428,19 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
             onDragLeave={() => setAlvo((atual) => (atual === "raiz" ? null : atual))}
             onDrop={(event) => soltar(null, event)}
           >
-            Meu Drive
+            <Home className="h-3.5 w-3.5" />
+            Biblioteca
           </button>
-          {trilha.map((pasta) => (
-            <span key={pasta.id} className="flex items-center gap-1">
-              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+          {trilha.map((pasta, index) => (
+            <span key={pasta.id} className="flex min-w-0 items-center gap-1">
+              <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
               <button
                 type="button"
                 className={cn(
-                  "rounded-md px-2 py-1 font-medium",
+                  "max-w-[220px] truncate rounded-md px-2 py-1 font-medium",
+                  index === trilha.length - 1
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                   alvo === pasta.id && "bg-primary/15 text-primary",
                 )}
                 onClick={() => {
@@ -305,37 +460,55 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
           ))}
         </nav>
         <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!unico}
-            onClick={() => {
-              if (!unico) return;
-              const [kind, id] = unico.split(":") as [ItemRef["kind"], string];
-              setRenomeando({ kind, id });
-            }}
-          >
-            Renomear
-          </Button>
-          <Button type="button" variant="outline" onClick={() => setCriando((aberto) => !aberto)}>
-            <FolderPlus className="mr-2 h-4 w-4" />
-            Nova pasta
-          </Button>
-          <Button type="button" onClick={() => fileRef.current?.click()}>
-            <Upload className="mr-2 h-4 w-4" />
-            Fazer upload
-          </Button>
-          <input
-            ref={fileRef}
-            type="file"
-            multiple
-            className="hidden"
-            onChange={(event) => {
-              const files = [...(event.target.files ?? [])];
-              event.target.value = "";
-              if (files.length) void enviarVarios(files, folderId);
-            }}
-          />
+          {readOnly ? null : (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!unico}
+                onClick={() => {
+                  if (!unico) return;
+                  const [kind, id] = unico.split(":") as [ItemRef["kind"], string];
+                  setRenomeando({ kind, id });
+                }}
+              >
+                Renomear
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCriando((aberto) => !aberto)}
+              >
+                <FolderPlus className="mr-2 h-4 w-4" />
+                Nova pasta
+              </Button>
+            </>
+          )}
+          {podeBaixar ? (
+            <Button type="button" onClick={() => void baixarSelecionados()}>
+              <Download className="mr-2 h-4 w-4" />
+              Download
+            </Button>
+          ) : null}
+          {readOnly ? null : (
+            <>
+              <Button type="button" onClick={() => fileRef.current?.click()}>
+                <Upload className="mr-2 h-4 w-4" />
+                Fazer upload
+              </Button>
+              <input
+                ref={fileRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(event) => {
+                  const files = [...(event.target.files ?? [])];
+                  event.target.value = "";
+                  if (files.length) void enviarVarios(files, folderId);
+                }}
+              />
+            </>
+          )}
         </div>
       </div>
 
@@ -363,9 +536,17 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
       {library.isLoading ? (
         <p className="px-4 py-8 text-sm text-muted-foreground">Carregando arquivos…</p>
       ) : pastas.length === 0 && arquivos.length === 0 ? (
-        <p className="px-4 py-16 text-center text-sm text-muted-foreground">
-          Arraste arquivos para cá, ou crie uma pasta.
-        </p>
+        <div className="px-4 py-16 text-center">
+          <Folder className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
+          <p className="text-sm font-medium">
+            {naRaiz ? "Biblioteca da marca" : "Esta pasta está vazia"}
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
+            {naRaiz
+              ? "Cada conteúdo ganha uma pasta com a data e o título. Arraste arquivos ou crie uma pasta."
+              : "Arraste arquivos para cá ou use Fazer upload."}
+          </p>
+        </div>
       ) : (
         <ul
           className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
@@ -373,10 +554,17 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
             if (event.target === event.currentTarget) setSelecao([]);
           }}
         >
+          {naRaiz ? (
+            <p className="col-span-full text-xs text-muted-foreground">
+              Um clique seleciona. Dois cliques abrem a pasta. Selecione uma pasta para baixar tudo
+              o que está dentro.
+            </p>
+          ) : null}
           {pastas.map((folder) => (
             <ItemMiniatura
               key={folder.id}
               nome={folder.nome}
+              subtitulo={contarItens(folder.id)}
               selecionado={selecao.includes(chave({ kind: "folder", id: folder.id }))}
               alvo={alvo === folder.id}
               renomeando={renomeando?.kind === "folder" && renomeando.id === folder.id}
@@ -392,7 +580,7 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
               onDragLeave={() => setAlvo((atual) => (atual === folder.id ? null : atual))}
               onDrop={(event) => soltar(folder.id, event)}
             >
-              <Folder className="h-16 w-16 text-primary" />
+              <FolderPreview files={arquivosDaPasta(folder.id, library.data?.files ?? [])} />
             </ItemMiniatura>
           ))}
           {arquivos.map((file) => (
@@ -431,6 +619,45 @@ export function BibliotecaPanel({ cadastroClienteId }: { cadastroClienteId: numb
   );
 }
 
+function arquivosDaPasta(folderId: string, files: Arquivo[]): Arquivo[] {
+  return files.filter((file) => file.folderId === folderId);
+}
+
+function FolderPreview({ files }: { files: Arquivo[] }) {
+  const thumbs = files
+    .filter(
+      (file) =>
+        Boolean(file.url) &&
+        (file.mimeType?.startsWith("image/") || file.mimeType?.startsWith("video/")),
+    )
+    .slice(0, 4);
+  if (thumbs.length === 0) {
+    return <Folder className="h-16 w-16 text-primary" />;
+  }
+  if (thumbs.length === 1) {
+    return (
+      <div className="relative h-full w-full">
+        <span className="absolute left-2 top-0 z-10 h-2 w-[38%] rounded-t-sm bg-amber-500" />
+        <div className="absolute inset-x-0 bottom-0 top-2 overflow-hidden rounded-md bg-muted">
+          <Miniatura file={thumbs[0]} />
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="relative h-full w-full">
+      <span className="absolute left-2 top-0 z-10 h-2 w-[38%] rounded-t-sm bg-amber-500" />
+      <div className="absolute inset-x-0 bottom-0 top-2 grid grid-cols-2 grid-rows-2 gap-px overflow-hidden rounded-md bg-background">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div key={thumbs[index]?.id ?? `vazio-${index}`} className="overflow-hidden bg-muted/80">
+            {thumbs[index] ? <Miniatura file={thumbs[index]} /> : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Miniatura({ file }: { file: Arquivo }) {
   if (file.mimeType?.startsWith("image/") && file.url) {
     return <img src={file.url} alt="" className="h-full w-full object-cover" />;
@@ -443,6 +670,7 @@ function Miniatura({ file }: { file: Arquivo }) {
 
 function ItemMiniatura({
   nome,
+  subtitulo,
   selecionado,
   alvo = false,
   renomeando,
@@ -458,6 +686,7 @@ function ItemMiniatura({
   onDrop,
 }: {
   nome: string;
+  subtitulo?: string;
   selecionado: boolean;
   alvo?: boolean;
   renomeando: boolean;
@@ -499,28 +728,28 @@ function ItemMiniatura({
         }, 0);
       }}
       className={cn(
-        "overflow-hidden rounded-xl border bg-card",
+        "cursor-pointer select-none overflow-hidden rounded-xl border bg-card",
         draggable && "cursor-grab active:cursor-grabbing",
         selecionado || alvo ? "border-primary bg-primary/10" : "border-muted hover:bg-muted/60",
       )}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
+      onClick={(event) => {
+        if (renomeando || arrastou.current) return;
+        if (event.target instanceof HTMLInputElement) return;
+        if (event.detail > 1) return;
+        onSelect(event);
+      }}
+      onDoubleClick={(event) => {
+        if (renomeando) return;
+        event.preventDefault();
+        onOpen();
+      }}
     >
-      <button
-        type="button"
-        className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-muted/40"
-        onClick={(event) => {
-          if (arrastou.current) return;
-          onSelect(event);
-        }}
-        onDoubleClick={(event) => {
-          event.preventDefault();
-          onOpen();
-        }}
-      >
+      <div className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-muted/40">
         {children}
-      </button>
+      </div>
       {renomeando ? (
         <input
           value={texto}
@@ -542,7 +771,12 @@ function ItemMiniatura({
           onBlur={confirmar}
         />
       ) : (
-        <p className="line-clamp-2 px-2 py-2 text-center text-sm font-medium">{nome}</p>
+        <div className="px-2 py-2 text-center">
+          <p className="line-clamp-2 text-sm font-medium">{nome}</p>
+          {subtitulo ? (
+            <p className="mt-0.5 text-[11px] text-muted-foreground">{subtitulo}</p>
+          ) : null}
+        </div>
       )}
     </li>
   );

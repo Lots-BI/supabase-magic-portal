@@ -12,10 +12,12 @@ describe("status-machine", () => {
     expect(canTransitionStatus("aguardando_aprovacao", "alteracoes_roteiro")).toBe(true);
     expect(canTransitionStatus("alteracoes_roteiro", "aguardando_aprovacao")).toBe(true);
     expect(canTransitionStatus("aguardando_material", "producao")).toBe(true);
+    expect(canTransitionStatus("producao", "aguardando_material")).toBe(true);
     expect(canTransitionStatus("producao", "aguardando_aprovacao_final")).toBe(true);
     expect(canTransitionStatus("aguardando_aprovacao_final", "agendado")).toBe(true);
     expect(canTransitionStatus("aguardando_aprovacao_final", "alteracoes_design")).toBe(true);
     expect(canTransitionStatus("alteracoes_design", "aguardando_aprovacao_final")).toBe(true);
+    expect(canTransitionStatus("alteracoes_design", "aguardando_material")).toBe(true);
     expect(canTransitionStatus("agendado", "publicado")).toBe(true);
     expect(canTransitionStatus("agendado", "arquivado")).toBe(true);
     expect(canTransitionStatus("aguardando_aprovacao_final", "arquivado")).toBe(true);

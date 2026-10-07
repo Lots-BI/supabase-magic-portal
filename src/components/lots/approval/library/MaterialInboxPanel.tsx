@@ -3,9 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Download, FolderOpen, HardDriveDownload } from "lucide-react";
+import { FolderOpen, HardDriveDownload } from "lucide-react";
 import { formatBR } from "@/lib/period";
-import { formatBytes } from "@/modules/approval/services/material-upload";
 import {
   listMaterialInboxFn,
   markMaterialsDownloadedFn,
@@ -16,6 +15,7 @@ import { ApprovalPanelSkeleton } from "../shared/ApprovalPanelSkeleton";
 import { ApprovalEmptyState } from "../shared/ApprovalEmptyState";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { Button } from "@/components/ui/button";
+import { SelectableMediaGallery } from "../card/SelectableMediaGallery";
 import type { ContentCard } from "@/modules/approval/types/content-card";
 import type { MediaAsset } from "@/lib/media-preview";
 
@@ -99,12 +99,7 @@ export function MaterialInboxPanel({ cadastroClienteId }: { cadastroClienteId: n
                 key={item.card.id}
                 item={item}
                 marking={markMut.isPending}
-                onDownloadAndProduce={() => {
-                  for (const m of item.materials) {
-                    if (m.downloadUrl) window.open(m.downloadUrl, "_blank", "noopener");
-                  }
-                  markMut.mutate(item.card.id);
-                }}
+                onStartProduction={() => markMut.mutate(item.card.id)}
               />
             ))}
           </ul>
@@ -117,11 +112,11 @@ export function MaterialInboxPanel({ cadastroClienteId }: { cadastroClienteId: n
 function MaterialInboxCard({
   item,
   marking,
-  onDownloadAndProduce,
+  onStartProduction,
 }: {
   item: InboxItem;
   marking: boolean;
-  onDownloadAndProduce: () => void;
+  onStartProduction: () => void;
 }) {
   const { card, materials } = item;
   const statusLabel = KANBAN_COLUMNS.find((c) => c.status === card.status)?.label ?? card.status;
@@ -150,7 +145,7 @@ function MaterialInboxCard({
           </p>
         </div>
         {ready ? (
-          <Button type="button" size="sm" disabled={marking} onClick={onDownloadAndProduce}>
+          <Button type="button" size="sm" disabled={marking} onClick={onStartProduction}>
             <HardDriveDownload className="mr-2 h-4 w-4" />
             Começar peça
           </Button>
@@ -162,37 +157,9 @@ function MaterialInboxCard({
           Aguardando o cliente enviar as mídias gravadas a partir do roteiro.
         </p>
       ) : (
-        <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {materials.map((m) => (
-            <li key={m.id} className="overflow-hidden rounded-lg border border-border bg-muted/30">
-              {m.kind === "video" ? (
-                <video src={m.url} className="aspect-square w-full object-cover" controls muted />
-              ) : (
-                <img src={m.url} alt="" className="aspect-square w-full object-cover" />
-              )}
-              <div className="flex items-center justify-between gap-2 p-2">
-                <span className="truncate text-[11px] text-muted-foreground">
-                  {m.fileName ?? "arquivo"}
-                  {m.fileSize ? ` · ${formatBytes(m.fileSize)}` : ""}
-                </span>
-                {m.downloadUrl ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 shrink-0"
-                    asChild
-                  >
-                    <a href={m.downloadUrl} download={m.fileName ?? undefined}>
-                      <Download className="mr-1 h-3.5 w-3.5" />
-                      Baixar
-                    </a>
-                  </Button>
-                ) : null}
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-3">
+          <SelectableMediaGallery assets={materials} />
+        </div>
       )}
     </li>
   );

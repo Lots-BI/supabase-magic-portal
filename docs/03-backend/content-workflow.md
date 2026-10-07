@@ -3,7 +3,7 @@ title: Content Workflow — Backend
 description: Server functions, repository pattern e API do módulo Aprovações.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-07-06
+last_review: 2026-10-07
 ---
 
 # Content Workflow — Backend
@@ -36,6 +36,9 @@ UI → Server Function → Module Service → Repository → Supabase
 
 **Regra:** nenhum arquivo em `modules/approval/` importa `@/integrations/supabase` exceto
 `*.repository.server.ts`.
+
+Admin pode devolver `producao` / `alteracoes_design` → `aguardando_material` (mídia enviada)
+a qualquer momento. Cliente não faz essa transição.
 
 ---
 

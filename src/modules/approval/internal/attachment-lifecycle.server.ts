@@ -20,6 +20,18 @@ function storageAdmin(): SupabaseClient {
   return getSupabaseAdmin();
 }
 
+async function syncUploadedAttachmentToLibrary(cardId: string, attachment: ContentCardAttachment) {
+  try {
+    const card = await contentCardRepository.findById(storageAdmin(), cardId);
+    if (!card) return;
+    const { syncAttachmentToCardLibrary } =
+      await import("@/modules/approval/library/card-library-folder.server");
+    await syncAttachmentToCardLibrary(storageAdmin(), card, attachment);
+  } catch {
+    // Biblioteca acompanha o anexo; falha aqui não desfaz o upload.
+  }
+}
+
 export function inferAttachmentKind(mime: string): AttachmentKind {
   if (mime.startsWith("image/")) return "image";
   if (mime.startsWith("video/")) return "video";
@@ -284,6 +296,7 @@ export async function confirmDirectUpload(
 
   const url = await signedUrlFor(input.path);
   const downloadUrl = await signedUrlFor(input.path, { download: input.fileName });
+  await syncUploadedAttachmentToLibrary(input.cardId, attachment);
   return { attachment, url, downloadUrl };
 }
 
@@ -356,6 +369,7 @@ export async function uploadCardAttachment(
   });
 
   const url = await signedUrlFor(storagePath);
+  await syncUploadedAttachmentToLibrary(input.cardId, attachment);
   return { attachment, url };
 }
 

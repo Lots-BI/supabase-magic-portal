@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -45,6 +46,7 @@ export function CardCreateSheet({
   const pillarsFn = useServerFn(listEditorialPillars);
 
   const [titulo, setTitulo] = useState("");
+  const [legenda, setLegenda] = useState("");
   const [formato, setFormato] = useState<(typeof CONTENT_FORMATOS)[number]>("estatico");
   const [linha, setLinha] = useState<string>(LINHAS_EDITORIAIS[0]);
   const [tema, setTema] = useState("");
@@ -68,6 +70,7 @@ export function CardCreateSheet({
           cadastro_cliente_id: cliente.id,
           cliente_nome: cliente.nome_cliente,
           titulo: titulo.trim(),
+          legenda: legenda.trim() || null,
           data_publicacao: data,
           hora_publicacao: hora ? `${hora}:00` : null,
           formato,
@@ -86,6 +89,7 @@ export function CardCreateSheet({
       onCreated(card.id);
       onClose();
       setTitulo("");
+      setLegenda("");
       setTema("");
       setHora("");
       setPilarId("");
@@ -149,6 +153,17 @@ export function CardCreateSheet({
           <div className="space-y-2">
             <Label htmlFor="new-tema">Tema *</Label>
             <Input id="new-tema" value={tema} onChange={(e) => setTema(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="new-legenda">Legenda</Label>
+            <Textarea
+              id="new-legenda"
+              rows={8}
+              value={legenda}
+              onChange={(e) => setLegenda(e.target.value)}
+              placeholder="Texto que vai na publicação"
+              className="min-h-[180px] text-base leading-relaxed"
+            />
           </div>
           <BrDateTimeFields
             date={data}

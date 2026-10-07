@@ -19,6 +19,7 @@ import {
   listScopedEditorialPillarsFn,
 } from "@/modules/client/scoped-portal.functions";
 import { listMaterialStatus } from "@/modules/approval/library/content-library.server";
+import { BibliotecaPanel } from "@/components/lots/approval/library/BibliotecaPanel";
 
 function invalidateScopedViews(
   qc: ReturnType<typeof useQueryClient>,
@@ -152,11 +153,19 @@ export function ClientApprovalWorkspace({ initialCardId }: { initialCardId?: str
       )}
 
       {scope.cadastroClienteId ? (
-        <MaterialStatus cadastroClienteId={scope.cadastroClienteId} />
+        <>
+          <MaterialStatus cadastroClienteId={scope.cadastroClienteId} />
+          <BibliotecaPanel cadastroClienteId={scope.cadastroClienteId} readOnly={!canMutate} />
+        </>
       ) : null}
 
       {!boardQ.isLoading && !boardQ.isError && suaVez.length > 0 && (
-        <ClientSuaVezQueue cards={suaVez} thumbMap={thumbMap} onOpenCard={setOpenCardId} />
+        <ClientSuaVezQueue
+          cards={suaVez}
+          thumbMap={thumbMap}
+          revisions={boardQ.data?.clientRevisions}
+          onOpenCard={setOpenCardId}
+        />
       )}
 
       {!boardQ.isLoading && !boardQ.isError && suaVez.length === 0 && (

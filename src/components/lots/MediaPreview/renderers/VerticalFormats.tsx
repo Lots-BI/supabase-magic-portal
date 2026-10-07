@@ -10,14 +10,14 @@ export function ReelRenderer({ ctx }: { ctx: MediaPreviewContext }) {
 
   if (!asset) {
     return (
-      <div className="flex aspect-[9/16] max-h-[520px] items-center justify-center bg-black text-white/50">
+      <div className="flex aspect-[9/16] max-h-[min(70vh,620px)] items-center justify-center bg-black text-white/50">
         Sem mídia
       </div>
     );
   }
 
   return (
-    <div className="relative mx-auto max-w-[320px] overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl">
+    <div className="relative mx-auto w-full max-w-[390px] overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl">
       <InlineVideoPlayer asset={asset} vertical />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-4 pt-16">
         <div className="flex items-end gap-3">
@@ -46,7 +46,7 @@ export function StoryRenderer({ ctx }: { ctx: MediaPreviewContext }) {
   const asset = ctx.assets[0];
 
   return (
-    <div className="relative mx-auto max-w-[320px] overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl">
+    <div className="relative mx-auto w-full max-w-[390px] overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl">
       {/* Barra superior estilo story */}
       <div className="absolute inset-x-0 top-0 z-20 space-y-2 p-3">
         <div className="flex gap-1">
@@ -73,7 +73,7 @@ export function StoryRenderer({ ctx }: { ctx: MediaPreviewContext }) {
         </div>
       </div>
 
-      <div className="aspect-[9/16] max-h-[520px]">
+      <div className="aspect-[9/16] max-h-[min(70vh,620px)]">
         {!asset ? (
           <div className="flex h-full items-center justify-center text-white/40">Sem mídia</div>
         ) : asset.kind === "video" ? (

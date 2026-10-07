@@ -4,6 +4,7 @@ import { contentCardRepository } from "../repositories/content-card.repository.s
 import { contentCardEventRepository } from "../repositories/content-card-event.repository.server";
 import { editorialPillarRepository } from "../repositories/editorial-pillar.repository.server";
 import { buildKanbanBoard } from "../services/build-kanban-board";
+import { clientTurnCards, flattenKanbanCards } from "../services/workflow-stamps";
 import { buildCardTimeline } from "../services/build-card-timeline";
 import {
   applyAttachmentCoversToCards,
@@ -19,7 +20,13 @@ export async function getClientKanbanBoard(supabase: SupabaseClient, scope: Clie
   );
   const withCovers = await applyAttachmentCoversToCards(supabase, cards);
   // Rascunhos internos (roteiro) não entram na fila do cliente.
-  return buildKanbanBoard(withCovers.filter((c) => c.status !== "roteiro"));
+  const board = buildKanbanBoard(withCovers.filter((c) => c.status !== "roteiro"));
+  const turnIds = clientTurnCards(flattenKanbanCards(board)).map((card) => card.id);
+  const clientRevisions = await contentCardEventRepository.listChangeKindsByCardIds(
+    supabase,
+    turnIds,
+  );
+  return { ...board, clientRevisions };
 }
 
 export async function getClientCardDetail(

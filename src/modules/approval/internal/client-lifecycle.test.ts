@@ -58,11 +58,14 @@ describe("client-lifecycle", () => {
       status: "aguardando_material",
     } as never);
 
-    const result = await clientApproveCard(supabase, actor, { card_id: "c1" });
+    const result = await clientApproveCard(supabase, actor, {
+      card_id: "c1",
+      legenda: "  Legenda do post  ",
+    });
     expect(contentCardRepository.update).toHaveBeenCalledWith(
       adminClient,
       "c1",
-      expect.objectContaining({ status: "aguardando_material" }),
+      expect.objectContaining({ status: "aguardando_material", legenda: "Legenda do post" }),
     );
     expect(contentCardEventRepository.append).toHaveBeenCalledWith(
       supabase,
@@ -176,6 +179,16 @@ describe("client-lifecycle", () => {
         roteiro: "<p>Trocar o gancho</p>",
       }),
     );
+  });
+
+  it("exige texto ao pedir alteração da peça final", async () => {
+    vi.mocked(contentCardRepository.findById).mockResolvedValue({
+      ...baseCard,
+      status: "aguardando_aprovacao_final",
+    } as never);
+    await expect(
+      clientRequestChanges(supabase, actor, { card_id: "c1", mensagem: "   " }),
+    ).rejects.toThrow(/Descreva a alteração/);
   });
 
   it("request changes on final piece moves to alteracoes_design via admin", async () => {

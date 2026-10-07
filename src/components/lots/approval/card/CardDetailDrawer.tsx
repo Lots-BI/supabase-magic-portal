@@ -37,6 +37,9 @@ import { KANBAN_COLUMNS } from "@/modules/approval/workflow/column-config";
 import { canTransitionStatus } from "@/modules/approval/workflow/status-machine";
 import { CardTimeline } from "./CardTimeline";
 import { CardMediaUpload } from "./CardMediaUpload";
+import { SelectableMediaGallery } from "./SelectableMediaGallery";
+import { RoteiroHtmlEditor } from "../roteiro/RoteiroHtmlEditor";
+import { CaptionPanel } from "../shared/CaptionPanel";
 import { MobileStatusPicker } from "../kanban/MobileStatusPicker";
 import { KANBAN_COLUMN_META } from "../kanban/kanban-meta";
 import { MediaPreview } from "@/components/lots/MediaPreview/MediaPreview";
@@ -97,6 +100,7 @@ export function CardDetailDrawer({
     data_publicacao: "",
     hora_publicacao: "",
   });
+  const [draftCardId, setDraftCardId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!card) return;
@@ -112,7 +116,23 @@ export function CardDetailDrawer({
       data_publicacao: card.data_publicacao,
       hora_publicacao: card.hora_publicacao?.slice(0, 5) ?? "",
     });
-  }, [card]);
+    setDraftCardId(card.id);
+  }, [
+    card?.id,
+    card?.titulo,
+    card?.legenda,
+    card?.copy_text,
+    card?.roteiro,
+    card?.direcao_arte,
+    card?.cta,
+    card?.observacoes,
+    card?.pilar_id,
+    card?.data_publicacao,
+    card?.hora_publicacao,
+  ]);
+
+  const captionValue =
+    card && draftCardId === card.id ? draft.legenda : (card?.legenda ?? draft.legenda);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["content-card", cardId] });
@@ -141,12 +161,8 @@ export function CardDetailDrawer({
         data: {
           id: cardId,
           titulo: draft.titulo,
-          legenda: draft.legenda || null,
-          copy_text: draft.copy_text || null,
+          legenda: (draftCardId === cardId ? draft.legenda : (card?.legenda ?? "")).trim() || null,
           roteiro: draft.roteiro || null,
-          direcao_arte: draft.direcao_arte || null,
-          cta: draft.cta || null,
-          observacoes: draft.observacoes || null,
           pilar_id: draft.pilar_id || null,
           data_publicacao: draft.data_publicacao,
           hora_publicacao: hora,
@@ -220,16 +236,9 @@ export function CardDetailDrawer({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const toggleChecklist = (itemId: string) => {
-    if (!card) return;
-    const checklist = card.checklist.map((item) =>
-      item.id === itemId ? { ...item, done: !item.done } : item,
-    );
-    updateFn({ data: { id: cardId, checklist } }).then(() => invalidate());
-  };
-
   const statusMeta = card ? KANBAN_COLUMN_META[card.status] : null;
   const cardAttachments = detailQ.data?.attachments ?? [];
+  const clientMaterials = cardAttachments.filter((asset) => asset.mediaRole === "cliente_material");
   const finalPreview = assetsForPublishPreview(cardAttachments, "final");
   const previewCtx =
     card &&
@@ -237,7 +246,7 @@ export function CardDetailDrawer({
       {
         formato: card.formato,
         plataforma: card.plataforma,
-        legenda: card.legenda,
+        legenda: captionValue || card.legenda,
         cliente_nome: card.cliente_nome,
         data_publicacao: card.data_publicacao,
         localizacao: card.localizacao,
@@ -249,7 +258,7 @@ export function CardDetailDrawer({
     <>
       <Dialog open onOpenChange={(o) => !o && onClose()}>
         <DialogContent
-          className="flex max-h-[min(100dvh-2rem,920px)] w-[calc(100vw-1.5rem)] max-w-4xl flex-col gap-0 overflow-hidden p-0 sm:rounded-xl [&>button]:right-4 [&>button]:top-4"
+          className="flex max-h-[min(100dvh-1rem,96dvh)] w-[calc(100vw-1.5rem)] max-w-5xl flex-col gap-0 overflow-hidden p-0 sm:rounded-xl [&>button]:right-4 [&>button]:top-4"
           onPointerDownOutside={(e) => {
             const t = e.target as HTMLElement | null;
             if (t?.closest("[data-radix-select-content]")) e.preventDefault();
@@ -281,242 +290,203 @@ export function CardDetailDrawer({
           )}
 
           {card && (
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-4 pb-24">
-              <div className="mb-4 flex flex-wrap gap-2">
-                <div className="hidden sm:block">
-                  <Select
-                    value={card.status}
-                    onValueChange={(v) => moveMut.mutate(v as ContentCardStatus)}
-                  >
-                    <SelectTrigger className="w-[220px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {KANBAN_COLUMNS.filter((col) =>
-                        canTransitionStatus(card.status, col.status),
-                      ).map((col) => (
-                        <SelectItem key={col.status} value={col.status}>
-                          {KANBAN_COLUMN_META[col.status].emoji} {col.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <MobileStatusPicker
-                  currentStatus={card.status}
-                  onSelect={(s) => moveMut.mutate(s)}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => duplicateMut.mutate()}
-                  disabled={duplicateMut.isPending}
-                >
-                  <Copy className="mr-1.5 h-4 w-4" />
-                  Duplicar
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setArchiveOpen(true)}
-                  disabled={archiveMut.isPending || card.status === "arquivado"}
-                >
-                  <Archive className="mr-1.5 h-4 w-4" />
-                  Arquivar
-                </Button>
-              </div>
-
-              <Tabs
-                defaultValue={card.status === "aguardando_material" ? "arquivos" : "conteudo"}
-                className="min-h-0 flex-1"
-              >
-                <TabsList className="mb-4 w-full justify-start">
-                  <TabsTrigger value="conteudo">Conteúdo</TabsTrigger>
-                  <TabsTrigger value="arquivos">Arquivos</TabsTrigger>
-                  <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                  <TabsTrigger value="comentarios">Comentários</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="conteudo" className="space-y-4">
-                  {selectedPillar && <PillarBadge pillar={selectedPillar} />}
-                  {(card.status === "publicado" || card.publish_status === "published") && (
-                    <PublishedIgMetrics ig={publishedIg} />
-                  )}
-                  <BrDateTimeFields
-                    date={draft.data_publicacao}
-                    time={draft.hora_publicacao}
-                    disabled={card.status === "arquivado"}
-                    requiredDate
-                    onDateChange={(iso) => setDraft((d) => ({ ...d, data_publicacao: iso }))}
-                    onTimeChange={(hhmm) => setDraft((d) => ({ ...d, hora_publicacao: hhmm }))}
-                  />
-                  <div className="space-y-2">
-                    <Label htmlFor="titulo">Título</Label>
-                    <Input
-                      id="titulo"
-                      value={draft.titulo}
-                      onChange={(e) => setDraft((d) => ({ ...d, titulo: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Pilar editorial</Label>
-                    {pillarsQ.isLoading ? (
-                      <p className="text-sm text-muted-foreground">Carregando pilares…</p>
-                    ) : pillarsQ.isError ? (
-                      <p className="text-sm text-destructive">
-                        Não foi possível carregar os pilares.
-                        {pillarsQ.error instanceof Error ? ` ${pillarsQ.error.message}` : ""}
-                      </p>
-                    ) : (pillarsQ.data ?? []).length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        Nenhum pilar ativo neste cliente. Crie em Conteúdos → Pilares.
-                      </p>
-                    ) : (
-                      <Select
-                        value={draft.pilar_id || "__none__"}
-                        onValueChange={(v) =>
-                          setDraft((d) => ({ ...d, pilar_id: v === "__none__" ? "" : v }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent position="popper" sideOffset={4}>
-                          <SelectItem value="__none__">Sem pilar</SelectItem>
-                          {(pillarsQ.data ?? []).map((p) => (
-                            <SelectItem key={p.id} value={p.id}>
-                              {p.titulo}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="copy">Copy</Label>
-                    <Textarea
-                      id="copy"
-                      rows={3}
-                      value={draft.copy_text}
-                      onChange={(e) => setDraft((d) => ({ ...d, copy_text: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="legenda">Legenda</Label>
-                    <Textarea
-                      id="legenda"
-                      rows={3}
-                      value={draft.legenda}
-                      onChange={(e) => setDraft((d) => ({ ...d, legenda: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="roteiro">Roteiro</Label>
-                    <Textarea
-                      id="roteiro"
-                      rows={3}
-                      value={draft.roteiro}
-                      onChange={(e) => setDraft((d) => ({ ...d, roteiro: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="direcao">Direção de Arte</Label>
-                    <Textarea
-                      id="direcao"
-                      rows={2}
-                      value={draft.direcao_arte}
-                      onChange={(e) => setDraft((d) => ({ ...d, direcao_arte: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cta">CTA</Label>
-                    <Input
-                      id="cta"
-                      value={draft.cta}
-                      onChange={(e) => setDraft((d) => ({ ...d, cta: e.target.value }))}
-                    />
-                  </div>
-                  {card.checklist.length > 0 && (
-                    <div className="space-y-2">
-                      <Label>Checklist</Label>
-                      <ul className="space-y-2">
-                        {card.checklist.map((item) => (
-                          <li key={item.id} className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={item.done}
-                              onChange={() => toggleChecklist(item.id)}
-                              className="rounded border-border"
-                            />
-                            <span className={item.done ? "text-muted-foreground line-through" : ""}>
-                              {item.label}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {previewCtx && (
-                    <div className="rounded-xl border border-border p-3">
-                      <Label className="mb-2 block">Preview</Label>
-                      <MediaPreview context={previewCtx} />
-                    </div>
-                  )}
-                  <Button
-                    onClick={() => {
-                      saveMut.mutate();
-                    }}
-                    disabled={saveMut.isPending}
-                  >
-                    Salvar alterações
-                  </Button>
-                </TabsContent>
-
-                <TabsContent value="arquivos">
-                  <CardMediaUpload
-                    cardId={cardId}
-                    capaUrl={card.capa_url}
-                    onUploaded={invalidate}
-                  />
-                </TabsContent>
-
-                <TabsContent value="timeline">
-                  <CardTimeline entries={detailQ.data?.events ?? []} />
-                </TabsContent>
-
-                <TabsContent value="comentarios" className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="comment">Novo comentário</Label>
-                    <Textarea
-                      id="comment"
-                      rows={3}
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      placeholder="Escreva um comentário…"
-                    />
-                    <Button
-                      type="button"
-                      onClick={() => commentMut.mutate()}
-                      disabled={!comment.trim() || commentMut.isPending}
+            <>
+              <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-4">
+                <div className="mb-4 flex flex-wrap gap-2">
+                  <div className="hidden sm:block">
+                    <Select
+                      value={card.status}
+                      onValueChange={(v) => moveMut.mutate(v as ContentCardStatus)}
                     >
-                      <MessageSquare className="mr-1.5 h-4 w-4" />
-                      Comentar
-                    </Button>
+                      <SelectTrigger className="w-[220px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {KANBAN_COLUMNS.filter((col) =>
+                          canTransitionStatus(card.status, col.status),
+                        ).map((col) => (
+                          <SelectItem key={col.status} value={col.status}>
+                            {KANBAN_COLUMN_META[col.status].emoji} {col.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="border-t border-border pt-4">
-                    <h4 className="mb-3 text-sm font-medium">Histórico</h4>
-                    <CardTimeline
-                      entries={(detailQ.data?.events ?? []).filter(
-                        (e) => e.eventType === "commented" || e.eventType === "updated",
-                      )}
+                  <MobileStatusPicker
+                    currentStatus={card.status}
+                    onSelect={(s) => moveMut.mutate(s)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => duplicateMut.mutate()}
+                    disabled={duplicateMut.isPending}
+                  >
+                    <Copy className="mr-1.5 h-4 w-4" />
+                    Duplicar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setArchiveOpen(true)}
+                    disabled={archiveMut.isPending || card.status === "arquivado"}
+                  >
+                    <Archive className="mr-1.5 h-4 w-4" />
+                    Arquivar
+                  </Button>
+                </div>
+
+                <Tabs
+                  defaultValue={card.status === "aguardando_material" ? "arquivos" : "conteudo"}
+                  className="min-h-0 flex-1"
+                >
+                  <TabsList className="mb-4 w-full justify-start">
+                    <TabsTrigger value="conteudo">Conteúdo</TabsTrigger>
+                    <TabsTrigger value="arquivos">Arquivos</TabsTrigger>
+                    <TabsTrigger value="timeline">Timeline</TabsTrigger>
+                    <TabsTrigger value="comentarios">Comentários</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="conteudo" className="space-y-6">
+                    {clientMaterials.length > 0 ? (
+                      <SelectableMediaGallery assets={clientMaterials} />
+                    ) : null}
+                    {selectedPillar && <PillarBadge pillar={selectedPillar} />}
+                    {(card.status === "publicado" || card.publish_status === "published") && (
+                      <PublishedIgMetrics ig={publishedIg} />
+                    )}
+                    <RoteiroHtmlEditor
+                      resetKey={card.id}
+                      html={card.roteiro}
+                      editable={card.status !== "arquivado"}
+                      size="hero"
+                      minHeightClass="min-h-[45vh]"
+                      onChange={(html) => setDraft((d) => ({ ...d, roteiro: html }))}
                     />
-                  </div>
-                </TabsContent>
-              </Tabs>
+                    <CaptionPanel
+                      value={captionValue}
+                      editable={card.status !== "arquivado"}
+                      onChange={(value) => setDraft((d) => ({ ...d, legenda: value }))}
+                    />
+                    <BrDateTimeFields
+                      date={draft.data_publicacao}
+                      time={draft.hora_publicacao}
+                      disabled={card.status === "arquivado"}
+                      requiredDate
+                      onDateChange={(iso) => setDraft((d) => ({ ...d, data_publicacao: iso }))}
+                      onTimeChange={(hhmm) => setDraft((d) => ({ ...d, hora_publicacao: hhmm }))}
+                    />
+                    <div className="space-y-2">
+                      <Label htmlFor="titulo">Título</Label>
+                      <Input
+                        id="titulo"
+                        value={draft.titulo}
+                        onChange={(e) => setDraft((d) => ({ ...d, titulo: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Pilar editorial</Label>
+                      {pillarsQ.isLoading ? (
+                        <p className="text-sm text-muted-foreground">Carregando pilares…</p>
+                      ) : pillarsQ.isError ? (
+                        <p className="text-sm text-destructive">
+                          Não foi possível carregar os pilares.
+                          {pillarsQ.error instanceof Error ? ` ${pillarsQ.error.message}` : ""}
+                        </p>
+                      ) : (pillarsQ.data ?? []).length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          Nenhum pilar ativo neste cliente. Crie em Conteúdos → Pilares.
+                        </p>
+                      ) : (
+                        <Select
+                          value={draft.pilar_id || "__none__"}
+                          onValueChange={(v) =>
+                            setDraft((d) => ({ ...d, pilar_id: v === "__none__" ? "" : v }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent position="popper" sideOffset={4}>
+                            <SelectItem value="__none__">Sem pilar</SelectItem>
+                            {(pillarsQ.data ?? []).map((p) => (
+                              <SelectItem key={p.id} value={p.id}>
+                                {p.titulo}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                    {previewCtx && (
+                      <div className="rounded-xl border border-border p-3">
+                        <Label className="mb-2 block">Preview</Label>
+                        <MediaPreview context={previewCtx} />
+                      </div>
+                    )}
+                    <Button
+                      onClick={() => {
+                        saveMut.mutate();
+                      }}
+                      disabled={saveMut.isPending}
+                    >
+                      Salvar alterações
+                    </Button>
+                  </TabsContent>
+
+                  <TabsContent value="arquivos" className="space-y-6">
+                    {clientMaterials.length > 0 ? (
+                      <SelectableMediaGallery assets={clientMaterials} />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Quando o cliente enviar as mídias, elas aparecem aqui para download.
+                      </p>
+                    )}
+                    <CardMediaUpload
+                      cardId={cardId}
+                      capaUrl={card.capa_url}
+                      onUploaded={invalidate}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="timeline">
+                    <CardTimeline entries={detailQ.data?.events ?? []} />
+                  </TabsContent>
+
+                  <TabsContent value="comentarios" className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="comment">Novo comentário</Label>
+                      <Textarea
+                        id="comment"
+                        rows={3}
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Escreva um comentário…"
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => commentMut.mutate()}
+                        disabled={!comment.trim() || commentMut.isPending}
+                      >
+                        <MessageSquare className="mr-1.5 h-4 w-4" />
+                        Comentar
+                      </Button>
+                    </div>
+                    <div className="border-t border-border pt-4">
+                      <h4 className="mb-3 text-sm font-medium">Histórico</h4>
+                      <CardTimeline
+                        entries={(detailQ.data?.events ?? []).filter(
+                          (e) => e.eventType === "commented" || e.eventType === "updated",
+                        )}
+                      />
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
               {card.status === "aguardando_material" ? (
-                <div className="sticky bottom-0 -mx-6 mt-4 border-t border-border bg-background px-6 py-3">
+                <div className="shrink-0 border-t border-border bg-background px-6 py-3">
                   <Button
                     type="button"
                     size="lg"
@@ -529,7 +499,7 @@ export function CardDetailDrawer({
                   </Button>
                 </div>
               ) : null}
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>

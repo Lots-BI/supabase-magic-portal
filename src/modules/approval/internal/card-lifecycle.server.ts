@@ -95,6 +95,14 @@ export async function createContentCard(
     legacy_post_id: input.legacy_post_id ?? null,
   });
   await appendEvent(supabase, card.id, actor, "created", { titulo: card.titulo });
+  try {
+    const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { ensureCardLibraryFolder } =
+      await import("@/modules/approval/library/card-library-folder.server");
+    await ensureCardLibraryFolder(getSupabaseAdmin(), card);
+  } catch {
+    // Pasta da biblioteca não bloqueia a criação do conteúdo.
+  }
   return card;
 }
 
@@ -132,6 +140,16 @@ export async function updateContentCard(
     status_de: existing.status,
     status_para: card.status,
   });
+  if (patch.titulo !== undefined || patch.data_publicacao !== undefined) {
+    try {
+      const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { ensureCardLibraryFolder } =
+        await import("@/modules/approval/library/card-library-folder.server");
+      await ensureCardLibraryFolder(getSupabaseAdmin(), card);
+    } catch {
+      // Renomear a pasta é complementar ao salvamento do card.
+    }
+  }
   return card;
 }
 

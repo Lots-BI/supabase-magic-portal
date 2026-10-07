@@ -22,7 +22,7 @@ export const KANBAN_COLUMNS: KanbanColumnConfig[] = [
   },
   {
     status: "aguardando_material",
-    label: "Material recebido",
+    label: "Mídia enviada",
     colorToken: "--cw-col-aguardando",
   },
   { status: "producao", label: "Em produção", colorToken: "--cw-col-producao" },

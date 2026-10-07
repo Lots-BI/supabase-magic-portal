@@ -3,6 +3,7 @@ import type { ContentCard } from "../types/content-card";
 import {
   agencyActionKind,
   agencyTurnCards,
+  clientActionLabel,
   clientTurnCards,
   publicationDayNumber,
   stampForStatus,
@@ -101,5 +102,17 @@ describe("workflow stamps", () => {
 
   it("extrai o dia da data ISO", () => {
     expect(publicationDayNumber("2026-09-11")).toBe("11");
+  });
+
+  it("nomeia a vez do cliente, com sufixo depois de alterações", () => {
+    expect(clientActionLabel("aguardando_aprovacao")).toBe("Aprovar Roteiro + Legenda");
+    expect(clientActionLabel("aguardando_aprovacao", { roteiro: true })).toBe(
+      "Aprovar Roteiro + Legenda (alterações)",
+    );
+    expect(clientActionLabel("aguardando_material")).toBe("Enviar Material");
+    expect(clientActionLabel("aguardando_aprovacao_final")).toBe("Aprovação Final");
+    expect(clientActionLabel("aguardando_aprovacao_final", { peca: true })).toBe(
+      "Aprovação Final (Alterações)",
+    );
   });
 });

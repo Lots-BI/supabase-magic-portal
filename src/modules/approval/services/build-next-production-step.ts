@@ -91,6 +91,7 @@ export function syncAutoChecklist(
     if (c.id === "roteiro_aprovado") return { ...c, done: roteiroOk || c.done };
     if (c.id === "media_final") return { ...c, done: mediaDone };
     if (c.id === "legenda_cta") return { ...c, done: legendaDone };
+    if (c.id === "preview_ok") return { ...c, done: mediaDone || c.done };
     return c;
   });
 }

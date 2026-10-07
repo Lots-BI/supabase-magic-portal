@@ -21,6 +21,20 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-10-07-conteudos-biblioteca-aprovacao",
+    date: "2026-10-07",
+    title: "Conteúdos: edite a legenda, envie mídia e peça alteração na peça",
+    summary:
+      "Na aprovação do roteiro você pode ajustar a legenda. A biblioteca da marca recebe uma pasta por conteúdo. Na peça final, o preview é exatamente o Instagram — se precisar mudar, descreva e envie a alteração.",
+    bullets: [
+      "Edite a **legenda** na hora de aprovar o roteiro.",
+      "**Biblioteca** no modo explorador: um clique seleciona, dois cliques abrem, e **Download** baixa a pasta inteira.",
+      "Peça final: só o preview do Instagram + **Pedir alterações** (o botão liga quando o texto está preenchido).",
+    ],
+    audience: "all",
+    tags: ["Conteúdos", "Novidade"],
+  },
+  {
     id: "2026-09-28-conteudos-roteiro-aprovacao",
     date: "2026-09-28",
     title: "Conteúdos: aprovar o roteiro não exige mais mídia no mesmo passo",

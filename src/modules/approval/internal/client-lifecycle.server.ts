@@ -59,10 +59,33 @@ async function appendClientEvent(
   return event;
 }
 
+function captionPatch(legenda: string | null | undefined) {
+  if (legenda === undefined) return {};
+  return { legenda: legenda.trim() || null };
+}
+
+export async function clientUpdateCaption(
+  supabase: SupabaseClient,
+  actor: LifecycleActor,
+  input: { card_id: string; legenda: string },
+): Promise<ContentCard> {
+  assertCardAction({ role: actor.role, action: "approve" });
+  const card = await contentCardRepository.findById(supabase, input.card_id);
+  if (!card) throw new Error("Card não encontrado");
+  await assertCardInClientAccess(supabase, actor.userId, card.cadastro_cliente_id);
+  if (card.status !== "aguardando_aprovacao") {
+    throw new Error("A legenda só pode ser editada na aprovação do roteiro.");
+  }
+  const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return contentCardRepository.update(getSupabaseAdmin(), card.id, {
+    legenda: input.legenda.trim() || null,
+  });
+}
+
 export async function clientApproveCard(
   supabase: SupabaseClient,
   actor: LifecycleActor,
-  input: { card_id: string; mensagem?: string | null },
+  input: { card_id: string; mensagem?: string | null; legenda?: string | null },
 ): Promise<ContentCard> {
   assertCardAction({ role: actor.role, action: "approve" });
   const card = await contentCardRepository.findById(supabase, input.card_id);
@@ -76,6 +99,7 @@ export async function clientApproveCard(
     const { getSupabaseAdmin } = await import("@/integrations/supabase/client.server");
     const updated = await contentCardRepository.update(getSupabaseAdmin(), card.id, {
       status: "aguardando_material",
+      ...captionPatch(input.legenda),
     });
     await appendClientEvent(supabase, card.id, actor, "approved", {
       kind: "roteiro",
@@ -116,7 +140,7 @@ export async function clientApproveCard(
 export async function clientRequestChanges(
   supabase: SupabaseClient,
   actor: LifecycleActor,
-  input: { card_id: string; mensagem?: string; roteiro?: string | null },
+  input: { card_id: string; mensagem?: string; roteiro?: string | null; legenda?: string | null },
 ): Promise<ContentCard> {
   assertCardAction({ role: actor.role, action: "request_changes" });
   const card = await contentCardRepository.findById(supabase, input.card_id);
@@ -135,6 +159,7 @@ export async function clientRequestChanges(
     const updated = await contentCardRepository.update(getSupabaseAdmin(), card.id, {
       status: "alteracoes_roteiro",
       ...roteiroPatch,
+      ...captionPatch(input.legenda),
     });
     await appendClientEvent(supabase, card.id, actor, "changes_requested", {
       mensagem,

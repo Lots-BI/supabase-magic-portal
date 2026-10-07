@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -52,21 +53,35 @@ export function CalendarCreateSheet({
 }) {
   const createFn = useServerFn(createCard);
   const [titulo, setTitulo] = useState("");
+  const [legenda, setLegenda] = useState("");
   const [formato, setFormato] = useState<(typeof CONTENT_FORMATOS)[number]>("estatico");
   const [linha, setLinha] = useState<string>(LINHAS_EDITORIAIS[0] ?? "Institucional");
   const [tema, setTema] = useState("");
   const [data, setData] = useState(defaultDate);
   const [hora, setHora] = useState("16:00");
+  const sessionRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      sessionRef.current = null;
+      return;
+    }
+    const sessionKey = `${defaultDate}`;
+    if (sessionRef.current === sessionKey) return;
+    sessionRef.current = sessionKey;
     setData(defaultDate);
     setTitulo("");
+    setLegenda("");
     setFormato("estatico");
     setLinha(LINHAS_EDITORIAIS[0] ?? "Institucional");
     setTema("");
     setHora(suggestedTime?.slice(0, 5) || "16:00");
-  }, [open, defaultDate, suggestedTime]);
+  }, [open, defaultDate]);
+
+  useEffect(() => {
+    if (!open || !suggestedTime) return;
+    setHora((current) => (current === "16:00" ? suggestedTime.slice(0, 5) : current));
+  }, [open, suggestedTime]);
 
   const mut = useMutation({
     mutationFn: async () => {
@@ -78,6 +93,7 @@ export function CalendarCreateSheet({
           cadastro_cliente_id: cadastroClienteId,
           cliente_nome: clienteNome,
           titulo: titulo.trim(),
+          legenda: legenda.trim() || null,
           data_publicacao: data,
           hora_publicacao: `${hora}:00`,
           formato,
@@ -103,7 +119,7 @@ export function CalendarCreateSheet({
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="overflow-y-auto sm:max-w-md">
+      <SheetContent className="overflow-y-auto sm:max-w-xl">
         <SheetHeader>
           <SheetTitle>Criar conteúdo</SheetTitle>
           <SheetDescription>
@@ -151,6 +167,17 @@ export function CalendarCreateSheet({
               value={tema}
               onChange={(e) => setTema(e.target.value)}
               placeholder="Assunto principal do conteúdo"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="legenda">Legenda</Label>
+            <Textarea
+              id="legenda"
+              rows={8}
+              value={legenda}
+              onChange={(e) => setLegenda(e.target.value)}
+              placeholder="Texto que vai na publicação"
+              className="min-h-[180px] text-base leading-relaxed"
             />
           </div>
           <BrDateTimeFields

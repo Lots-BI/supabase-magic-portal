@@ -17,4 +17,5 @@ export const contentCardRequestChangesSchema = z.object({
   card_id: z.string().uuid(),
   mensagem: z.string().trim().max(2000).optional().default(""),
   roteiro: z.string().max(80_000).optional().nullable(),
+  legenda: z.string().max(2_200).optional().nullable(),
 });

@@ -11,18 +11,21 @@ Os 9 status no banco continuam iguais. Na tela viram 5 selos: Ideia / Cliente / 
 
 ## Fazer agora
 
-Cartazes cuja vez é da agência (`roteiro`, `alteracoes_*`, `aguardando_material`, `producao`). Toque abre o workspace. Verde de baixo:
+Cartazes cuja vez é da agência (`roteiro`, `alteracoes_*`, `aguardando_material`, `producao`). A barrinha acima da mídia (Escrever / Baixar / Editar) diz o que falta. Toque abre o workspace. Verde de baixo:
 
-| Status | Verde |
-| ------ | ----- |
+| Status                          | Verde                 |
+| ------------------------------- | --------------------- |
 | roteiro / alterações de roteiro | **Mandar ao cliente** |
-| material recebido | **Começar peça** |
-| produção | **Pedir ok** |
-| aprovado final | **Agendar** |
+| mídia enviada                   | **Começar peça**      |
+| produção                        | **Pedir ok**          |
+
+Em produção, o seletor de status e o botão **Mídia enviada** devolvem o card para `aguardando_material` a qualquer momento — não precisa ter pedido ok antes.
 
 ## Calendário
 
-Toque no dia = criar (linha editorial + horário). No Motorola, **+** no canto. O horário pode vir pré-preenchido pelos insights.
+Toque no dia = criar (linha editorial, tema, **legenda** e horário). No Motorola, **+** no canto. O horário pode vir pré-preenchido pelos insights. Depois de criar, o roteiro e a legenda abrem em blocos grandes — no editor e no popup do card. Também nasce uma pasta na **Biblioteca** com a data e o título (`07/10 — …`).
+
+A mídia que o cliente envia aparece no popup (abas Conteúdo e Arquivos) e nessa pasta. Um clique seleciona; dois cliques abrem. Selecione a pasta (ou os arquivos) e use **Download** — o browser pede o destino e baixa a pasta inteira.
 
 ## Insights (só admin)
 
@@ -30,7 +33,7 @@ Depois do cliente escolhido: top 7 pubs, frase com o melhor dia e a melhor faixa
 
 ## Cliente
 
-O cliente vê só a fila **Sua vez**. No roteiro, lê e edita numa janela grande (o mesmo editor do admin); aprova com verde sem precisar gravar nada ainda. Só depois de aprovar é que a tela pede as mídias, pela câmera.
+O cliente vê a fila **Sua vez** e a **Biblioteca** (upload livre). No roteiro, lê e edita o texto e a **legenda**; aprova com verde sem precisar gravar nada ainda. Só depois de aprovar é que a tela pede as mídias, pela câmera. Na peça final, o cliente vê só o preview do Instagram; para pedir ajuste, preenche **Pedir alterações** e toca em **Enviar alteração**.
 
 ## Ver como cliente
 
