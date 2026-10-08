@@ -400,6 +400,75 @@ export class InstagramGraphClient {
     return { id: body.id };
   }
 
+  /** Comentário de topo da thread. A Graph só aceita resposta no comentário raiz. */
+  async getCommentParentId(accessToken: string, commentId: string): Promise<string | null> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${commentId}`;
+    const response = await this.config.httpClient.request(url, {
+      searchParams: {
+        access_token: accessToken,
+        fields: "id,parent_id",
+      },
+    });
+    const body = await response.json<{
+      id?: string;
+      parent_id?: string;
+      error?: { message?: string };
+    }>();
+    if (body.error?.message) throw new Error(body.error.message);
+    return body.parent_id ?? null;
+  }
+
+  async setCommentHidden(accessToken: string, commentId: string, hide: boolean): Promise<void> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${commentId}`;
+    const response = await this.config.httpClient.request(url, {
+      method: "POST",
+      searchParams: {
+        access_token: accessToken,
+        hide: hide ? "true" : "false",
+      },
+    });
+    const body = await response.json<{ success?: boolean; error?: { message?: string } }>();
+    if (body.error?.message) throw new Error(body.error.message);
+  }
+
+  /** A Graph só apaga comentários feitos em mídia da própria conta. */
+  async deleteComment(accessToken: string, commentId: string): Promise<void> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${commentId}`;
+    const response = await this.config.httpClient.request(url, {
+      method: "DELETE",
+      searchParams: { access_token: accessToken },
+    });
+    const body = await response.json<{ success?: boolean; error?: { message?: string } }>();
+    if (body.error?.message) throw new Error(body.error.message);
+  }
+
+  /** Resposta privada: uma por comentário, até 7 dias depois dele. */
+  async sendPrivateReply(
+    accessToken: string,
+    igUserId: string,
+    commentId: string,
+    message: string,
+  ): Promise<{ id: string }> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${igUserId}/messages`;
+    const response = await this.config.httpClient.request(url, {
+      method: "POST",
+      searchParams: {
+        access_token: accessToken,
+        recipient: JSON.stringify({ comment_id: commentId }),
+        message: JSON.stringify({ text: message }),
+      },
+    });
+    const body = await response.json<{
+      message_id?: string;
+      id?: string;
+      error?: { message?: string };
+    }>();
+    if (body.error?.message) throw new Error(body.error.message);
+    const id = body.message_id ?? body.id;
+    if (!id) throw new Error("Graph não retornou id da mensagem");
+    return { id };
+  }
+
   async sendDirectMessage(
     accessToken: string,
     igUserId: string,

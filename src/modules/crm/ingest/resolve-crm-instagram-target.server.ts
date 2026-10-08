@@ -11,6 +11,7 @@ export type CrmInstagramTarget = {
   connectionId: string;
   accessToken: string;
   igUserId: string;
+  igUsername: string | null;
   cadastroClienteId: number;
 };
 
@@ -64,10 +65,14 @@ export async function resolveCrmInstagramTarget(
       identity.external_id,
       pageRows[0]?.external_id ?? null,
     );
+    const igUsername =
+      pages.find((page) => page.instagram_business_account?.id === selected.igUserId)
+        ?.instagram_business_account?.username ?? null;
     return {
       connectionId: connection.id,
       accessToken: selected.accessToken,
       igUserId: selected.igUserId,
+      igUsername,
       cadastroClienteId,
     };
   } catch {
@@ -75,6 +80,7 @@ export async function resolveCrmInstagramTarget(
       connectionId: connection.id,
       accessToken: token.accessToken,
       igUserId: identity.external_id,
+      igUsername: null,
       cadastroClienteId,
     };
   }

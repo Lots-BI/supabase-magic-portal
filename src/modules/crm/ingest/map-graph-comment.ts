@@ -45,6 +45,7 @@ export function mapGraphCommentToSignal(
       username,
       igsid: comment.from?.id ?? null,
       hidden: comment.hidden === true,
+      parentId: comment.parent_id ?? null,
     },
   };
 }

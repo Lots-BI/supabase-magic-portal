@@ -20,5 +20,6 @@ describe("mapGraphCommentToSignal", () => {
     expect(signal.kind).toBe("reply");
     expect(signal.place).toBe("reels");
     expect(signal.source).toBe("instagram_comment_reply");
+    expect(signal.payload?.parentId).toBe("c1");
   });
 });

@@ -4,6 +4,8 @@ export const crmKeys = {
   people: (cadastroClienteId: number | "portfolio", days: number, view = "all") =>
     ["crm", "people", cadastroClienteId, days, view] as const,
   person: (id: string) => ["crm", "person", id] as const,
+  comments: (cadastroClienteId: number, days: number) =>
+    ["crm", "comments", cadastroClienteId, days] as const,
   portfolio: (days: number) => ["crm", "portfolio", days] as const,
   ranking: (cadastroClienteId: number, days: number) =>
     ["crm", "ranking", cadastroClienteId, days] as const,

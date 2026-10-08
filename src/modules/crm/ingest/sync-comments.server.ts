@@ -5,11 +5,12 @@ import type { InstagramCommentV1 } from "@/modules/platform-hub/plugins/instagra
 import { listActivePluginConnections } from "@/modules/platform-hub-bridges/ph-persistence/sync-all-active-connections";
 import { mapGraphCommentToSignal } from "./map-graph-comment";
 import { normalizeIdentityValue, normalizeUsername } from "../normalize-identity";
-import { shouldSkipComment } from "../skip-rules";
-import { CRM_COLLECTOR_KEYS } from "../types";
-import type { CrmIdentityInput } from "../types";
+import { isBrandAuthor, shouldSkipComment } from "../skip-rules";
+import { CRM_COLLECTOR_KEYS, CRM_SOURCE_BRAND_REPLY } from "../types";
+import type { CrmIdentityInput, CrmSignalInput } from "../types";
 import { resolveCrmInstagramTarget } from "./resolve-crm-instagram-target.server";
-import { persistCrmSignal } from "./persist-signal.server";
+import { persistCrmSignal, recomputeAndStoreStats } from "./persist-signal.server";
+import { ignoreBrandPeople, loadCrmBrandAuthor } from "./brand-author.server";
 
 const MEDIA_LOOKBACK_DAYS = 21;
 const MEDIA_CAP = 40;
@@ -101,16 +102,41 @@ async function loadCardMeta(
   return { pilarTitulo: pilar?.titulo ?? null, tema: data.tema ?? null };
 }
 
-async function persistSignal(
+/** Resposta da própria marca: fica na pessoa do comentário pai, nunca vira pessoa nova. */
+async function persistBrandReply(
   supabase: SupabaseClient,
   cadastroClienteId: number,
-  brandUsername: string | null,
-  signal: Parameters<typeof persistCrmSignal>[2],
-  identities: CrmIdentityInput[],
-  displayName: string,
-) {
-  await persistCrmSignal(supabase, cadastroClienteId, signal, identities, displayName);
-  void brandUsername;
+  comment: InstagramCommentV1,
+  mapped: CrmSignalInput,
+): Promise<string | null> {
+  if (!comment.parent_id) return null;
+  const { data: parent } = await supabase
+    .from("crm_signals")
+    .select("person_id")
+    .eq("cadastro_cliente_id", cadastroClienteId)
+    .eq("external_id", comment.parent_id)
+    .in("kind", ["comment", "reply"])
+    .limit(1)
+    .maybeSingle();
+  if (!parent?.person_id) return null;
+  const { error } = await supabase.from("crm_signals").upsert(
+    {
+      person_id: parent.person_id,
+      cadastro_cliente_id: cadastroClienteId,
+      kind: "brand_reply",
+      place: mapped.place,
+      source: CRM_SOURCE_BRAND_REPLY,
+      external_id: comment.id,
+      body: mapped.body,
+      occurred_at: mapped.occurredAt,
+      ig_media_id: mapped.igMediaId,
+      content_card_id: mapped.contentCardId,
+      payload: { ...mapped.payload, inReplyTo: comment.parent_id },
+    },
+    { onConflict: "cadastro_cliente_id,source,external_id", ignoreDuplicates: true },
+  );
+  if (error) throw new Error(error.message);
+  return parent.person_id as string;
 }
 
 function identitiesFromComment(comment: InstagramCommentV1): {
@@ -144,13 +170,6 @@ export async function syncCrmCommentsForCadastro(
 ): Promise<CrmCommentsSyncResult> {
   await ensureBaselineCollectors(supabase, cadastroClienteId);
 
-  const { data: cadastro } = await supabase
-    .from("cadastro_clientes")
-    .select("instagram_username")
-    .eq("id", cadastroClienteId)
-    .maybeSingle();
-  const brandUsername = cadastro?.instagram_username ?? null;
-
   const target = await resolveCrmInstagramTarget(supabase, cadastroClienteId);
   if ("error" in target) {
     await upsertCollector(supabase, cadastroClienteId, "comments", "scope_missing", target.detail);
@@ -162,6 +181,12 @@ export async function syncCrmCommentsForCadastro(
       error: target.detail,
     };
   }
+
+  const brand = await loadCrmBrandAuthor(supabase, cadastroClienteId, {
+    igUserId: target.igUserId,
+    igUsername: target.igUsername,
+  });
+  await ignoreBrandPeople(supabase, cadastroClienteId, brand);
 
   const cutoff = new Date(Date.now() - MEDIA_LOOKBACK_DAYS * 86_400_000).toISOString();
   const { data: mediaRows, error: mediaError } = await supabase
@@ -233,8 +258,9 @@ export async function syncCrmCommentsForCadastro(
     }
 
     let fetchedHere = 0;
+    const answeredPeople = new Set<string>();
     for (const comment of comments) {
-      if (shouldSkipComment(comment, brandUsername)) continue;
+      if (!comment.id) continue;
       const mapped = mapGraphCommentToSignal(comment, {
         igMediaId: row.id,
         mediaProductType: row.media_product_type,
@@ -244,18 +270,21 @@ export async function syncCrmCommentsForCadastro(
         tema: cardMeta.tema,
         captionExcerpt: excerpt,
       });
+      const author = { id: comment.from?.id, username: comment.username ?? comment.from?.username };
+      if (isBrandAuthor(author, brand)) {
+        const personId = await persistBrandReply(supabase, cadastroClienteId, comment, mapped);
+        if (personId) answeredPeople.add(personId);
+        continue;
+      }
+      if (shouldSkipComment(comment, null)) continue;
       const { identities, displayName } = identitiesFromComment(comment);
       if (identities.length === 0) continue;
-      await persistSignal(
-        supabase,
-        cadastroClienteId,
-        brandUsername,
-        mapped,
-        identities,
-        displayName,
-      );
+      await persistCrmSignal(supabase, cadastroClienteId, mapped, identities, displayName);
       fetchedHere += 1;
       peopleTouched += 1;
+    }
+    for (const personId of answeredPeople) {
+      await recomputeAndStoreStats(supabase, personId, cadastroClienteId);
     }
     commentsFetched += fetchedHere;
 

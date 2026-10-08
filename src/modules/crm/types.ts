@@ -84,6 +84,7 @@ export type CrmSignalPayload = {
   username?: string | null;
   igsid?: string | null;
   hidden?: boolean;
+  parentId?: string | null;
 };
 
 export type CrmSignalInput = {
@@ -144,3 +145,5 @@ export type CrmGraphComment = {
 
 export const CRM_SOURCE_COMMENT = "instagram_comment";
 export const CRM_SOURCE_REPLY = "instagram_comment_reply";
+export const CRM_SOURCE_BRAND_REPLY = "instagram_brand_reply";
+export const CRM_SOURCE_PRIVATE_REPLY = "instagram_private_reply";

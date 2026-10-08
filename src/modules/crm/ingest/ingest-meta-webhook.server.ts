@@ -5,7 +5,8 @@ import { mapGraphCommentToSignal } from "./map-graph-comment";
 import { mapGraphDmToSignal } from "./map-graph-dm";
 import { mapLeadForm } from "./map-lead-form";
 import { mapWhatsappInbound } from "./map-whatsapp";
-import { shouldSkipComment } from "../skip-rules";
+import { isBrandAuthor, shouldSkipComment } from "../skip-rules";
+import { loadCrmBrandAuthor } from "./brand-author.server";
 import type { CrmGraphComment } from "../types";
 
 async function claimReceipt(
@@ -126,6 +127,17 @@ async function ingestOneEvent(
   if (event.field === "comments" || event.field === "mentions") {
     const comment = commentFromPayload(event.payload);
     if (!comment || shouldSkipComment(comment, null)) return false;
+    const brand = await loadCrmBrandAuthor(supabase, cadastroClienteId, {
+      igUserId: event.entryId,
+    });
+    if (
+      isBrandAuthor(
+        { id: comment.from?.id, username: comment.username ?? comment.from?.username },
+        brand,
+      )
+    ) {
+      return false;
+    }
     const graphMediaId =
       typeof event.payload.media === "object" && event.payload.media
         ? String((event.payload.media as { id?: string }).id ?? "")

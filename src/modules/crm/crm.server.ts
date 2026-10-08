@@ -8,7 +8,20 @@ import { InstagramGraphClient } from "@/modules/platform-hub/plugins/instagram_o
 import { isStaffMember } from "@/modules/approval/internal/staff-auth.server";
 import { coverageGap } from "./coverage";
 import { nextAction, CHURN_LABEL } from "./next-action";
-import { CRM_COLLECTOR_KEYS, type CrmCollectorKey, type CrmCollectorStatus } from "./types";
+import {
+  CRM_COLLECTOR_KEYS,
+  CRM_SOURCE_BRAND_REPLY,
+  CRM_SOURCE_PRIVATE_REPLY,
+  type CrmCollectorKey,
+  type CrmCollectorStatus,
+} from "./types";
+import {
+  buildCommentThreads,
+  type CrmCommentThread,
+  type CrmThreadSource,
+} from "./comment-threads";
+import { isBrandAuthor } from "./skip-rules";
+import { ignoreBrandPeople, loadCrmBrandAuthor } from "./ingest/brand-author.server";
 import { isChurnQueue, isInboxNow, type CrmPeopleView } from "./inbox";
 import { assertCanMerge, identitiesAfterMerge } from "./merge";
 import { toCsv, toExportRow } from "./export-people";
@@ -18,6 +31,7 @@ import { recomputeAndStoreStats } from "./ingest/persist-signal.server";
 import { syncCrmCommentsForCadastro } from "./ingest/sync-comments.server";
 import { syncCrmDirectForCadastro } from "./ingest/sync-direct.server";
 import { resolveCrmInstagramTarget } from "./ingest/resolve-crm-instagram-target.server";
+import { personListTitle } from "./present";
 import { periodRange } from "@/lib/metrics";
 import type { PeriodDays } from "@/components/lots/PeriodToggle";
 
@@ -298,6 +312,147 @@ export const listCrmPeopleFn = createServerFn({ method: "GET" })
     return filtered.slice(0, 200);
   });
 
+export type CrmCommentFeedThread = CrmCommentThread & {
+  privateReplied: boolean;
+  canPrivateReply: boolean;
+};
+
+export type CrmCommentFeed = {
+  brandName: string;
+  threads: CrmCommentFeedThread[];
+};
+
+type CommentSignalRow = {
+  id: string;
+  person_id: string;
+  body: string | null;
+  occurred_at: string;
+  place: string;
+  payload: unknown;
+  external_id: string;
+  kind: string;
+  source: string;
+};
+
+type CommentPayload = {
+  permalink?: string | null;
+  captionExcerpt?: string | null;
+  parentId?: string | null;
+  inReplyTo?: string | null;
+  privateReplyTo?: string | null;
+  hidden?: boolean;
+  igsid?: string | null;
+  username?: string | null;
+};
+
+const COMMENT_SIGNAL_COLUMNS =
+  "id, person_id, body, occurred_at, place, payload, external_id, kind, source";
+const PRIVATE_REPLY_WINDOW_MS = 7 * 86_400_000;
+
+export const listCrmCommentsFn = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ cadastroClienteId: z.number().int().positive(), days: daysSchema }).parse(d),
+  )
+  .handler(async ({ data, context }): Promise<CrmCommentFeed> => {
+    await assertAdminOrClientScope(context, data.cadastroClienteId);
+    const admin = getSupabaseAdmin();
+    const brand = await loadCrmBrandAuthor(admin, data.cadastroClienteId);
+    await ignoreBrandPeople(admin, data.cadastroClienteId, brand);
+    const brandHandle = [...brand.usernames][0];
+    const brandName = brandHandle ? `@${brandHandle}` : "Marca";
+
+    const period = periodRange(data.days as PeriodDays);
+    const { data: signals, error } = await context.supabase
+      .from("crm_signals")
+      .select(COMMENT_SIGNAL_COLUMNS)
+      .eq("cadastro_cliente_id", data.cadastroClienteId)
+      .in("kind", ["comment", "reply", "brand_reply"])
+      .gte("occurred_at", period.from)
+      .order("occurred_at", { ascending: false })
+      .limit(400);
+    if (error) throw new Error(error.message);
+    const rows = (signals ?? []) as CommentSignalRow[];
+    if (rows.length === 0) return { brandName, threads: [] };
+
+    const loaded = new Set(rows.map((row) => row.external_id));
+    const missingParents = [
+      ...new Set(
+        rows
+          .map((row) => (row.payload as CommentPayload | null)?.parentId)
+          .filter((id): id is string => typeof id === "string" && !loaded.has(id)),
+      ),
+    ];
+    if (missingParents.length > 0) {
+      const { data: parents } = await context.supabase
+        .from("crm_signals")
+        .select(COMMENT_SIGNAL_COLUMNS)
+        .eq("cadastro_cliente_id", data.cadastroClienteId)
+        .in("kind", ["comment", "reply"])
+        .in("external_id", missingParents.slice(0, 100));
+      rows.push(...((parents ?? []) as CommentSignalRow[]));
+    }
+
+    const personIds = [...new Set(rows.map((row) => row.person_id))];
+    const [{ data: people }, { data: ignored }] = await Promise.all([
+      context.supabase
+        .from("vw_crm_people_list")
+        .select("id, display_name, ig_username")
+        .in("id", personIds),
+      admin.from("crm_people").select("id").in("id", personIds).not("ignored_at", "is", null),
+    ]);
+    const names = new Map(
+      (people ?? []).map((person) => [
+        person.id as string,
+        personListTitle(person.display_name, person.ig_username),
+      ]),
+    );
+    const ignoredIds = new Set((ignored ?? []).map((row) => row.id as string));
+
+    const privateReplied = new Set<string>();
+    const sources: CrmThreadSource[] = [];
+    for (const row of rows) {
+      const payload = (row.payload ?? {}) as CommentPayload;
+      if (row.source === CRM_SOURCE_PRIVATE_REPLY) {
+        if (payload.privateReplyTo) privateReplied.add(payload.privateReplyTo);
+        continue;
+      }
+      if (row.kind === "brand_reply" && row.source !== CRM_SOURCE_BRAND_REPLY) continue;
+      const fromBrand =
+        row.kind === "brand_reply" ||
+        isBrandAuthor({ id: payload.igsid, username: payload.username }, brand);
+      if (!fromBrand && ignoredIds.has(row.person_id)) continue;
+      sources.push({
+        id: row.id,
+        personId: row.person_id,
+        personName:
+          names.get(row.person_id) ?? (payload.username ? `@${payload.username}` : "Pessoa"),
+        body: row.body,
+        occurredAt: row.occurred_at,
+        place: row.place,
+        permalink: payload.permalink ?? null,
+        captionExcerpt: payload.captionExcerpt ?? null,
+        externalId: row.external_id,
+        kind: fromBrand ? "brand_reply" : (row.kind as "comment" | "reply"),
+        parentId: payload.parentId ?? null,
+        inReplyTo: payload.inReplyTo ?? null,
+        hidden: payload.hidden === true,
+      });
+    }
+
+    const now = Date.now();
+    const threads = buildCommentThreads(sources, { brandName })
+      .slice(0, 80)
+      .map((thread) => ({
+        ...thread,
+        privateReplied: privateReplied.has(thread.externalId),
+        canPrivateReply:
+          !privateReplied.has(thread.externalId) &&
+          now - Date.parse(thread.occurredAt) < PRIVATE_REPLY_WINDOW_MS,
+      }));
+    return { brandName, threads };
+  });
+
 export type CrmPersonDetail = {
   person: CrmPersonListRow;
   identities: { kind: string; value: string; source: string | null }[];
@@ -503,7 +658,7 @@ export const syncCrmCommentsFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => cadastroSchema.parse(d))
   .handler(async ({ data, context }) => {
-    const role = await assertAdminOrClientScope(context, data.cadastroClienteId);
+    const { role } = await assertAdminOrClientScope(context, data.cadastroClienteId);
     if (role === "cliente") throw new Error("Forbidden");
     const admin = getSupabaseAdmin();
     const comments = await syncCrmCommentsForCadastro(admin, data.cadastroClienteId);
@@ -593,6 +748,23 @@ export const addCrmPersonNoteFn = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+async function threadRootCommentId(
+  graph: InstagramGraphClient,
+  accessToken: string,
+  signal: { kind: string; external_id: string; payload: unknown },
+): Promise<string> {
+  const payload = (signal.payload ?? {}) as { parentId?: string | null };
+  if (signal.kind === "comment") return signal.external_id;
+  if (payload.parentId) return payload.parentId;
+  try {
+    const parent = await graph.getCommentParentId(accessToken, signal.external_id);
+    if (parent) return parent;
+  } catch {
+    /* o id do próprio comentário ainda pode ser a raiz */
+  }
+  return signal.external_id;
+}
+
 export const replyCrmCommentFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
@@ -611,31 +783,156 @@ export const replyCrmCommentFn = createServerFn({ method: "POST" })
     });
     if (!ok) throw new Error("Forbidden");
     const admin = getSupabaseAdmin();
-    const { data: signal, error } = await admin
-      .from("crm_signals")
-      .select("id, person_id, cadastro_cliente_id, source, external_id, kind")
-      .eq("id", data.signalId)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    if (!signal || (signal.kind !== "comment" && signal.kind !== "reply")) {
-      throw new Error("Sinal não é um comentário");
-    }
+    const signal = await loadCommentSignal(admin, data.signalId, ["comment", "reply"]);
     const target = await resolveCrmInstagramTarget(admin, signal.cadastro_cliente_id);
     if ("error" in target) throw new Error(target.detail);
     const graph = new InstagramGraphClient({ httpClient: new FetchHttpClient() });
-    const posted = await graph.replyToComment(target.accessToken, signal.external_id, data.message);
+    const graphCommentId = await threadRootCommentId(graph, target.accessToken, signal);
+    const posted = await graph.replyToComment(target.accessToken, graphCommentId, data.message);
+    const payload = (signal.payload ?? {}) as CommentPayload;
     await admin.from("crm_signals").insert({
       person_id: signal.person_id,
       cadastro_cliente_id: signal.cadastro_cliente_id,
       kind: "brand_reply",
-      place: "feed",
-      source: "instagram_brand_reply",
+      place: signal.place,
+      source: CRM_SOURCE_BRAND_REPLY,
       external_id: posted.id,
       body: data.message,
       occurred_at: new Date().toISOString(),
-      payload: { inReplyTo: signal.external_id },
+      ig_media_id: signal.ig_media_id,
+      payload: {
+        inReplyTo: signal.external_id,
+        parentId: graphCommentId,
+        permalink: payload.permalink ?? null,
+      },
     });
     return { ok: true, id: posted.id };
+  });
+
+type CommentActionSignal = {
+  id: string;
+  person_id: string;
+  cadastro_cliente_id: number;
+  external_id: string;
+  kind: string;
+  source: string;
+  place: string;
+  occurred_at: string;
+  ig_media_id: string | null;
+  payload: unknown;
+};
+
+async function loadCommentSignal(
+  admin: ReturnType<typeof getSupabaseAdmin>,
+  signalId: string,
+  kinds: readonly string[],
+): Promise<CommentActionSignal> {
+  const { data: signal, error } = await admin
+    .from("crm_signals")
+    .select(
+      "id, person_id, cadastro_cliente_id, external_id, kind, source, place, occurred_at, ig_media_id, payload",
+    )
+    .eq("id", signalId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!signal || !kinds.includes(signal.kind)) throw new Error("Sinal não é um comentário");
+  if (signal.kind === "brand_reply" && signal.source !== CRM_SOURCE_BRAND_REPLY) {
+    throw new Error("Só respostas públicas da marca podem ser alteradas aqui.");
+  }
+  return signal as CommentActionSignal;
+}
+
+async function commentActionTarget(context: AuthCtx, signalId: string, kinds: readonly string[]) {
+  await requireAdmin(context);
+  const admin = getSupabaseAdmin();
+  const signal = await loadCommentSignal(admin, signalId, kinds);
+  const target = await resolveCrmInstagramTarget(admin, signal.cadastro_cliente_id);
+  if ("error" in target) throw new Error(target.detail);
+  const graph = new InstagramGraphClient({ httpClient: new FetchHttpClient() });
+  return { admin, signal, target, graph };
+}
+
+export const hideCrmCommentFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ signalId: z.string().uuid(), hide: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { admin, signal, target, graph } = await commentActionTarget(context, data.signalId, [
+      "comment",
+      "reply",
+    ]);
+    await graph.setCommentHidden(target.accessToken, signal.external_id, data.hide);
+    const payload = (signal.payload ?? {}) as Record<string, unknown>;
+    const { error } = await admin
+      .from("crm_signals")
+      .update({ payload: { ...payload, hidden: data.hide } })
+      .eq("id", signal.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteCrmCommentFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ signalId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { admin, signal, target, graph } = await commentActionTarget(context, data.signalId, [
+      "comment",
+      "reply",
+      "brand_reply",
+    ]);
+    await graph.deleteComment(target.accessToken, signal.external_id);
+    const { error } = await admin
+      .from("crm_signals")
+      .delete()
+      .eq("cadastro_cliente_id", signal.cadastro_cliente_id)
+      .or(`id.eq.${signal.id},payload->>parentId.eq.${signal.external_id}`);
+    if (error) throw new Error(error.message);
+    await recomputeAndStoreStats(admin, signal.person_id, signal.cadastro_cliente_id);
+    return { ok: true };
+  });
+
+export const privateReplyCrmCommentFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ signalId: z.string().uuid(), message: z.string().min(1).max(1000) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { admin, signal, target, graph } = await commentActionTarget(context, data.signalId, [
+      "comment",
+      "reply",
+    ]);
+    if (Date.now() - Date.parse(signal.occurred_at) >= PRIVATE_REPLY_WINDOW_MS) {
+      throw new Error("O Instagram só permite Direct a partir de comentários com até 7 dias.");
+    }
+    const { data: existing } = await admin
+      .from("crm_signals")
+      .select("id")
+      .eq("cadastro_cliente_id", signal.cadastro_cliente_id)
+      .eq("source", CRM_SOURCE_PRIVATE_REPLY)
+      .eq("payload->>privateReplyTo", signal.external_id)
+      .limit(1);
+    if ((existing ?? []).length > 0) {
+      throw new Error("Este comentário já recebeu um Direct. O Instagram permite só um.");
+    }
+    const sent = await graph.sendPrivateReply(
+      target.accessToken,
+      target.igUserId,
+      signal.external_id,
+      data.message,
+    );
+    await admin.from("crm_signals").insert({
+      person_id: signal.person_id,
+      cadastro_cliente_id: signal.cadastro_cliente_id,
+      kind: "brand_reply",
+      place: "unknown",
+      source: CRM_SOURCE_PRIVATE_REPLY,
+      external_id: sent.id,
+      body: data.message,
+      occurred_at: new Date().toISOString(),
+      payload: { privateReplyTo: signal.external_id },
+    });
+    return { ok: true, id: sent.id };
   });
 
 async function requireAdmin(context: AuthCtx) {

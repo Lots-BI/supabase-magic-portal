@@ -2,16 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import {
-  ChevronDown,
-  Contact2,
-  RefreshCw,
-  Star,
-  MessageCircle,
-  Download,
-  KeyRound,
-  Copy,
-} from "lucide-react";
+import { ChevronDown, Contact2, RefreshCw, Star, Download, KeyRound, Copy } from "lucide-react";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { StatCard } from "@/components/lots/StatCard";
 import { SectionCard } from "@/components/lots/SectionCard";
@@ -57,6 +48,8 @@ import {
   type CrmPeopleFilters,
 } from "@/modules/crm/people-filters";
 import { CrmPeopleToolbar } from "@/components/lots/crm/CrmPeopleToolbar";
+import { CrmCommentFeed } from "@/components/lots/crm/CrmCommentFeed";
+import { CommentReplyBox } from "@/components/lots/crm/CommentReplyBox";
 import {
   addCrmPersonNoteFn,
   assignCrmPersonFn,
@@ -280,6 +273,7 @@ export function CrmWorkspace({
   const [q, setQ] = useState("");
   const [filters, setFilters] = useState<CrmPeopleFilters>(DEFAULT_CRM_PEOPLE_FILTERS);
   const [view, setView] = useState<CrmPeopleView>("inbox");
+  const [section, setSection] = useState<"comments" | "people">("comments");
   const [openId, setOpenId] = useState<string | null>(null);
 
   const coverageFn = useServerFn(getCrmCoverageFn);
@@ -397,7 +391,9 @@ export function CrmWorkspace({
         }
       />
 
-      {commentsChip?.status === "scope_missing" ? (
+      {commentsChip?.status === "scope_missing" &&
+      (coverageQuery.data?.gap.identifiedComments ?? 0) === 0 &&
+      !coverageQuery.isLoading ? (
         <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:text-amber-100">
           Falta a permissão de comentários do Instagram.{" "}
           <a href={connectionsHref} className="underline">
@@ -439,80 +435,101 @@ export function CrmWorkspace({
       </div>
 
       <SectionCard
-        title="Pessoas"
-        description="Separadas pelo canal do último contato. Caixa de entrada = ainda sem resposta da marca."
+        title={section === "comments" ? "Comentários" : "Pessoas"}
+        description={
+          section === "comments"
+            ? "Cada card é um comentário. A resposta sai nele, sem abrir a ficha."
+            : "Separadas pelo canal do último contato. Caixa de entrada = ainda sem resposta da marca."
+        }
       >
-        <Tabs value={view} onValueChange={(v) => setView(v as CrmPeopleView)} className="mb-4">
+        <Tabs
+          value={section}
+          onValueChange={(value) => setSection(value as "comments" | "people")}
+          className="mb-4"
+        >
           <TabsList>
-            <TabsTrigger value="inbox">Caixa de entrada</TabsTrigger>
-            <TabsTrigger value="churn">Em risco</TabsTrigger>
-            <TabsTrigger value="all">Todas</TabsTrigger>
+            <TabsTrigger value="comments">Comentários</TabsTrigger>
+            <TabsTrigger value="people">Pessoas</TabsTrigger>
           </TabsList>
         </Tabs>
-        <CrmPeopleToolbar
-          query={q}
-          onQueryChange={setQ}
-          filters={filters}
-          onFiltersChange={setFilters}
-          owners={collectOwners(people)}
-          places={placeOptions(people)}
-          pillars={pillarOptions(people)}
-          shown={visible.length}
-          total={people.length}
-          filtersActive={filtersActive}
-          onClear={() => {
-            setQ("");
-            setFilters(DEFAULT_CRM_PEOPLE_FILTERS);
-          }}
-        />
-        {peopleQuery.isLoading ? (
-          <p className="text-sm text-muted-foreground">Carregando audiência…</p>
-        ) : people.length === 0 ? (
-          <EmptyState
-            icon={Contact2}
-            compact
-            title={
-              view === "inbox"
-                ? "Nada na caixa de entrada"
-                : view === "churn"
-                  ? "Ninguém em risco neste recorte"
-                  : "Nenhuma pessoa identificada neste recorte"
-            }
-            description={
-              commentsChip?.status === "scope_missing"
-                ? "Refaça o login Instagram com a permissão de comentários."
-                : "Puxe o Instagram nesta tela (comentários e Direct). Sem ManyChat."
-            }
-            action={
-              <Button asChild variant="outline" size="sm">
-                <a href={connectionsHref}>
-                  {connectionsHref.includes("admin") ? "Conexões" : "Conexões da marca"}
-                </a>
-              </Button>
-            }
-          />
-        ) : visible.length === 0 ? (
-          <EmptyState
-            icon={Contact2}
-            compact
-            title="Nenhuma pessoa com esses filtros"
-            description="O recorte deste período tem gente, mas a combinação de canal, calor, situação e contato não encontrou ninguém."
-            action={
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setQ("");
-                  setFilters(DEFAULT_CRM_PEOPLE_FILTERS);
-                }}
-              >
-                Limpar filtros
-              </Button>
-            }
-          />
+        {section === "comments" ? (
+          <CrmCommentFeed cadastroClienteId={cadastroClienteId} days={days} canWrite={canWrite} />
         ) : (
-          <PeopleList people={visible} view={view} onOpen={setOpenId} />
+          <>
+            <Tabs value={view} onValueChange={(v) => setView(v as CrmPeopleView)} className="mb-4">
+              <TabsList>
+                <TabsTrigger value="inbox">Caixa de entrada</TabsTrigger>
+                <TabsTrigger value="churn">Em risco</TabsTrigger>
+                <TabsTrigger value="all">Todas</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <CrmPeopleToolbar
+              query={q}
+              onQueryChange={setQ}
+              filters={filters}
+              onFiltersChange={setFilters}
+              owners={collectOwners(people)}
+              places={placeOptions(people)}
+              pillars={pillarOptions(people)}
+              shown={visible.length}
+              total={people.length}
+              filtersActive={filtersActive}
+              onClear={() => {
+                setQ("");
+                setFilters(DEFAULT_CRM_PEOPLE_FILTERS);
+              }}
+            />
+            {peopleQuery.isLoading ? (
+              <p className="text-sm text-muted-foreground">Carregando audiência…</p>
+            ) : people.length === 0 ? (
+              <EmptyState
+                icon={Contact2}
+                compact
+                title={
+                  view === "inbox"
+                    ? "Nada na caixa de entrada"
+                    : view === "churn"
+                      ? "Ninguém em risco neste recorte"
+                      : "Nenhuma pessoa identificada neste recorte"
+                }
+                description={
+                  commentsChip?.status === "scope_missing" &&
+                  (coverageQuery.data?.gap.identifiedComments ?? 0) === 0
+                    ? "Refaça o login Instagram com a permissão de comentários."
+                    : "Puxe o Instagram nesta tela (comentários e Direct)."
+                }
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <a href={connectionsHref}>
+                      {connectionsHref.includes("admin") ? "Conexões" : "Conexões da marca"}
+                    </a>
+                  </Button>
+                }
+              />
+            ) : visible.length === 0 ? (
+              <EmptyState
+                icon={Contact2}
+                compact
+                title="Nenhuma pessoa com esses filtros"
+                description="O recorte deste período tem gente, mas a combinação de canal, calor, situação e contato não encontrou ninguém."
+                action={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setQ("");
+                      setFilters(DEFAULT_CRM_PEOPLE_FILTERS);
+                    }}
+                  >
+                    Limpar filtros
+                  </Button>
+                }
+              />
+            ) : (
+              <PeopleList people={visible} view={view} onOpen={setOpenId} />
+            )}
+          </>
         )}
       </SectionCard>
 
@@ -814,8 +831,6 @@ function PersonDrawer({
   const mergeFn = useServerFn(mergeCrmPeopleFn);
   const listFn = useServerFn(listCrmPeopleFn);
   const [note, setNote] = useState("");
-  const [reply, setReply] = useState("");
-  const [replySignal, setReplySignal] = useState<string | null>(null);
   const [dm, setDm] = useState("");
   const [mergeQ, setMergeQ] = useState("");
 
@@ -842,10 +857,6 @@ function PersonDrawer({
   const title = detail
     ? personListTitle(detail.person.displayName, detail.person.igUsername)
     : "Pessoa";
-  const replyTarget = detail?.signals.find(
-    (signal) => signal.kind === "comment" || signal.kind === "reply",
-  );
-  const activeReplyId = replySignal ?? replyTarget?.id ?? null;
   const heatReasons = detail
     ? explainIntent(
         detail.signals.map((signal): CrmSignalInput => ({
@@ -874,30 +885,6 @@ function PersonDrawer({
             </SheetDescription>
           </SheetHeader>
           {detail ? <HeatMeter score={detail.person.intentScore} /> : null}
-          {detail && canWrite && activeReplyId ? (
-            <div className="space-y-2">
-              <Textarea
-                value={reply}
-                onChange={(e) => setReply(e.target.value)}
-                placeholder="Resposta pública no Instagram"
-                className="min-h-11"
-              />
-              <Button
-                className="h-11"
-                disabled={!reply.trim()}
-                onClick={async () => {
-                  await replyFn({ data: { signalId: activeReplyId, message: reply.trim() } });
-                  setReply("");
-                  setReplySignal(null);
-                  toast.success("Resposta publicada.");
-                  invalidate();
-                }}
-              >
-                <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
-                Responder
-              </Button>
-            </div>
-          ) : null}
         </div>
         {!detail ? (
           <p className="px-4 py-4 text-sm text-muted-foreground">Carregando ficha…</p>
@@ -944,13 +931,13 @@ function PersonDrawer({
                       </a>
                     ) : null}
                     {canWrite && (s.kind === "comment" || s.kind === "reply") ? (
-                      <button
-                        type="button"
-                        className="ml-2 text-xs underline"
-                        onClick={() => setReplySignal(s.id)}
-                      >
-                        Responder
-                      </button>
+                      <CommentReplyBox
+                        signalId={s.id}
+                        onReply={async (signalId, message) => {
+                          await replyFn({ data: { signalId, message } });
+                          invalidate();
+                        }}
+                      />
                     ) : null}
                   </li>
                 ))}

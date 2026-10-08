@@ -15,6 +15,36 @@ export function isBrandComment(
   return commentUser === brand;
 }
 
+export type CrmBrandAuthor = {
+  ids: ReadonlySet<string>;
+  usernames: ReadonlySet<string>;
+};
+
+export function brandAuthor(
+  ids: readonly (string | null | undefined)[],
+  usernames: readonly (string | null | undefined)[],
+): CrmBrandAuthor {
+  return {
+    ids: new Set(ids.map((id) => id?.trim()).filter((id): id is string => Boolean(id))),
+    usernames: new Set(
+      usernames
+        .map((name) => normalizeUsername(name))
+        .filter((name): name is string => name !== null && !name.includes(" ")),
+    ),
+  };
+}
+
+/** Comentário ou resposta escrito pela própria conta do cliente. */
+export function isBrandAuthor(
+  author: { id?: string | null; username?: string | null },
+  brand: CrmBrandAuthor,
+): boolean {
+  const id = author.id?.trim();
+  if (id && brand.ids.has(id)) return true;
+  const username = normalizeUsername(author.username);
+  return Boolean(username && brand.usernames.has(username));
+}
+
 export function shouldSkipComment(
   comment: CrmGraphComment,
   brandUsername: string | null | undefined,
