@@ -45,7 +45,7 @@ import type { EditorialPillar } from "@/modules/approval/types/editorial-pillar"
 import type { TimelineEntry } from "@/modules/approval/services/build-card-timeline";
 import type { PublishedIgSnapshot } from "@/modules/instagram-posts/types";
 import { PublishedIgMetrics } from "./PublishedIgMetrics";
-import { MATERIAL_ACCEPT } from "@/modules/approval/services/material-upload";
+import { MATERIAL_PICKER_ACCEPT } from "@/modules/approval/services/material-upload";
 
 type ClientCardDetail = {
   card: ContentCard;
@@ -142,12 +142,12 @@ export function ClientCardDetailDrawer({
   };
 
   const materialQueue = {
-    createTicket: async (file: File) =>
+    createTicket: async (file: File, meta: { fileName: string; mimeType: string }) =>
       createUploadUrlFn({
         data: {
           cardId,
-          fileName: file.name,
-          mimeType: file.type || "",
+          fileName: meta.fileName,
+          mimeType: meta.mimeType,
           fileSize: file.size,
         },
       }),
@@ -255,6 +255,15 @@ export function ClientCardDetailDrawer({
       assetsForPublishPreview(detailQ.data?.attachments ?? [], "final"),
     );
 
+  const [plainSheet, setPlainSheet] = useState(false);
+  useEffect(() => {
+    const ios =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const narrow = window.matchMedia("(max-width: 639px)").matches;
+    setPlainSheet(ios || narrow);
+  }, []);
+
   const approveDisabled = approveMut.isPending || changesMut.isPending;
   const changeDisabled =
     changesMut.isPending ||
@@ -270,7 +279,28 @@ export function ClientCardDetailDrawer({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-[-50%] translate-y-[-50%] flex-col gap-0 overflow-hidden rounded-none p-0 sm:h-auto sm:max-h-[94dvh] sm:w-[calc(100vw-2rem)] sm:max-w-5xl sm:rounded-2xl [&>button]:right-3 [&>button]:top-3">
+      <DialogContent
+        className="left-0 top-0 flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none p-0 sm:left-[50%] sm:top-[50%] sm:h-auto sm:max-h-[94dvh] sm:w-[calc(100vw-2rem)] sm:max-w-5xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl [&>button]:right-3 [&>button]:top-3"
+        style={
+          plainSheet
+            ? {
+                transform: "none",
+                animation: "none",
+                left: 0,
+                top: 0,
+                width: "100%",
+                maxWidth: "100%",
+                height: "100dvh",
+                maxHeight: "100dvh",
+                borderRadius: 0,
+              }
+            : undefined
+        }
+        onFocusOutside={(event) => event.preventDefault()}
+        onPointerDownOutside={(event) => {
+          if (plainSheet) event.preventDefault();
+        }}
+      >
         <DialogHeader className="sr-only">
           <DialogTitle>{card?.titulo ?? "Conteúdo"}</DialogTitle>
           <DialogDescription>
@@ -313,7 +343,11 @@ export function ClientCardDetailDrawer({
                 <ClientMaterialSendPanel
                   existing={clientMaterials}
                   disabled={previewOnly}
-                  accept={card.formato === "reels" ? "video/*" : MATERIAL_ACCEPT}
+                  accept={
+                    card.formato === "reels"
+                      ? "video/*,video/mp4,video/quicktime"
+                      : MATERIAL_PICKER_ACCEPT
+                  }
                   createTicket={materialQueue.createTicket}
                   confirm={materialQueue.confirm}
                   onSent={invalidate}

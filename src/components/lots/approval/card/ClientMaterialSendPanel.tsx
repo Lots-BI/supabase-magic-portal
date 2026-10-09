@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Camera, FolderOpen, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,15 +6,16 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import {
   CLIENT_MATERIAL_MAX_FILES,
-  MATERIAL_ACCEPT,
+  MATERIAL_PICKER_ACCEPT,
   formatBytes,
 } from "@/modules/approval/services/material-upload";
+import { PickFilesControl } from "./PickFilesControl";
 import {
   uploadHint,
   uploadMaterialBytes,
-  validateMaterialFile,
   type MaterialUploadTicket,
 } from "@/modules/approval/client/direct-media-upload";
+import { prepareUploadFile } from "@/modules/approval/services/fit-media-to-allocation";
 import type { MediaAsset } from "@/lib/media-preview";
 
 type Staged = {
@@ -26,22 +27,10 @@ type Staged = {
   error?: string;
 };
 
-function useCoarsePointer() {
-  const [coarse, setCoarse] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(pointer: coarse)");
-    const sync = () => setCoarse(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-  return coarse;
-}
-
 export function ClientMaterialSendPanel({
   existing,
   disabled,
-  accept = MATERIAL_ACCEPT,
+  accept = MATERIAL_PICKER_ACCEPT,
   createTicket,
   confirm,
   onSent,
@@ -51,7 +40,10 @@ export function ClientMaterialSendPanel({
   existing: MediaAsset[];
   disabled?: boolean;
   accept?: string;
-  createTicket: (file: File) => Promise<MaterialUploadTicket>;
+  createTicket: (
+    file: File,
+    meta: { fileName: string; mimeType: string },
+  ) => Promise<MaterialUploadTicket>;
   confirm: (input: {
     path: string;
     fileName: string;
@@ -62,9 +54,6 @@ export function ClientMaterialSendPanel({
   onCanSendChange?: (canSend: boolean) => void;
   bindSubmit?: (submit: () => void) => void;
 }) {
-  const filesRef = useRef<HTMLInputElement>(null);
-  const cameraRef = useRef<HTMLInputElement>(null);
-  const coarse = useCoarsePointer();
   const [staged, setStaged] = useState<Staged[]>([]);
   const sending = staged.some((item) => item.status === "uploading");
   const queued = staged.filter((item) => item.status === "queued");
@@ -123,16 +112,22 @@ export function ClientMaterialSendPanel({
     for (const item of batch) {
       patch(item.id, { status: "uploading", progress: 0, error: undefined });
       try {
-        const { file, mimeType } = await validateMaterialFile(item.file);
-        const ticket = await createTicket(file);
+        const prepared = await prepareUploadFile(item.file, (pct) =>
+          patch(item.id, { progress: Math.round(pct * 0.35) }),
+        );
+        if (prepared.compressed) {
+          toast.info(`${prepared.fileName} foi reduzido para caber nos 50 MB do armazenamento.`);
+        }
+        const { file, mimeType, fileName } = prepared;
+        const ticket = await createTicket(file, { fileName, mimeType });
         await uploadMaterialBytes({
           ticket: { ...ticket, mimeType: ticket.mimeType || mimeType },
           file,
-          onProgress: (pct) => patch(item.id, { progress: pct }),
+          onProgress: (pct) => patch(item.id, { progress: 35 + Math.round(pct * 0.65) }),
         });
         await confirm({
           path: ticket.path,
-          fileName: file.name,
+          fileName,
           mimeType: ticket.mimeType || mimeType,
           fileSize: file.size,
         });
@@ -169,81 +164,64 @@ export function ClientMaterialSendPanel({
     [],
   );
 
+  const dropZoneClass = cn(
+    "flex min-h-[140px] w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-muted/30 text-muted-foreground",
+    staged.length === 0 && existing.length === 0 && "border-foreground/40",
+  );
+
   return (
     <div className="space-y-4">
-      <input
-        ref={filesRef}
-        type="file"
-        multiple
-        accept={accept}
-        className="hidden"
-        onChange={(event) => {
-          addFiles(event.target.files);
-          event.target.value = "";
-        }}
-      />
-      <input
-        ref={cameraRef}
-        type="file"
-        accept={accept}
-        capture="environment"
-        className="hidden"
-        onChange={(event) => {
-          addFiles(event.target.files);
-          event.target.value = "";
-        }}
-      />
-
       <p className="text-sm font-semibold">Roteiro aprovado. Agora envie as mídias gravadas.</p>
       <p className="text-sm text-muted-foreground">
-        Até {CLIENT_MATERIAL_MAX_FILES} arquivos. Elas só entram no conteúdo depois de{" "}
+        Até {CLIENT_MATERIAL_MAX_FILES} arquivos, do celular ou do computador. Se passar de 50 MB, a
+        mídia é reduzida antes de entrar no armazenamento. Só grava depois de{" "}
         <strong>Enviar mídias</strong>.
       </p>
 
-      <button
-        type="button"
-        disabled={sending || room === 0}
-        onClick={() => {
-          if (disabled) {
-            toast.info("Pré-visualização — ações não são registradas.");
-            return;
-          }
-          filesRef.current?.click();
-        }}
-        onDragOver={(event) => {
-          event.preventDefault();
-        }}
-        onDrop={(event) => {
-          event.preventDefault();
-          addFiles(event.dataTransfer.files);
-        }}
-        className={cn(
-          "flex min-h-[140px] w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-muted/30 text-muted-foreground",
-          staged.length === 0 && existing.length === 0 && "border-foreground/40",
-        )}
-      >
-        <FolderOpen className="h-10 w-10" />
-        <span className="text-sm font-medium text-foreground">Escolher arquivos</span>
-        <span className="text-xs">Abre o gerenciador · até {room} agora</span>
-      </button>
-
-      {coarse ? (
-        <Button
+      {disabled ? (
+        <button
           type="button"
-          variant="outline"
-          disabled={sending || room === 0}
-          onClick={() => {
-            if (disabled) {
-              toast.info("Pré-visualização — ações não são registradas.");
-              return;
-            }
-            cameraRef.current?.click();
-          }}
+          onClick={() => toast.info("Pré-visualização — ações não são registradas.")}
+          className={dropZoneClass}
         >
-          <Camera className="mr-2 h-4 w-4" />
-          Câmera
-        </Button>
-      ) : null}
+          <FolderOpen className="h-10 w-10" />
+          <span className="text-sm font-medium text-foreground">Escolher arquivos</span>
+        </button>
+      ) : (
+        <PickFilesControl
+          multiple
+          accept={accept}
+          disabled={sending || room === 0}
+          ariaLabel="Escolher fotos, vídeos ou arquivos"
+          onFiles={addFiles}
+          onDragOver={(event) => event.preventDefault()}
+          onDrop={(event) => {
+            event.preventDefault();
+            addFiles(event.dataTransfer.files);
+          }}
+          className={dropZoneClass}
+        >
+          <FolderOpen className="h-10 w-10" />
+          <span className="text-sm font-medium text-foreground">Galeria ou arquivos</span>
+          <span className="text-xs">Fotos, vídeos e PDF · até {room} agora</span>
+        </PickFilesControl>
+      )}
+
+      {disabled ? null : (
+        <PickFilesControl
+          accept={accept}
+          capture="environment"
+          disabled={sending || room === 0}
+          ariaLabel="Gravar com a câmera"
+          onFiles={addFiles}
+          className="inline-flex"
+        >
+          <span className="inline-flex h-10 items-center rounded-md border border-input bg-card px-4 text-sm font-medium">
+            <Camera className="mr-2 h-4 w-4" />
+            Câmera
+          </span>
+        </PickFilesControl>
+      )}
 
       {existing.length > 0 ? (
         <ul className="grid grid-cols-3 gap-2">
@@ -264,7 +242,13 @@ export function ClientMaterialSendPanel({
           {staged.map((item) => (
             <li key={item.id} className="flex gap-3 rounded-xl border border-border bg-card p-2">
               {item.file.type.startsWith("video/") ? (
-                <video src={item.preview} className="h-16 w-16 shrink-0 rounded-lg object-cover" />
+                <video
+                  src={item.preview}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="h-16 w-16 shrink-0 rounded-lg object-cover"
+                />
               ) : (
                 <img
                   src={item.preview}

@@ -179,10 +179,15 @@ function uploadViaTus(
         );
       }
 
-      void upload.findPreviousUploads().then((previous) => {
-        if (previous[0]) upload?.resumeFromPreviousUpload(previous[0]);
-        upload?.start();
-      }, fail);
+      void upload.findPreviousUploads().then(
+        (previous) => {
+          if (previous[0]) upload?.resumeFromPreviousUpload(previous[0]);
+          upload?.start();
+        },
+        () => {
+          upload?.start();
+        },
+      );
     }, fail);
   });
 }
@@ -216,7 +221,9 @@ export async function uploadOriginalToSignedUrl(
   });
 }
 
-export async function validateMaterialFile(file: File): Promise<{ file: File; mimeType: string }> {
+export async function validateMaterialFile(
+  file: File,
+): Promise<{ file: File; mimeType: string; fileName: string }> {
   return resolveMaterialFile(file);
 }
 

@@ -1,11 +1,27 @@
-/** Limite por arquivo — original, sem compressão. 5 GB. */
+/** Teto do app antes de recusar. O Storage do plano Free corta antes, em 50 MB. */
 export const MATERIAL_MAX_BYTES = 5 * 1024 * 1024 * 1024;
+
+/** Teto global do Storage no plano Free. O bucket pode dizer 5 GB; a plataforma não aceita. */
+export const STORAGE_ALLOCATION_BYTES = 50 * 1000 * 1000;
+
+/** Meta da redução, com folga para o arquivo passar no teto de 50 MB. */
+export const STORAGE_FIT_TARGET_BYTES = 42 * 1000 * 1000;
+
+export function exceedsStorageAllocation(size: number): boolean {
+  return size > STORAGE_ALLOCATION_BYTES;
+}
 
 /** Máximo de originais do cliente por conteúdo, em um único envio. */
 export const CLIENT_MATERIAL_MAX_FILES = 6;
 
 export const MATERIAL_ACCEPT =
   "image/*,video/*,audio/*,.heic,.heif,.mov,.m4v,.mkv,.avi,.mpeg,.mpg,.3gp,.wav,.mp3,.aac,.m4a,.pdf";
+
+/**
+ * O que o seletor do celular deve receber. Extensões (`.mov`, `.heic`) junto de
+ * `image/*` fazem o iOS abrir a galeria vazia.
+ */
+export const MATERIAL_PICKER_ACCEPT = "image/*,video/*,audio/*,application/pdf";
 
 const EXT_MIME: Record<string, string> = {
   jpg: "image/jpeg",
@@ -70,7 +86,9 @@ export function resolveUploadMime(fileName: string, mimeType: string): string {
 
 export function assertAllowedMaterial(fileName: string, mimeType: string, size: number): void {
   if (!Number.isFinite(size) || size <= 0) {
-    throw new Error("Arquivo vazio.");
+    throw new Error(
+      "Arquivo vazio ou ainda na nuvem. Abra a foto ou o vídeo no celular para baixar e tente de novo.",
+    );
   }
   if (size > MATERIAL_MAX_BYTES) {
     throw new Error("Arquivo acima de 5 GB. Envie em partes ou use outro arquivo.");
@@ -110,27 +128,39 @@ export async function sniffUploadMime(file: File): Promise<string | null> {
   if (b.length >= 4 && b[0] === 0x25 && b[1] === 0x50 && b[2] === 0x44 && b[3] === 0x46) {
     return "application/pdf";
   }
-  if (b.length >= 8 && b[4] === 0x66 && b[5] === 0x74 && b[6] === 0x79 && b[7] === 0x70) {
+  if (b.length >= 12 && b[4] === 0x66 && b[5] === 0x74 && b[6] === 0x79 && b[7] === 0x70) {
+    const brand = String.fromCharCode(b[8]!, b[9]!, b[10]!, b[11]!);
+    if (brand === "qt  ") return "video/quicktime";
+    if (
+      brand.startsWith("hei") ||
+      brand === "heic" ||
+      brand === "heix" ||
+      brand === "mif1" ||
+      brand === "msf1"
+    ) {
+      return "image/heic";
+    }
     return "video/mp4";
   }
   return null;
 }
 
-export async function resolveMaterialFile(file: File): Promise<{ file: File; mimeType: string }> {
+export async function resolveMaterialFile(
+  file: File,
+): Promise<{ file: File; mimeType: string; fileName: string }> {
   let mimeType = resolveUploadMime(file.name, file.type);
   if (mimeType === "application/octet-stream") {
     const sniffed = await sniffUploadMime(file);
     if (sniffed) mimeType = sniffed;
   }
-  let name = file.name || "arquivo";
+  let name = file.name.trim() || "arquivo";
   if (!fileExtension(name) && mimeType !== "application/octet-stream") {
     const ext =
       Object.entries(EXT_MIME).find(([, m]) => m === mimeType)?.[0] ?? mimeType.split("/")[1];
-    name = `${name}.${ext}`;
+    if (ext) name = `${name}.${ext}`;
   }
+  name = name.slice(0, 180);
   assertAllowedMaterial(name, mimeType, file.size);
-  return {
-    file: new File([file], name, { type: mimeType, lastModified: file.lastModified }),
-    mimeType,
-  };
+  // Não recria o File: no celular isso copia o vídeo inteiro e o Safari derruba o envio.
+  return { file, mimeType, fileName: name };
 }

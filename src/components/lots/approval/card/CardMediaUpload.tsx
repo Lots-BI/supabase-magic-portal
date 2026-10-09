@@ -60,12 +60,12 @@ export function CardMediaUpload({
     <div className="space-y-3">
       <MaterialUploadQueue
         label={mediaRole === "final" ? "Enviar peça final" : "Enviar arquivo"}
-        createTicket={(file) =>
+        createTicket={(file, meta) =>
           createUrlFn({
             data: {
               cardId,
-              fileName: file.name,
-              mimeType: file.type || "",
+              fileName: meta.fileName,
+              mimeType: meta.mimeType,
               fileSize: file.size,
               ...(mediaRole ? { mediaRole } : {}),
             },

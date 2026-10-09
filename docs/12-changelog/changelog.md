@@ -63,6 +63,15 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Corrigido
 
+- **Conteúdos: mídia acima de 50 MB (2026-10-09):** o plano Free do Storage aceita
+  no máximo 50 MB por arquivo. Foto ou vídeo maior é reduzido no aparelho antes
+  de entrar no armazenamento. Áudio e PDF acima disso continuam recusados.
+
+- **Conteúdos: envio de mídia no celular (2026-10-09):** o cliente escolhe na galeria,
+  nos arquivos ou na câmera. O popup no iPhone/iPad deixa de usar `transform`, que
+  impedia o seletor de abrir. Vídeos grandes não são mais copiados na memória antes
+  do envio.
+
 - **Timeout dos dashboards (2026-09-11):** `/dashboard` e `/admin` falhavam com
   `canceling statement due to statement timeout` — RLS avaliava `has_role` em cada
   linha Hub/Make. Migration **64**: RPCs `portfolio_*` e `dashboard_*` passam a

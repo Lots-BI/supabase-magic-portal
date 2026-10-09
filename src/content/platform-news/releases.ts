@@ -21,6 +21,20 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-10-09-conteudos-midia-celular",
+    date: "2026-10-09",
+    title: "Conteúdos: envie mídia pelo celular",
+    summary:
+      "Dá para escolher fotos e vídeos na galeria, nos arquivos ou na câmera, e enviar do celular do mesmo jeito que no computador.",
+    bullets: [
+      "**Galeria ou arquivos** e **Câmera** na hora de enviar o material.",
+      "O envio vale no iPhone, iPad e Android.",
+      "Arquivo acima de **50 MB** é reduzido antes de entrar no armazenamento.",
+    ],
+    audience: "client",
+    tags: ["Conteúdos", "Novidade"],
+  },
+  {
     id: "2026-10-07-conteudos-biblioteca-aprovacao",
     date: "2026-10-07",
     title: "Conteúdos: edite a legenda, envie mídia e peça alteração na peça",

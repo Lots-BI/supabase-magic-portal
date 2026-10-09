@@ -11,7 +11,7 @@ Quando a agência precisa de você, o post aparece grande na tela. A barrinha em
 
 1. Leia o roteiro e a **legenda**. Pode editar os dois. Quer mudar o roteiro? Edite e toque em **Enviar alteração**.
 2. Sem mudanças? Toque em **Aprovar** — não precisa gravar nada ainda.
-3. Depois de aprovar, o popup continua aberto. Escolha até 6 arquivos no computador e toque em **Enviar mídias** — só então elas entram no conteúdo e na pasta da biblioteca.
+3. Depois de aprovar, o popup continua aberto. No celular ou no computador, escolha até 6 arquivos (galeria, arquivos ou câmera) e toque em **Enviar mídias** — só então elas entram no conteúdo e na pasta da biblioteca. Se o arquivo passar de 50 MB, ele é reduzido antes de ser guardado.
 4. Na peça final você vê o post como no Instagram. Para pedir ajuste, preencha **Pedir alterações** e toque em **Enviar alteração**.
 5. **Verde** = aprovar. **Âmbar** = enviar alteração.
 

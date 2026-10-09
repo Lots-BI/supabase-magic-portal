@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { assertAllowedMaterial, MATERIAL_MAX_BYTES, resolveUploadMime } from "./material-upload";
+import {
+  assertAllowedMaterial,
+  MATERIAL_MAX_BYTES,
+  resolveMaterialFile,
+  resolveUploadMime,
+  sniffUploadMime,
+} from "./material-upload";
 
 describe("material-upload", () => {
   it("aceita vídeo longo sem mime do browser", () => {
@@ -24,5 +30,18 @@ describe("material-upload", () => {
     expect(() => assertAllowedMaterial("virus.exe", "application/x-msdownload", 100)).toThrow(
       /Formato/,
     );
+  });
+
+  it("reconhece heic e mov pela assinatura sem copiar o arquivo", async () => {
+    const heic = new File(
+      [Uint8Array.from([0, 0, 0, 0x18, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63])],
+      "IMG_0001",
+      { type: "" },
+    );
+    expect(await sniffUploadMime(heic)).toBe("image/heic");
+    const resolved = await resolveMaterialFile(heic);
+    expect(resolved.file).toBe(heic);
+    expect(resolved.fileName).toBe("IMG_0001.heic");
+    expect(resolved.mimeType).toBe("image/heic");
   });
 });

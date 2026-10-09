@@ -1,16 +1,17 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Camera, Loader2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { MATERIAL_ACCEPT } from "@/modules/approval/services/material-upload";
+import { MATERIAL_PICKER_ACCEPT } from "@/modules/approval/services/material-upload";
+import { PickFilesControl } from "./PickFilesControl";
 import {
   uploadHint,
   uploadMaterialBytes,
-  validateMaterialFile,
   type MaterialUploadTicket,
 } from "@/modules/approval/client/direct-media-upload";
+import { prepareUploadFile } from "@/modules/approval/services/fit-media-to-allocation";
 
 type JobStatus = "uploading" | "done" | "error";
 
@@ -30,12 +31,15 @@ export function MaterialUploadQueue({
   onDone,
   variant = "button",
   capture,
-  accept = MATERIAL_ACCEPT,
+  accept = MATERIAL_PICKER_ACCEPT,
   empty,
   disabled,
 }: {
   label?: string;
-  createTicket: (file: File) => Promise<MaterialUploadTicket>;
+  createTicket: (
+    file: File,
+    meta: { fileName: string; mimeType: string },
+  ) => Promise<MaterialUploadTicket>;
   confirm: (input: {
     path: string;
     fileName: string;
@@ -50,17 +54,12 @@ export function MaterialUploadQueue({
   /** Mostra o mesmo controle, mas o clique só avisa — não abre o seletor de arquivo. */
   disabled?: boolean;
 }) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
 
   const busy = jobs.some((j) => j.status === "uploading");
 
-  const handleTriggerClick = () => {
-    if (disabled) {
-      toast.info("Pré-visualização — ações não são registradas.");
-      return;
-    }
-    inputRef.current?.click();
+  const blockPreview = () => {
+    toast.info("Pré-visualização — ações não são registradas.");
   };
 
   const patchJob = (id: string, patch: Partial<Job>) => {
@@ -68,12 +67,16 @@ export function MaterialUploadQueue({
   };
 
   const runFile = async (original: File) => {
-    const { file, mimeType } = await validateMaterialFile(original);
-    const id = `${file.name}-${file.size}-${Date.now()}`;
+    const prepared = await prepareUploadFile(original);
+    const { file, mimeType, fileName } = prepared;
+    const id = `${fileName}-${file.size}-${Date.now()}`;
     const controller = new AbortController();
     setJobs((prev) => [...prev, { id, file, progress: 0, status: "uploading", controller }]);
     try {
-      const ticket = await createTicket(file);
+      if (prepared.compressed) {
+        toast.info(`${fileName} foi reduzido para caber nos 50 MB do armazenamento.`);
+      }
+      const ticket = await createTicket(file, { fileName, mimeType });
       await uploadMaterialBytes({
         ticket: { ...ticket, mimeType: ticket.mimeType || mimeType },
         file,
@@ -82,7 +85,7 @@ export function MaterialUploadQueue({
       });
       await confirm({
         path: ticket.path,
-        fileName: file.name,
+        fileName,
         mimeType: ticket.mimeType || mimeType,
         fileSize: file.size,
       });
@@ -96,50 +99,54 @@ export function MaterialUploadQueue({
     }
   };
 
-  const handleFiles = async (list: FileList | null) => {
-    if (!list?.length) return;
-    for (const file of Array.from(list)) {
+  const handleFiles = async (list: File[]) => {
+    if (!list.length) return;
+    for (const file of list) {
       await runFile(file);
     }
-    if (inputRef.current) inputRef.current.value = "";
   };
 
   const camera = variant === "camera";
 
   return (
     <div className="space-y-3">
-      <input
-        ref={inputRef}
-        type="file"
-        multiple={!capture}
-        accept={accept}
-        capture={capture ? "environment" : undefined}
-        className="hidden"
-        onChange={(e) => void handleFiles(e.target.files)}
-      />
-      {camera ? (
-        <button
-          type="button"
+      {disabled ? (
+        <Button type="button" variant="outline" onClick={blockPreview}>
+          <Upload className="mr-2 h-4 w-4" />
+          {label}
+        </Button>
+      ) : camera ? (
+        <PickFilesControl
+          accept={accept}
+          capture="environment"
           disabled={busy}
-          onClick={handleTriggerClick}
+          ariaLabel={label}
+          onFiles={(files) => void handleFiles(files)}
           className={cn(
             "flex min-h-[160px] w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-muted/30 text-muted-foreground",
             empty && !busy && "animate-pulse border-foreground/40",
           )}
         >
           {busy ? <Loader2 className="h-10 w-10 animate-spin" /> : <Camera className="h-10 w-10" />}
-        </button>
+        </PickFilesControl>
       ) : (
-        <div className="flex flex-wrap items-center gap-2">
-          <Button type="button" variant="outline" disabled={busy} onClick={handleTriggerClick}>
+        <PickFilesControl
+          multiple
+          accept={accept}
+          disabled={busy}
+          ariaLabel={label}
+          onFiles={(files) => void handleFiles(files)}
+          className="inline-flex"
+        >
+          <span className="inline-flex h-10 items-center rounded-md border border-input bg-card px-4 text-sm font-medium shadow-sm">
             {busy ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <Upload className="mr-2 h-4 w-4" />
             )}
             {busy ? "Enviando…" : label}
-          </Button>
-        </div>
+          </span>
+        </PickFilesControl>
       )}
       {jobs.length > 0 && (
         <ul className="space-y-2">

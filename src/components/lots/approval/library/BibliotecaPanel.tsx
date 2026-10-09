@@ -24,8 +24,11 @@ import {
   safePathSegment,
   type DownloadableFile,
 } from "@/lib/download-media-files";
+import { MATERIAL_PICKER_ACCEPT } from "@/modules/approval/services/material-upload";
+import { uploadMaterialBytes } from "@/modules/approval/client/direct-media-upload";
+import { prepareUploadFile } from "@/modules/approval/services/fit-media-to-allocation";
+import { PickFilesControl } from "../card/PickFilesControl";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -106,7 +109,6 @@ export function BibliotecaPanel({
   const confirmFn = useServerFn(confirmLibraryFile);
   const moveFn = useServerFn(moveLibraryFile);
   const renameFn = useServerFn(renameLibraryItem);
-  const fileRef = useRef<HTMLInputElement>(null);
   const [folderId, setFolderId] = useState<string | null>(null);
   const [nomePasta, setNomePasta] = useState("");
   const [criando, setCriando] = useState(false);
@@ -159,21 +161,29 @@ export function BibliotecaPanel({
   });
 
   async function enviarArquivo(file: File, destino: string | null) {
+    const prepared = await prepareUploadFile(file);
+    if (prepared.compressed) {
+      toast.info(`${prepared.fileName} foi reduzido para caber nos 50 MB do armazenamento.`);
+    }
     const ticket = await prepareFn({
-      data: { cadastroClienteId, folderId: destino, nome: file.name },
+      data: { cadastroClienteId, folderId: destino, nome: prepared.fileName },
     });
-    const { error } = await supabase.storage
-      .from("editorial-media")
-      .uploadToSignedUrl(ticket.path, ticket.token, file);
-    if (error) throw new Error(error.message);
+    await uploadMaterialBytes({
+      ticket: {
+        path: ticket.path,
+        token: ticket.token,
+        mimeType: prepared.mimeType,
+      },
+      file: prepared.file,
+    });
     await confirmFn({
       data: {
         cadastroClienteId,
         folderId: destino,
-        nome: file.name,
+        nome: prepared.fileName,
         path: ticket.path,
-        mimeType: file.type || null,
-        fileSize: file.size,
+        mimeType: prepared.mimeType,
+        fileSize: prepared.file.size,
       },
     });
   }
@@ -491,23 +501,18 @@ export function BibliotecaPanel({
             </Button>
           ) : null}
           {readOnly ? null : (
-            <>
-              <Button type="button" onClick={() => fileRef.current?.click()}>
+            <PickFilesControl
+              multiple
+              accept={MATERIAL_PICKER_ACCEPT}
+              ariaLabel="Fazer upload"
+              onFiles={(files) => void enviarVarios(files, folderId)}
+              className="inline-flex"
+            >
+              <span className="inline-flex h-10 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
                 <Upload className="mr-2 h-4 w-4" />
                 Fazer upload
-              </Button>
-              <input
-                ref={fileRef}
-                type="file"
-                multiple
-                className="hidden"
-                onChange={(event) => {
-                  const files = [...(event.target.files ?? [])];
-                  event.target.value = "";
-                  if (files.length) void enviarVarios(files, folderId);
-                }}
-              />
-            </>
+              </span>
+            </PickFilesControl>
           )}
         </div>
       </div>
