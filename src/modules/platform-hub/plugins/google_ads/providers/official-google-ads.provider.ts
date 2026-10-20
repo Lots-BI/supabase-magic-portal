@@ -6,6 +6,7 @@ import { createOfficialMetricsProvider } from "../../_internal/provider-framewor
 import { GoogleAdsClient } from "../api/google-ads-client";
 import {
   countDistinctGoogleAdsCampaigns,
+  googleAdsCampaignStatuses,
   mapGoogleAdsRowsToMetricRows,
 } from "../api/google-ads-metrics.mapper";
 import { GOOGLE_ADS_OAUTH_CREDENTIAL_KEY } from "../google-ads-credential-keys";
@@ -58,6 +59,7 @@ export function createOfficialGoogleAdsProvider(
         metricsCount: metricRows.length,
         pagesFetched,
         rateLimitHit,
+        campaignStatuses: googleAdsCampaignStatuses(rows),
       };
     },
   });

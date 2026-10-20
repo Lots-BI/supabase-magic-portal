@@ -3,7 +3,7 @@ title: Changelog
 description: Histórico de mudanças relevantes do Lots BI (produto, dados e infraestrutura).
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-07
+last_review: 2026-10-20
 ---
 
 # Changelog
@@ -19,7 +19,38 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ## [Não lançado]
 
+### Adicionado
+
+- **Visão geral do cliente (2026-10-20):** ao escolher um cliente em **Ver como
+  cliente**, a tela é a visão geral só daquela conta (título Visão geral). O login
+  de cliente usa a mesma tela e a consulta recusa o nome de outra conta.
+
+- **Dashboards Meta e Instagram (2026-10-20):** a coleta passa a gravar conjunto,
+  anúncio e turbinação, seguidores atribuídos ao anúncio, funil de vídeo e o
+  estoque de seguidores do perfil. Os totais de campanha que já existiam
+  continuam separados.
+
+- **Menu Dashboards para admin e organização (2026-10-20):** a sidebar interna
+  passa a ter a aba **Dashboards**. Admin e operador entram no hub e nas
+  plataformas sem digitar a URL.
+
+- **Ver como cliente (2026-10-20):** a lista mostra só clientes com status ativo.
+
+- **Resultados no Meta Ads (2026-10-20):** o card continua com o total. A seta
+  abre cada métrica que gerou esse resultado, com (i) na frente do nome. A coleta
+  passa a guardar o indicador oficial do Gerenciador e a janela de atribuição padrão.
+
+- **Seguidores via anúncio no Meta Ads (2026-10-20):** o dashboard ganha um card
+  com os seguidores adquiridos pelos anúncios. A coleta diária de cada campanha
+  mostra essa coluna junto de gasto, resultados, conversas e cliques.
+
 ### Alterado
+
+- **Menu Visão geral (2026-10-20):** o item da conta abre só a visão daquele
+  cliente. Visão geral e Dashboards não ficam ativos ao mesmo tempo.
+
+- **Meta Ads: ranking acima dos gráficos (2026-10-20):** a tabela de campanhas
+  fica logo abaixo dos cards, antes dos gráficos.
 
 - **Conteúdos: biblioteca no modo explorador (2026-10-07):** um clique seleciona
   (ou desmarca) pasta e arquivo; dois cliques abrem. **Download** baixa a pasta

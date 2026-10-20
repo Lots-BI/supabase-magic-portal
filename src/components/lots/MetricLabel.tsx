@@ -6,15 +6,36 @@ export interface MetricLabelProps {
   label: string;
   description?: string;
   className?: string;
+  /** Só o (i), para usar ao lado de um texto que já está na tela. */
+  iconOnly?: boolean;
 }
 
 /** Rótulo de KPI com tooltip explicativo (acessível via hover e foco). */
-export function MetricLabel({ label, description, className }: MetricLabelProps) {
+export function MetricLabel({ label, description, className, iconOnly = false }: MetricLabelProps) {
   if (!description) {
     return (
       <p className={cn("font-medium uppercase tracking-[0.08em] text-muted-foreground", className)}>
         {label}
       </p>
+    );
+  }
+
+  if (iconOnly) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className="lots-focus inline-flex shrink-0 items-center text-muted-foreground"
+            aria-label={`${label}: ${description}`}
+          >
+            <Info className="h-3 w-3 opacity-70" aria-hidden />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[260px] text-left leading-snug">
+          {description}
+        </TooltipContent>
+      </Tooltip>
     );
   }
 

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { mapAccountInsightsDayToMetricRows } from "../api/instagram-account-insights.mapper";
+import {
+  mapAccountInsightsDayToMetricRows,
+  mapFollowBreakdownToMetricRows,
+} from "../api/instagram-account-insights.mapper";
 
 describe("instagram-account-insights.mapper", () => {
   it("maps total_value insights to MetricRowV1 with the requested date", () => {
@@ -51,6 +54,35 @@ describe("instagram-account-insights.mapper", () => {
     expect(rows.find((r) => r.metricKey === "follower_count")).toBeUndefined();
     expect(rows.find((r) => r.metricKey === "views")).toBeUndefined();
     expect(rows.find((r) => r.metricKey === "likes")).toBeUndefined();
+  });
+
+  it("separa seguir e deixar de seguir pelo breakdown follow_type", () => {
+    const rows = mapFollowBreakdownToMetricRows(
+      {
+        data: [
+          {
+            name: "follows_and_unfollows",
+            total_value: {
+              breakdowns: [
+                {
+                  dimension_keys: ["follow_type"],
+                  results: [
+                    { dimension_values: ["FOLLOWER"], value: 8 },
+                    { dimension_values: ["NON_FOLLOWER"], value: 3 },
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+      },
+      "2026-10-19",
+    );
+
+    expect(rows).toEqual([
+      { metricKey: "follows", value: 8, date: "2026-10-19" },
+      { metricKey: "unfollows", value: 3, date: "2026-10-19" },
+    ]);
   });
 
   it("returns an empty array when there is no data", () => {

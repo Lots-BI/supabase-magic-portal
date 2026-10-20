@@ -3,7 +3,7 @@ title: Frontend — Roteamento & Guardas
 description: Mapa de rotas file-based, guarda de autenticação e navegação por papel.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-10-20
 ---
 
 # Roteamento & Guardas
@@ -71,10 +71,21 @@ sequenceDiagram
 
 No layout autenticado, `checkIsAdmin` (server fn) define os grupos de navegação:
 
-- **Cliente:** Visão geral (`/dashboard`), Aprovações (`/aprovacoes`).
+- **Cliente:** a página inicial é a **visão geral isolada** da conta (`/cliente/:slug`).
+  Os números vêm da função `client_overview`, que só devolve a conta se ela estiver
+  em `current_user_clientes()`. Um login de cliente não recebe a visão de outra conta.
+  Com uma conta só, `/dashboard` redireciona para essa visão geral.
+- **Ver como cliente:** abre essa mesma visão geral, com o nome da conta no topo e o
+  item **Visão geral** (ícone de olho) ativo no menu. Não impersona sessão. No hub
+  `/dashboard` o operador continua no menu admin: uma Visão geral (portfólio) e
+  um Dashboards. Dentro de `/cliente/:slug`, só a visão daquela conta fica ativa.
 - **Admin visualizando cliente:** em `/cliente/:slug/*`, Aprovações aponta para
   `/cliente/:slug/aprovacoes` (modo `slug_context` via `ClientScopeProvider`).
-- **Admin:** Operações (visão geral, relatórios, editorial, clientes, usuários, serviços) +
+- **Admin e operador de organização:** o menu interno (em `/admin`) inclui **Dashboards**,
+  o mesmo item do cliente, que abre `/dashboard` e as plataformas do cliente. Com uma conta
+  só, os filhos (Meta Ads, Instagram, etc.) aparecem direto no menu admin. Com várias, o
+  item abre o hub para escolher a conta.
+- **Admin:** Operações (visão geral, dashboards, relatórios, editorial, clientes, usuários, serviços) +
   Diagnóstico (debug, auditoria de views).
 - Admin também vê atalho "Painel admin" e o seletor **"Ver como cliente"**
   (`ImpersonateClienteMenu`) — que apenas **navega** para a página do cliente, não impersona

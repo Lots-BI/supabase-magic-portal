@@ -92,10 +92,11 @@ function ClienteLayout() {
   const { cliente: slug } = Route.useParams();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isDiretrizes = /\/brandbook\/?$/.test(pathname);
+  const isOverview = /^\/cliente\/[^/]+\/?$/.test(pathname);
 
   return (
     <div className={isDiretrizes ? undefined : "space-y-5"}>
-      {isDiretrizes ? null : (
+      {isDiretrizes || isOverview ? null : (
         <div>
           <Link
             to="/dashboard"

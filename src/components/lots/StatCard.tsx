@@ -1,8 +1,15 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
-import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ChevronDown, Minus } from "lucide-react";
 import { MetricLabel } from "./MetricLabel";
+
+export interface StatCardOption {
+  key: string;
+  label: string;
+  value: string;
+  description?: string;
+}
 
 export interface StatCardProps {
   label: string;
@@ -19,6 +26,10 @@ export interface StatCardProps {
   /** Visual weight — `hero` for the executive headline KPI. */
   emphasis?: "hero" | "default" | "compact";
   className?: string;
+  /** Seletor da métrica que compõe o total (ex.: Resultados). */
+  options?: StatCardOption[];
+  selectedKey?: string;
+  onSelect?: (key: string) => void;
 }
 
 const numberFmt = (v: string | number) => (typeof v === "number" ? v.toLocaleString("pt-BR") : v);
@@ -37,6 +48,9 @@ export const StatCard = memo(function StatCard({
   positiveIsGood = true,
   emphasis = "default",
   className,
+  options,
+  selectedKey,
+  onSelect,
 }: StatCardProps) {
   const hasDelta = typeof delta === "number" && Number.isFinite(delta);
   const trend = hasDelta ? (delta === 0 ? "flat" : delta > 0 ? "up" : "down") : null;
@@ -44,6 +58,8 @@ export const StatCard = memo(function StatCard({
 
   const isHero = emphasis === "hero";
   const isCompact = emphasis === "compact";
+  const [open, setOpen] = useState(false);
+  const hasOptions = (options?.length ?? 0) > 0;
 
   return (
     <div
@@ -105,6 +121,58 @@ export const StatCard = memo(function StatCard({
           </span>
         )}
         {hint && <p className="truncate text-xs text-muted-foreground">{hint}</p>}
+        {hasOptions ? (
+          <div className="mt-1">
+            <button
+              type="button"
+              aria-expanded={open}
+              onClick={() => setOpen((was) => !was)}
+              className="lots-focus inline-flex items-center gap-1 text-[11.5px] font-medium text-muted-foreground hover:text-foreground"
+            >
+              Métrica do resultado
+              <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
+            </button>
+            {open ? (
+              <ul className="mt-1.5 overflow-hidden rounded-lg border border-border bg-background">
+                {options!.map((option) => {
+                  const selected = option.key === selectedKey;
+                  return (
+                    <li key={option.key}>
+                      <div
+                        className={cn(
+                          "flex items-center gap-1.5 px-2.5 py-1.5",
+                          selected ? "bg-primary/10" : "hover:bg-muted/60",
+                        )}
+                      >
+                        {option.description ? (
+                          <MetricLabel
+                            iconOnly
+                            label={option.label}
+                            description={option.description}
+                          />
+                        ) : null}
+                        <button
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => onSelect?.(option.key)}
+                          className={cn(
+                            "flex min-w-0 flex-1 items-center justify-between gap-3 text-left text-[12px]",
+                            selected
+                              ? "font-medium text-foreground"
+                              : "text-muted-foreground hover:text-foreground",
+                          )}
+                        >
+                          <span className="min-w-0 truncate">{option.label}</span>
+                          <span className="shrink-0 tabular-nums">{option.value}</span>
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </div>
   );

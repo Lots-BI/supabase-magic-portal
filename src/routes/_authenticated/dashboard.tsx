@@ -1,4 +1,4 @@
-import { createFileRoute, getRouteApi } from "@tanstack/react-router";
+import { createFileRoute, getRouteApi, Navigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { DashboardsHub } from "@/components/lots/DashboardsHub";
@@ -33,6 +33,10 @@ const authenticatedRoute = getRouteApi("/_authenticated");
 function DashboardsBody() {
   const { isAdmin } = authenticatedRoute.useRouteContext();
   const { data: accounts } = useSuspenseQuery(dashboardAccountsQuery);
+
+  if (accounts.length === 1) {
+    return <Navigate to="/cliente/$cliente" params={{ cliente: accounts[0]!.slug }} replace />;
+  }
 
   return (
     <DashboardsHub

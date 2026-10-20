@@ -14,6 +14,7 @@ import {
   mapMetaInsightsToMetricRows,
   markerRowsForUncoveredDates,
 } from "../api/meta-insights.mapper";
+import { mapMetaHierarchyInsights } from "../api/meta-structure";
 import { META_OAUTH_CREDENTIAL_KEY } from "../meta-credential-keys";
 import {
   createMetaCollectTelemetry,
@@ -33,6 +34,48 @@ export interface OfficialMetaProviderConfig {
 }
 
 const METRICS_CAPABILITY = "meta:metrics:collect" as Capability;
+
+async function collectHierarchy(
+  graphClient: MetaGraphClient,
+  input: {
+    accessToken: string;
+    adAccountId: string;
+    window: { from: string; to: string };
+    campaignObjectives: ReadonlyMap<string, string>;
+  },
+) {
+  let boostedAdIds = new Set<string>();
+  try {
+    boostedAdIds = await graphClient.fetchBoostedAdIds({
+      accessToken: input.accessToken,
+      adAccountId: input.adAccountId,
+    });
+  } catch {
+    boostedAdIds = new Set();
+  }
+
+  const levels = ["ad", "adset"] as const;
+  const batches = await Promise.all(
+    levels.map(async (level) => {
+      try {
+        const insights = await graphClient.fetchLevelInsights({
+          accessToken: input.accessToken,
+          adAccountId: input.adAccountId,
+          level,
+          window: input.window,
+        });
+        return mapMetaHierarchyInsights(insights, {
+          level,
+          campaignObjectives: input.campaignObjectives,
+          boostedAdIds,
+        });
+      } catch {
+        return [];
+      }
+    }),
+  );
+  return batches.flat();
+}
 
 function resolveAdAccountIdentity(identities: readonly PlatformIdentityV1[]): PlatformIdentityV1 {
   const primary = identities.find((id) => id.identityType === "ad_account" && id.isPrimary);
@@ -89,18 +132,27 @@ export function createOfficialMetaProvider(config: OfficialMetaProviderConfig): 
         });
 
         let campaignObjectives = new Map<string, string>();
+        let campaignStatuses: { name: string; status: string }[] = [];
         try {
-          campaignObjectives = await graphClient.fetchCampaignObjectives({
+          const catalog = await graphClient.fetchCampaignObjectives({
             accessToken: tokenBundle.accessToken,
             adAccountId: adAccount.externalId,
           });
+          campaignObjectives = catalog.objectives;
+          campaignStatuses = catalog.statuses;
         } catch {
           // Insights já vieram; sem objective só contamos conversão de negócio.
         }
 
         const mapped = mapMetaInsightsToMetricRows(insights, { campaignObjectives });
+        const hierarchy = await collectHierarchy(graphClient, {
+          accessToken: tokenBundle.accessToken,
+          adAccountId: adAccount.externalId,
+          window,
+          campaignObjectives,
+        });
         const coveredDates = insights.map((row) => row.date_start).filter(Boolean);
-        const rows = [...mapped, ...markerRowsForUncoveredDates(window, coveredDates)];
+        const rows = [...mapped, ...hierarchy, ...markerRowsForUncoveredDates(window, coveredDates)];
         timer.finish({
           campaignsCount: countDistinctCampaigns(insights),
           metricsCount: rows.length,
@@ -115,6 +167,7 @@ export function createOfficialMetaProvider(config: OfficialMetaProviderConfig): 
           providerType: "official_api",
           profile: "metrics-timeseries",
           collectedAt: new Date().toISOString(),
+          campaignStatuses,
           payload: {
             version: METRIC_BATCH_CONTRACT_VERSION,
             connectionId: params.connectionId,

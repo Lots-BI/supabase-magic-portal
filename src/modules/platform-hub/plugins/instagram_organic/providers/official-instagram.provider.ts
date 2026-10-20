@@ -15,8 +15,11 @@ import type { HttpClientPort } from "../../_internal/http/http-client.port";
 import { IG_MEDIA_SYNC_PAYLOAD_KEY, type IgMediaSyncItemV1 } from "@/modules/instagram-posts/types";
 import { InstagramGraphClient } from "../api/instagram-graph-client";
 import { mapInsightsToMetrics, mediaPublishedAt } from "../api/instagram-insights.mapper";
-import { mapAccountInsightsDayToMetricRows } from "../api/instagram-account-insights.mapper";
-import { enumerateDatesInclusive, todayInSaoPaulo } from "../api/date-utils";
+import {
+  mapAccountInsightsDayToMetricRows,
+  mapFollowBreakdownToMetricRows,
+} from "../api/instagram-account-insights.mapper";
+import { addDaysToDateStr, enumerateDatesInclusive, todayInSaoPaulo } from "../api/date-utils";
 import { INSTAGRAM_ORGANIC_OAUTH_CREDENTIAL_KEY } from "../instagram-credential-keys";
 import {
   INSTAGRAM_ORGANIC_METRICS_CAPABILITY,
@@ -99,6 +102,21 @@ export function createOfficialInstagramProvider(
       try {
         const response = await graphClient.fetchAccountInsightsForDay(accessToken, igUserId, date);
         rows.push(...mapAccountInsightsDayToMetricRows(response, date));
+        try {
+          const breakdown = await graphClient.fetchFollowTypeBreakdown(accessToken, igUserId, date);
+          const breakdownRows = mapFollowBreakdownToMetricRows(breakdown, date);
+          if (breakdownRows.length > 0) {
+            for (let index = rows.length - 1; index >= 0; index -= 1) {
+              const row = rows[index];
+              if (row?.date === date && row.metricKey === "follows") rows.splice(index, 1);
+            }
+            rows.push(...breakdownRows);
+          }
+        } catch (breakdownError) {
+          const message =
+            breakdownError instanceof Error ? breakdownError.message : String(breakdownError);
+          if (isFatalInstagramGraphError(message)) throw breakdownError;
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         if (isFatalInstagramGraphError(message)) throw err;
@@ -108,6 +126,26 @@ export function createOfficialInstagramProvider(
 
     if (rows.length === 0 && dayErrors.length > 0) {
       throw new Error(dayErrors.join("; "));
+    }
+
+    const yesterday = addDaysToDateStr(today, -1);
+    if (dates.includes(yesterday)) {
+      try {
+        const counts = await graphClient.fetchAccountProfileCounts(accessToken, igUserId);
+        const snapshot: Array<[string, number | undefined]> = [
+          ["followers_count", counts.followers_count],
+          ["following_count", counts.follows_count],
+          ["media_count", counts.media_count],
+        ];
+        for (const [metricKey, value] of snapshot) {
+          if (typeof value === "number" && Number.isFinite(value)) {
+            rows.push({ metricKey, value, date: yesterday });
+          }
+        }
+      } catch (snapshotError) {
+        const message = snapshotError instanceof Error ? snapshotError.message : String(snapshotError);
+        if (isFatalInstagramGraphError(message)) throw snapshotError;
+      }
     }
 
     return {

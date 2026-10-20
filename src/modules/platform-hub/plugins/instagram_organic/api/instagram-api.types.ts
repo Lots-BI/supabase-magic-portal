@@ -41,7 +41,13 @@ export interface InstagramAccountInsightsResponseV1 {
     period?: string;
     title?: string;
     description?: string;
-    total_value?: { value?: number };
+    total_value?: {
+      value?: number;
+      breakdowns?: Array<{
+        dimension_keys?: string[];
+        results?: Array<{ dimension_values?: string[]; value?: number }>;
+      }>;
+    };
   }>;
   error?: { message: string; code?: number };
 }

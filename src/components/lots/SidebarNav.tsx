@@ -19,11 +19,9 @@ function itemHref(item: NavItem) {
 
 function isItemActive(pathname: string, item: NavItem) {
   const href = itemHref(item);
-  return (
-    pathname === href ||
-    (item.prefixMatch !== false && pathname.startsWith(`${href}/`)) ||
-    (item.prefixMatch !== false && pathname.startsWith(href) && href !== "/")
-  );
+  if (pathname === href) return true;
+  if (item.prefixMatch === false || href === "/") return false;
+  return pathname.startsWith(`${href}/`) || pathname.startsWith(href);
 }
 
 export function SidebarNav({ groups, onNavigate, className }: SidebarNavProps) {
@@ -44,7 +42,7 @@ export function SidebarNav({ groups, onNavigate, className }: SidebarNavProps) {
           <ul className="space-y-0.5">
             {group.items.map((item) => (
               <NavTreeItem
-                key={itemHref(item)}
+                key={`${item.label}:${itemHref(item)}`}
                 item={item}
                 pathname={pathname}
                 onNavigate={onNavigate}
@@ -90,7 +88,8 @@ function NavTreeItem({
   function toggleMenu() {
     setOpen((wasOpen) => {
       const next = !wasOpen;
-      if (next && !childActive) {
+      const onClient = pathname.startsWith("/cliente/");
+      if (next && !childActive && !onClient) {
         void router.navigate({ to: item.to, params: item.params });
       }
       return next;
@@ -143,7 +142,7 @@ function NavTreeItem({
           aria-label={`Dashboards de ${item.label}`}
         >
           {children.map((child) => (
-            <li key={itemHref(child)}>
+            <li key={`${child.label}:${itemHref(child)}`}>
               <NavLink
                 item={child}
                 active={isItemActive(pathname, child)}
@@ -175,6 +174,8 @@ function NavLink({
     <Link
       to={item.to}
       params={item.params}
+      activeOptions={{ exact: item.prefixMatch === false, includeSearch: false }}
+      activeProps={{ className: "" }}
       onClick={() => onNavigate?.()}
       className={cn(
         "group relative flex items-center gap-2.5 rounded-lg font-medium text-sidebar-foreground transition-colors",

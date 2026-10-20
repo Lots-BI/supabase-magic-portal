@@ -64,6 +64,8 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `61_crm_people_graph.sql`                 | CRM de audiência: pessoas, identidades, sinais, stats, notas, cobertura. View `vw_crm_people_list`. |
 | `62_crm_inbox.sql`                        | Dono, merge (`merged_into_id`), recibos de webhook Meta, view com `last_kind`. |
 | `63_crm_ingest_api.sql`                   | Tokens da API de ingestão CRM (`crm_ingest_tokens`, hash SHA-256). Kinds `form`/`email`/`call`/`other`; places `web`/`phone`. |
+| `79_meta_ig_structure_metrics.sql`        | Views Meta/Instagram: seguidores, vídeo, compras. Hierarquia `nx` fica fora do total de campanha. |
+| `80_client_overview_rpc.sql`              | RPC `client_overview`: visão geral de um cliente, só se o nome está em `current_user_clientes()`. |
 
 > Conteúdos (38–45) e demais arquivos em `supabase/migrations-official/` seguem a mesma
 > numeração. Lista completa no diretório. **Não existe `04`.** A tentativa

@@ -16,7 +16,7 @@ import {
 import { InstagramPostCard } from "./InstagramPostCard";
 import { InstagramPostReport } from "./InstagramPostReport";
 import { StatCard } from "@/components/lots/StatCard";
-import { engagementRate, POSTS_KPI_KEYS, POSTS_KPI_LABELS, summarizePosts } from "./format-metrics";
+import { averageMetricValues, engagementRate, POSTS_KPI_KEYS, POSTS_KPI_LABELS, summarizePosts } from "./format-metrics";
 
 const PRODUCT_FILTERS = [
   { value: "all", label: "Todos" },
@@ -107,6 +107,10 @@ export function InstagramPostsPage({
     () => summarizePosts(previousQuery.data?.posts ?? []),
     [previousQuery.data?.posts],
   );
+  const previousAverages = useMemo(
+    () => averageMetricValues(previousQuery.data?.posts ?? []),
+    [previousQuery.data?.posts],
+  );
   const avgEngagement =
     posts.length > 0
       ? posts.reduce((sum, post) => sum + (engagementRate(post.metrics) ?? 0), 0) / posts.length
@@ -182,8 +186,10 @@ export function InstagramPostsPage({
         ))}
       </div>
       <p className="text-[11px] text-muted-foreground">
-        Cards: variação vs o período anterior do mesmo tamanho. Alcance somado entre publicações
-        pode contar a mesma pessoa mais de uma vez. Engajamento médio: {avgEngagement.toFixed(1)}%.
+        Cards: variação vs o total do período anterior. Nas publicações, a porcentagem de cada
+        métrica compara a peça com a média das publicações do período anterior. Alcance somado
+        entre publicações pode contar a mesma pessoa mais de uma vez. Engajamento médio:{" "}
+        {avgEngagement.toFixed(1)}%.
       </p>
 
       <div className="flex flex-wrap gap-2">
@@ -216,7 +222,12 @@ export function InstagramPostsPage({
       ) : (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {posts.map((post) => (
-            <InstagramPostCard key={post.id} post={post} onOpen={() => setSelected(post)} />
+            <InstagramPostCard
+              key={post.id}
+              post={post}
+              previousAverages={previousQuery.isFetched ? previousAverages : undefined}
+              onOpen={() => setSelected(post)}
+            />
           ))}
         </div>
       )}

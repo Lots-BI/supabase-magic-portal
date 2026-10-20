@@ -3723,6 +3723,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      ph_campaign_status: {
+        Row: {
+          campanha: string;
+          cliente: string;
+          plataforma: string;
+          status: string;
+          updated_at: string;
+        };
+        Insert: {
+          campanha: string;
+          cliente: string;
+          plataforma: string;
+          status: string;
+          updated_at?: string;
+        };
+        Update: {
+          campanha?: string;
+          cliente?: string;
+          plataforma?: string;
+          status?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       user_roles: {
         Row: {
           created_at: string;
@@ -4435,6 +4459,10 @@ export type Database = {
           shares: number | null;
           views: number | null;
           website_clicks: number | null;
+          unfollows: number | null;
+          followers_count: number | null;
+          following_count: number | null;
+          media_count: number | null;
         };
         Relationships: [];
       };
@@ -4471,6 +4499,15 @@ export type Database = {
           spend: number | null;
           unique_clicks: number | null;
           video_views: number | null;
+          instagram_profile_follows: number | null;
+          instagram_profile_visits: number | null;
+          outbound_clicks: number | null;
+          video_thruplay: number | null;
+          video_p25: number | null;
+          video_p50: number | null;
+          video_p75: number | null;
+          video_p100: number | null;
+          purchase_value: number | null;
         };
         Relationships: [];
       };
@@ -4539,6 +4576,24 @@ export type Database = {
         Args: never;
         Returns: {
           cliente_nome: string;
+        }[];
+      };
+      client_overview: {
+        Args: { p_cliente: string; p_from: string; p_to: string };
+        Returns: {
+          data: string;
+          cliente: string;
+          meta_spend: number | null;
+          google_spend: number | null;
+          total_impressions: number | null;
+          total_clicks: number | null;
+          ga4_sessions: number | null;
+          ga4_conversions: number | null;
+          instagram_reach: number | null;
+          instagram_interactions: number | null;
+          meta_results: number | null;
+          meta_conversions: number | null;
+          google_conversions: number | null;
         }[];
       };
       dashboard_coverage: {

@@ -5,7 +5,7 @@ status: living
 owner: Engenharia / Dados Lots BI
 tags: [dashboard, instagram, platformdef]
 difficulty: intermediate
-last_review: 2026-09-05
+last_review: 2026-10-20
 ---
 
 # Instagram
@@ -61,6 +61,18 @@ Coleta de **publicações** (`/publicacoes`, feed/reels/stories) é independente
 | saves              | saves              | sum       |
 | shares             | shares             | sum       |
 | profile_links_taps | profile_links_taps | sum       |
+| views              | views              | sum       |
+| replies            | replies            | sum       |
+| website_clicks     | website_clicks     | sum       |
+| follows            | follows            | sum       |
+| unfollows          | unfollows          | sum       |
+| followers_count    | followers_count    | **last**  |
+| following_count    | following_count    | **last**  |
+| media_count        | media_count        | **last**  |
+
+`follows` e `unfollows` vêm de `follows_and_unfollows` com `breakdown=follow_type`
+(seguir versus deixar de seguir). `followers_count` é o estoque do perfil gravado
+no dia de ontem — a Graph API não envia a série histórica.
 
 ## KPIs derivados
 

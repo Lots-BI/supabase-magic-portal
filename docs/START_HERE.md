@@ -3,7 +3,7 @@ title: START HERE — Lots BI Engineering Handbook
 description: Ponto de entrada principal. Leia isto primeiro para entender o Lots BI em menos de uma hora.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-20
 ---
 
 # START HERE
@@ -96,6 +96,9 @@ Mandato: **código ↔ docs sincronizados** · melhoria contínua · ADRs para d
 ## Fluxo de desenvolvimento oficial (2 minutos)
 
 **Cursor** é o ambiente de engenharia. Todo código é escrito neste repositório.
+
+Agentes: o manual permanente (comandos, admin local, commit/push/deploy) está em
+[`AGENTS.md`](../AGENTS.md) — o Cursor injeta esse arquivo em toda sessão.
 
 ```
 Desenvolvimento (Cursor) → Commit → Git → GitHub → Deploy → Portal Lots BI

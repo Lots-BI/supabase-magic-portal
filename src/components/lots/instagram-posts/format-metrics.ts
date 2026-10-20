@@ -176,6 +176,27 @@ function sumMetric(posts: Array<{ metrics: IgMediaMetrics }>, key: string): numb
   }, 0);
 }
 
+/** Média de cada métrica entre as publicações que têm o número. */
+export function averageMetricValues(
+  posts: Array<{ metrics: IgMediaMetrics }>,
+): Record<string, number> {
+  const buckets = new Map<string, { sum: number; count: number }>();
+  for (const post of posts) {
+    for (const [key, value] of Object.entries(post.metrics)) {
+      if (typeof value !== "number" || !Number.isFinite(value)) continue;
+      const bucket = buckets.get(key) ?? { sum: 0, count: 0 };
+      bucket.sum += value;
+      bucket.count += 1;
+      buckets.set(key, bucket);
+    }
+  }
+  const averages: Record<string, number> = {};
+  for (const [key, bucket] of buckets) {
+    if (bucket.count > 0) averages[key] = bucket.sum / bucket.count;
+  }
+  return averages;
+}
+
 /** Totais dos cards da aba Publicações (não das peças individuais). */
 export function summarizePosts(posts: Array<{ metrics: IgMediaMetrics }>): PostsSummary {
   return {

@@ -6,13 +6,16 @@ import { listClientes } from "@/lib/admin.functions";
 import { slugify } from "@/lib/slug";
 import { cn } from "@/lib/utils";
 
-type AdminClienteRow = { id: number; nome_cliente: string; slug?: string | null };
+type AdminClienteRow = {
+  id: number;
+  nome_cliente: string;
+  slug?: string | null;
+  ativo?: boolean | null;
+};
 
 /**
- * Seletor para o admin "Ver como cliente". Não impersona — apenas
- * navega para a aba Conteúdos do cliente escolhido, a mesma tela que o
- * cliente vê. Se já houver um cliente selecionado em Conteúdos (admin),
- * usa esse cliente direto, sem precisar buscar de novo.
+ * Seletor para o admin "Ver como cliente". Não impersona — abre a visão
+ * geral isolada daquele cliente, a mesma página inicial da conta.
  */
 export function ImpersonateClienteMenu() {
   const navigate = useNavigate();
@@ -34,7 +37,7 @@ export function ImpersonateClienteMenu() {
     staleTime: 60_000,
   });
 
-  const list = (clientes as AdminClienteRow[] | undefined) ?? [];
+  const list = ((clientes as AdminClienteRow[] | undefined) ?? []).filter((c) => c.ativo === true);
   const currentCliente = hasCurrentCliente
     ? (list.find((c) => c.id === currentClienteId) ?? null)
     : null;
@@ -51,10 +54,10 @@ export function ImpersonateClienteMenu() {
     !q ? true : c.nome_cliente.toLowerCase().includes(q.toLowerCase()),
   );
 
-  function goToClienteAprovacoes(c: AdminClienteRow) {
+  function goToClienteOverview(c: AdminClienteRow) {
     setOpen(false);
     const target = c.slug ? slugify(c.slug) : slugify(c.nome_cliente);
-    navigate({ to: "/cliente/$cliente/aprovacoes", params: { cliente: target } });
+    navigate({ to: "/cliente/$cliente", params: { cliente: target } });
   }
 
   return (
@@ -62,7 +65,7 @@ export function ImpersonateClienteMenu() {
       <button
         onClick={() => {
           if (currentCliente) {
-            goToClienteAprovacoes(currentCliente);
+            goToClienteOverview(currentCliente);
             return;
           }
           setOpen((o) => !o);
@@ -93,12 +96,14 @@ export function ImpersonateClienteMenu() {
               <li className="px-3 py-2 text-[12px] text-muted-foreground">Carregando…</li>
             )}
             {clientes && filtered.length === 0 && (
-              <li className="px-3 py-2 text-[12px] text-muted-foreground">Nenhum cliente.</li>
+              <li className="px-3 py-2 text-[12px] text-muted-foreground">
+                {q ? "Nenhum cliente ativo com esse nome." : "Nenhum cliente ativo."}
+              </li>
             )}
             {filtered.map((c) => (
               <li key={c.id}>
                 <button
-                  onClick={() => goToClienteAprovacoes(c)}
+                  onClick={() => goToClienteOverview(c)}
                   className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-[12.5px] hover:bg-muted/60"
                 >
                   <span className="truncate font-medium text-foreground">{c.nome_cliente}</span>

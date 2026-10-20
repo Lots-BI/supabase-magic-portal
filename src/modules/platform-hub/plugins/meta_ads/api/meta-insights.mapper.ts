@@ -85,6 +85,28 @@ function objectiveOf(insight: MetaInsightRowV1, options?: MapMetaInsightsOptions
   return options.campaignObjectives.get(insight.campaign_id) ?? "";
 }
 
+const PROFILE_FOLLOW_ACTIONS = [
+  "onsite_conversion.instagram_follow",
+  "instagram_follow",
+  "follow",
+] as const;
+
+function insightCount(
+  raw: string | readonly MetaActionValueV1[] | undefined,
+  actionTypes: readonly string[],
+  byType: Map<string, number>,
+): number {
+  if (typeof raw === "string") {
+    const direct = parseMetricValue(raw);
+    if (direct !== null && direct > 0) return direct;
+  }
+  if (Array.isArray(raw)) {
+    const listed = sumActionValues(raw);
+    if (listed > 0) return listed;
+  }
+  return firstPositive(byType, actionTypes);
+}
+
 function parseMetricValue(raw: string | undefined): number | null {
   if (raw === undefined || raw === "") return null;
   const value = Number(raw);
@@ -94,12 +116,61 @@ function parseMetricValue(raw: string | undefined): number | null {
 function valueFromResultStat(stat: MetaResultStatV1): number {
   const direct = parseMetricValue(stat.value);
   if (direct !== null) return direct;
-  let total = 0;
-  for (const nested of stat.values ?? []) {
-    const n = parseMetricValue(nested.value);
-    if (n !== null) total += n;
+  const nested = stat.values ?? [];
+  const preferred =
+    nested.find((item) => item.attribution_windows?.includes("default")) ?? nested[0];
+  return parseMetricValue(preferred?.value) ?? 0;
+}
+
+/** Indicador da coluna Resultados → métrica que o dashboard sabe nomear. */
+export function resultSourceKeyFromIndicator(raw: string | undefined): string {
+  const type = (raw ?? "")
+    .replace(/^actions:/i, "")
+    .replace(/^conversions:/i, "")
+    .trim()
+    .toLowerCase();
+  if (!type) return "objective";
+  if (type.includes("messaging_conversation_started") || type.includes("total_messaging_connection")) {
+    return "messaging_conversations_started";
   }
-  return total;
+  if (type.includes("messaging_first_reply")) return "messaging_first_replies";
+  if (type === "link_click" || type.endsWith(".link_click")) return "inline_link_clicks";
+  if (type.includes("landing_page_view")) return "landing_page_views";
+  if (type.includes("thruplay")) return "video_thruplay";
+  if (type === "video_view" || type.endsWith(".video_view")) return "video_views";
+  if (type.includes("instagram_profile_follow") || type === "follow") return "instagram_profile_follows";
+  if (type.includes("instagram_profile_visit") || type.includes("profile_visit")) {
+    return "instagram_profile_visits";
+  }
+  if (
+    type.includes("purchase") ||
+    type.includes("lead") ||
+    type.includes("complete_registration") ||
+    type.startsWith("offsite_conversion")
+  ) {
+    return "conversions";
+  }
+  if (type.includes("post_engagement")) return "post_engagements";
+  if (type.includes("page_engagement")) return "page_engagements";
+  if (type.includes("outbound_click")) return "outbound_clicks";
+  return "objective";
+}
+
+export function officialResultParts(
+  insight: MetaInsightRowV1,
+): Array<{ key: string; value: number }> {
+  const list = insight.results?.length ? insight.results : insight.objective_results;
+  if (!list?.length) return [];
+  const parts: Array<{ key: string; value: number }> = [];
+  for (const stat of list) {
+    const value = valueFromResultStat(stat);
+    if (value <= 0) continue;
+    parts.push({
+      key: resultSourceKeyFromIndicator(stat.indicator ?? stat.action_type),
+      value,
+    });
+  }
+  return parts;
 }
 
 /**
@@ -250,6 +321,35 @@ export function pickResultsValue(insight: MetaInsightRowV1, objective = ""): num
   return conversionLike;
 }
 
+function inferredResultSource(insight: MetaInsightRowV1, objective: string): string {
+  const byType = actionsByType(insight);
+  const normalized = objective.trim().toUpperCase();
+  const messaging = firstPositive(byType, MESSAGING_RESULT_ACTION_TYPES);
+  const leads = firstPositive(byType, LEAD_RESULT_ACTION_TYPES);
+  const conversionLike = pickConversionLikeResults(insight, byType);
+  const traffic = firstPositive(byType, FALLBACK_RESULT_ACTION_TYPES);
+
+  if (SALES_OBJECTIVES.has(normalized)) {
+    return conversionLike > 0 ? "conversions" : "";
+  }
+  if (LEAD_OBJECTIVES.has(normalized)) {
+    if (leads > 0 || conversionLike > 0) return "conversions";
+    return messaging > 0 ? "messaging_conversations_started" : "";
+  }
+  if (messaging > 0) return "messaging_conversations_started";
+  if (TRAFFIC_OBJECTIVES.has(normalized)) {
+    if (firstPositive(byType, ["landing_page_view", "omni_landing_page_view"]) > 0) {
+      return "landing_page_views";
+    }
+    if (traffic > 0) return "inline_link_clicks";
+    return conversionLike > 0 ? "conversions" : "";
+  }
+  if (normalized === "OUTCOME_APP_PROMOTION" || normalized === "APP_INSTALLS") {
+    return conversionLike > 0 ? "conversions" : "";
+  }
+  return conversionLike > 0 ? "conversions" : "";
+}
+
 function enumerateIsoDays(from: string, to: string): string[] {
   const days: string[] = [];
   let cursor = from;
@@ -337,6 +437,15 @@ export function collapseSevenDayMessagingAttribution(rows: MetricRowV1[]): Metri
         if (keep.has(date)) continue;
         setValue(campaign, date, "messaging_conversations_started", 0);
         setValue(campaign, date, "results", 0);
+        for (const row of rows) {
+          if (
+            (row.campaign ?? "") === campaign &&
+            row.date === date &&
+            row.metricKey.startsWith("rk_")
+          ) {
+            row.value = 0;
+          }
+        }
       }
     }
   }
@@ -415,12 +524,49 @@ export function mapMetaInsightsToMetricRows(
       date,
       campaign,
     });
+    const objective = objectiveOf(insight, options);
+    const resultValue = pickResultsValue(insight, objective);
     rows.push({
       metricKey: "results",
-      value: pickResultsValue(insight, objectiveOf(insight, options)),
+      value: resultValue,
       date,
       campaign,
     });
+
+    const officialParts = officialResultParts(insight);
+    if (officialParts.length > 0) {
+      for (const part of officialParts) {
+        rows.push({ metricKey: `rk_${part.key}`, value: part.value, date, campaign });
+      }
+    } else if (resultValue > 0) {
+      const source = inferredResultSource(insight, objective) || "objective";
+      rows.push({ metricKey: `rk_${source}`, value: resultValue, date, campaign });
+    }
+
+    const thruplay = sumActionValues(insight.video_thruplay_watched_actions);
+    if (thruplay > 0) rows.push({ metricKey: "video_thruplay", value: thruplay, date, campaign });
+    const outbound = sumActionValues(insight.outbound_clicks);
+    if (outbound > 0) rows.push({ metricKey: "outbound_clicks", value: outbound, date, campaign });
+    const follows = insightCount(
+      insight.instagram_profile_follow,
+      PROFILE_FOLLOW_ACTIONS,
+      byType,
+    );
+    // Inclusive 0: o gap-finder usa a métrica para saber que o dia já foi
+    // coletado com a coluna de seguidores. Sem o zero, dias antigos nunca voltam.
+    rows.push({ metricKey: "instagram_profile_follows", value: follows, date, campaign });
+    const visits = insightCount(insight.instagram_profile_visits, ["instagram_profile_visit"], byType);
+    if (visits > 0) {
+      rows.push({ metricKey: "instagram_profile_visits", value: visits, date, campaign });
+    }
+    const purchaseValue = firstPositive(actionsByType({ ...insight, actions: insight.action_values }), [
+      "omni_purchase",
+      "purchase",
+      "offsite_conversion.fb_pixel_purchase",
+    ]);
+    if (purchaseValue > 0) {
+      rows.push({ metricKey: "purchase_value", value: purchaseValue, date, campaign });
+    }
   }
 
   return collapseSevenDayMessagingAttribution(rows);

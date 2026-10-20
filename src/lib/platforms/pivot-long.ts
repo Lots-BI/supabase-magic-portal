@@ -28,12 +28,18 @@ export function pivotLongMetricRows(def: PlatformDef, long: LongMetricRow[]): Ro
   const byKey = new Map<string, Row>();
 
   for (const item of long) {
+    const campanhaRaw = item.campanha?.trim() ? item.campanha : "";
+    // Hierarquia (conjunto/anúncio) gravada no mesmo dia da campanha.
+    // O prefixo evita somar o anúncio de novo no total da campanha.
+    if (campanhaRaw.startsWith("nx\t")) continue;
+
     const metrica = String(item.metrica ?? "").toLowerCase();
     const column = HUB_METRICA_TO_COLUMN[metrica] ?? metrica;
-    if (!columns.has(column)) continue;
+    const keepResultKind = metrica.startsWith("rk_");
+    if (!columns.has(column) && !keepResultKind) continue;
 
     const day = String(item.data).slice(0, 10);
-    const campanha = item.campanha?.trim() ? item.campanha : "";
+    const campanha = campanhaRaw;
     const id = def.campaignField ? `${day}\t${campanha}` : day;
     let row = byKey.get(id);
     if (!row) {

@@ -23,9 +23,16 @@ export interface IngestEnvelopeBaseV1 {
   correlationId?: string;
 }
 
+export interface CampaignStatusV1 {
+  name: string;
+  status: string;
+}
+
 export interface MetricsTimeseriesIngestEnvelopeV1 extends IngestEnvelopeBaseV1 {
   profile: "metrics-timeseries";
   payload: MetricBatchV1;
+  /** Estado atual no gerenciador (ACTIVE, PAUSED…). Não entra na série diária. */
+  campaignStatuses?: CampaignStatusV1[];
 }
 
 /** Perfis reservados — contrato declarado; implementação futura via ADR. */

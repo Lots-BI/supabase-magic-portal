@@ -1,0 +1,15 @@
+---
+description: Manual permanente do agente Lots BI — ler AGENTS.md em toda sessão
+alwaysApply: true
+---
+
+# Agente Lots BI — sempre
+
+Ler **`AGENTS.md`** (raiz deste repo) no início da sessão.
+
+- Cwd Git: esta pasta. Se o Cursor abriu o wrapper `lots-portal/`, entrar em `supabase-magic-portal/`.
+- PowerShell: `;` nunca `&&`. Commit/push/deploy só se o humano pedir.
+- Local neste PC: `$env:NAPI_RS_FORCE_WASI="1"`; porta **8080** em `127.0.0.1`
+- Admin: `leandromajr@gmail.com` · `npm run ensure:owner-admin`
+- Produção: push `main` → Vercel → https://lotsbi.leandromajr.com
+- Sem force-push, sem `.env`, sem `toISOString()` para hoje, sem mudar o ciclo de Conteúdos

@@ -85,8 +85,8 @@ export interface PlatformDef {
   campaignField?: string;
   /** Métricas brutas (exibidas em cards e disponíveis no engine). */
   metrics: MetricDef[];
-  /** Métricas em destaque nos cards do topo (subset de metrics.key). */
-  heroMetrics: string[];
+  /** Métricas nas colunas do ranking. Sem isto, usa heroMetrics. */
+  rankingMetrics?: string[];
   /** KPIs derivados — calculados sobre os totais. */
   kpis: KpiDef[];
   /** Gráficos a renderizar (cada um vira uma seção). */

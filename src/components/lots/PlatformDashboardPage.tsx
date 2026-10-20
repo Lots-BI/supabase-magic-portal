@@ -127,6 +127,7 @@ function MetricsSyncButton({
         toast.success(`${result.daysFilled} dia(s) atualizado(s)`);
       }
       queryClient.invalidateQueries({ queryKey: ["platform-rows", queryKey] });
+      queryClient.invalidateQueries({ queryKey: ["meta-structure"] });
     },
     onError: (error) => toast.error(error.message),
   });

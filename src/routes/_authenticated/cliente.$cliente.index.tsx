@@ -1,9 +1,12 @@
 import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
-import { DashboardsHub } from "@/components/lots/DashboardsHub";
+import { ClientOverview } from "@/components/lots/ClientOverview";
 import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
+import { dashboardAccountsQuery } from "@/lib/dashboard-accounts-query";
 import { clientePlatformsQuery, clienteRefQuery } from "./cliente.$cliente";
+
+const authenticatedRoute = getRouteApi("/_authenticated");
 
 export const Route = createFileRoute("/_authenticated/cliente/$cliente/")({
   loader: async ({ context, params }) => {
@@ -47,8 +50,6 @@ function ClienteDashboardsBody({ slug }: { slug: string }) {
   );
 }
 
-const authenticatedRoute = getRouteApi("/_authenticated");
-
 function ClienteDashboardsResolved({
   slug,
   queryName,
@@ -60,25 +61,20 @@ function ClienteDashboardsResolved({
   nome: string;
   cadastroId: number | null;
 }) {
-  const { isAdmin } = authenticatedRoute.useRouteContext();
+  const { isOrgOperator } = authenticatedRoute.useRouteContext();
+  const { data: accounts } = useSuspenseQuery(dashboardAccountsQuery);
   const { data: platforms } = useSuspenseQuery(clientePlatformsQuery(queryName, cadastroId));
-
-  return (
-    <div className="space-y-7">
-      <DashboardsHub
-        title={nome}
-        description="Abra o dashboard de cada plataforma conectada a esta conta."
-        accounts={[
-          {
-            name: nome,
-            slug,
-            platforms,
-          },
-        ]}
-        syncQueryName={isAdmin ? queryName : undefined}
-        emptyTitle="Nenhuma plataforma com dados ainda"
-        emptyDescription="Conecte Instagram ou Meta Ads em Conexões — os dashboards aparecem aqui mesmo antes das primeiras métricas."
-      />
-    </div>
+  const ownsAccount = accounts.some(
+    (account) => account.slug === slug || account.name === queryName,
   );
+
+  if (!isOrgOperator && accounts.length > 0 && !ownsAccount) {
+    return (
+      <div className="lots-surface p-6 text-sm text-muted-foreground">
+        Esta visão geral não faz parte da sua conta.
+      </div>
+    );
+  }
+
+  return <ClientOverview nome={nome} slug={slug} queryName={queryName} platforms={platforms} />;
 }

@@ -1,5 +1,5 @@
 export interface GoogleAdsSearchRowV1 {
-  campaign?: { id?: string; name?: string };
+  campaign?: { id?: string; name?: string; status?: string };
   segments?: { date?: string };
   metrics?: {
     impressions?: string;

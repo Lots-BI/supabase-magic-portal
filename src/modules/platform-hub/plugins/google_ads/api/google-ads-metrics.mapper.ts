@@ -34,6 +34,18 @@ export function mapGoogleAdsRowsToMetricRows(rows: readonly GoogleAdsSearchRowV1
   return metricRows;
 }
 
+export function googleAdsCampaignStatuses(
+  rows: readonly GoogleAdsSearchRowV1[],
+): { name: string; status: string }[] {
+  const byName = new Map<string, string>();
+  for (const row of rows) {
+    const name = row.campaign?.name;
+    const status = row.campaign?.status;
+    if (name && status) byName.set(name, status);
+  }
+  return [...byName.entries()].map(([name, status]) => ({ name, status }));
+}
+
 export function countDistinctGoogleAdsCampaigns(rows: readonly GoogleAdsSearchRowV1[]): number {
   const campaigns = new Set<string>();
   for (const row of rows) {

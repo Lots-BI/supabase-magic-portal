@@ -27,7 +27,8 @@ describe("mapMetaInsightsToMetricRows", () => {
     expect(rows.find((r) => r.metricKey === "video_views")?.value).toBe(0);
     expect(rows.find((r) => r.metricKey === "unique_clicks")).toBeUndefined();
     expect(rows.find((r) => r.metricKey === "messaging_conversations_started")?.value).toBe(0);
-    expect(rows).toHaveLength(14);
+    expect(rows.find((r) => r.metricKey === "instagram_profile_follows")?.value).toBe(0);
+    expect(rows).toHaveLength(15);
   });
 
   it("soma o campo conversions da Insights API", () => {
@@ -112,6 +113,40 @@ describe("mapMetaInsightsToMetricRows", () => {
     expect(pickResultsValue(insight, "OUTCOME_SALES")).toBe(0);
     // Sem objective: a conversa conta (caso Rodrigo / WhatsApp). LPV não.
     expect(pickResultsValue(insight)).toBe(2);
+  });
+
+  it("usa só a janela default do field results e grava o indicador", () => {
+    const rows = mapMetaInsightsToMetricRows([
+      {
+        ...base,
+        results: [
+          {
+            indicator: "actions:link_click",
+            values: [
+              { value: "10", attribution_windows: ["default"] },
+              { value: "4", attribution_windows: ["1d_view"] },
+            ],
+          },
+        ],
+      },
+    ]);
+    expect(rows.find((row) => row.metricKey === "results")?.value).toBe(10);
+    expect(rows.find((row) => row.metricKey === "rk_inline_link_clicks")?.value).toBe(10);
+  });
+
+  it("grava seguidores do perfil a partir do campo ou da ação", () => {
+    const fromField = mapMetaInsightsToMetricRows([
+      { ...base, instagram_profile_follow: "6" },
+    ]);
+    expect(fromField.find((row) => row.metricKey === "instagram_profile_follows")?.value).toBe(6);
+
+    const fromAction = mapMetaInsightsToMetricRows([
+      {
+        ...base,
+        actions: [{ action_type: "onsite_conversion.instagram_follow", value: "3" }],
+      },
+    ]);
+    expect(fromAction.find((row) => row.metricKey === "instagram_profile_follows")?.value).toBe(3);
   });
 
   it("usa o field oficial results da Insights API (coluna do Gerenciador)", () => {

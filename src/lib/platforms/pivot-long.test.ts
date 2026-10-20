@@ -32,4 +32,19 @@ describe("pivotLongMetricRows", () => {
     expect(ig[0]?.interactions).toBe(9);
     expect(ig[0]?.views).toBe(100);
   });
+
+  it("ignora linhas de hierarquia Meta para não somar o anúncio na campanha", () => {
+    const rows = pivotLongMetricRows(metaAdsDef, [
+      { data: "2026-09-05", cliente: "Acme", campanha: "A", metrica: "spend", valor: 40 },
+      {
+        data: "2026-09-05",
+        cliente: "Acme",
+        campanha: "nx\tad\t1\tA\tConjunto\tPost",
+        metrica: "nx_spend",
+        valor: 40,
+      },
+    ]);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.spend).toBe(40);
+  });
 });

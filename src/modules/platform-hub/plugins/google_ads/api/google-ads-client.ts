@@ -60,7 +60,7 @@ export class GoogleAdsClient {
     let rateLimitHit = false;
 
     const query = [
-      "SELECT campaign.id, campaign.name, segments.date, metrics.impressions, metrics.clicks, metrics.cost_micros",
+      "SELECT campaign.id, campaign.name, campaign.status, segments.date, metrics.impressions, metrics.clicks, metrics.cost_micros",
       "FROM campaign",
       `WHERE segments.date BETWEEN '${input.window.from}' AND '${input.window.to}'`,
     ].join(" ");

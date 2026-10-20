@@ -1,11 +1,22 @@
 import { useEffect, useState } from "react";
-import { ImageIcon } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ImageIcon, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { pctDelta } from "@/lib/platforms/engine";
 import type { IgMediaRow } from "@/modules/instagram-posts/types";
 import { formatMetricValue, formatProductTypeLabel, pickDisplayMetrics } from "./format-metrics";
 import { getInstagramPostThumbUrlFn } from "@/modules/instagram-posts/instagram-posts.server";
 
-export function InstagramPostCard({ post, onOpen }: { post: IgMediaRow; onOpen: () => void }) {
+const LOWER_IS_BETTER = new Set(["exits"]);
+
+export function InstagramPostCard({
+  post,
+  previousAverages,
+  onOpen,
+}: {
+  post: IgMediaRow;
+  previousAverages?: Record<string, number>;
+  onOpen: () => void;
+}) {
   const [thumbUrl, setThumbUrl] = useState<string | null>(
     post.thumbnail_url ?? post.media_url ?? null,
   );
@@ -73,14 +84,46 @@ export function InstagramPostCard({ post, onOpen }: { post: IgMediaRow; onOpen: 
           </p>
         )}
         <div className="flex flex-wrap gap-1.5">
-          {metrics.map((metric) => (
-            <span
-              key={metric.key}
-              className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-medium text-foreground"
-            >
-              {metric.label}: {formatMetricValue(metric.key, metric.value)}
-            </span>
-          ))}
+          {metrics.map((metric) => {
+            const baseline = previousAverages?.[metric.key];
+            const delta =
+              baseline == null ? null : pctDelta(metric.value, baseline);
+            const positiveIsGood = !LOWER_IS_BETTER.has(metric.key);
+            const trend = delta == null ? null : delta === 0 ? "flat" : delta > 0 ? "up" : "down";
+            const good = trend == null || trend === "flat" ? null : (trend === "up") === positiveIsGood;
+            return (
+              <span
+                key={metric.key}
+                className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-[10px] font-medium text-foreground"
+                title={
+                  baseline == null
+                    ? undefined
+                    : `Média do período anterior: ${formatMetricValue(metric.key, baseline)}`
+                }
+              >
+                {metric.label}: {formatMetricValue(metric.key, metric.value)}
+                {delta != null && (
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-0.5 rounded-full px-1 py-px text-[9px] font-semibold tabular-nums",
+                      good === null && "bg-background text-muted-foreground",
+                      good === true && "bg-success/12 text-[color:var(--success)]",
+                      good === false && "bg-danger/12 text-[color:var(--danger)]",
+                    )}
+                  >
+                    {trend === "flat" ? (
+                      <Minus className="h-2.5 w-2.5" aria-hidden />
+                    ) : trend === "up" ? (
+                      <ArrowUpRight className="h-2.5 w-2.5" aria-hidden />
+                    ) : (
+                      <ArrowDownRight className="h-2.5 w-2.5" aria-hidden />
+                    )}
+                    {Math.abs(delta).toFixed(1)}%
+                  </span>
+                )}
+              </span>
+            );
+          })}
         </div>
       </div>
     </button>

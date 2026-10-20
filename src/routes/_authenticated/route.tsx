@@ -19,7 +19,7 @@ import { isPlatformOwnerEmail } from "@/lib/platform-owner";
 import "@/modules/os-bootstrap";
 import {
   Contact2,
-  LayoutDashboard,
+  Eye,
   Users,
   Briefcase,
   LogOut,
@@ -160,7 +160,7 @@ function AuthenticatedLayout() {
   const clienteSlug = clienteSlugMatch?.[1];
   const isClientBrandbook = /^\/cliente\/[^/]+\/brandbook\/?$/.test(pathname);
   const signOut = useSignOut(user.email);
-  const clientNav = useClientNavAccount(pathname, !(inAdmin && isOrgOperator));
+  const clientNav = useClientNavAccount(pathname, true);
   const clientDashboards = clientNav.nav;
   const diretrizesSlug = clientNav.slug ?? clienteSlug;
 
@@ -168,7 +168,8 @@ function AuthenticatedLayout() {
     {
       label: "Dados",
       items: [
-        { to: "/admin", label: "Visão geral", icon: LayoutDashboard, prefixMatch: false },
+        { to: "/admin", label: "Visão geral", icon: Eye, prefixMatch: false },
+        clientDashboards,
         { to: "/admin/tarefas", label: "Tarefas", icon: ListTodo },
         { to: "/admin/crm", label: "CRM", icon: Contact2 },
         { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
@@ -245,6 +246,16 @@ function AuthenticatedLayout() {
     {
       label: "Dados",
       items: [
+        ...(diretrizesSlug
+          ? [
+              {
+                to: `/cliente/${diretrizesSlug}`,
+                label: "Visão geral",
+                icon: Eye,
+                prefixMatch: false,
+              },
+            ]
+          : []),
         clientDashboards,
         { to: "/tarefas", label: "Tarefas", icon: ListTodo },
         ...(diretrizesSlug
@@ -324,8 +335,9 @@ function AuthenticatedLayout() {
       : []),
   ];
 
-  const groups = inAdmin && isOrgOperator ? adminGroups : clientGroups;
-  const variant: "admin" | "client" = inAdmin && isOrgOperator ? "admin" : "client";
+  const operatorOnHub = isOrgOperator && (inAdmin || pathname === "/dashboard");
+  const groups = operatorOnHub ? adminGroups : clientGroups;
+  const variant: "admin" | "client" = operatorOnHub ? "admin" : "client";
 
   return (
     <AppShell

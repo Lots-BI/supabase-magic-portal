@@ -11,6 +11,7 @@ import {
   listMissingDates,
 } from "@/modules/instagram-posts/instagram-profile-gap-finder";
 import { syncAllActivePluginConnections } from "./sync-all-active-connections";
+import { persistCampaignStatuses } from "@/modules/platform-hub-bridges/base-metricas/persist-campaign-status";
 
 export interface OfficialPluginSyncResult {
   ok: boolean;
@@ -101,6 +102,14 @@ export async function syncOfficialPluginConnection(
         window: range,
       });
       if (!isMetricsTimeseriesEnvelope(envelope)) continue;
+      if (envelope.campaignStatuses?.length) {
+        await persistCampaignStatuses(
+          supabase,
+          canonicalClientName,
+          options.platformLabel,
+          envelope.campaignStatuses,
+        );
+      }
       if (envelope.payload.rows.length === 0) continue;
       envelope.payload.canonicalClientName = canonicalClientName;
       envelope.payload.platformLabel = options.platformLabel;

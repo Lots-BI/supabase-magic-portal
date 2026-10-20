@@ -16,6 +16,7 @@ export interface OfficialMetricsCollectResult {
   metricsCount: number;
   pagesFetched: number;
   rateLimitHit: boolean;
+  campaignStatuses?: { name: string; status: string }[];
 }
 
 export interface OfficialMetricsTelemetrySink {
@@ -105,6 +106,7 @@ export function createOfficialMetricsProvider(
           providerType: "official_api",
           profile: "metrics-timeseries",
           collectedAt: new Date().toISOString(),
+          campaignStatuses: result.campaignStatuses,
           payload: {
             version: METRIC_BATCH_CONTRACT_VERSION,
             connectionId: params.connectionId,

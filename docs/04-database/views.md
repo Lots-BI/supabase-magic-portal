@@ -3,7 +3,7 @@ title: Banco — Views Analíticas
 description: Catálogo das views vw_* que alimentam os dashboards.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-20
 ---
 
 # Views Analíticas (`vw_*`)
@@ -60,10 +60,10 @@ Colunas: `id, data, cliente, plataforma, metrica, valor, campanha, created_at`.
 
 | View                        | Granularidade             | Colunas principais                                                                                                             |
 | --------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `vw_meta_ads_diario`        | data × cliente × campanha | … spend, results, conversions, cliques/vídeo/engajamento (46), conversas WhatsApp e page_engagements (58)                      |
+| `vw_meta_ads_diario`        | data × cliente × campanha | … spend, results, conversas (58), seguidores/visitas de anúncio, vídeo e purchase_value (79). Hierarquia `nx` fica de fora. |
 | `vw_google_ads_diario`      | data × cliente × campanha | impressions, clicks, spend + ctr/cpc/cpm derivados na view                                                                     |
 | `vw_ga4_diario`             | data × cliente            | active_users, sessions, engaged_sessions, pageviews, event_count, conversions, engagement_rate                                 |
-| `vw_instagram_diario`       | data × cliente            | reach, interactions, accounts_engaged, likes, comments, saves, shares, profile_links_taps, engagement_rate                     |
+| `vw_instagram_diario`       | data × cliente            | reach, interactions, likes… follows, unfollows, followers_count, following_count, media_count (79)                            |
 | `vw_google_business_diario` | data × cliente            | profile_views, searches, direction_requests, website_clicks, phone_calls, messages, photo_views, reviews_count, reviews_rating |
 
 > `vw_meta_ads_diario` usa `AVG` para cpc/cpm/ctr/frequency (médias do dia) e `SUM` para
@@ -81,8 +81,8 @@ por `data + cliente` (Meta Ads e Google Ads também passam `campanha`):
 
 | Dashboard | View final | View intermediária | Migration |
 | --------- | ---------- | ------------------ | --------- |
-| Instagram | `vw_instagram_diario` | `vw_instagram_normalizada_prefer_hub` | 34, 47 |
-| Meta Ads | `vw_meta_ads_diario` | `vw_meta_ads_normalizada_prefer_hub` | 36, 47, 58 |
+| Instagram | `vw_instagram_diario` | `vw_instagram_normalizada_prefer_hub` | 34, 46, 79 |
+| Meta Ads | `vw_meta_ads_diario` | `vw_meta_ads_normalizada_prefer_hub` | 36, 47, 58, 79 |
 | Google Ads | `vw_google_ads_diario` | `vw_google_ads_normalizada_prefer_hub` | 49 (spend `/ 1e6`) |
 | GA4 | `vw_ga4_diario` | `vw_ga4_normalizada_prefer_hub` | 50 |
 

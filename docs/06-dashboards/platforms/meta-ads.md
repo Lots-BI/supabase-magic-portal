@@ -5,7 +5,7 @@ status: living
 owner: Engenharia / Dados Lots BI
 tags: [dashboard, meta-ads, platformdef]
 difficulty: intermediate
-last_review: 2026-09-11
+last_review: 2026-10-20
 ---
 
 # Meta Ads
@@ -83,14 +83,34 @@ reconstrói: compra → evento custom → lead → **mensagem WhatsApp/Messenger
 
 Ver [`meta-insights.mapper.ts`](../../../src/modules/platform-hub/plugins/meta_ads/api/meta-insights.mapper.ts).
 
-Dias já coletados **com entrega** e sem `messaging_conversations_started` voltam como
-faltantes no **Puxar métricas**. Marcadores de dia sem entrega (só results/conversions 0)
+Dias já coletados **com entrega** e sem `messaging_conversations_started` ou sem
+`instagram_profile_follows` (o zero também conta) voltam como faltantes no
+**Puxar métricas**. Marcadores de dia sem entrega (só results/conversions 0)
 continuam preenchidos.
+
+## Hierarquia e métricas extras
+
+A coleta de campanha continua sendo a fonte de gasto, alcance e resultados.
+No mesmo **Puxar métricas** o coletor também pede conjunto (`adset`) e anúncio (`ad`).
+Essas linhas usam o prefixo `nx` e aparecem na seção **Estrutura** do dashboard
+(Conjuntos, Anúncios, Turbinação). Turbinação é o anúncio cujo criativo aponta
+para uma publicação que já existia (`source_instagram_media_id`).
+
+No card da campanha, somados a partir dos anúncios: seguidores via anúncio,
+visitas ao perfil, cliques de saída, ThruPlay, vídeo 25/50/75/100% e valor de
+compra. A view ignora o prefixo `nx` para o gasto não duplicar. A janela de
+refresh (14 dias) regrava os dias recentes com o contrato novo.
+
+**Seguidores via anúncio** entra nos cards de destaque (ao lado de Cliques) e
+na coleta diária de cada campanha, na frente das demais colunas. O número é
+a coluna Seguidores do Instagram no Gerenciador: seguidores atribuídos aos
+anúncios do período.
 
 ## KPIs derivados
 
 CTR, CTR do link, CPC, CPC do link, CPM, Frequência (`impressions / reach`),
-**Custo por resultado** (`spend / results`), **Custo por conversão** (`spend / conversions`).
+**Custo por resultado** (`spend / results`), **Custo por conversão** (`spend / conversions`),
+**Custo por seguidor** e **ROAS de compra** (`purchase_value / spend`).
 
 ## Limitações e dívida técnica
 
@@ -99,6 +119,7 @@ Somar dias inflaria pessoas únicas em relação ao Gerenciador no período.
 
 ## Comportamento na UI
 
+- O ranking de campanhas fica acima dos gráficos.
 - Frequency aparece como KPI derivado quando reach > 0.
 - Filtros de período aplicam-se à view diária antes da agregação.
 

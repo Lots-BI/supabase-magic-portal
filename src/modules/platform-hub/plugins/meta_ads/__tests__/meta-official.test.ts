@@ -76,7 +76,7 @@ describe("OfficialMetaProvider", () => {
 
     expect(envelope.profile).toBe("metrics-timeseries");
     expect(envelope.payload.platformLabel).toBe(META_PLATFORM_LABEL);
-    expect(envelope.payload.rows).toHaveLength(14);
+    expect(envelope.payload.rows).toHaveLength(15);
     expect(envelope.payload.rows.find((row) => row.metricKey === "spend")?.value).toBe(25.5);
     expect(envelope.payload.rows.find((row) => row.metricKey === "results")?.value).toBe(0);
 
@@ -90,7 +90,9 @@ describe("OfficialMetaProvider", () => {
     const httpClient = new MockHttpClient([
       {
         match: (url) => url.includes("/insights"),
-        respond: () => {
+        respond: (url) => {
+          const level = new URL(url).searchParams.get("level");
+          if (level && level !== "campaign") return { body: { data: [] } };
           callCount += 1;
           if (callCount === 1) {
             return {
@@ -154,7 +156,7 @@ describe("OfficialMetaProvider", () => {
     expect(callCount).toBe(2);
     expect(envelope.payload.rows.filter((row) => row.campaign === "P1").length).toBeGreaterThan(0);
     expect(envelope.payload.rows.filter((row) => row.campaign === "P2").length).toBeGreaterThan(0);
-    expect(envelope.payload.rows).toHaveLength(22);
+    expect(envelope.payload.rows).toHaveLength(24);
   });
 
   it("falha autenticação quando token ausente", async () => {

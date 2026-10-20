@@ -6,19 +6,27 @@
 // dataset. Nada de cálculos no componente: tudo passa pelo engine.
 // ============================================================================
 
-import { useSuspenseQuery, queryOptions, keepPreviousData } from "@tanstack/react-query";
-import { Suspense, useMemo } from "react";
-import { Inbox, Sparkles, TrendingDown, TrendingUp, Trophy } from "lucide-react";
+import { useSuspenseQuery, useQuery, queryOptions, keepPreviousData } from "@tanstack/react-query";
+import { Fragment, Suspense, useMemo, useState } from "react";
+import { Inbox, Sparkles, TrendingDown, TrendingUp, Trophy, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import type { PlatformDef, ValueFormat } from "@/lib/platforms/types";
+import type { PlatformDef, Row, ValueFormat } from "@/lib/platforms/types";
 import type { CommonMetric } from "@/lib/metrics";
 import { METRIC_META, resolveMetricDescription } from "@/lib/metrics";
 import { aggregatePeriod, pctDelta } from "@/lib/platforms/engine";
+import {
+  OBJECTIVE_RESULT_DESCRIPTION,
+  OBJECTIVE_RESULT_KEY,
+  TOTAL_RESULTS_DESCRIPTION,
+  summarizeResultSources,
+} from "@/lib/platforms/result-sources";
 import { fetchDashboardRows } from "@/lib/platforms/fetch-dashboard-rows";
 import type { Period } from "@/lib/period";
 import { formatBR } from "@/lib/period";
 import { SectionCard } from "./SectionCard";
 import { StatCard } from "./StatCard";
+import { MetricLabel } from "./MetricLabel";
+import { MetaStructureBoard } from "@/components/lots/meta-ads/MetaStructureBoard";
 import { ChartFrame, ChartLegendItem } from "./charts/ChartFrame";
 import { AreaChartLotsLazy } from "./charts/AreaChartLotsLazy";
 import { getSeriesColor } from "./charts/chart-colors";
@@ -124,13 +132,24 @@ function PlatformDashboardBody({ def, cliente, period }: Props) {
         </SectionCard>
       ) : (
         <>
-          <HeroCards def={def} agg={agg} />
+          <HeroCards def={def} agg={agg} rows={rows} period={period} />
           <ExtraMetricCards def={def} agg={agg} />
           <KpiCards def={def} agg={agg} />
+          {def.campaignField ? (
+            <CampaignRanking
+              def={def}
+              agg={agg}
+              rows={rows}
+              period={period}
+              cliente={cliente}
+            />
+          ) : null}
           <ChartsSection def={def} agg={agg} />
+          {def.campaignField ? null : <DailyTable def={def} agg={agg} period={period} />}
           <ComparisonBlock def={def} agg={agg} period={period} />
-          {def.campaignField && <CampaignRanking def={def} agg={agg} />}
-          <DailyTable def={def} agg={agg} period={period} />
+          {def.key === "meta_ads" ? (
+            <MetaStructureBoard cliente={cliente} period={period} />
+          ) : null}
           <InsightsBlock def={def} agg={agg} period={period} />
         </>
       )}
@@ -147,24 +166,91 @@ function metricDescription(key: string, explicit?: string): string | undefined {
   return resolveMetricDescription(key);
 }
 
-function HeroCards({ def, agg }: { def: PlatformDef; agg: ReturnType<typeof aggregatePeriod> }) {
+function HeroCards({
+  def,
+  agg,
+  rows,
+  period,
+}: {
+  def: PlatformDef;
+  agg: ReturnType<typeof aggregatePeriod>;
+  rows: Row[];
+  period: Period;
+}) {
+  const [resultKey, setResultKey] = useState("results");
+  const slices = useMemo(
+    () =>
+      summarizeResultSources(
+        rows,
+        { from: period.from, to: period.to },
+        { from: period.prevFrom, to: period.prevTo },
+      ),
+    [rows, period],
+  );
   const heroes = def.metrics.filter((m) => def.heroMetrics.includes(m.key));
+  const resultOptions = slices.map((slice) => ({
+    key: slice.key,
+    label:
+      slice.key === OBJECTIVE_RESULT_KEY
+        ? "Resultado do objetivo"
+        : `Resultado · ${def.metrics.find((metric) => metric.key === slice.key)?.label ?? slice.key}`,
+        description:
+          slice.key === OBJECTIVE_RESULT_KEY
+            ? OBJECTIVE_RESULT_DESCRIPTION
+            : `Vezes em que «${
+                def.metrics.find((metric) => metric.key === slice.key)?.label ?? slice.key
+              }» foi a coluna Resultados do Gerenciador. O card com esse nome soma a métrica em todas as campanhas, mesmo quando o resultado do dia foi outro número.`,
+    value: formatValue("int", slice.current),
+    current: slice.current,
+    previous: slice.previous,
+  }));
+  const showResultMenu = resultOptions.some((option) => option.key !== OBJECTIVE_RESULT_KEY);
+
   return (
     <section className="relative isolate grid grid-cols-2 gap-3 lg:grid-cols-4">
       {heroes.map((m, i) => {
-        const cur = agg.current[m.key] ?? 0;
-        const prev = agg.previous[m.key] ?? 0;
+        const isResults = m.key === "results" && showResultMenu;
+        const chosen =
+          isResults && resultKey !== "results"
+            ? resultOptions.find((option) => option.key === resultKey)
+            : undefined;
+        const cur = chosen ? chosen.current : (agg.current[m.key] ?? 0);
+        const prev = chosen ? chosen.previous : (agg.previous[m.key] ?? 0);
+        const total = agg.current.results ?? 0;
         return (
           <StatCard
             key={m.key}
-            label={m.label}
-            value={formatValue(m.format, cur)}
+            label={chosen?.label ?? m.label}
+            value={formatValue(chosen ? "int" : m.format, cur)}
             icon={m.icon}
             delta={pctDelta(cur, prev)}
             positiveIsGood={m.positiveIsGood ?? true}
             emphasis={i === 0 ? "hero" : "default"}
-            description={metricDescription(m.key, m.description)}
-            className={i === 0 ? "lg:col-span-2" : undefined}
+            description={
+              chosen?.description ??
+              metricDescription(m.key, m.description)
+            }
+            className={cn(i === 0 ? "lg:col-span-2" : undefined, isResults && "z-10")}
+            hint={
+              chosen
+                ? `Total de resultados: ${formatValue("int", total)}`
+                : undefined
+            }
+            options={
+              isResults
+                ? [
+                    {
+                      key: "results",
+                      label: "Total",
+                      value: formatValue("int", total),
+                      description: TOTAL_RESULTS_DESCRIPTION,
+                    },
+                    ...resultOptions,
+                  ]
+                : undefined
+            }
+            selectedKey={resultKey}
+            onSelect={setResultKey}
           />
         );
       })}
@@ -301,12 +387,19 @@ function ComparisonBlock({
   period: Period;
 }) {
   const rows = [
-    ...def.metrics,
-    ...def.kpis.map((k) => ({
-      key: k.key,
-      label: k.label,
-      format: k.format,
-      positiveIsGood: k.positiveIsGood,
+    ...def.metrics.map((metric) => ({
+      key: metric.key,
+      label: metric.label,
+      format: metric.format,
+      positiveIsGood: metric.positiveIsGood,
+      description: metric.description,
+    })),
+    ...def.kpis.map((kpi) => ({
+      key: kpi.key,
+      label: kpi.label,
+      format: kpi.format,
+      positiveIsGood: kpi.positiveIsGood,
+      description: kpi.description,
     })),
   ];
   return (
@@ -337,7 +430,13 @@ function ComparisonBlock({
               const positiveIsGood = (row as { positiveIsGood?: boolean }).positiveIsGood ?? true;
               return (
                 <tr key={row.key} className="border-t border-border hover:bg-muted/40">
-                  <td className="px-4 py-2.5 text-foreground">{row.label}</td>
+                  <td className="px-4 py-2.5 text-foreground">
+                    <MetricLabel
+                      label={row.label}
+                      description={row.description}
+                      className="normal-case tracking-normal"
+                    />
+                  </td>
                   <td className="px-4 py-2.5 text-right tabular-nums text-foreground">
                     {formatValue(row.format, cur)}
                   </td>
@@ -359,27 +458,76 @@ function ComparisonBlock({
 
 // ---------- Ranking de campanhas -------------------------------------------
 
+function campaignPlatformLabel(key: string): string | null {
+  if (key === "meta_ads") return "Meta Ads";
+  if (key === "google_ads") return "Google Ads";
+  return null;
+}
+
+function campaignActivity(status: string | undefined): { label: string; active: boolean } | null {
+  if (!status) return null;
+  const value = status.toUpperCase();
+  if (value === "ACTIVE" || value === "ENABLED") return { label: "Ativa", active: true };
+  if (value === "PAUSED" || value === "CAMPAIGN_PAUSED" || value === "ADSET_PAUSED") {
+    return { label: "Pausada", active: false };
+  }
+  return { label: "Inativa", active: false };
+}
+
 function CampaignRanking({
   def,
   agg,
+  rows,
+  period,
+  cliente,
 }: {
   def: PlatformDef;
   agg: ReturnType<typeof aggregatePeriod>;
+  rows: Row[];
+  period: Period;
+  cliente: string;
 }) {
-  if (agg.campaigns.length === 0) return null;
-  // Ordenação default: por primeira métrica hero (geralmente spend).
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const platform = campaignPlatformLabel(def.key);
+  const statusQuery = useQuery({
+    queryKey: ["campaign-status", platform, cliente],
+    enabled: platform != null,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ph_campaign_status")
+        .select("campanha, status")
+        .eq("cliente", cliente)
+        .eq("plataforma", platform!);
+      if (error) throw new Error(error.message);
+      const map: Record<string, string> = {};
+      for (const row of data ?? []) map[row.campanha] = row.status;
+      return map;
+    },
+    staleTime: 60_000,
+  });
+  const statuses = statusQuery.data ?? {};
+
+  if (agg.campaigns.length === 0 || !def.campaignField) return null;
   const sortKey = def.heroMetrics[0];
   const ranked = [...agg.campaigns]
     .filter((c) => c.campanha.trim().length > 0)
     .sort((a, b) => (b.totals[sortKey] ?? 0) - (a.totals[sortKey] ?? 0));
   if (ranked.length === 0) return null;
-  const cols = def.metrics.filter((m) => def.heroMetrics.includes(m.key));
+  const cols = (def.rankingMetrics ?? def.heroMetrics)
+    .map((key) => def.metrics.find((metric) => metric.key === key))
+    .filter((metric): metric is (typeof def.metrics)[number] => metric != null);
+  const dailyMetrics = [
+    ...cols,
+    ...def.metrics.filter((metric) => !cols.some((col) => col.key === metric.key)),
+  ];
   const kpiCols = def.kpis.slice(0, 3);
+  const colSpan = 3 + cols.length + kpiCols.length;
+
   return (
     <SectionCard
       eyebrow="Campanhas"
       title="Ranking por desempenho"
-      description={`${ranked.length} ${ranked.length === 1 ? "campanha ativa" : "campanhas ativas"} no período, ordenadas por ${def.metrics.find((m) => m.key === sortKey)?.label ?? sortKey}.`}
+      description="Clique na campanha para ver a coleta diária dela. Ativa ou inativa é o estado atual no gerenciador — entra na próxima coleta."
       bodyClassName="px-0 py-0"
     >
       <div className="lots-table-scroll">
@@ -388,52 +536,158 @@ function CampaignRanking({
             <tr>
               <th className="lots-table-head-sticky px-4 py-2.5 font-medium">#</th>
               <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Campanha</th>
+              <th className="lots-table-head-sticky px-4 py-2.5 font-medium">Status</th>
               {cols.map((c) => (
                 <th
                   key={c.key}
                   className="lots-table-head-sticky px-4 py-2.5 text-right font-medium"
                 >
-                  {c.label}
+                  <MetricLabel
+                    label={c.short ?? c.label}
+                    description={c.description}
+                    className="ml-auto normal-case tracking-normal"
+                  />
                 </th>
               ))}
               {kpiCols.map((k) => (
                 <th key={k.key} className="px-4 py-2.5 text-right font-medium">
-                  {k.label}
+                  <MetricLabel
+                    label={k.label}
+                    description={k.description}
+                    className="ml-auto normal-case tracking-normal"
+                  />
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {ranked.map((c, i) => (
-              <tr key={c.campanha} className="border-t border-border hover:bg-muted/40">
-                <td className="px-4 py-2.5">
-                  <span
-                    className={cn(
-                      "inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-semibold tabular-nums",
-                      i === 0
-                        ? "bg-primary/15 text-primary-700 dark:text-primary-200"
-                        : "bg-muted text-muted-foreground",
-                    )}
-                  >
-                    {i === 0 ? <Trophy className="h-3 w-3" /> : i + 1}
-                  </span>
-                </td>
-                <td className="px-4 py-2.5 font-medium text-foreground">{c.campanha}</td>
-                {cols.map((col) => (
-                  <td key={col.key} className="px-4 py-2.5 text-right tabular-nums text-foreground">
-                    {formatValue(col.format, c.totals[col.key] ?? 0)}
-                  </td>
-                ))}
-                {kpiCols.map((k) => (
-                  <td
-                    key={k.key}
-                    className="px-4 py-2.5 text-right tabular-nums text-muted-foreground"
-                  >
-                    {formatValue(k.format, c.kpis[k.key] ?? 0)}
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {ranked.map((c, i) => {
+              const expanded = open[c.campanha] === true;
+              const activity = campaignActivity(statuses[c.campanha]);
+              const daily = rows
+                .filter((row) => {
+                  const name = String(row[def.campaignField!] ?? "").trim();
+                  return name === c.campanha && row.data >= period.from && row.data <= period.to;
+                })
+                .sort((a, b) => (a.data < b.data ? 1 : -1));
+              return (
+                <Fragment key={c.campanha}>
+                  <tr className="border-t border-border hover:bg-muted/40">
+                    <td className="px-4 py-2.5">
+                      <span
+                        className={cn(
+                          "inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-semibold tabular-nums",
+                          i === 0
+                            ? "bg-primary/15 text-primary-700 dark:text-primary-200"
+                            : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {i === 0 ? <Trophy className="h-3 w-3" /> : i + 1}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 font-medium text-foreground">
+                      <button
+                        type="button"
+                        aria-expanded={expanded}
+                        onClick={() =>
+                          setOpen((current) => ({ ...current, [c.campanha]: !current[c.campanha] }))
+                        }
+                        className="lots-focus inline-flex max-w-[280px] items-center gap-1.5 text-left"
+                      >
+                        <ChevronRight
+                          className={cn("h-3.5 w-3.5 shrink-0 transition-transform", expanded && "rotate-90")}
+                        />
+                        <span className="truncate">{c.campanha}</span>
+                      </button>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {activity ? (
+                        <span
+                          className={cn(
+                            "inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium",
+                            activity.active
+                              ? "bg-success/12 text-[color:var(--success)]"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {activity.label}
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    {cols.map((col) => (
+                      <td key={col.key} className="px-4 py-2.5 text-right tabular-nums text-foreground">
+                        {formatValue(col.format, c.totals[col.key] ?? 0)}
+                      </td>
+                    ))}
+                    {kpiCols.map((k) => (
+                      <td
+                        key={k.key}
+                        className="px-4 py-2.5 text-right tabular-nums text-muted-foreground"
+                      >
+                        {formatValue(k.format, c.kpis[k.key] ?? 0)}
+                      </td>
+                    ))}
+                  </tr>
+                  {expanded ? (
+                    <tr key={`${c.campanha}-daily`} className="border-t border-border bg-muted/20">
+                      <td colSpan={colSpan} className="px-4 py-3">
+                        <p className="mb-2 text-[12px] text-muted-foreground">
+                          Coleta diária de {c.campanha}
+                        </p>
+                        <div className="max-h-[360px] overflow-auto">
+                          <table className="w-full min-w-max text-[12.5px]">
+                            <thead className="text-left text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
+                              <tr>
+                                <th className="px-3 py-2 font-medium">Dia</th>
+                                {dailyMetrics.map((m) => (
+                                  <th key={m.key} className="px-3 py-2 text-right font-medium">
+                                    <MetricLabel
+                                      label={m.short ?? m.label}
+                                      description={m.description ?? m.label}
+                                      className="ml-auto normal-case tracking-normal"
+                                    />
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {daily.length === 0 ? (
+                                <tr>
+                                  <td
+                                    colSpan={1 + dailyMetrics.length}
+                                    className="px-3 py-3 text-muted-foreground"
+                                  >
+                                    Sem dias neste período.
+                                  </td>
+                                </tr>
+                              ) : (
+                                daily.map((day) => (
+                                  <tr key={day.data} className="border-t border-border">
+                                    <td className="whitespace-nowrap px-3 py-2 tabular-nums text-foreground">
+                                      {formatBR(day.data)}
+                                    </td>
+                                    {dailyMetrics.map((m) => (
+                                      <td
+                                        key={m.key}
+                                        className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-foreground"
+                                      >
+                                        {formatValue(m.format, day[m.key] as number)}
+                                      </td>
+                                    ))}
+                                  </tr>
+                                ))
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : null}
+                </Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -468,7 +722,11 @@ function DailyTable({
               <th className="px-4 py-2.5 font-medium">Dia</th>
               {def.metrics.map((m) => (
                 <th key={m.key} className="px-4 py-2.5 text-right font-medium">
-                  {m.short ?? m.label}
+                  <MetricLabel
+                    label={m.short ?? m.label}
+                    description={m.description ?? m.label}
+                    className="ml-auto normal-case tracking-normal"
+                  />
                 </th>
               ))}
             </tr>

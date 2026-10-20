@@ -16,7 +16,7 @@ export interface MetaResultStatV1 {
   indicator?: string;
   action_type?: string;
   value?: string;
-  values?: Array<{ value?: string }>;
+  values?: Array<{ value?: string; attribution_windows?: string[] }>;
 }
 
 export interface MetaInsightRowV1 {
@@ -24,12 +24,25 @@ export interface MetaInsightRowV1 {
   campaign_id?: string;
   date_start: string;
   date_stop: string;
+  adset_id?: string;
+  adset_name?: string;
+  ad_id?: string;
+  ad_name?: string;
   impressions?: string;
   reach?: string;
   clicks?: string;
   spend?: string;
   inline_link_clicks?: string;
   unique_clicks?: string;
+  instagram_profile_follow?: string | MetaActionValueV1[];
+  instagram_profile_visits?: string | MetaActionValueV1[];
+  outbound_clicks?: MetaActionValueV1[];
+  video_thruplay_watched_actions?: MetaActionValueV1[];
+  video_p25_watched_actions?: MetaActionValueV1[];
+  video_p50_watched_actions?: MetaActionValueV1[];
+  video_p75_watched_actions?: MetaActionValueV1[];
+  video_p100_watched_actions?: MetaActionValueV1[];
+  action_values?: MetaActionValueV1[];
   /** Todas as ações atribuídas (cliques, leads, compras, mensagens…). */
   actions?: MetaActionValueV1[];
   /** Subconjunto de conversões da Insights API (pixel / API / CRM). */
@@ -52,6 +65,21 @@ export interface MetaCampaignRowV1 {
   id: string;
   name?: string;
   objective?: string;
+  effective_status?: string;
+}
+
+export interface MetaAdCreativeV1 {
+  source_instagram_media_id?: string;
+}
+
+export interface MetaAdRowV1 {
+  id?: string;
+  creative?: MetaAdCreativeV1;
+}
+
+export interface MetaAdsListResponseV1 {
+  data: MetaAdRowV1[];
+  paging?: MetaGraphPagingV1;
 }
 
 export interface MetaCampaignsResponseV1 {

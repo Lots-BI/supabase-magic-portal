@@ -25,6 +25,7 @@ import {
   listMissingDates,
 } from "@/modules/instagram-posts/instagram-profile-gap-finder";
 import { syncAllActivePluginConnections } from "@/modules/platform-hub-bridges/ph-persistence/sync-all-active-connections";
+import { persistCampaignStatuses } from "@/modules/platform-hub-bridges/base-metricas/persist-campaign-status";
 
 /**
  * Lookback padrão para o primeiro backfill. Diferente do Instagram (limite
@@ -87,10 +88,11 @@ async function fetchExistingMetaAdsDates(
       metrics.has("clicks") ||
       metrics.has("reach");
     const hasMessagingContract = metrics.has("messaging_conversations_started");
+    const hasFollowsContract = metrics.has("instagram_profile_follows");
     // Marcadores de dia sem entrega (só 0 em results/conversions) contam como
-    // preenchidos. Dias com entrega no contrato antigo (sem conversas) são
-    // refeitos para puxar WhatsApp/Messenger e o field oficial de Resultados.
-    if (!hasDelivery || hasMessagingContract) dates.add(date);
+    // preenchidos. Dias com entrega no contrato antigo (sem conversas ou sem
+    // o marcador de seguidores, inclusive 0) são refeitos.
+    if (!hasDelivery || (hasMessagingContract && hasFollowsContract)) dates.add(date);
   }
 
   // Make nunca gravou results/conversions — dias só no Make continuam "faltantes"
@@ -167,7 +169,18 @@ export async function syncMetaAdsCampaignsConnection(
         window: range,
       });
 
-      if (!isMetricsTimeseriesEnvelope(envelope) || envelope.payload.rows.length === 0) continue;
+      if (!isMetricsTimeseriesEnvelope(envelope)) continue;
+
+      if (envelope.campaignStatuses?.length) {
+        await persistCampaignStatuses(
+          supabase,
+          canonicalClientName,
+          envelope.payload.platformLabel || META_ADS_PLATFORM_LABEL,
+          envelope.campaignStatuses,
+        );
+      }
+
+      if (envelope.payload.rows.length === 0) continue;
 
       envelope.payload.canonicalClientName = canonicalClientName;
       envelope.payload.platformLabel = envelope.payload.platformLabel || META_ADS_PLATFORM_LABEL;

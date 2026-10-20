@@ -3,6 +3,7 @@ import { HttpClientError } from "../../_internal/http/http-client.port";
 import { MockHttpClient } from "../../_internal/http/mock-http-client";
 import {
   META_INSIGHTS_FIELDS_ACTIONS,
+  META_INSIGHTS_FIELDS_CAMPAIGN,
   META_INSIGHTS_FIELDS_FULL,
   META_INSIGHTS_FIELDS_WITH_RESULTS,
   MetaGraphClient,
@@ -55,7 +56,7 @@ describe("MetaGraphClient", () => {
       window: { from: "2026-09-01", to: "2026-09-01" },
     });
 
-    expect(requestedFields[0]).toBe(META_INSIGHTS_FIELDS_WITH_RESULTS);
+    expect(requestedFields[0]).toBe(META_INSIGHTS_FIELDS_CAMPAIGN);
     expect(requestedFields[0]).toContain("conversions");
     expect(requestedFields[0]).toContain("inline_link_clicks");
     expect(requestedFields[1]).toBe(META_INSIGHTS_FIELDS_ACTIONS);
@@ -105,7 +106,7 @@ describe("MetaGraphClient", () => {
       window: { from: "2026-09-01", to: "2026-09-01" },
     });
 
-    expect(requestedFields[0]).toBe(META_INSIGHTS_FIELDS_WITH_RESULTS);
+    expect(requestedFields[0]).toBe(META_INSIGHTS_FIELDS_CAMPAIGN);
     expect(requestedFields[1]).toBe(META_INSIGHTS_FIELDS_FULL);
     expect(result.insights[0]?.impressions).toBe("10");
   });

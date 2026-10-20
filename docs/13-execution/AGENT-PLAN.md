@@ -12,9 +12,11 @@ estagio_final: Hub é a fonte das 4 plataformas de mídia; Make só histórico; 
 
 # AGENT-PLAN — Pendências Lots BI
 
-Só o agente usa isto. Próxima sessão: ler **Invariantes** + **Estágio final** + o WS em `resume:`. Executar um WS (ou um passo se o WS for grande). Marcar `- [x]`. Atualizar `resume`. Escrever o Diário.
+Só o agente usa isto. **Manual permanente (toda sessão):** [`AGENTS.md`](../../AGENTS.md).
 
-Não pular STOP GATE. Commit/PR só se o humano pedir. PowerShell: `;` nunca `&&`. Repo git = `supabase-magic-portal/` (não `d:\lots-portal`). Código Hub está em **`main`** (PR #2, 2026-09-11). Próximo trabalho: branch nova a partir de `main`.
+Próxima sessão de ingestão: ler **Invariantes** + **Estágio final** + o WS em `resume:`. Executar um WS (ou um passo se o WS for grande). Marcar `- [x]`. Atualizar `resume`. Escrever o Diário.
+
+Não pular STOP GATE. Commit/PR só se o humano pedir. PowerShell: `;` nunca `&&`. Repo git = `supabase-magic-portal/` (não o wrapper `lots-portal`). Código Hub está em **`main`** (PR #2, 2026-09-11). Próximo trabalho: branch nova a partir de `main`.
 
 ---
 

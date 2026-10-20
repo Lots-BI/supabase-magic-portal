@@ -171,6 +171,52 @@ export class InstagramGraphClient {
     return first.body;
   }
 
+  /** Seguiram / deixaram de seguir. Sem breakdown a API devolve vazio. */
+  async fetchFollowTypeBreakdown(
+    accessToken: string,
+    igUserId: string,
+    date: string,
+  ): Promise<InstagramAccountInsightsResponseV1> {
+    const { sinceUnix, untilUnix } = spDayBoundsUnixSeconds(date);
+    const url = `${graphBaseUrl(this.graphVersion)}/${igUserId}/insights`;
+    const response = await this.config.httpClient.request(url, {
+      searchParams: {
+        access_token: accessToken,
+        metric: "follows_and_unfollows",
+        period: "day",
+        metric_type: "total_value",
+        breakdown: "follow_type",
+        since: String(sinceUnix),
+        until: String(untilUnix),
+      },
+    });
+    const body = await response.json<InstagramAccountInsightsResponseV1>();
+    if (body.error?.message) throw new Error(body.error.message);
+    return body;
+  }
+
+  /** Estoque atual do perfil. A Graph v22 não manda série histórica de seguidores. */
+  async fetchAccountProfileCounts(
+    accessToken: string,
+    igUserId: string,
+  ): Promise<{ followers_count?: number; follows_count?: number; media_count?: number }> {
+    const url = `${graphBaseUrl(this.graphVersion)}/${igUserId}`;
+    const response = await this.config.httpClient.request(url, {
+      searchParams: {
+        access_token: accessToken,
+        fields: "followers_count,follows_count,media_count",
+      },
+    });
+    const body = await response.json<{
+      followers_count?: number;
+      follows_count?: number;
+      media_count?: number;
+      error?: { message: string };
+    }>();
+    if (body.error?.message) throw new Error(body.error.message);
+    return body;
+  }
+
   private async requestAccountInsightsForDay(
     accessToken: string,
     igUserId: string,
