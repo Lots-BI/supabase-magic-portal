@@ -4594,6 +4594,8 @@ export type Database = {
           meta_results: number | null;
           meta_conversions: number | null;
           google_conversions: number | null;
+          meta_messaging_conversations_started: number | null;
+          instagram_followers_count: number | null;
         }[];
       };
       dashboard_coverage: {

@@ -69,6 +69,8 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `81_campaign_status.sql`                  | Status atual da campanha (`ph_campaign_status`), separado da série diária. |
 | `82_dashboard_long_page_order.sql`        | Tira a hierarquia `nx` do RPC do dashboard e ordena as linhas para a paginação de 1000. |
 | `83_replace_hub_keep_structure.sql`       | Troca o dia da campanha sem apagar conjunto/anúncio quando o envelope não traz `nx`. |
+| `84_client_overview_messaging.sql`        | `client_overview` passa a devolver conversas por mensagem iniciadas da Meta. |
+| `85_client_overview_ig_followers.sql`     | `client_overview` passa a devolver o estoque de seguidores do Instagram. |
 
 > Conteúdos (38–45) e demais arquivos em `supabase/migrations-official/` seguem a mesma
 > numeração. Lista completa no diretório. **Não existe `04`.** A tentativa

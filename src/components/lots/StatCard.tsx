@@ -26,8 +26,9 @@ export interface StatCardProps {
   /** Visual weight — `hero` for the executive headline KPI. */
   emphasis?: "hero" | "default" | "compact";
   className?: string;
-  /** Seletor da métrica que compõe o total (ex.: Resultados). */
+  /** Seletor da métrica exibida no card. */
   options?: StatCardOption[];
+  optionsLabel?: string;
   selectedKey?: string;
   onSelect?: (key: string) => void;
 }
@@ -49,6 +50,7 @@ export const StatCard = memo(function StatCard({
   emphasis = "default",
   className,
   options,
+  optionsLabel = "Métrica do resultado",
   selectedKey,
   onSelect,
 }: StatCardProps) {
@@ -129,7 +131,7 @@ export const StatCard = memo(function StatCard({
               onClick={() => setOpen((was) => !was)}
               className="lots-focus inline-flex items-center gap-1 text-[11.5px] font-medium text-muted-foreground hover:text-foreground"
             >
-              Métrica do resultado
+              {optionsLabel}
               <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
             </button>
             {open ? (
@@ -154,7 +156,10 @@ export const StatCard = memo(function StatCard({
                         <button
                           type="button"
                           aria-pressed={selected}
-                          onClick={() => onSelect?.(option.key)}
+                          onClick={() => {
+                            setOpen(false);
+                            onSelect?.(option.key);
+                          }}
                           className={cn(
                             "flex min-w-0 flex-1 items-center justify-between gap-3 text-left text-[12px]",
                             selected

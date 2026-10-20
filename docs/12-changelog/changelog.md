@@ -46,6 +46,17 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Alterado
 
+- **Visão geral: métrica do terceiro card (2026-10-20):** o card abre em
+  Conversas por mensagem iniciadas. Quem vê a conta troca a métrica, e a escolha
+  fica salva no navegador daquela conta.
+
+- **Visão geral: Resultados (2026-10-20):** o card Conversões passa a se chamar
+  Resultados. O (i) explica que é a métrica que as campanhas usam para otimizar
+  a entrega de usuários.
+
+- **Visão geral: Seguidores Instagram (2026-10-20):** a troca de métrica inclui
+  o total de seguidores do perfil no último dia do período.
+
 - **Menu Visão geral (2026-10-20):** o item da conta abre só a visão daquele
   cliente. Visão geral e Dashboards não ficam ativos ao mesmo tempo.
 

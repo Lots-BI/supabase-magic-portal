@@ -312,6 +312,10 @@ export interface OverviewRow {
   meta_results?: number | null;
   meta_conversions?: number | null;
   google_conversions?: number | null;
+  /** Conversas iniciadas nos anúncios da Meta. Coluna nova de client_overview. */
+  meta_messaging_conversations_started?: number | null;
+  /** Estoque de seguidores do Instagram no dia. */
+  instagram_followers_count?: number | null;
 }
 
 /** Colunas mínimas de vw_overview_cliente — evita select("*"). */
