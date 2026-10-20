@@ -39,10 +39,8 @@ describe("meta structure", () => {
       ad: "Post do feed",
     });
     expect(rows.find((row) => row.metricKey === "spend")).toBeUndefined();
-    expect(rows.find((row) => row.metricKey === "instagram_profile_follows")).toMatchObject({
-      campaign: "Sempre on",
-      value: 4,
-    });
+    expect(rows.find((row) => row.metricKey === "instagram_profile_follows")).toBeUndefined();
+    expect(rows.find((row) => row.metricKey === "nx_instagram_follows")?.value).toBe(4);
   });
 
   it("roundtrip da chave", () => {

@@ -27,7 +27,6 @@ import {
   MessageCircle,
   MessagesSquare,
   Globe,
-  UserPlus,
 } from "lucide-react";
 import type { PlatformDef } from "./types";
 import * as f from "./formulas";
@@ -213,18 +212,6 @@ export const metaAdsDef: PlatformDef = {
       description: "Ação link_click. Use Cliques no link quando o Gerenciador mostrar os dois.",
     },
     {
-      key: "instagram_profile_follows",
-      column: "instagram_profile_follows",
-      label: "Seguidores via anúncio",
-      short: "Seguidores",
-      format: "int",
-      aggregation: { kind: "sum" },
-      icon: UserPlus,
-      positiveIsGood: true,
-      description:
-        "Seguidores do Instagram adquiridos pelos anúncios e campanhas no período — a coluna Seguidores do Instagram no Gerenciador.",
-    },
-    {
       key: "instagram_profile_visits",
       column: "instagram_profile_visits",
       label: "Visitas ao perfil via anúncio",
@@ -306,20 +293,8 @@ export const metaAdsDef: PlatformDef = {
       description: "Valor das compras atribuídas (action_values de purchase / omni_purchase).",
     },
   ],
-  heroMetrics: [
-    "spend",
-    "results",
-    "messaging_conversations_started",
-    "clicks",
-    "instagram_profile_follows",
-  ],
-  rankingMetrics: [
-    "spend",
-    "results",
-    "instagram_profile_follows",
-    "messaging_conversations_started",
-    "clicks",
-  ],
+  heroMetrics: ["spend", "results", "messaging_conversations_started", "clicks"],
+  rankingMetrics: ["spend", "results", "messaging_conversations_started", "clicks"],
   kpis: [
     {
       key: "ctr",
@@ -391,15 +366,6 @@ export const metaAdsDef: PlatformDef = {
       compute: (t) => f.cpa(t.spend, t.conversions),
       icon: Activity,
       description: "Valor gasto ÷ conversões.",
-    },
-    {
-      key: "cost_per_ig_follow",
-      label: "Custo por seguidor",
-      format: "currency",
-      positiveIsGood: false,
-      compute: (t) => f.cpa(t.spend, t.instagram_profile_follows),
-      icon: UserPlus,
-      description: "Valor gasto ÷ seguidores do perfil atribuídos aos anúncios.",
     },
     {
       key: "roas",

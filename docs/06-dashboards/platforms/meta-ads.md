@@ -93,24 +93,19 @@ continuam preenchidos.
 A coleta de campanha continua sendo a fonte de gasto, alcance e resultados.
 No mesmo **Puxar métricas** o coletor também pede conjunto (`adset`) e anúncio (`ad`).
 Essas linhas usam o prefixo `nx` e aparecem na seção **Estrutura** do dashboard
-(Conjuntos, Anúncios, Turbinação). Turbinação é o anúncio cujo criativo aponta
-para uma publicação que já existia (`source_instagram_media_id`).
+(Conjuntos, Anúncios, Turbinação), lidas por `dashboard_meta_structure_long`.
+O RPC do dashboard de campanha não as inclui: o PostgREST corta em 1000 linhas
+e, misturadas, elas faziam gasto e resultados do período sumirem.
 
-No card da campanha, somados a partir dos anúncios: seguidores via anúncio,
-visitas ao perfil, cliques de saída, ThruPlay, vídeo 25/50/75/100% e valor de
-compra. A view ignora o prefixo `nx` para o gasto não duplicar. A janela de
-refresh (14 dias) regrava os dias recentes com o contrato novo.
-
-**Seguidores via anúncio** entra nos cards de destaque (ao lado de Cliques) e
-na coleta diária de cada campanha, na frente das demais colunas. O número é
-a coluna Seguidores do Instagram no Gerenciador: seguidores atribuídos aos
-anúncios do período.
+No card da campanha, o número é só o da coleta `level=campaign`. Conjunto e
+anúncio ficam na seção Estrutura e não reescrevem o dia da campanha. Se a
+paginação da API parar no meio, a coleta falha e o dia anterior permanece.
 
 ## KPIs derivados
 
 CTR, CTR do link, CPC, CPC do link, CPM, Frequência (`impressions / reach`),
-**Custo por resultado** (`spend / results`), **Custo por conversão** (`spend / conversions`),
-**Custo por seguidor** e **ROAS de compra** (`purchase_value / spend`).
+**Custo por resultado** (`spend / results`), **Custo por conversão** (`spend / conversions`)
+e **ROAS de compra** (`purchase_value / spend`).
 
 ## Limitações e dívida técnica
 

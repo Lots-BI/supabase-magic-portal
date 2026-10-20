@@ -4618,6 +4618,16 @@ export type Database = {
           valor: number;
         }[];
       };
+      dashboard_meta_structure_long: {
+        Args: { p_cliente: string; p_from: string; p_to: string };
+        Returns: {
+          campanha: string;
+          cliente: string;
+          data: string;
+          metrica: string;
+          valor: number;
+        }[];
+      };
       ensure_owner_admin_for_user: {
         Args: { _user_id: string };
         Returns: undefined;

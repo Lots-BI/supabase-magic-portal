@@ -24,6 +24,8 @@ export interface FetchCampaignInsightsResult {
   insights: MetaInsightsResponseV1["data"];
   pagesFetched: number;
   rateLimitHit: boolean;
+  /** Ainda havia página quando o teto foi atingido. O dia não pode ser substituído. */
+  truncated: boolean;
 }
 
 /** Delivery + `actions` (fallback quando o field oficial `results` falha). */
@@ -149,7 +151,7 @@ export class MetaGraphClient {
       };
     };
 
-    const { items, pagesFetched } = await paginateCursorPages({
+    const { items, pagesFetched, truncated } = await paginateCursorPages({
       maxPages: input.maxPages,
       fetchPage: async (after) => {
         try {
@@ -221,7 +223,7 @@ export class MetaGraphClient {
       },
     });
 
-    return { insights: items, pagesFetched, rateLimitHit };
+    return { insights: items, pagesFetched, rateLimitHit, truncated };
   }
 
   /** Objetivo e status atuais — a Insights API não manda se a campanha está ativa. */
@@ -280,7 +282,7 @@ export class MetaGraphClient {
     level: "ad" | "adset";
     window: { from: string; to: string };
     maxPages?: number;
-  }): Promise<MetaInsightsResponseV1["data"]> {
+  }): Promise<{ items: MetaInsightsResponseV1["data"]; truncated: boolean }> {
     const accountId = normalizeAdAccountId(input.adAccountId);
     const baseUrl = `${graphBaseUrl(this.graphVersion)}/${accountId}/insights`;
     let fields = input.level === "ad" ? META_AD_INSIGHTS_FIELDS : META_ADSET_INSIGHTS_FIELDS;
@@ -304,7 +306,7 @@ export class MetaGraphClient {
       };
     };
 
-    const { items } = await paginateCursorPages({
+    const { items, truncated } = await paginateCursorPages({
       maxPages: input.maxPages,
       fetchPage: async (after) => {
         let attempts = 0;
@@ -324,7 +326,7 @@ export class MetaGraphClient {
       },
     });
 
-    return items;
+    return { items, truncated };
   }
 
   /** Anúncios cujo criativo aponta para uma publicação que já existia (turbinação). */

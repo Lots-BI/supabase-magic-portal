@@ -148,19 +148,6 @@ const NX_KEYS: Array<[keyof HierarchyMetricBag, string]> = [
   ["messaging_conversations_started", "nx_messaging"],
 ];
 
-/** Métricas aditivas que sobem do anúncio para o card da campanha. */
-const CAMPAIGN_EXTRA_KEYS: Array<[keyof HierarchyMetricBag, string]> = [
-  ["instagram_profile_follows", "instagram_profile_follows"],
-  ["instagram_profile_visits", "instagram_profile_visits"],
-  ["outbound_clicks", "outbound_clicks"],
-  ["video_thruplay", "video_thruplay"],
-  ["video_p25", "video_p25"],
-  ["video_p50", "video_p50"],
-  ["video_p75", "video_p75"],
-  ["video_p100", "video_p100"],
-  ["purchase_value", "purchase_value"],
-];
-
 export interface MapHierarchyOptions {
   level: StructureLevel;
   campaignObjectives?: ReadonlyMap<string, string>;
@@ -179,16 +166,15 @@ function pushPositive(
 }
 
 /**
- * Linhas de conjunto/anúncio (prefixo nx) e, no nível anúncio, os extras
- * aditivos gravados também no nome da campanha para o dashboard atual.
- * Gasto e alcance da campanha continuam vindo da coleta `level=campaign`.
+ * Só linhas de conjunto/anúncio (prefixo nx). O dia da campanha continua
+ * exclusivo da coleta level=campaign — somar o anúncio por cima troca o
+ * número oficial no replace-by-day.
  */
 export function mapMetaHierarchyInsights(
   insights: readonly MetaInsightRowV1[],
   options: MapHierarchyOptions,
 ): MetricRowV1[] {
   const rows: MetricRowV1[] = [];
-  const extras = new Map<string, number>();
 
   for (const insight of insights) {
     const date = insight.date_start;
@@ -219,20 +205,6 @@ export function mapMetaHierarchyInsights(
       }
       pushPositive(rows, metricKey, value, date, key);
     }
-
-    if (options.level !== "ad" || !campaignName) continue;
-    for (const [field, metricKey] of CAMPAIGN_EXTRA_KEYS) {
-      const value = bag[field];
-      if (value <= 0) continue;
-      const lookup = `${campaignName}\0${date}\0${metricKey}`;
-      extras.set(lookup, (extras.get(lookup) ?? 0) + value);
-    }
-  }
-
-  for (const [lookup, value] of extras) {
-    const [campaign, date, metricKey] = lookup.split("\0");
-    if (!campaign || !date || !metricKey) continue;
-    rows.push({ metricKey, value, date, campaign });
   }
 
   return rows;

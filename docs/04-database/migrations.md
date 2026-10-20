@@ -3,7 +3,7 @@ title: Banco — Migrations
 description: Histórico, convenções e princípios das migrations do Lots BI.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-20
 ---
 
 # Migrations
@@ -66,6 +66,9 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `63_crm_ingest_api.sql`                   | Tokens da API de ingestão CRM (`crm_ingest_tokens`, hash SHA-256). Kinds `form`/`email`/`call`/`other`; places `web`/`phone`. |
 | `79_meta_ig_structure_metrics.sql`        | Views Meta/Instagram: seguidores, vídeo, compras. Hierarquia `nx` fica fora do total de campanha. |
 | `80_client_overview_rpc.sql`              | RPC `client_overview`: visão geral de um cliente, só se o nome está em `current_user_clientes()`. |
+| `81_campaign_status.sql`                  | Status atual da campanha (`ph_campaign_status`), separado da série diária. |
+| `82_dashboard_long_page_order.sql`        | Tira a hierarquia `nx` do RPC do dashboard e ordena as linhas para a paginação de 1000. |
+| `83_replace_hub_keep_structure.sql`       | Troca o dia da campanha sem apagar conjunto/anúncio quando o envelope não traz `nx`. |
 
 > Conteúdos (38–45) e demais arquivos em `supabase/migrations-official/` seguem a mesma
 > numeração. Lista completa no diretório. **Não existe `04`.** A tentativa

@@ -58,12 +58,13 @@ async function collectHierarchy(
   const batches = await Promise.all(
     levels.map(async (level) => {
       try {
-        const insights = await graphClient.fetchLevelInsights({
+        const { items: insights, truncated } = await graphClient.fetchLevelInsights({
           accessToken: input.accessToken,
           adAccountId: input.adAccountId,
           level,
           window: input.window,
         });
+        if (truncated) return [];
         return mapMetaHierarchyInsights(insights, {
           level,
           campaignObjectives: input.campaignObjectives,
@@ -125,7 +126,7 @@ export function createOfficialMetaProvider(config: OfficialMetaProviderConfig): 
           throw new Error("Meta access token not found in CredentialVault");
         }
 
-        const { insights, pagesFetched, rateLimitHit } = await graphClient.fetchCampaignInsights({
+        const { insights, pagesFetched, rateLimitHit, truncated } = await graphClient.fetchCampaignInsights({
           accessToken: tokenBundle.accessToken,
           adAccountId: adAccount.externalId,
           window,
@@ -142,6 +143,12 @@ export function createOfficialMetaProvider(config: OfficialMetaProviderConfig): 
           campaignStatuses = catalog.statuses;
         } catch {
           // Insights já vieram; sem objective só contamos conversão de negócio.
+        }
+
+        if (truncated || rateLimitHit) {
+          throw new Error(
+            "Coleta Meta incompleta. Nenhum dia foi substituído para não gravar um pedaço no lugar do dia inteiro.",
+          );
         }
 
         const mapped = mapMetaInsightsToMetricRows(insights, { campaignObjectives });

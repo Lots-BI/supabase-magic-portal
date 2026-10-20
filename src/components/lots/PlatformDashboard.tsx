@@ -188,18 +188,19 @@ function HeroCards({
     [rows, period],
   );
   const heroes = def.metrics.filter((m) => def.heroMetrics.includes(m.key));
+  const labelOf = (key: string) =>
+    def.metrics.find((metric) => metric.key === key)?.label ??
+    (key === "instagram_profile_follows" ? "Seguidores via anúncio" : key);
   const resultOptions = slices.map((slice) => ({
     key: slice.key,
     label:
       slice.key === OBJECTIVE_RESULT_KEY
         ? "Resultado do objetivo"
-        : `Resultado · ${def.metrics.find((metric) => metric.key === slice.key)?.label ?? slice.key}`,
+        : `Resultado · ${labelOf(slice.key)}`,
         description:
           slice.key === OBJECTIVE_RESULT_KEY
             ? OBJECTIVE_RESULT_DESCRIPTION
-            : `Vezes em que «${
-                def.metrics.find((metric) => metric.key === slice.key)?.label ?? slice.key
-              }» foi a coluna Resultados do Gerenciador. O card com esse nome soma a métrica em todas as campanhas, mesmo quando o resultado do dia foi outro número.`,
+            : `Vezes em que «${labelOf(slice.key)}» foi a coluna Resultados do Gerenciador. O card com esse nome soma a métrica em todas as campanhas, mesmo quando o resultado do dia foi outro número.`,
     value: formatValue("int", slice.current),
     current: slice.current,
     previous: slice.previous,
@@ -673,7 +674,7 @@ function CampaignRanking({
                                         key={m.key}
                                         className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-foreground"
                                       >
-                                        {formatValue(m.format, day[m.key] as number)}
+                                        {formatValue(m.format, (day[m.key] as number | undefined) ?? 0)}
                                       </td>
                                     ))}
                                   </tr>

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchHubLongPages } from "@/lib/platforms/fetch-dashboard-rows";
 import type { Period } from "@/lib/period";
 import { parseStructureCampaignKey } from "@/modules/platform-hub/plugins/meta_ads/api/meta-structure";
 import { SectionCard } from "@/components/lots/SectionCard";
@@ -28,7 +29,6 @@ interface Bucket {
   reach: number;
   clicks: number;
   results: number;
-  follows: number;
   visits: number;
   purchase: number;
 }
@@ -57,9 +57,6 @@ function addMetric(bucket: Bucket, metric: string, value: number) {
     case "nx_results":
       bucket.results += value;
       break;
-    case "nx_instagram_follows":
-      bucket.follows += value;
-      break;
     case "nx_instagram_visits":
       bucket.visits += value;
       break;
@@ -76,14 +73,18 @@ export function MetaStructureBoard({ cliente, period }: { cliente: string; perio
   const query = useQuery({
     queryKey: ["meta-structure", cliente, period.from, period.to],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("dashboard_prefer_hub_long", {
-        p_plataforma: "meta_ads",
+      const args = {
         p_cliente: cliente,
         p_from: period.from,
         p_to: period.to,
+      };
+      return fetchHubLongPages(async (fromRow, toRow) => {
+        const { data, error } = await supabase
+          .rpc("dashboard_meta_structure_long", args)
+          .range(fromRow, toRow);
+        if (error) throw new Error(error.message);
+        return (data ?? []) as StructureRow[];
       });
-      if (error) throw new Error(error.message);
-      return (data ?? []) as StructureRow[];
     },
     staleTime: 30_000,
   });
@@ -114,7 +115,6 @@ export function MetaStructureBoard({ cliente, period }: { cliente: string; perio
         reach: 0,
         clicks: 0,
         results: 0,
-        follows: 0,
         visits: 0,
         purchase: 0,
       };
@@ -170,7 +170,6 @@ export function MetaStructureBoard({ cliente, period }: { cliente: string; perio
                 <th className="px-4 py-2.5 text-right font-medium">Impressões</th>
                 <th className="px-4 py-2.5 text-right font-medium">Alcance</th>
                 <th className="px-4 py-2.5 text-right font-medium">Cliques</th>
-                <th className="px-4 py-2.5 text-right font-medium">Seguidores</th>
                 <th className="px-4 py-2.5 text-right font-medium">Visitas</th>
                 <th className="px-4 py-2.5 text-right font-medium">Compras</th>
               </tr>
@@ -191,7 +190,6 @@ export function MetaStructureBoard({ cliente, period }: { cliente: string; perio
                   </td>
                   <td className="px-4 py-2.5 text-right tabular-nums">{int.format(row.reach)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums">{int.format(row.clicks)}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums">{int.format(row.follows)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums">{int.format(row.visits)}</td>
                   <td className="px-4 py-2.5 text-right tabular-nums">
                     {money.format(row.purchase)}

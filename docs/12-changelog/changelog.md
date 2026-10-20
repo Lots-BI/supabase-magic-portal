@@ -92,7 +92,18 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
   na publicação/agendamento (é a legenda do Instagram). Roteiro e legenda aparecem
   em blocos grandes.
 
+### Removido
+
+- **Seguidores no dashboard Meta Ads (2026-10-20):** saem o card, a coluna do
+  ranking, a coleta diária, o custo por seguidor e a coluna da estrutura.
+
 ### Corrigido
+
+- **Coleta Meta Ads cortada em 1000 linhas (2026-10-20):** o dashboard lia só o
+  primeiro milhar. Com conjunto e anúncio no mesmo recorte, gasto, resultados e
+  campanhas do período sumiam. A leitura agora pagina e, se ainda faltar página,
+  não mostra número pela metade. Coleta incompleta não substitui o dia. O dia
+  da campanha não recebe mais a soma do anúncio por cima.
 
 - **Conteúdos: mídia acima de 50 MB (2026-10-09):** o plano Free do Storage aceita
   no máximo 50 MB por arquivo. Foto ou vídeo maior é reduzido no aparelho antes

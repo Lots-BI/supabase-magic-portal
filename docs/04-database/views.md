@@ -14,7 +14,9 @@ vale, RLS das tabelas-base aplica. Isolação extra em `vw_metricas_normalizadas
 
 Dashboards de plataforma leem `vw_*_diario` prefer_hub. Visão geral / Relatórios **não**
 varrem essas views no browser: usam RPC `portfolio_overview` / `portfolio_clientes_ativos`
-(migrations 56–57).
+(migrations 56–57). O RPC `dashboard_prefer_hub_long` devolve no máximo 1000 linhas
+por chamada (teto do PostgREST). A hierarquia `nx` não entra nele (migration 82);
+o client pagina o restante.
 
 Definições históricas: `08_aliases_e_null_guard.sql`. Prefer_hub e overview: 34, 36, 47,
 49, 50, 54–57.
