@@ -3,7 +3,7 @@ title: Ingestão Hub (estado atual)
 description: Como o Lots BI coleta métricas em 2026-09 — Hub official_api para Meta/IG, Make leftover, Google/GA4 aguardam OAuth.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-21
 ---
 
 # Ingestão Hub (estado atual)
@@ -17,9 +17,11 @@ Em **2026-09-11** (merge PR #2 em `main`) a fonte viva de Meta Ads e Instagram p
 | Meta Ads | `vw_meta_ads_diario` prefer_hub | Cron `meta-ads-campaigns-sync` 03:10 UTC | Ontem BRT depois do cron |
 | Instagram perfil | `vw_instagram_diario` prefer_hub | Cron `instagram-profile-sync` 03:25 UTC | Ontem BRT |
 | Instagram publicações | `ig_media` | Cron `instagram-media-sync` | Independente do consolidado |
-| Google Ads | `vw_google_ads_diario` prefer_hub | Código + cron prontos | Make até **2026-08-17** até OAuth |
+| Google Ads | `vw_google_ads_diario` prefer_hub | Cron + REST **v23** | Make leftover até a conexão OAuth |
 | GA4 | `vw_ga4_diario` prefer_hub | Código + cron prontos | Make até **2026-08-17** até OAuth |
-| TikTok / YouTube / GBP | — | Wizard esconde | Sem produto official_api |
+| TikTok | `dashboard_prefer_hub_long` | Cron `tiktok-campaigns-sync` 03:50 UTC | Depois da conexão OAuth |
+| YouTube | `dashboard_prefer_hub_long` | Cron `youtube-channel-sync` 03:55 UTC | Depois da conexão OAuth |
+| Google Business | `vw_google_business_diario` prefer_hub | Cron `google-business-profile-sync` 04:05 UTC | Puxar + cron |
 
 Prefer_hub: se o Hub tem o dia (e não é sentinela Meta vazia `campanha=''` + results/conversions 0), o Make daquele dia **não entra**. `ph_metricas_source` XOR **não** é virado para `hub` no consolidado — esconderia Google/GA4.
 

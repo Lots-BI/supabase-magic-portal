@@ -78,6 +78,11 @@ A página de métricas do YouTube no portal do cliente é `/cliente/{slug}/youtu
 
 ## 5. Google Ads — token em modo teste
 
+O assistente chama `customers:listAccessibleCustomers` na REST **v23**
+(`GOOGLE_ADS_REST_API_VERSION`). Versão antiga (v19) devolvia HTML 404 depois do
+login. A tela “app não verificado pelo Google” é a tela de permissão em
+**Testando** — Continuar é esperado. O 404 depois disso era a API, não o OAuth.
+
 O developer token foi informado como modo teste. Esta verificação não abre o [Google Ads API Center](https://ads.google.com/aw/apicenter). Trate como teste até a tela mostrar outro status.
 
 Nesse modo a plataforma só lê contas de anúncio de teste do Google. A conta real do cliente de uma organização de fora não aparece.

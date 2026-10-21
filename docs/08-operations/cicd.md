@@ -3,7 +3,7 @@ title: CI/CD
 description: Pipeline de integração e deploy — GitHub Actions, gates e deploy futuro.
 status: living
 owner: Engenharia / Ops Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-21
 ---
 
 # CI/CD
@@ -74,9 +74,12 @@ Checklist alinhado ao handbook: `.github/pull_request_template.md`
 
 Merge em `main` → **Vercel** em `https://lotsbi.leandromajr.com`. Ver [Deployment](./deployment.md).
 
-Crons de métricas: workflows `meta-ads-campaigns-sync-cron.yml`, `instagram-profile-sync-cron.yml`,
-`google-ads-sync-cron.yml`, `ga4-sync-cron.yml` (secrets `APP_URL` + `CRON_SECRET`). Primeiro
-run após o merge de 2026-09-11 pode exigir `workflow_dispatch` se a janela UTC já passou.
+Crons de métricas (secrets `APP_URL` + `CRON_SECRET`): `meta-ads-campaigns-sync-cron.yml`,
+`instagram-profile-sync-cron.yml`, `instagram-media-sync-cron.yml`,
+`google-ads-campaigns-sync-cron.yml`, `ga4-profile-sync-cron.yml`,
+`tiktok-campaigns-sync-cron.yml`, `youtube-channel-sync-cron.yml`,
+`google-business-profile-sync-cron.yml`. Primeiro run após o merge pode exigir
+`workflow_dispatch` se a janela UTC já passou.
 
 ### Cloudflare (preparado — ADR-0012)
 

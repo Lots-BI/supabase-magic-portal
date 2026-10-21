@@ -5,6 +5,14 @@ import {
   type HttpResponseV1,
 } from "./http-client.port";
 
+function formatHttpErrorMessage(status: number, textBody: string): string {
+  const head = textBody.trimStart().slice(0, 32).toLowerCase();
+  if (head.startsWith("<!doctype") || head.startsWith("<html")) {
+    return `HTTP ${status}: resposta HTML inesperada (recurso não encontrado)`;
+  }
+  return `HTTP ${status}: ${textBody.slice(0, 300)}`;
+}
+
 function buildUrl(base: string, searchParams?: HttpRequestInitV1["searchParams"]): string {
   if (!searchParams) return base;
   const url = new URL(base);
@@ -48,7 +56,7 @@ export class FetchHttpClient implements HttpClientPort {
 
     if (!response.ok) {
       throw new HttpClientError(
-        `HTTP ${response.status}: ${textBody.slice(0, 300)}`,
+        formatHttpErrorMessage(response.status, textBody),
         response.status,
         textBody,
       );

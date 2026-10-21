@@ -19,8 +19,8 @@ last_review: 2026-10-21
 | PlatformDef  | `src/lib/platforms/youtube.ts` |
 | Rota cliente | `/cliente/{slug}/youtube`      |
 
-Não há `vw_youtube_diario`. A tela usa `PlatformDashboardPage`. Coleta do canal e upload
-de vídeo ficam no fluxo de conexão Google.
+Não há `vw_youtube_diario`. A tela usa `PlatformDashboardPage`. Coleta do canal: Puxar e
+cron `GET /api/cron/youtube-channel-sync`. Upload de vídeo fica no fluxo de conexão Google.
 
 ## Métricas oficiais
 

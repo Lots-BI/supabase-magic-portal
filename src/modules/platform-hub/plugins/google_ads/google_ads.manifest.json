@@ -47,7 +47,7 @@
     },
     {
       "provider": "official_api",
-      "apiVersion": "v19"
+      "apiVersion": "v23"
     }
   ],
   "ingestProfiles": ["metrics-timeseries"]

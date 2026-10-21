@@ -4,4 +4,6 @@ export interface DiscoveredIdentityV1 {
   externalId: string;
   label: string;
   parentLabel?: string;
+  /** MCC pai — ao vincular o customer, o wizard também anexa o manager. */
+  parentExternalId?: string;
 }

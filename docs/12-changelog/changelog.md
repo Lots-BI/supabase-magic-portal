@@ -45,6 +45,15 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Corrigido
 
+- **Google Ads: passo 4 do assistente (2026-10-21):** depois do login Google a
+  listagem de contas chamava a API REST **v19**, já descontinuada. O Google
+  devolvia HTML 404. A descoberta e a coleta usam **v23** e, na conta gerente
+  (MCC), listam os clientes filhos.
+
+- **Cron TikTok e YouTube (2026-10-21):** os workflows já chamavam as rotas; o
+  job não importava os coletores e quebrava à noite. Google Business passa a
+  ter cron próprio (`04:05 UTC`).
+
 - **Alerta de sync falho (2026-10-21):** a visão geral lista a conexão que falhou
   (hoje: Val Borto / Instagram). O Puxar grava `last_sync_status` para o alerta
   aparecer sem depender só do health check.

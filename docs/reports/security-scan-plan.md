@@ -3,7 +3,7 @@ title: Plano de varredura de segurança — isolamento multi-tenant
 description: Mapa ponta a ponta da plataforma e protocolo somente-leitura para detectar vazamento de dados entre clientes.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-21
 ---
 
 # Plano de varredura de segurança — Lots BI
@@ -108,6 +108,9 @@ Rotas cron (auth compartilhado em `server/lib/cron-auth.ts`):
 - `/api/cron/google-ads-campaigns-sync`
 - `/api/cron/ga4-profile-sync`
 - `/api/cron/instagram-media-sync`
+- `/api/cron/tiktok-campaigns-sync`
+- `/api/cron/youtube-channel-sync`
+- `/api/cron/google-business-profile-sync`
 - `/api/cron/conteudos-publish-due`
 
 OAuth callbacks: `/oauth/meta/callback`, `/oauth/google/callback`, `/oauth/tiktok/callback`. Self-service do cliente (portal): Instagram orgânico e Meta Ads (`hub-client.server.ts`).

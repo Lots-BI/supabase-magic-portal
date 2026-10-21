@@ -9,6 +9,7 @@ import {
   discoverHubIdentities,
 } from "@/modules/platform-hub-admin/hub-admin.server";
 import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
+import { withGoogleAdsManagerParents } from "@/modules/platform-hub-bridges/ph-persistence/services/google-ads-identity-attach";
 import { cn } from "@/lib/utils";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -79,7 +80,11 @@ export function HubIdentityPicker({ connectionId, pluginKey, onComplete }: HubId
 
   const attachMutation = useMutation({
     mutationFn: () => {
-      const picked = (identities ?? []).filter((i) => selected.has(i.externalId));
+      const discovered = identities ?? [];
+      const picked =
+        pluginKey === "google_ads"
+          ? withGoogleAdsManagerParents(discovered, selected)
+          : discovered.filter((i) => selected.has(i.externalId));
       let primaryAssigned = false;
       return batchAttachHubIdentities({
         data: {

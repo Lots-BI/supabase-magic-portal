@@ -3,6 +3,7 @@ import { HttpClientError } from "../../_internal/http/http-client.port";
 import { parseRetryAfterMs, RateLimitHttpError } from "../../_internal/http/fetch-http-client";
 import { paginateCursorPages } from "../../_internal/http/paginate-cursor";
 import type { GoogleAdsSearchResponseV1, GoogleAdsSearchRowV1 } from "./google-ads-api.types";
+import { GOOGLE_ADS_REST_API_VERSION, googleAdsBaseUrl } from "./google-ads-api-version";
 
 export interface GoogleAdsClientConfig {
   httpClient: HttpClientPort;
@@ -28,10 +29,6 @@ function normalizeCustomerId(externalId: string): string {
   return externalId.replace(/-/g, "").replace(/^customers\//, "");
 }
 
-function googleAdsBaseUrl(version: string): string {
-  return `https://googleads.googleapis.com/${version}`;
-}
-
 function throwGoogleAdsHttpError(error: unknown): never {
   if (error instanceof HttpClientError) {
     if (error.status === 401) {
@@ -49,7 +46,7 @@ export class GoogleAdsClient {
   private readonly apiVersion: string;
 
   constructor(private readonly config: GoogleAdsClientConfig) {
-    this.apiVersion = config.apiVersion ?? "v19";
+    this.apiVersion = config.apiVersion ?? GOOGLE_ADS_REST_API_VERSION;
   }
 
   async fetchCampaignMetrics(

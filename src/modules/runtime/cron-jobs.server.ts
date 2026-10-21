@@ -5,6 +5,9 @@ import { syncAllInstagramProfileConnections } from "@/modules/instagram-posts/in
 import { syncAllMetaAdsCampaignsConnections } from "@/modules/meta-ads/meta-ads-campaigns-sync.server";
 import { syncAllGoogleAdsCampaignsConnections } from "@/modules/google-ads/google-ads-campaigns-sync.server";
 import { syncAllGa4ProfileConnections } from "@/modules/ga4/ga4-profile-sync.server";
+import { syncAllTikTokCampaignsConnections } from "@/modules/tiktok/tiktok-campaigns-sync.server";
+import { syncAllYouTubeChannelConnections } from "@/modules/youtube/youtube-channel-sync.server";
+import { syncAllGoogleBusinessProfileConnections } from "@/modules/google-business/google-business-profile-sync.server";
 import { syncAllCrmComments } from "@/modules/crm/ingest/sync-comments.server";
 import { syncAllCrmDirect } from "@/modules/crm/ingest/sync-direct.server";
 import { runDuePublishes } from "@/modules/approval/jobs/publish-due.server";
@@ -76,6 +79,16 @@ export async function runYouTubeCron() {
 export async function runGa4Cron() {
   const summary = await syncAllGa4ProfileConnections(getSupabaseAdmin());
   await withTimeline(`Cron GA4: ${summary.failed} falha(s)`, summary.failed, summary.total);
+  return envelope(summary);
+}
+
+export async function runGoogleBusinessCron() {
+  const summary = await syncAllGoogleBusinessProfileConnections(getSupabaseAdmin());
+  await withTimeline(
+    `Cron Google Business: ${summary.failed} falha(s)`,
+    summary.failed,
+    summary.total,
+  );
   return envelope(summary);
 }
 

@@ -51,6 +51,7 @@ import { Route as AuthenticatedTutorialSplatRouteImport } from './routes/_authen
 import { Route as ApiCronConteudosPublishDueRouteImport } from './routes/api/cron/conteudos-publish-due'
 import { Route as ApiCronGa4ProfileSyncRouteImport } from './routes/api/cron/ga4-profile-sync'
 import { Route as ApiCronGoogleAdsCampaignsSyncRouteImport } from './routes/api/cron/google-ads-campaigns-sync'
+import { Route as ApiCronGoogleBusinessProfileSyncRouteImport } from './routes/api/cron/google-business-profile-sync'
 import { Route as ApiCronInstagramCrmCommentsSyncRouteImport } from './routes/api/cron/instagram-crm-comments-sync'
 import { Route as ApiCronInstagramMediaSyncRouteImport } from './routes/api/cron/instagram-media-sync'
 import { Route as ApiCronInstagramProfileSyncRouteImport } from './routes/api/cron/instagram-profile-sync'
@@ -336,6 +337,12 @@ const ApiCronGoogleAdsCampaignsSyncRoute =
   ApiCronGoogleAdsCampaignsSyncRouteImport.update({
     id: '/api/cron/google-ads-campaigns-sync',
     path: '/api/cron/google-ads-campaigns-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiCronGoogleBusinessProfileSyncRoute =
+  ApiCronGoogleBusinessProfileSyncRouteImport.update({
+    id: '/api/cron/google-business-profile-sync',
+    path: '/api/cron/google-business-profile-sync',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiCronInstagramCrmCommentsSyncRoute =
@@ -697,6 +704,7 @@ export interface FileRoutesByFullPath {
   '/api/cron/conteudos-publish-due': typeof ApiCronConteudosPublishDueRoute
   '/api/cron/ga4-profile-sync': typeof ApiCronGa4ProfileSyncRoute
   '/api/cron/google-ads-campaigns-sync': typeof ApiCronGoogleAdsCampaignsSyncRoute
+  '/api/cron/google-business-profile-sync': typeof ApiCronGoogleBusinessProfileSyncRoute
   '/api/cron/instagram-crm-comments-sync': typeof ApiCronInstagramCrmCommentsSyncRoute
   '/api/cron/instagram-media-sync': typeof ApiCronInstagramMediaSyncRoute
   '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
@@ -787,6 +795,7 @@ export interface FileRoutesByTo {
   '/api/cron/conteudos-publish-due': typeof ApiCronConteudosPublishDueRoute
   '/api/cron/ga4-profile-sync': typeof ApiCronGa4ProfileSyncRoute
   '/api/cron/google-ads-campaigns-sync': typeof ApiCronGoogleAdsCampaignsSyncRoute
+  '/api/cron/google-business-profile-sync': typeof ApiCronGoogleBusinessProfileSyncRoute
   '/api/cron/instagram-crm-comments-sync': typeof ApiCronInstagramCrmCommentsSyncRoute
   '/api/cron/instagram-media-sync': typeof ApiCronInstagramMediaSyncRoute
   '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
@@ -885,6 +894,7 @@ export interface FileRoutesById {
   '/api/cron/conteudos-publish-due': typeof ApiCronConteudosPublishDueRoute
   '/api/cron/ga4-profile-sync': typeof ApiCronGa4ProfileSyncRoute
   '/api/cron/google-ads-campaigns-sync': typeof ApiCronGoogleAdsCampaignsSyncRoute
+  '/api/cron/google-business-profile-sync': typeof ApiCronGoogleBusinessProfileSyncRoute
   '/api/cron/instagram-crm-comments-sync': typeof ApiCronInstagramCrmCommentsSyncRoute
   '/api/cron/instagram-media-sync': typeof ApiCronInstagramMediaSyncRoute
   '/api/cron/instagram-profile-sync': typeof ApiCronInstagramProfileSyncRoute
@@ -984,6 +994,7 @@ export interface FileRouteTypes {
     | '/api/cron/conteudos-publish-due'
     | '/api/cron/ga4-profile-sync'
     | '/api/cron/google-ads-campaigns-sync'
+    | '/api/cron/google-business-profile-sync'
     | '/api/cron/instagram-crm-comments-sync'
     | '/api/cron/instagram-media-sync'
     | '/api/cron/instagram-profile-sync'
@@ -1074,6 +1085,7 @@ export interface FileRouteTypes {
     | '/api/cron/conteudos-publish-due'
     | '/api/cron/ga4-profile-sync'
     | '/api/cron/google-ads-campaigns-sync'
+    | '/api/cron/google-business-profile-sync'
     | '/api/cron/instagram-crm-comments-sync'
     | '/api/cron/instagram-media-sync'
     | '/api/cron/instagram-profile-sync'
@@ -1171,6 +1183,7 @@ export interface FileRouteTypes {
     | '/api/cron/conteudos-publish-due'
     | '/api/cron/ga4-profile-sync'
     | '/api/cron/google-ads-campaigns-sync'
+    | '/api/cron/google-business-profile-sync'
     | '/api/cron/instagram-crm-comments-sync'
     | '/api/cron/instagram-media-sync'
     | '/api/cron/instagram-profile-sync'
@@ -1240,6 +1253,7 @@ export interface RootRouteChildren {
   ApiCronConteudosPublishDueRoute: typeof ApiCronConteudosPublishDueRoute
   ApiCronGa4ProfileSyncRoute: typeof ApiCronGa4ProfileSyncRoute
   ApiCronGoogleAdsCampaignsSyncRoute: typeof ApiCronGoogleAdsCampaignsSyncRoute
+  ApiCronGoogleBusinessProfileSyncRoute: typeof ApiCronGoogleBusinessProfileSyncRoute
   ApiCronInstagramCrmCommentsSyncRoute: typeof ApiCronInstagramCrmCommentsSyncRoute
   ApiCronInstagramMediaSyncRoute: typeof ApiCronInstagramMediaSyncRoute
   ApiCronInstagramProfileSyncRoute: typeof ApiCronInstagramProfileSyncRoute
@@ -1548,6 +1562,13 @@ declare module '@tanstack/react-router' {
       path: '/api/cron/google-ads-campaigns-sync'
       fullPath: '/api/cron/google-ads-campaigns-sync'
       preLoaderRoute: typeof ApiCronGoogleAdsCampaignsSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/google-business-profile-sync': {
+      id: '/api/cron/google-business-profile-sync'
+      path: '/api/cron/google-business-profile-sync'
+      fullPath: '/api/cron/google-business-profile-sync'
+      preLoaderRoute: typeof ApiCronGoogleBusinessProfileSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/cron/instagram-crm-comments-sync': {
@@ -2238,6 +2259,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCronConteudosPublishDueRoute: ApiCronConteudosPublishDueRoute,
   ApiCronGa4ProfileSyncRoute: ApiCronGa4ProfileSyncRoute,
   ApiCronGoogleAdsCampaignsSyncRoute: ApiCronGoogleAdsCampaignsSyncRoute,
+  ApiCronGoogleBusinessProfileSyncRoute: ApiCronGoogleBusinessProfileSyncRoute,
   ApiCronInstagramCrmCommentsSyncRoute: ApiCronInstagramCrmCommentsSyncRoute,
   ApiCronInstagramMediaSyncRoute: ApiCronInstagramMediaSyncRoute,
   ApiCronInstagramProfileSyncRoute: ApiCronInstagramProfileSyncRoute,

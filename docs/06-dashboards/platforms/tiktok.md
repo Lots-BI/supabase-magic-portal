@@ -21,7 +21,7 @@ last_review: 2026-10-21
 | Campanha     | `campanha`                    |
 
 Não há `vw_tiktok_diario`. A tela usa `PlatformDashboardPage`. Spend do TikTok entra como
-moeda, não micros.
+moeda, não micros. Coleta: Puxar e cron `GET /api/cron/tiktok-campaigns-sync`.
 
 ## Métricas oficiais
 

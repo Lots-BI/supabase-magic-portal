@@ -21,6 +21,7 @@ last_review: 2026-10-21
 | Rota cliente | `/cliente/{slug}/google-business`        |
 
 A tela usa `PlatformDashboardPage`. O assistente de conexão lista Google Business.
+Coleta: Puxar na visão geral e cron `GET /api/cron/google-business-profile-sync` (04:05 UTC).
 
 ## Métricas oficiais
 
