@@ -1,23 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
-import type { LucideIcon } from "lucide-react";
-import {
-  Activity,
-  DollarSign,
-  Eye,
-  MessageCircle,
-  MousePointerClick,
-  Percent,
-  Sparkles,
-  Target,
-  Trophy,
-  UserPlus,
-  Users,
-} from "lucide-react";
+import { useMemo, useState } from "react";
+import { DollarSign, Percent, Sparkles, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { StatCard } from "@/components/lots/StatCard";
+import { OverviewSlotCard } from "@/components/lots/OverviewSlotCard";
 import { PeriodToggle, type PeriodDays } from "@/components/lots/PeriodToggle";
 import { DeltaPill } from "@/components/lots/DeltaPill";
 import { ChartFrame, ChartLegendItem } from "@/components/lots/charts/ChartFrame";
@@ -65,125 +53,6 @@ function mapOverview(row: Record<string, unknown>): OverviewRow {
   };
 }
 
-const OVERVIEW_SLOT_STORAGE = "lots.overview.slot-metric";
-const DEFAULT_OVERVIEW_SLOT = "messaging";
-
-type OverviewSlotKey =
-  | "messaging"
-  | "sessions"
-  | "impressions"
-  | "clicks"
-  | "reach"
-  | "engagement"
-  | "followers"
-  | "meta_results";
-
-const OVERVIEW_SLOTS: Array<{
-  key: OverviewSlotKey;
-  label: string;
-  description: string;
-  icon: LucideIcon;
-  aggregate: "sum" | "max" | "last";
-  pick: (row: OverviewRow) => number;
-}> = [
-  {
-    key: "messaging",
-    label: "Conversas por mensagem iniciadas",
-    description: "Conversas iniciadas nos anúncios da Meta no período.",
-    icon: MessageCircle,
-    aggregate: "sum",
-    pick: (row) => row.meta_messaging_conversations_started ?? 0,
-  },
-  {
-    key: "sessions",
-    label: "Sessões GA4",
-    description: METRIC_META.sessions.description,
-    icon: Activity,
-    aggregate: "sum",
-    pick: (row) => row.ga4_sessions ?? 0,
-  },
-  {
-    key: "impressions",
-    label: "Impressões",
-    description: METRIC_META.impressions.description,
-    icon: Eye,
-    aggregate: "sum",
-    pick: (row) => row.total_impressions ?? 0,
-  },
-  {
-    key: "clicks",
-    label: "Cliques",
-    description: METRIC_META.clicks.description,
-    icon: MousePointerClick,
-    aggregate: "sum",
-    pick: (row) => row.total_clicks ?? 0,
-  },
-  {
-    key: "reach",
-    label: "Alcance Instagram",
-    description: "Maior alcance diário do Instagram no período. Não soma os dias.",
-    icon: Users,
-    aggregate: "max",
-    pick: (row) => row.instagram_reach ?? 0,
-  },
-  {
-    key: "engagement",
-    label: "Interações Instagram",
-    description: METRIC_META.engagement.description,
-    icon: Sparkles,
-    aggregate: "sum",
-    pick: (row) => row.instagram_interactions ?? 0,
-  },
-  {
-    key: "followers",
-    label: "Seguidores Instagram",
-    description: "Total de seguidores do perfil no último dia do período.",
-    icon: UserPlus,
-    aggregate: "last",
-    pick: (row) => row.instagram_followers_count ?? 0,
-  },
-  {
-    key: "meta_results",
-    label: "Resultados Meta",
-    description: "Coluna Resultados do Gerenciador de Anúncios no período.",
-    icon: Trophy,
-    aggregate: "sum",
-    pick: (row) => row.meta_results ?? 0,
-  },
-];
-
-function isOverviewSlot(value: string | null): value is OverviewSlotKey {
-  return OVERVIEW_SLOTS.some((slot) => slot.key === value);
-}
-
-function readOverviewSlot(slug: string): OverviewSlotKey {
-  if (typeof window === "undefined") return DEFAULT_OVERVIEW_SLOT;
-  try {
-    const stored = window.localStorage.getItem(`${OVERVIEW_SLOT_STORAGE}:${slug}`);
-    if (isOverviewSlot(stored)) return stored;
-  } catch {
-    /* navegador sem storage */
-  }
-  return DEFAULT_OVERVIEW_SLOT;
-}
-
-function sumOverviewSlot(rows: OverviewRow[], key: OverviewSlotKey): number {
-  const slot = OVERVIEW_SLOTS.find((item) => item.key === key) ?? OVERVIEW_SLOTS[0]!;
-  if (slot.aggregate === "max") {
-    return rows.reduce((max, row) => Math.max(max, slot.pick(row)), 0);
-  }
-  if (slot.aggregate === "last") {
-    const ordered = [...rows].sort((a, b) => (a.data < b.data ? -1 : 1));
-    let value = 0;
-    for (const row of ordered) {
-      const next = slot.pick(row);
-      if (next > 0) value = next;
-    }
-    return value;
-  }
-  return rows.reduce((sum, row) => sum + slot.pick(row), 0);
-}
-
 export function clientOverviewQuery(cliente: string, days: PeriodDays) {
   const period = periodRange(days);
   return queryOptions({
@@ -213,11 +82,6 @@ export function ClientOverview({
   platforms: string[];
 }) {
   const [days, setDays] = useState<PeriodDays>(30);
-  const [slotKey, setSlotKey] = useState<OverviewSlotKey>(() => readOverviewSlot(slug));
-  useEffect(() => {
-    setSlotKey(readOverviewSlot(slug));
-  }, [slug]);
-  const slot = OVERVIEW_SLOTS.find((item) => item.key === slotKey) ?? OVERVIEW_SLOTS[0]!;
   const { data: overview } = useSuspenseQuery(clientOverviewQuery(queryName, days));
   const period = useMemo(() => periodRange(days), [days]);
   const current = overview.filter((row) => row.data >= period.from && row.data <= period.to);
@@ -262,33 +126,7 @@ export function ClientOverview({
               : "Resultados Meta + conversões GA4"
           }
         />
-        <StatCard
-          label={slot.label}
-          value={formatMetric("sessions", sumOverviewSlot(current, slot.key))}
-          icon={slot.icon}
-          delta={pctDelta(
-            sumOverviewSlot(current, slot.key),
-            sumOverviewSlot(previous, slot.key),
-          )}
-          description={slot.description}
-          optionsLabel="Trocar métrica"
-          selectedKey={slot.key}
-          onSelect={(key) => {
-            if (!isOverviewSlot(key)) return;
-            setSlotKey(key);
-            try {
-              window.localStorage.setItem(`${OVERVIEW_SLOT_STORAGE}:${slug}`, key);
-            } catch {
-              /* navegador sem storage */
-            }
-          }}
-          options={OVERVIEW_SLOTS.map((item) => ({
-            key: item.key,
-            label: item.label,
-            description: item.description,
-            value: formatMetric("sessions", sumOverviewSlot(current, item.key)),
-          }))}
-        />
+        <OverviewSlotCard current={current} previous={previous} scope={slug} />
         <StatCard
           label="CTR consolidado"
           value={cT.impressions > 0 ? `${ctr.toFixed(2)}%` : "—"}

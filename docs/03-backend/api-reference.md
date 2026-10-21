@@ -3,7 +3,7 @@ title: Backend — Referência de API (Server Functions)
 description: Catálogo de todas as server functions, com auth exigida, input e retorno.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-20
 ---
 
 # Referência de API — Server Functions
@@ -195,8 +195,9 @@ last_review: 2026-09-11
 - **Input:** `{ days: 7 | 30 | 90 }`.
 - **Retorno:** `{ overview: OverviewRow[], clientesAtivos: PortfolioClienteAtivo[] }`.
 - **Uso:** `/admin` e `/admin/relatorios`. Chama RPCs `portfolio_overview` e
-  `portfolio_clientes_ativos` (migrations 56–57). **Não** faz SELECT PostgREST em
-  `vw_overview_cliente` (timeout 8-union).
+  `portfolio_clientes_ativos` (migrations 56–57, 86). **Não** faz SELECT PostgREST em
+  `vw_overview_cliente` (timeout 8-union). A 86 acrescenta conversas Meta e
+  seguidores Instagram para o seletor do terceiro card.
 
 ---
 

@@ -22,14 +22,16 @@ Telas operacionais (editorial, relatórios, admin CRUD): [Módulos admin](./admi
 
 Arquivo: `src/routes/_authenticated/admin/index.tsx`.
 
-- **Hero KPIs:** investimento total (Meta + Google), clientes ativos, alcance Instagram,
-  sessões GA4, conversões (com CPA).
-- **Secundários:** serviços ativos, acessos vinculados, última sincronização, CTR consolidado.
+- **Hero KPIs:** investimento total (Meta + Google), conversões (com CPA), o
+  terceiro card com **Trocar métrica** (começa em Sessões GA4) e CTR consolidado.
+- **Secundários:** chips de aprovação, sync atrasada e conexões com falha.
 - **Gráficos:** evolução diária (Meta + Google + conversões), mix de investimento (donut).
-- **Listas:** top clientes por investimento, status de ingestão por conta.
+- **Listas:** o que precisa de atenção, status de ingestão por conta.
 - Fonte: RPC `portfolio_overview` + `portfolio_clientes_ativos` via `getAdminPortfolioFn`
   (`src/modules/dashboards/admin-portfolio.server.ts`). Conversões =
-  `overviewConversions()` (`meta_results` + Google + GA4).
+  `overviewConversions()` (`meta_results` + Google + GA4). O seletor do terceiro
+  card é o mesmo da visão geral do cliente (`OverviewSlotCard`). A escolha fica
+  neste navegador (`lots.overview.slot-metric:admin`).
 
 ### 2. Visão Geral do Cliente (cliente) — `/dashboard`
 

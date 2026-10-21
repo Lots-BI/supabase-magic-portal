@@ -71,6 +71,7 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `83_replace_hub_keep_structure.sql`       | Troca o dia da campanha sem apagar conjunto/anúncio quando o envelope não traz `nx`. |
 | `84_client_overview_messaging.sql`        | `client_overview` passa a devolver conversas por mensagem iniciadas da Meta. |
 | `85_client_overview_ig_followers.sql`     | `client_overview` passa a devolver o estoque de seguidores do Instagram. |
+| `86_portfolio_overview_slot_metrics.sql`  | `portfolio_overview` devolve conversas Meta e seguidores IG no fim (seletor do admin). |
 
 > Conteúdos (38–45) e demais arquivos em `supabase/migrations-official/` seguem a mesma
 > numeração. Lista completa no diretório. **Não existe `04`.** A tentativa

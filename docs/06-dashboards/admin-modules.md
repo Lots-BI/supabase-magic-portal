@@ -41,7 +41,8 @@ flowchart TB
 | Motor   | `metrics.ts` — `sumOverview`, `overviewConversions` |
 | Período | `PeriodSelector` + `resolvePeriod`          |
 
-Visão de portfólio: investimento total, clientes ativos, comparativo de período.
+Visão de portfólio: investimento, conversões, terceiro card com **Trocar métrica**
+(Sessões GA4 no padrão) e CTR. A escolha fica neste navegador.
 
 ---
 

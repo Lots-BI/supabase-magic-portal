@@ -43,7 +43,7 @@ const HIGHLIGHTS = [
   {
     slug: "04-database/migrations",
     title: "Migrations",
-    description: "Ordem oficial até 85, idempotência e validação.",
+    description: "Ordem oficial até 86, idempotência e validação.",
     icon: Database,
   },
   {

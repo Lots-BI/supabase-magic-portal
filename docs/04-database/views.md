@@ -14,7 +14,7 @@ vale, RLS das tabelas-base aplica. Isolação extra em `vw_metricas_normalizadas
 
 Dashboards de plataforma leem `vw_*_diario` prefer_hub. Visão geral / Relatórios **não**
 varrem essas views no browser: usam RPC `portfolio_overview` / `portfolio_clientes_ativos`
-(migrations 56–57). O RPC `dashboard_prefer_hub_long` devolve no máximo 1000 linhas
+(migrations 56–57, 86). O RPC `dashboard_prefer_hub_long` devolve no máximo 1000 linhas
 por chamada (teto do PostgREST). A hierarquia `nx` não entra nele (migration 82);
 o client pagina o restante.
 
@@ -105,7 +105,7 @@ Uma linha por `data × cliente`. Forma live = um `GROUP BY` + `FILTER` (migratio
 A view 8-union no remoto causava timeout no JWT admin.
 
 Admin `/admin` e `/admin/relatorios` leem via RPC `portfolio_overview` (não o PostgREST
-na view). Colunas novas **só no fim** (57):
+na view). Colunas novas **só no fim** (57, 86):
 
 | Coluna | Origem |
 | ------ | ------ |
@@ -115,6 +115,8 @@ na view). Colunas novas **só no fim** (57):
 | `instagram_reach`, `instagram_interactions` | Instagram |
 | `meta_results`, `meta_conversions` | Meta Ads |
 | `google_conversions` | Google Ads (ainda vazio sem Hub) |
+| `meta_messaging_conversations_started` | Meta Ads (86) |
+| `instagram_followers_count` | Instagram estoque (86) |
 
 KPI Conversões no app = `meta_results + google_conversions + ga4_conversions`.
 

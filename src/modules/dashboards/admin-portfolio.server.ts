@@ -43,6 +43,10 @@ function mapOverview(row: Record<string, unknown>): OverviewRow {
     meta_results: asNumber(row.meta_results),
     meta_conversions: asNumber(row.meta_conversions),
     google_conversions: asNumber(row.google_conversions),
+    meta_messaging_conversations_started: asNumber(
+      row.meta_messaging_conversations_started,
+    ),
+    instagram_followers_count: asNumber(row.instagram_followers_count),
   };
 }
 

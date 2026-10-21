@@ -20,12 +20,11 @@ O **Centro executivo** consolida a performance de **todos os clientes** em um ú
 | KPI                | Significado                            | Fonte |
 | ------------------ | -------------------------------------- | ----- |
 | Investimento total | Soma Meta Ads + Google Ads no período  | RPC `portfolio_overview` |
-| Clientes ativos    | Quantos clientes têm dados recentes    | RPC `portfolio_clientes_ativos` |
-| Alcance Instagram  | Alcance agregado (MAX por cliente/dia) | overview |
-| Sessões GA4        | Tráfego do site                        | overview |
-| Resultados         | Métrica que as campanhas usam para otimizar a entrega | Meta results + Google + GA4 |
+| Conversões         | Resultados Meta + Google + GA4         | overview |
+| Terceiro card      | Começa em Sessões GA4; **Trocar métrica** muda o recorte | overview |
+| CTR consolidado    | Cliques / impressões do portfólio      | overview |
 
-Cada card mostra **delta** vs período anterior (pill verde/vermelha).
+Cada card mostra **delta** vs período anterior (pill verde/vermelha). O seletor do terceiro card é o mesmo da visão geral do cliente e fica neste navegador.
 
 > **Não** some conversões do pixel Meta (`meta_conversions`) em cima de Resultados — seria dobro.
 > GA4 Make parou em 17/08/2026; na janela de 30 dias o GA4 pode ser zero mesmo com Meta ativo.

@@ -4661,9 +4661,11 @@ export type Database = {
           ga4_sessions: number;
           google_conversions: number;
           google_spend: number;
+          instagram_followers_count: number;
           instagram_interactions: number;
           instagram_reach: number;
           meta_conversions: number;
+          meta_messaging_conversations_started: number;
           meta_results: number;
           meta_spend: number;
           total_clicks: number;

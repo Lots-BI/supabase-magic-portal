@@ -3,7 +3,7 @@ title: Frontend — Design System & Engine de Plataformas
 description: Componentes lots/*, kit ui/* e como o engine declarativo renderiza dashboards.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-29
+last_review: 2026-10-20
 ---
 
 # Design System & Engine de Plataformas
@@ -19,7 +19,7 @@ last_review: 2026-06-29
 
 - `AppShell` — casca com sidebar/topbar e navegação por grupos.
 - `PageHeader` — cabeçalho de página (eyebrow, título, descrição, ações).
-- `StatCard` — card de métrica com valor, delta e ênfase (`hero`/`default`/`compact`).
+- `StatCard` — card de métrica com valor, delta, ênfase (`hero`/`default`/`compact`) e seletor opcional (`options`).
 - `SectionCard` — bloco de seção com cabeçalho.
 - `PeriodPicker` / `PeriodToggle` — seleção de período.
 - `DeltaPill` — variação percentual colorida (respeita `positiveIsGood`).

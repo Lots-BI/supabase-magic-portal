@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { listClientes } from "@/lib/admin.functions";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { StatCard } from "@/components/lots/StatCard";
+import { OverviewSlotCard } from "@/components/lots/OverviewSlotCard";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { PeriodToggle, type PeriodDays } from "@/components/lots/PeriodToggle";
 import { DeltaPill } from "@/components/lots/DeltaPill";
@@ -26,6 +27,10 @@ import {
   aggregateByCliente,
   METRIC_META,
 } from "@/lib/metrics";
+import {
+  ADMIN_DEFAULT_OVERVIEW_SLOT,
+  ADMIN_OVERVIEW_SLOT_SCOPE,
+} from "@/lib/overview-slots";
 import { adminPortfolioQuery } from "@/modules/dashboards/admin-portfolio.server";
 import { slugify } from "@/lib/slug";
 import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
@@ -35,7 +40,6 @@ import { getHubAgencyAlerts } from "@/modules/platform-hub-admin/hub-admin.serve
 import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
 import {
   DollarSign,
-  Activity,
   Target,
   Compass,
   Sparkles,
@@ -269,12 +273,11 @@ function OverviewBody({ days }: { days: PeriodDays }) {
               : "Resultados Meta + conversões GA4"
           }
         />
-        <StatCard
-          label="Sessões GA4"
-          value={formatMetric("sessions", cT.sessions)}
-          icon={Activity}
-          delta={pctDelta(cT.sessions, pT.sessions)}
-          description={METRIC_META.sessions.description}
+        <OverviewSlotCard
+          current={current}
+          previous={previous}
+          scope={ADMIN_OVERVIEW_SLOT_SCOPE}
+          fallback={ADMIN_DEFAULT_OVERVIEW_SLOT}
         />
         <StatCard
           label="CTR consolidado"

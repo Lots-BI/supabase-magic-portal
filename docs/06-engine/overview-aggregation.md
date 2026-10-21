@@ -3,7 +3,7 @@ title: Overview & Relatórios — metrics.ts
 description: Agregação cross-platform para dashboards consolidados e relatórios admin.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-20
 ---
 
 # Overview & Relatórios — `metrics.ts`
@@ -14,7 +14,8 @@ Camada de agregação **cross-platform** para overview executivo, dashboard do c
 `/admin/relatorios`. Complementa (não substitui) o platform engine.
 
 **Timeout 2026-09-11:** as abas admin **não** devem ler `vw_overview_cliente` 8-union no browser.
-Usar `getAdminPortfolioFn` → RPC `portfolio_overview` / `portfolio_clientes_ativos` (migration 56).
+Usar `getAdminPortfolioFn` → RPC `portfolio_overview` / `portfolio_clientes_ativos` (migrations 56 e 86).
+O terceiro card (`src/lib/overview-slots.ts`) troca a métrica sem mudar investimento, conversões ou CTR.
 Auditoria e plano: `docs/reports/overview-relatorios-timeout-audit.md`.
 
 ---

@@ -46,6 +46,10 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Alterado
 
+- **Visão geral do admin: trocar métrica (2026-10-20):** o card de Sessões GA4
+  passa a ter o mesmo seletor da visão geral do cliente. A escolha fica neste
+  navegador. Conversas Meta e seguidores Instagram entram no RPC do portfólio.
+
 - **Novidades, tutorial e diagnóstico (2026-10-20):** as abas Novidades,
   Tutorial, Knowledge Center, AI Workspace, Painel operacional, Auditoria de
   views, Privacidade e Termos descrevem os recortes dos dashboards. O sino
