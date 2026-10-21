@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchHubLongPages } from "@/lib/platforms/fetch-dashboard-rows";
 import type { Period } from "@/lib/period";
 import { parseStructureCampaignKey } from "@/modules/platform-hub/plugins/meta_ads/api/meta-structure";
+import { ALL_META_AD_ACCOUNTS } from "./MetaAdAccountSelector";
+import { rowMatchesAdAccount } from "./meta-ad-account";
 import { SectionCard } from "@/components/lots/SectionCard";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +21,7 @@ interface StructureRow {
   campanha: string | null;
   metrica: string | null;
   valor: number | null;
+  ad_account_id?: string | null;
 }
 
 interface Bucket {
@@ -68,7 +71,19 @@ function addMetric(bucket: Bucket, metric: string, value: number) {
   }
 }
 
-export function MetaStructureBoard({ cliente, period }: { cliente: string; period: Period }) {
+export function MetaStructureBoard({
+  cliente,
+  period,
+  adAccountId = ALL_META_AD_ACCOUNTS,
+  primaryAdAccountId,
+  accountLabels,
+}: {
+  cliente: string;
+  period: Period;
+  adAccountId?: string;
+  primaryAdAccountId?: string;
+  accountLabels?: ReadonlyMap<string, string>;
+}) {
   const [tab, setTab] = useState<TabId>("ad");
   const query = useQuery({
     queryKey: ["meta-structure", cliente, period.from, period.to],
@@ -92,6 +107,8 @@ export function MetaStructureBoard({ cliente, period }: { cliente: string; perio
   const rows = useMemo(() => {
     const buckets = new Map<string, Bucket>();
     for (const row of query.data ?? []) {
+      const account = String(row.ad_account_id ?? "").trim();
+      if (!rowMatchesAdAccount(account, adAccountId, primaryAdAccountId)) continue;
       const metric = String(row.metrica ?? "");
       if (!metric.startsWith("nx_")) continue;
       const parsed = parseStructureCampaignKey(String(row.campanha ?? ""));
@@ -104,9 +121,13 @@ export function MetaStructureBoard({ cliente, period }: { cliente: string; perio
         tab === "adset"
           ? parsed.adset || "Conjunto sem nome"
           : parsed.ad || "Anúncio sem nome";
-      const detail =
+      const accountName = account ? accountLabels?.get(account) : undefined;
+      const detailBase =
         tab === "adset" ? parsed.campaign : `${parsed.campaign} · ${parsed.adset}`.replace(/^ · | · $/g, "");
-      const id = `${parsed.level}\0${parsed.boosted ? "1" : "0"}\0${label}\0${detail}`;
+      const detail = accountName && adAccountId === ALL_META_AD_ACCOUNTS
+        ? [detailBase, accountName].filter(Boolean).join(" · ")
+        : detailBase;
+      const id = `${account}\0${parsed.level}\0${parsed.boosted ? "1" : "0"}\0${label}\0${detail}`;
       const bucket = buckets.get(id) ?? {
         label,
         detail,
@@ -122,7 +143,7 @@ export function MetaStructureBoard({ cliente, period }: { cliente: string; perio
       buckets.set(id, bucket);
     }
     return [...buckets.values()].sort((a, b) => b.spend - a.spend);
-  }, [query.data, tab]);
+  }, [query.data, tab, adAccountId, primaryAdAccountId, accountLabels]);
 
   return (
     <SectionCard

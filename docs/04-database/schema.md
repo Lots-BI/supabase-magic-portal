@@ -3,7 +3,7 @@ title: Banco — Schema & Modelo de Dados
 description: Tabelas, enums, relacionamentos, RLS e o modelo multi-tenant do Lots BI.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-21
 ---
 
 # Banco de Dados — Schema & Modelo de Dados
@@ -15,9 +15,10 @@ domínio. As definições vivem em `supabase/migrations-official/`.
 
 **RLS policies:** [rls-policies.md](./rls-policies.md)
 
-Métricas long: `base_metricas_hub` (writer Hub, replace-by-day) e `base_metricas_make`
-(leftover; schema na migration 52). Views preferem Hub por dia. Não virar
-`ph_metricas_source` XOR para `hub` no consolidado enquanto Google/GA4 forem Make.
+Métricas long: `base_metricas_hub` (writer Hub, replace-by-day, chave
+`cadastro_cliente_id` — [ADR-0025](../02-architecture/adr/0025-multi-org-cadastro-metric-key.md))
+e `base_metricas_make` (leftover; schema na migration 52). Views preferem Hub por dia.
+Não virar `ph_metricas_source` XOR para `hub` no consolidado enquanto Google/GA4 forem Make.
 
 ---
 
@@ -38,11 +39,21 @@ erDiagram
 
     cadastro_clientes {
         bigint id PK
+        uuid organization_id FK
         text nome_cliente
-        text slug UK
+        text slug
         boolean ativo
         text IDs_tecnicos
         numeric valor_mensal
+    }
+    base_metricas_hub {
+        bigint id PK
+        bigint cadastro_cliente_id FK
+        text cliente
+        text plataforma
+        text metrica
+        date data
+        text campanha
     }
     base_metricas {
         uuid id
@@ -101,8 +112,11 @@ erDiagram
     }
 ```
 
-> A junção entre `base_metricas` e o cadastro é **textual** (por nome), reconciliada via
-> `cliente_aliases`. Ver [ADR-0004](../02-architecture/adr/0004-chave-de-cliente-por-nome-e-aliases.md).
+> Make (`base_metricas_make`) ainda junta por **nome** + `cliente_aliases`
+> ([ADR-0004](../02-architecture/adr/0004-chave-de-cliente-por-nome-e-aliases.md)).
+> Hub (`base_metricas_hub`) grava `cadastro_cliente_id`
+> ([ADR-0025](../02-architecture/adr/0025-multi-org-cadastro-metric-key.md)). Slug é único
+> por organização, não no banco inteiro.
 
 ---
 
@@ -120,7 +134,8 @@ campanha, created_at)`. Populada pelo Make.
 
 ### `cadastro_clientes` (fonte oficial de clientes)
 
-- `id bigint` (PK legada, com sequence), `nome_cliente`, `slug` (único), `ativo`.
+- `id bigint` (PK legada, com sequence), `organization_id`, `nome_cliente`,
+  `slug` (único por organização; migration 88), `ativo`.
 - Dados comerciais: `empresa`, `email_principal`, `telefone`, `observacoes`, `data_inicio`,
   `valor_mensal`, `mlabs_url`.
 - Flags de plataforma: algumas `text` por compatibilidade com o Make
@@ -158,11 +173,19 @@ Calendário editorial e histórico. Enums:
 - `post_status` = `{ rascunho, em_producao, aguardando_aprovacao, aprovado, publicado }`.
 - `post_revision_tipo` = `{ comentario, solicitacao_alteracao, aprovacao, mudanca_status }`.
 
+### `base_metricas_hub`
+
+Writer do Hub. Unique natural key por `(cadastro_cliente_id, plataforma, metrica, data, campanha)`
+quando o id existe; linhas antigas sem id ficam na chave por nome. SELECT autenticado:
+id no escopo de `current_user_cadastro_cliente_ids()`, ou nome via
+`metric_cliente_in_scope` se o id ainda for nulo.
+
 ### `cliente_aliases`
 
-Reconcilia `base_metricas.cliente` (texto do Make) ↔ `cadastro_clientes.nome_cliente`
+Reconcilia `base_metricas_make.cliente` (texto do Make) ↔ `cadastro_clientes.nome_cliente`
 (canônico). Seeds: `Antena → Antena Imobiliária`, `Big Frio juec → BigFrioJuec`,
-`Rafa Teo → Rafa Teo Ferreira`.
+`Rafa Teo → Rafa Teo Ferreira`. SELECT só para dono da plataforma ou nomes em
+`current_user_clientes()` (migration 87 removeu `USING true`).
 
 ---
 
@@ -211,6 +234,7 @@ Padrão geral das policies:
 - **Admin** → `FOR ALL USING/ WITH CHECK has_role(auth.uid(),'admin')`.
 - **Cliente** → `SELECT` restrito a `nome_cliente IN (current_user_clientes())` (e variações
   para `cliente_servicos`, `posts_editorial`, `post_revisions`).
-- `servicos` e `cliente_aliases` → SELECT liberado a qualquer autenticado.
+- Isolamento multi-org: [rls-policies.md](./rls-policies.md) (`current_user_cadastro_cliente_ids`,
+  `can_manage_org`, `is_platform_owner`).
 
 Detalhe das views em [views.md](./views.md); histórico em [migrations.md](./migrations.md).

@@ -3,7 +3,7 @@ title: Backend — Referência de API (Server Functions)
 description: Catálogo de todas as server functions, com auth exigida, input e retorno.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-20
+last_review: 2026-10-21
 ---
 
 # Referência de API — Server Functions
@@ -116,10 +116,12 @@ last_review: 2026-10-20
 
 #### `createUserAccount` — `POST`
 
-- **Admin?** Sim. Usa **service-role**.
-- **Input:** `{ email, nome?, tipo: "admin"|"cliente", mode: "invite"|"password", password?, cadastro_cliente_id? }`.
-- **Comportamento:** convida por e-mail ou cria com senha; se `tipo=admin` insere em
-  `user_roles`; se `cadastro_cliente_id` informado, concede `client_access`.
+- **Admin?** Operador da organização (`assertCanOperate`). Usa **service-role**.
+- **Input:** `{ email, nome?, tipo: "admin"|"cliente", member_role?: owner|gestor|social_media|gestor_trafego|visualizador|cliente, mode: "invite"|"password", password?, cadastro_cliente_id?, organization_id? }`.
+- **Comportamento:** convida por e-mail ou cria com senha (mín. 10). `member_role` entra em
+  `organization_members`. Só o dono da plataforma coloca `user_roles.admin`, e só ao
+  convidar o e-mail dono como `owner`. Se `cadastro_cliente_id` informado, concede
+  `client_access` no escopo da org.
 - **Retorno:** `{ user_id, invite_sent, temp_password }`.
 
 ### Diagnóstico
@@ -186,6 +188,18 @@ last_review: 2026-10-20
 - **Retorno:** `{ count }` de posts em `aguardando_aprovacao` (badge).
 
 ---
+
+## Módulo: `sync-cliente-platform.server.ts`
+
+#### `syncClientePlatformFn` — `POST`
+
+- **Admin?** Não (dono da plataforma, admin global, operador da organização
+  no cadastro, ou portal do cliente).
+- **Input:** `{ cadastroClienteId: number, platform: meta_ads | google_ads | ga4 | instagram | publicacoes | tiktok | youtube | google_business }`.
+- **Retorno:** `{ ok, error?, daysFilled?, daysRequested?, mediaCount? }`.
+- **Uso:** botão **Puxar** na visão geral (`/admin` por cliente, `/cliente/{slug}` por
+  plataforma) e **Puxar métricas** no dashboard da plataforma. Coleta só aquela
+  conexão; não varre o portfólio.
 
 ## Módulo: `admin-portfolio.server.ts`
 

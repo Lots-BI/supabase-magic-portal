@@ -61,4 +61,28 @@ describe("groupRowsForReplaceDays", () => {
     expect(groups[0]?.rows).toHaveLength(1);
     expect(groups[0]?.rows[0]?.valor).toBe(12);
   });
+
+  it("separa o mesmo dia de duas contas de anúncios", () => {
+    const groups = groupRowsForReplaceDays([
+      {
+        cliente: "Fernanda",
+        plataforma: "Meta Ads",
+        metrica: "spend",
+        valor: 10,
+        data: "2026-10-01",
+        campanha: "A",
+        ad_account_id: "act_1",
+      },
+      {
+        cliente: "Fernanda",
+        plataforma: "Meta Ads",
+        metrica: "spend",
+        valor: 4,
+        data: "2026-10-01",
+        campanha: "B",
+        ad_account_id: "act_2",
+      },
+    ]);
+    expect(groups).toHaveLength(2);
+  });
 });

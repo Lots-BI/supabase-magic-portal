@@ -17,7 +17,8 @@ export type Platform =
   | "ga4"
   | "instagram"
   | "google_business"
-  | "tiktok";
+  | "tiktok"
+  | "youtube";
 
 export const PLATFORM_LABEL: Record<Platform, string> = {
   meta_ads: "Meta Ads",
@@ -26,6 +27,7 @@ export const PLATFORM_LABEL: Record<Platform, string> = {
   instagram: "Instagram",
   google_business: "Google Business",
   tiktok: "TikTok",
+  youtube: "YouTube",
 };
 
 /** Famílias de canais — usado para agrupar visualmente. */
@@ -35,6 +37,7 @@ export const PLATFORM_FAMILY: Record<Platform, "paid" | "organic" | "analytics">
   instagram: "organic",
   google_business: "organic",
   tiktok: "paid",
+  youtube: "organic",
   ga4: "analytics",
 };
 

@@ -40,6 +40,31 @@ describe("byCampaign", () => {
     );
     expect(campaigns.map((c) => c.campanha)).toEqual(["Campanha A"]);
   });
+
+  it("não junta campanhas de mesmo nome em contas diferentes", () => {
+    const campaigns = byCampaign(
+      metaAdsDef,
+      [
+        {
+          data: "2026-09-01",
+          cliente: "Fernanda",
+          campanha: "Campanha A",
+          ad_account_id: "act_1",
+          spend: 10,
+        },
+        {
+          data: "2026-09-01",
+          cliente: "Fernanda",
+          campanha: "Campanha A",
+          ad_account_id: "act_2",
+          spend: 7,
+        },
+      ],
+      period,
+    );
+    expect(campaigns).toHaveLength(2);
+    expect(campaigns.map((item) => item.adAccountId).sort()).toEqual(["act_1", "act_2"]);
+  });
 });
 
 describe("platformViewSelect", () => {

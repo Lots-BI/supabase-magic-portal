@@ -3,7 +3,7 @@ title: Roadmap & Dívidas Técnicas
 description: Direção de evolução do Lots BI — estado atual, arquitetura alvo e dívidas priorizadas.
 status: living
 owner: Engenharia / Produto Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-21
 ---
 
 # Roadmap & Dívidas Técnicas
@@ -193,8 +193,8 @@ Plano: [content-workflow-implementation-plan.md](../03-backend/content-workflow-
 
 ## Fase 1 — Fundações de dados (alta prioridade)
 
-- 🔧 **Chave de cliente por ID (FK), não por nome.** Migrar `base_metricas`/pipeline para
-  referenciar `cadastro_clientes.id`. Ver [ADR-0004](../02-architecture/adr/0004-chave-de-cliente-por-nome-e-aliases.md).
+- ✅ **Chave de cliente por ID no Hub.** `base_metricas_hub.cadastro_cliente_id` (88, ADR-0025).
+  Make leftover ainda usa o nome. Ver [ADR-0004](../02-architecture/adr/0004-chave-de-cliente-por-nome-e-aliases.md).
 - ✅ **Schema Make versionado** (migration 52). Hub unique + RPC replace (48).
 - 🔧 **Catálogo de clientes dedicado** para substituir `SELECT DISTINCT` em
   `current_user_clientes()` (admin).
@@ -248,7 +248,7 @@ Plano: [content-workflow-implementation-plan.md](../03-backend/content-workflow-
 
 | #   | Dívida                                | Impacto              | Esforço | Fase |
 | --- | ------------------------------------- | -------------------- | ------- | ---- |
-| D1  | Junção de cliente por nome            | Alto                 | Alto    | 1    |
+| D1  | Junção de cliente por nome (Make)     | Médio (Hub por id)   | Alto    | 1    |
 | D2  | Make leftover (Google/GA4 sem Hub)    | Alto                 | Médio   | Hub  |
 | D3  | `DISTINCT` em runtime no multi-tenant | Médio                | Médio   | 1    |
 | D4  | ~~Views DEFINER~~ → invoker (51)      | Resolvido            | —       | 2    |

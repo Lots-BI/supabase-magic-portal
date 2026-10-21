@@ -78,14 +78,27 @@ async function collectHierarchy(
   return batches.flat();
 }
 
-function resolveAdAccountIdentity(identities: readonly PlatformIdentityV1[]): PlatformIdentityV1 {
-  const primary = identities.find((id) => id.identityType === "ad_account" && id.isPrimary);
-  if (primary) return primary;
+export function listAdAccountIdentities(
+  identities: readonly PlatformIdentityV1[],
+): PlatformIdentityV1[] {
+  return identities
+    .filter((id) => id.identityType === "ad_account")
+    .slice()
+    .sort(
+      (a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.externalId.localeCompare(b.externalId),
+    );
+}
 
-  const fallback = identities.find((id) => id.identityType === "ad_account");
-  if (fallback) return fallback;
+function resolveAdAccountIdentity(identities: readonly PlatformIdentityV1[]): PlatformIdentityV1 {
+  const accounts = listAdAccountIdentities(identities);
+  const account = accounts.find((id) => id.isPrimary) ?? accounts[0];
+  if (account) return account;
 
   throw new Error("Meta collect requires an ad_account identity on the connection");
+}
+
+function stampAdAccount<T extends { adAccountId?: string }>(items: T[], adAccountId: string): T[] {
+  return items.map((item) => ({ ...item, adAccountId }));
 }
 
 function assertCapability(capability: Capability): void {
@@ -159,7 +172,11 @@ export function createOfficialMetaProvider(config: OfficialMetaProviderConfig): 
           campaignObjectives,
         });
         const coveredDates = insights.map((row) => row.date_start).filter(Boolean);
-        const rows = [...mapped, ...hierarchy, ...markerRowsForUncoveredDates(window, coveredDates)];
+        const rows = stampAdAccount(
+          [...mapped, ...hierarchy, ...markerRowsForUncoveredDates(window, coveredDates)],
+          adAccount.externalId,
+        );
+        campaignStatuses = stampAdAccount(campaignStatuses, adAccount.externalId);
         timer.finish({
           campaignsCount: countDistinctCampaigns(insights),
           metricsCount: rows.length,

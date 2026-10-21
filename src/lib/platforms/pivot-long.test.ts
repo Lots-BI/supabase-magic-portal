@@ -47,4 +47,27 @@ describe("pivotLongMetricRows", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]?.spend).toBe(40);
   });
+
+  it("não soma campanhas homônimas de contas diferentes", () => {
+    const rows = pivotLongMetricRows(metaAdsDef, [
+      {
+        data: "2026-09-05",
+        cliente: "Fernanda",
+        campanha: "A",
+        metrica: "spend",
+        valor: 40,
+        ad_account_id: "act_1",
+      },
+      {
+        data: "2026-09-05",
+        cliente: "Fernanda",
+        campanha: "A",
+        metrica: "spend",
+        valor: 10,
+        ad_account_id: "act_2",
+      },
+    ]);
+    expect(rows).toHaveLength(2);
+    expect(rows.map((row) => row.spend).sort()).toEqual([10, 40]);
+  });
 });

@@ -10,6 +10,7 @@ import { META_OAUTH_CREDENTIAL_KEY } from "../meta-credential-keys";
 import { MetaOAuthService } from "../oauth/meta-oauth.service";
 import {
   createOfficialMetaProvider,
+  listAdAccountIdentities,
   META_PLATFORM_LABEL,
 } from "../providers/official-meta.provider";
 import { runDualRunComparison } from "../../_internal/dual-run/dual-run.service";
@@ -41,6 +42,37 @@ function metaInsightsMock() {
 }
 
 describe("OfficialMetaProvider", () => {
+  it("lista todas as contas de anúncios, primary primeiro", () => {
+    const connectionId = "00000000-0000-4000-8000-000000000099" as never;
+    const listed = listAdAccountIdentities([
+      {
+        version: "1.0.0",
+        connectionId,
+        identityType: "page",
+        externalId: "page",
+        label: "Page",
+        isPrimary: false,
+      },
+      {
+        version: "1.0.0",
+        connectionId,
+        identityType: "ad_account",
+        externalId: "act_2",
+        label: "Secundária",
+        isPrimary: false,
+      },
+      {
+        version: "1.0.0",
+        connectionId,
+        identityType: "ad_account",
+        externalId: "act_1",
+        label: "Principal",
+        isPrimary: true,
+      },
+    ]);
+    expect(listed.map((item) => item.externalId)).toEqual(["act_1", "act_2"]);
+  });
+
   it("produz IngestEnvelope compatível com MetricPipeline", async () => {
     const stack = createConnectionStack();
     const connection = await stack.connectionService.create({
@@ -77,6 +109,7 @@ describe("OfficialMetaProvider", () => {
     expect(envelope.profile).toBe("metrics-timeseries");
     expect(envelope.payload.platformLabel).toBe(META_PLATFORM_LABEL);
     expect(envelope.payload.rows).toHaveLength(15);
+    expect(envelope.payload.rows.every((row) => row.adAccountId === "act_123456")).toBe(true);
     expect(envelope.payload.rows.find((row) => row.metricKey === "spend")?.value).toBe(25.5);
     expect(envelope.payload.rows.find((row) => row.metricKey === "results")?.value).toBe(0);
 

@@ -3,7 +3,7 @@ title: Integrações & Pipeline de Ingestão
 description: Catálogo de plataformas, IDs técnicos e o pipeline externo (Make/workers).
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-21
 ---
 
 # Integrações & Pipeline de Ingestão
@@ -25,7 +25,7 @@ Fonte: `src/lib/integrations-catalog.ts`. Cada integração define a coluna que 
 | Integração         | `activeField`           | Campos técnicos (coluna)                            |
 | ------------------ | ----------------------- | --------------------------------------------------- |
 | Google Ads         | `google_ads_ativo`      | `google_ads_customer_id` (primary)                  |
-| Meta Ads           | `meta_ativo`            | `facebook_ad_account_id` (primary)                  |
+| Meta Ads           | `meta_ativo`            | `facebook_ad_account_id` (primary no cadastro). Contas extras vivem em `ph_identities`. |
 | Instagram          | `instagram_ativo`       | `instagram_username`, `instagram_page_id` (primary) |
 | Google Analytics 4 | `ga4_ativo`             | `ga4_property_id` (primary)                         |
 | Google Business    | `google_business_ativo` | `google_business_location_id` (primary)             |

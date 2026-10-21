@@ -2,12 +2,20 @@ import type { BaseMetricasInsertRowV1 } from "@/modules/platform-hub/metric-pipe
 
 export type MetricNaturalKeyRow = Pick<
   BaseMetricasInsertRowV1,
-  "cliente" | "plataforma" | "metrica" | "data" | "campanha"
+  "cliente" | "plataforma" | "metrica" | "data" | "campanha" | "cadastro_cliente_id" | "ad_account_id"
 >;
 
-/** Espelha uq_base_metricas_hub_natural_key (COALESCE(campanha, '')). */
+/** Espelha unique do Hub: cadastro quando existe, senão nome, mais a conta. */
 export function metricRowNaturalKey(row: MetricNaturalKeyRow): string {
-  return [row.cliente, row.plataforma, row.metrica, row.data, row.campanha ?? ""].join("\u0001");
+  return [
+    row.cadastro_cliente_id ?? "",
+    row.cliente,
+    row.plataforma,
+    row.metrica,
+    row.data,
+    row.campanha ?? "",
+    row.ad_account_id ?? "",
+  ].join("\u0001");
 }
 
 /** Re-coleta deve inserir só chaves novas (ex.: results) sem estourar unique em spend/clicks. */

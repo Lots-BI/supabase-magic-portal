@@ -5,7 +5,7 @@ status: living
 owner: Engenharia / Dados Lots BI
 tags: [dashboard, meta-ads, platformdef]
 difficulty: intermediate
-last_review: 2026-10-20
+last_review: 2026-10-21
 ---
 
 # Meta Ads
@@ -20,17 +20,20 @@ last_review: 2026-10-20
 
 ## Coleta — Platform Hub substitui o Make
 
-O botão **Puxar métricas** (no header do dashboard, ao lado do seletor de período) chama
-`syncMetaAdsCampaignsFn`, que:
+O botão **Puxar métricas** (no header do dashboard, ao lado do seletor de período, e
+na visão geral por cliente) chama `syncClientePlatformFn` → `syncMetaAdsCampaignsConnection`, que:
 
-1. Detecta os dias **faltantes** para o cliente dentro do lookback (89 dias + "ontem" — escolha
-   deliberada e ajustável, não é um limite documentado da API como no Instagram).
+1. Detecta os dias **faltantes por conta de anúncios** dentro do lookback (89 dias + "ontem" —
+   escolha deliberada e ajustável, não é um limite documentado da API como no Instagram).
+   Um cliente pode ter várias identidades `ad_account` na mesma conexão; cada uma é coletada
+   e gravada com `ad_account_id`.
 2. Coleta cada intervalo contínuo faltante via Marketing Insights API
    (`GET /{ad-account-id}/insights?level=campaign&time_increment=1`) — diferente do Instagram, o
    Meta Ads aceita um range de dias em **uma única chamada** paginada, não uma por dia.
 3. Grava em `base_metricas_hub` via `MetricPipeline` (nunca em `base_metricas_make`).
-4. Limita a 30 dias por clique (`META_ADS_MAX_DAYS_PER_RUN`) — cliques repetidos completam o
-   backfill histórico progressivamente.
+4. Limita a 89 dias por clique (`META_ADS_MAX_DAYS_PER_RUN`) — o lookback cabe
+   em uma execução. O seletor **Todas as contas** soma; ao isolar uma conta,
+   linhas Hub antigas sem `ad_account_id` entram na conta primary.
 
 Implementação: plugin `meta_ads`, capability `meta:metrics:collect` (mesma capability já usada
 pela homologação/dual-run — não foi necessário criar uma nova, diferente do Instagram que
@@ -99,6 +102,14 @@ aba Conjuntos precisa aceitar as duas.
 O RPC do dashboard de campanha não as inclui: o PostgREST corta em 1000 linhas
 e, misturadas, elas faziam gasto e resultados do período sumirem.
 
+A migration 89 remove a série duplicada (linha com `cadastro_cliente_id` + linha
+sem id no mesmo dia/campanha/métrica). Sem isso o card somava 2× — José Bernardo
+01–20/10: 146 no dashboard, 73 no Gerenciador.
+
+A migration 90 grava `ad_account_id` no Hub. O replace e o unique passam a ser
+por conta, para um cliente com duas contas de anúncios (Fernanda) não perder a
+série da outra ao puxar métricas.
+
 No card da campanha, o número é só o da coleta `level=campaign`. Conjunto e
 anúncio ficam na seção Estrutura e não reescrevem o dia da campanha. Se a
 paginação da API parar no meio, a coleta falha e o dia anterior permanece.
@@ -119,6 +130,10 @@ Somar dias inflaria pessoas únicas em relação ao Gerenciador no período.
 - O ranking de campanhas fica acima dos gráficos.
 - Frequency aparece como KPI derivado quando reach > 0.
 - Filtros de período aplicam-se à view diária antes da agregação.
+- Com **mais de uma conta de anúncios** vinculada, o dashboard mostra o seletor
+  **Todas as contas** | cada identidade. O padrão soma as duas. A escolha fica
+  neste navegador (`lots.dashboard.meta-ad-account:{cliente}`). Campanhas de mesmo
+  nome em contas diferentes não se misturam.
 
 ## Referências
 

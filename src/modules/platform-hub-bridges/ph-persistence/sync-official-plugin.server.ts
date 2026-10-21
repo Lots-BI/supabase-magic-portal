@@ -12,6 +12,7 @@ import {
 } from "@/modules/instagram-posts/instagram-profile-gap-finder";
 import { syncAllActivePluginConnections } from "./sync-all-active-connections";
 import { persistCampaignStatuses } from "@/modules/platform-hub-bridges/base-metricas/persist-campaign-status";
+import { resolveConnectionCadastroId } from "./resolve-connection-cadastro";
 
 export interface OfficialPluginSyncResult {
   ok: boolean;
@@ -64,6 +65,7 @@ export async function syncOfficialPluginConnection(
       error: "Cliente não resolvido para esta conexão",
     };
   }
+  const cadastroClienteId = await resolveConnectionCadastroId(supabase, connectionId);
 
   const dates = new Set<string>();
   const { data, error } = await supabase
@@ -112,6 +114,7 @@ export async function syncOfficialPluginConnection(
       }
       if (envelope.payload.rows.length === 0) continue;
       envelope.payload.canonicalClientName = canonicalClientName;
+      envelope.payload.cadastroClienteId = cadastroClienteId;
       envelope.payload.platformLabel = options.platformLabel;
       await stack.metricPipeline.accept(envelope);
       daysFilled += new Set(envelope.payload.rows.map((row) => row.date)).size;

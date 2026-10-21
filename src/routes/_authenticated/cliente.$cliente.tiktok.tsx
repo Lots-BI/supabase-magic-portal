@@ -1,14 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PlatformPlaceholder } from "@/components/lots/PlatformPlaceholder";
-import { Music2 } from "lucide-react";
+import { PlatformDashboardPage } from "@/components/lots/PlatformDashboardPage";
+import { tiktokDef } from "@/lib/platforms/tiktok";
 
 export const Route = createFileRoute("/_authenticated/cliente/$cliente/tiktok")({
-  component: () => (
-    <PlatformPlaceholder
-      icon={Music2}
-      title="TikTok"
-      platformId="tiktok"
-      description="Métricas de campanhas e conteúdo da conta TikTok."
-    />
-  ),
+  component: () => <PlatformDashboardPage def={tiktokDef} />,
 });

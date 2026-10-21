@@ -3,7 +3,7 @@ title: Frontend — Roteamento & Guardas
 description: Mapa de rotas file-based, guarda de autenticação e navegação por papel.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-20
+last_review: 2026-10-21
 ---
 
 # Roteamento & Guardas
@@ -30,7 +30,7 @@ flowchart TD
     authed --> cli["/cliente/$cliente (layout)"]
     cli --> cliIdx["/cliente/$cliente (visão geral)"]
     cli --> cliAprov["/cliente/$cliente/aprovacoes"]
-    cli --> cliPlat["/cliente/$cliente/{instagram,meta-ads,...}"]
+    cli --> cliPlat["/cliente/$cliente/{instagram,meta-ads,tiktok,youtube,...}"]
 
     authed --> admin["/admin (guarda admin na UI)"]
     admin --> admIdx["/admin (centro executivo)"]

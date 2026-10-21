@@ -11,11 +11,9 @@ function deriveKey(secret: string): Buffer {
 }
 
 function resolveSecret(): string {
-  const secret =
-    process.env.HUB_CREDENTIAL_ENCRYPTION_KEY?.trim() ||
-    process.env.OFFICIAL_SERVICE_ROLE_KEY?.trim();
+  const secret = process.env.HUB_CREDENTIAL_ENCRYPTION_KEY?.trim();
   if (!secret) {
-    throw new Error("Missing HUB_CREDENTIAL_ENCRYPTION_KEY or OFFICIAL_SERVICE_ROLE_KEY");
+    throw new Error("Missing HUB_CREDENTIAL_ENCRYPTION_KEY");
   }
   return secret;
 }

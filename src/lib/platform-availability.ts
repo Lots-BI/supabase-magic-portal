@@ -12,7 +12,8 @@ export type ClientPlatformRouteKey =
   | "google-ads"
   | "ga4"
   | "google-business"
-  | "tiktok";
+  | "tiktok"
+  | "youtube";
 
 const CATALOG_TO_ROUTE: Record<string, ClientPlatformRouteKey> = {
   instagram: "instagram",
@@ -21,6 +22,7 @@ const CATALOG_TO_ROUTE: Record<string, ClientPlatformRouteKey> = {
   ga4: "ga4",
   google_business: "google-business",
   tiktok: "tiktok",
+  youtube: "youtube",
 };
 
 const ORDER: ClientPlatformRouteKey[] = [
@@ -30,6 +32,7 @@ const ORDER: ClientPlatformRouteKey[] = [
   "ga4",
   "google-business",
   "tiktok",
+  "youtube",
 ];
 
 /** Retorna chaves de rota (/cliente/.../meta-ads) com métrica ou conexão. */

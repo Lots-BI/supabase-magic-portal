@@ -3,7 +3,7 @@ title: RLS — Catálogo de Policies
 description: Todas as Row Level Security policies do Postgres, por tabela.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-21
 ---
 
 # RLS — Catálogo de Policies
@@ -19,6 +19,7 @@ Fonte: `supabase/migrations-official/`. Toda tabela de domínio tem
 | ------------------------- | ----------------------------------------------- |
 | `has_role(user_id, role)` | Verifica papel (`admin` \| `cliente`)           |
 | `current_user_clientes()` | Retorna nomes de clientes visíveis ao JWT atual |
+| `current_user_cadastro_cliente_ids()` | IDs de `cadastro_clientes` no escopo do JWT (88) |
 
 ---
 
@@ -81,8 +82,10 @@ Fonte: `supabase/migrations-official/`. Toda tabela de domínio tem
 
 | Policy                        | Operação | Regra                           | Migration |
 | ----------------------------- | -------- | ------------------------------- | --------- |
-| `cliente_aliases_select_auth` | SELECT   | `auth.role() = 'authenticated'` | 08        |
-| `cliente_aliases_admin_all`   | ALL      | `has_role(auth.uid(), 'admin')` | 08        |
+| `cliente_aliases_select`      | SELECT   | dono da plataforma ou nome em `current_user_clientes()` | 66 |
+| `cliente_aliases_write`       | ALL      | `can_manage_org` do cadastro canônico | 66 |
+
+`cliente_aliases_select_auth` (`USING true`) foi removida na 87.
 
 ---
 
@@ -114,8 +117,9 @@ Cliente final pode atualizar post **apenas** quando status atual é `aguardando_
 ## `base_metricas_make` e `base_metricas_hub`
 
 RLS **ON**. Migration **54** concede SELECT autenticado no Make (antes: RLS sem policy →
-views `security_invoker` devolviam `[]` no JWT). Hub já tinha SELECT por cliente via
-conexões / policies Hub.
+views `security_invoker` devolviam `[]` no JWT). Hub (88): SELECT se
+`cadastro_cliente_id` está em `current_user_cadastro_cliente_ids()`, ou se o id é nulo
+e `metric_cliente_in_scope(cliente)`. Dono da plataforma vê tudo.
 
 Views críticas usam `security_invoker` (51). Isolação extra: `current_user_clientes()` nas
 views de normalização. O workaround DEFINER da migration 07 / ADR-0003 **não** é o estado

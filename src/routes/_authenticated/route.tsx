@@ -63,20 +63,22 @@ export const Route = createFileRoute("/_authenticated")({
     const isOwner = isPlatformOwnerEmail(data.user.email);
     let isAdmin = isOwner;
     let isOrgOperator = isOwner;
+    let organizationName: string | null = null;
+    const [adminResult, orgResult] = await Promise.all([
+      context.queryClient.fetchQuery({
+        queryKey: ["me", "isAdmin"],
+        queryFn: () => checkIsAdmin(),
+      }),
+      context.queryClient.fetchQuery({
+        queryKey: ["me", "isOrgOperator"],
+        queryFn: () => checkIsOrgOperator(),
+      }),
+    ]);
     if (!isOwner) {
-      const [adminResult, orgResult] = await Promise.all([
-        context.queryClient.fetchQuery({
-          queryKey: ["me", "isAdmin"],
-          queryFn: () => checkIsAdmin(),
-        }),
-        context.queryClient.fetchQuery({
-          queryKey: ["me", "isOrgOperator"],
-          queryFn: () => checkIsOrgOperator(),
-        }),
-      ]);
       isAdmin = !!adminResult?.isAdmin;
       isOrgOperator = !!orgResult?.isOrgOperator;
     }
+    organizationName = orgResult?.organizationName ?? null;
 
     if (location.pathname.startsWith("/admin") && !isAdmin && !isOrgOperator) {
       throw redirect({ to: "/dashboard" });
@@ -125,6 +127,7 @@ export const Route = createFileRoute("/_authenticated")({
       isAdmin,
       isOrgOperator: isAdmin || isOrgOperator,
       isPlatformOwner: isOwner,
+      organizationName,
     };
   },
   component: AuthenticatedLayout,
@@ -152,7 +155,12 @@ function ShellImpersonateSlot() {
 
 function AuthenticatedLayout() {
   usePlatformLiveSync();
-  const { user, isAdmin, isOrgOperator } = Route.useRouteContext();
+  const { user, isAdmin, isOrgOperator, organizationName } = Route.useRouteContext();
+  const roleLabel = organizationName
+    ? organizationName
+    : isAdmin
+      ? `Admin · ${BRAND_NAME}`
+      : `Cliente · ${BRAND_NAME}`;
   const isOwner = isPlatformOwnerEmail(user.email);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const inAdmin = pathname.startsWith("/admin");
@@ -354,7 +362,7 @@ function AuthenticatedLayout() {
               {user.email?.split("@")[0]}
             </p>
             <p className="text-[10.5px] leading-tight text-muted-foreground">
-              {isAdmin ? "Administrador" : "Cliente"}
+              {organizationName ?? (isAdmin ? "Administrador" : "Cliente")}
             </p>
           </div>
           <button
@@ -375,9 +383,7 @@ function AuthenticatedLayout() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[12px] font-medium text-sidebar-foreground">{user.email}</p>
-            <p className="text-[10.5px] text-muted-foreground">
-              {isAdmin ? `Admin · ${BRAND_NAME}` : `Cliente · ${BRAND_NAME}`}
-            </p>
+            <p className="text-[10.5px] text-muted-foreground">{roleLabel}</p>
           </div>
         </div>
       }

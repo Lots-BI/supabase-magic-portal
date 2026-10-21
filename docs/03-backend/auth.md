@@ -3,7 +3,7 @@ title: Autenticação & Autorização
 description: Fluxo de auth Supabase, papéis, guards de rota e server functions.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-07-01
+last_review: 2026-10-21
 ---
 
 # Autenticação & Autorização
@@ -129,7 +129,10 @@ Namespace `user_metadata.lots_bi`:
 
 ### Política de cadastro
 
-Usuários são criados **somente via admin** (`createUserAccount`). Signup público desabilitado na UI.
+Pedido de acesso: `/criar-conta` cria a conta; `/solicitar-acesso` grava o pedido;
+a Lots aprova e nasce a organização. Time da org entra por convite (`createUserAccount`)
+com papéis `owner`, `gestor`, `social_media`, `gestor_trafego`, `visualizador` ou
+`cliente`. Signup aberto do Dashboard Supabase permanece desligado.
 
 Links de convite/recovery usam `redirectTo` = `{APP_URL}/auth/callback`.
 

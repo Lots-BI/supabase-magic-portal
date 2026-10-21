@@ -3,7 +3,7 @@ title: Changelog
 description: Histórico de mudanças relevantes do Lots BI (produto, dados e infraestrutura).
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-20
+last_review: 2026-10-21
 ---
 
 # Changelog
@@ -20,6 +20,34 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 ## [Não lançado]
 
 ### Adicionado
+
+- **Visão geral: puxar por cliente e plataforma (2026-10-21):** na visão geral
+  do admin, abra o cliente e use **Puxar** em Meta, Google Ads, GA4 ou Instagram.
+  Na visão geral da conta, cada dashboard tem o mesmo botão. A coleta fica só
+  daquela conexão, sem varrer o portfólio.
+
+- **Meta Ads: várias contas de anúncios (2026-10-21):** um cliente pode ter
+  mais de uma conta vinculada na mesma conexão. A coleta puxa todas, o dashboard
+  soma no recorte **Todas as contas** e o seletor isola cada uma. Fernanda
+  (CA 1 + Lots _Fernandapsicóloga) é o caso. Depois do deploy, use **Puxar
+  métricas** para preencher a conta que ainda não tinha série.
+
+- **Organizações de fora (2026-10-21):** o dono da org cadastra cliente, convida
+  dono/gestor/social/tráfego/visualizador/cliente, desativa cliente e reenvia
+  convite. TikTok e YouTube passam a ter dashboard no portal. Google Business
+  volta no assistente de conexão. Pedido de acesso continua com aprovação da Lots.
+  Checkout e nota fiscal não mudam.
+
+### Segurança
+
+- RPC `access_invalidate_auth_sessions` só com service role. Policy aberta de
+  aliases removida. Cofre exige `HUB_CREDENTIAL_ENCRYPTION_KEY`. Cadastro com
+  limite de taxa e senha de 10 caracteres.
+
+### Dados
+
+- Hub grava `cadastro_cliente_id`. Duas orgs podem ter o mesmo nome de cliente.
+  Slug único por organização. Plano estratégico lê a mesma RPC dos dashboards.
 
 - **Visão geral do cliente (2026-10-20):** ao escolher um cliente em **Ver como
   cliente**, a tela é a visão geral só daquela conta (título Visão geral). O login
@@ -43,6 +71,13 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 - **Seguidores via anúncio no Meta Ads (2026-10-20):** o dashboard ganha um card
   com os seguidores adquiridos pelos anúncios. A coleta diária de cada campanha
   mostra essa coluna junto de gasto, resultados, conversas e cliques.
+
+### Corrigido
+
+- **Puxar na visão geral (2026-10-21):** operador da organização (gestor,
+  social, tráfego) consegue puxar a série do cliente da org. Linhas Meta sem
+  `ad_account_id` entram na conta primary no seletor. Falha ao gravar status
+  da campanha não descarta as métricas já coletadas.
 
 ### Alterado
 
@@ -135,6 +170,11 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
   ranking, a coleta diária, o custo por seguidor e a coluna da estrutura.
 
 ### Corrigido
+
+- **Meta Ads: conversas em dobro (2026-10-21):** a coleta nova (com
+  `cadastro_cliente_id`) e a antiga (sem id) gravavam o mesmo dia duas vezes.
+  O dashboard somava as duas. José Bernardo 01–20/10: 146 no portal, 73 no
+  Gerenciador. A série sem id sai; o replace cobre as duas metades.
 
 - **Meta Ads: aba Conjuntos vazia (2026-10-20):** a chave do conjunto no hub
   tem cinco campos (sem o nome do anúncio). A tela exigia seis e descartava

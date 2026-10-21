@@ -35,6 +35,7 @@ import { adminPortfolioQuery } from "@/modules/dashboards/admin-portfolio.server
 import { slugify } from "@/lib/slug";
 import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
 import { PortfolioClientsAccordion } from "@/components/lots/admin/PortfolioClientsAccordion";
+import { indexCadastroIdsByClienteName } from "@/modules/dashboards/cliente-sync-platform";
 import { getApprovalOpsDashboard } from "@/modules/approval/dashboard/dashboard.server";
 import { getHubAgencyAlerts } from "@/modules/platform-hub-admin/hub-admin.server";
 import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
@@ -96,14 +97,27 @@ function EmptyOrgHint() {
   const { data: clientes } = useSuspenseQuery(clientesAdminQuery);
   if (clientes.length > 0) return null;
   return (
-    <SectionCard title="Primeiro cliente">
+    <SectionCard title="Começar">
       <p className="text-sm text-muted-foreground">
-        Esta organização ainda não tem clientes. Cadastre o primeiro para conectar métricas e
-        conteúdo.
+        Esta organização ainda não tem clientes. Siga nesta ordem:
       </p>
-      <Link to="/admin/clientes/novo" className="mt-3 inline-block text-sm text-primary underline">
-        Cadastrar cliente
-      </Link>
+      <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
+        <li>
+          <Link to="/admin/clientes/novo" className="text-primary underline">
+            Cadastrar o primeiro cliente
+          </Link>
+        </li>
+        <li>
+          <Link to="/admin/conexoes" className="text-primary underline">
+            Conectar as contas de mídia
+          </Link>
+        </li>
+        <li>
+          <Link to="/admin/usuarios/novo" className="text-primary underline">
+            Convidar o time ou o cliente final
+          </Link>
+        </li>
+      </ol>
     </SectionCard>
   );
 }
@@ -355,7 +369,11 @@ function OverviewBody({ days }: { days: PeriodDays }) {
         </ChartFrame>
       </section>
 
-      <PortfolioClientsAccordion current={current} previous={previous} />
+      <PortfolioClientsAccordion
+        current={current}
+        previous={previous}
+        cadastroByName={indexCadastroIdsByClienteName(clientes)}
+      />
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-3">
         <SectionCard

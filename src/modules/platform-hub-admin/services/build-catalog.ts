@@ -2,7 +2,7 @@ import { createHubRegistry } from "@/modules/platform-hub/public";
 import type { PlatformCatalogItemV1 } from "../types";
 
 export function isHubWizardConnectable(pluginKey: string): boolean {
-  return pluginKey !== "google_business";
+  return pluginKey !== "example";
 }
 
 export function buildPlatformCatalog(

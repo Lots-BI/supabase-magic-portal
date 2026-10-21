@@ -12,6 +12,7 @@ import {
   listMissingDates,
 } from "@/modules/instagram-posts/instagram-profile-gap-finder";
 import { syncAllActivePluginConnections } from "@/modules/platform-hub-bridges/ph-persistence/sync-all-active-connections";
+import { resolveConnectionCadastroId } from "@/modules/platform-hub-bridges/ph-persistence/resolve-connection-cadastro";
 
 export const GOOGLE_ADS_LOOKBACK_DAYS = 89;
 export const GOOGLE_ADS_MAX_DAYS_PER_RUN = 89;
@@ -112,6 +113,10 @@ export async function syncGoogleAdsCampaignsConnection(
       if (envelope.payload.rows.length === 0) continue;
 
       envelope.payload.canonicalClientName = canonicalClientName;
+      envelope.payload.cadastroClienteId = await resolveConnectionCadastroId(
+        supabase,
+        connectionId,
+      );
       envelope.payload.platformLabel = GOOGLE_ADS_PLATFORM_LABEL;
       await stack.metricPipeline.accept(envelope);
       daysFilled += new Set(envelope.payload.rows.map((row) => row.date)).size;

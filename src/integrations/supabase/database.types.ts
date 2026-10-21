@@ -557,6 +557,8 @@ export type Database = {
       };
       base_metricas_hub: {
         Row: {
+          ad_account_id: string | null;
+          cadastro_cliente_id: number | null;
           campanha: string | null;
           cliente: string;
           created_at: string | null;
@@ -567,6 +569,8 @@ export type Database = {
           valor: number | null;
         };
         Insert: {
+          ad_account_id?: string | null;
+          cadastro_cliente_id?: number | null;
           campanha?: string | null;
           cliente: string;
           created_at?: string | null;
@@ -577,6 +581,8 @@ export type Database = {
           valor?: number | null;
         };
         Update: {
+          ad_account_id?: string | null;
+          cadastro_cliente_id?: number | null;
           campanha?: string | null;
           cliente?: string;
           created_at?: string | null;
@@ -3725,6 +3731,7 @@ export type Database = {
       };
       ph_campaign_status: {
         Row: {
+          ad_account_id: string;
           campanha: string;
           cliente: string;
           plataforma: string;
@@ -3732,6 +3739,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          ad_account_id?: string;
           campanha: string;
           cliente: string;
           plataforma: string;
@@ -3739,6 +3747,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          ad_account_id?: string;
           campanha?: string;
           cliente?: string;
           plataforma?: string;
@@ -4613,6 +4622,7 @@ export type Database = {
           p_to: string;
         };
         Returns: {
+          ad_account_id: string;
           campanha: string;
           cliente: string;
           data: string;
@@ -4623,11 +4633,20 @@ export type Database = {
       dashboard_meta_structure_long: {
         Args: { p_cliente: string; p_from: string; p_to: string };
         Returns: {
+          ad_account_id: string;
           campanha: string;
           cliente: string;
           data: string;
           metrica: string;
           valor: number;
+        }[];
+      };
+      dashboard_meta_ad_accounts: {
+        Args: { p_cliente: string };
+        Returns: {
+          ad_account_id: string;
+          is_primary: boolean;
+          label: string;
         }[];
       };
       ensure_owner_admin_for_user: {

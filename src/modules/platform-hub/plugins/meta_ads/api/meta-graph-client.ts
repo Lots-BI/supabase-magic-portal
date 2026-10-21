@@ -245,6 +245,22 @@ export class MetaGraphClient {
             searchParams: {
               access_token: input.accessToken,
               fields: "id,name,objective,effective_status",
+              filtering: JSON.stringify([
+                {
+                  field: "effective_status",
+                  operator: "IN",
+                  value: [
+                    "ACTIVE",
+                    "PAUSED",
+                    "CAMPAIGN_PAUSED",
+                    "ADSET_PAUSED",
+                    "IN_PROCESS",
+                    "WITH_ISSUES",
+                    "PENDING_REVIEW",
+                    "PENDING_PROCESS",
+                  ],
+                },
+              ]),
               limit: "200",
               after,
             },

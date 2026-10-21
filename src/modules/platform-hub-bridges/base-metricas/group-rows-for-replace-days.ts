@@ -8,7 +8,7 @@ export type HubReplaceDayGroup = {
 };
 
 function naturalKey(row: BaseMetricasInsertRowV1): string {
-  return `${row.cliente}\u0001${row.plataforma}\u0001${row.metrica}\u0001${row.data}\u0001${row.campanha ?? ""}`;
+  return `${row.cadastro_cliente_id ?? ""}\u0001${row.cliente}\u0001${row.plataforma}\u0001${row.metrica}\u0001${row.data}\u0001${row.campanha ?? ""}\u0001${row.ad_account_id ?? ""}`;
 }
 
 /** Última linha ganha — evita unique violation na RPC depois do DELETE do dia. */
@@ -29,7 +29,7 @@ export function groupRowsForReplaceDays(
   const groups = new Map<string, BaseMetricasInsertRowV1[]>();
 
   for (const row of dedupeHubMetricRows(rows)) {
-    const key = `${row.cliente}\u0001${row.plataforma}`;
+    const key = `${row.cadastro_cliente_id ?? ""}\u0001${row.cliente}\u0001${row.plataforma}\u0001${row.ad_account_id ?? ""}`;
     const list = groups.get(key) ?? [];
     list.push(row);
     groups.set(key, list);

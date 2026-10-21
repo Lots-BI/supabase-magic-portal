@@ -18,7 +18,7 @@ export class IncompleteHubReadError extends Error {
 
 function pageSignature(row: LongMetricRow | undefined): string {
   if (!row) return "";
-  return `${row.data}\0${row.campanha ?? ""}\0${row.metrica}\0${row.valor}`;
+  return `${row.data}\0${row.ad_account_id ?? ""}\0${row.campanha ?? ""}\0${row.metrica}\0${row.valor}`;
 }
 
 /** Junta as páginas até a última vir incompleta. A RPC precisa ordenar. */

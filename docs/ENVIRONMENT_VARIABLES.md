@@ -3,7 +3,7 @@ title: Variáveis de ambiente — Platform Hub & Admin
 description: Inventário auditado de todas as variáveis usadas pelo Platform Hub e pelo módulo administrativo.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-07-09
+last_review: 2026-10-21
 ---
 
 # Variáveis de ambiente — Platform Hub & Admin
@@ -37,7 +37,7 @@ Necessárias para autenticação, RLS no browser, server functions e `getSupabas
 | `VITE_OFFICIAL_SUPABASE_PROJECT_ID` | não | ID do projeto; fallback hardcoded `ywvhoctcmibjitvwkkhb` | `public-config.ts` | `ywvhoctcmibjitvwkkhb` | dev, staging, prod, ci | Supabase → **Settings → General** → Reference ID |
 | `OFFICIAL_SUPABASE_URL` | sim (servidor) | URL do projeto para server functions / admin client | `env.server.ts`, `client.server.ts`, scripts `ensure-owner-admin.mjs`, `audit-client-portal.mjs` | `https://ywvhoctcmibjitvwkkhb.supabase.co` | dev, staging, prod, ci, local-cli | Mesmo valor de `VITE_OFFICIAL_SUPABASE_URL` |
 | `OFFICIAL_SUPABASE_ANON_KEY` | sim (servidor) | Chave anon no runtime do servidor | `env.server.ts`, `admin.functions.ts` (auth), `system-diagnostics.server.ts` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` | dev, staging, prod, ci | Mesmo valor de `VITE_OFFICIAL_SUPABASE_ANON_KEY` |
-| `OFFICIAL_SERVICE_ROLE_KEY` | sim (admin + Hub) | Service role — bypass RLS; **nunca** prefixar com `VITE_` | `client.server.ts`, `credential-crypto.ts` (fallback), Gate A scripts | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` | dev, staging, prod, ci, local-cli | Supabase → **Settings → API** → `service_role` (secret) |
+| `OFFICIAL_SERVICE_ROLE_KEY` | sim (admin + Hub) | Service role — bypass RLS; **nunca** prefixar com `VITE_`; **não** criptografa o cofre | `client.server.ts`, Gate A scripts | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` | dev, staging, prod, ci, local-cli | Supabase → **Settings → API** → `service_role` (secret) |
 
 ### Aliases legados (Lovable / migração)
 
@@ -106,8 +106,8 @@ Criptografia AES-256-GCM de tokens OAuth em `ph_credentials`.
 
 | Variável | Obrigatório | Descrição | Onde é usada | Exemplo | Ambiente | Como obter |
 | -------- | ----------- | --------- | ------------ | ------- | -------- | ---------- |
-| `HUB_CREDENTIAL_ENCRYPTION_KEY` | condicional | Segredo dedicado para criptografar credenciais no vault | `platform-hub-bridges/ph-persistence/credential-crypto.ts` | `openssl rand -base64 32` (ex.: `K7x...`) | staging, prod | Gerar string aleatória forte (32+ bytes); armazenar em secret manager |
-| `OFFICIAL_SERVICE_ROLE_KEY` | fallback | Usado se `HUB_CREDENTIAL_ENCRYPTION_KEY` ausente | `credential-crypto.ts` | (service role) | dev | Supabase API — **recomendado usar chave dedicada em produção** |
+| `HUB_CREDENTIAL_ENCRYPTION_KEY` | sim | Segredo dedicado para criptografar credenciais no vault. Sem fallback para a service role. | `platform-hub-bridges/ph-persistence/credential-crypto.ts` | `openssl rand -base64 32` (ex.: `K7x...`) | dev, staging, prod | Gerar string aleatória forte (32+ bytes); armazenar em secret manager. Se tokens já foram gravados com outro valor, use o mesmo — não rotacione. |
+| `OFFICIAL_SERVICE_ROLE_KEY` | server | API admin; **não** criptografa mais o cofre | `client.server.ts` | (service role) | todos | Nunca `VITE_` |
 
 ---
 
@@ -199,7 +199,7 @@ Runbook: `src/modules/platform-hub-bridges/gate-a-meta-staging/docs/RUNBOOK.md`
 | `APP_URL` | `http://localhost:5173` | URL preview | domínio público |
 | OAuth (`META_*`, `GOOGLE_*`, `TIKTOK_*`) | opcional até testar conexões | obrigatório para homologação live | obrigatório para official providers |
 | `GOOGLE_ADS_DEVELOPER_TOKEN` | opcional | obrigatório p/ Google Ads | obrigatório p/ Google Ads |
-| `HUB_CREDENTIAL_ENCRYPTION_KEY` | opcional (fallback OK) | recomendado | **recomendado** |
+| `HUB_CREDENTIAL_ENCRYPTION_KEY` | obrigatória | obrigatória | **obrigatória** |
 | `PLATFORM_HUB_WRITER_TARGET` | default `HUB` | `HUB` ou `BOTH` | `HUB` até cutover |
 | `PLATFORM_HUB_SUPABASE_WRITER` | `true` no admin stack | `true` | conforme fase de rollout |
 | Gate A (`GATE_A_*`) | CLI local apenas | CLI | CLI (não UI) |

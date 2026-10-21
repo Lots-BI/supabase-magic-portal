@@ -88,25 +88,35 @@ export function dailySeries(def: PlatformDef, rows: Row[], period: Period): Dail
 /** Ranking por campanha — só quando def.campaignField está presente. */
 export interface CampaignAggregate {
   campanha: string;
+  adAccountId?: string;
   totals: Record<string, number>;
   kpis: Record<string, number>;
 }
 
+export function campaignGroupKey(campanha: string, adAccountId?: string | null): string {
+  return `${adAccountId?.trim() ?? ""}\t${campanha}`;
+}
+
 export function byCampaign(def: PlatformDef, rows: Row[], period: Period): CampaignAggregate[] {
   if (!def.campaignField) return [];
-  const groups = new Map<string, Row[]>();
+  const groups = new Map<string, { campanha: string; adAccountId?: string; rows: Row[] }>();
   for (const r of rows) {
     if (r.data < period.from || r.data > period.to) continue;
     const name = String(r[def.campaignField] ?? "").trim();
     if (!name) continue;
-    const arr = groups.get(name) ?? [];
-    arr.push(r);
-    groups.set(name, arr);
+    const adAccountId = String(r.ad_account_id ?? "").trim() || undefined;
+    const key = campaignGroupKey(name, adAccountId);
+    const existing = groups.get(key);
+    if (existing) {
+      existing.rows.push(r);
+      continue;
+    }
+    groups.set(key, { campanha: name, adAccountId, rows: [r] });
   }
-  return Array.from(groups.entries()).map(([campanha, rs]) => {
-    const totals = aggregate(def, rs, period);
+  return Array.from(groups.values()).map((group) => {
+    const totals = aggregate(def, group.rows, period);
     const kpis = deriveKpis(def, totals, period);
-    return { campanha, totals, kpis };
+    return { campanha: group.campanha, adAccountId: group.adAccountId, totals, kpis };
   });
 }
 

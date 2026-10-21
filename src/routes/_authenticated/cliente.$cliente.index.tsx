@@ -76,5 +76,13 @@ function ClienteDashboardsResolved({
     );
   }
 
-  return <ClientOverview nome={nome} slug={slug} queryName={queryName} platforms={platforms} />;
+  return (
+    <ClientOverview
+      nome={nome}
+      slug={slug}
+      queryName={queryName}
+      platforms={platforms}
+      cadastroId={cadastroId}
+    />
+  );
 }

@@ -1,32 +1,43 @@
 ---
 title: TikTok — Dashboard
-description: Status e roadmap do dashboard TikTok no Lots BI.
+description: Campanhas TikTok Ads no portal do cliente.
 status: living
 owner: Engenharia / Dados Lots BI
-tags: [dashboard, tiktok]
+tags: [dashboard, tiktok, platformdef]
 difficulty: beginner
-last_review: 2026-06-26
+last_review: 2026-10-21
 ---
 
 # TikTok
 
-## Situação atual
+## Origem dos dados
 
-| Item         | Valor                           |
-| ------------ | ------------------------------- |
-| Rota cliente | `/cliente/{slug}/tiktok`        |
-| View SQL     | — (não documentada no catálogo) |
-| Status       | `PlatformPlaceholder`           |
+| Item         | Valor                         |
+| ------------ | ----------------------------- |
+| Platform key | `tiktok`                      |
+| Leitura      | RPC `dashboard_prefer_hub_long` |
+| PlatformDef  | `src/lib/platforms/tiktok.ts` |
+| Rota cliente | `/cliente/{slug}/tiktok`      |
+| Campanha     | `campanha`                    |
 
-## Origem dos dados (alvo)
+Não há `vw_tiktok_diario`. A tela usa `PlatformDashboardPage`. Spend do TikTok entra como
+moeda, não micros.
 
-Coletor proprietário ou integração estável — ver [Coletores alvo](../../07-integrations/target-collectors.md).
+## Métricas oficiais
+
+| Key         | Coluna      | Agregação |
+| ----------- | ----------- | --------- |
+| spend       | spend       | sum       |
+| impressions | impressions | sum       |
+
+KPI: CPM (`spend ÷ impressions × 1000`).
 
 ## Limitações
 
-Sem `PlatformDef` registrado; métricas e fórmulas serão definidas na promoção da plataforma.
+A API de anúncios (`ads.read`) coleta campanha. Não publica vídeo no perfil. App e
+redirect OAuth ainda são passo humano — [credenciais](../../08-operations/credenciais-google-tiktok-youtube.md).
 
 ## Referências
 
-- [Roadmap](../../11-roadmap/roadmap.md)
 - [Catálogo de plataformas](../../06-engine/platform-catalog.md)
+- [Dashboards — visão geral](../dashboards.md)

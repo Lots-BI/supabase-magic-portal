@@ -15,6 +15,7 @@ export type LongMetricRow = {
   campanha?: string | null;
   metrica: string;
   valor: number | null;
+  ad_account_id?: string | null;
 };
 
 function num(value: unknown): number {
@@ -40,11 +41,13 @@ export function pivotLongMetricRows(def: PlatformDef, long: LongMetricRow[]): Ro
 
     const day = String(item.data).slice(0, 10);
     const campanha = campanhaRaw;
-    const id = def.campaignField ? `${day}\t${campanha}` : day;
+    const adAccountId = item.ad_account_id?.trim() || "";
+    const id = def.campaignField ? `${day}\t${adAccountId}\t${campanha}` : day;
     let row = byKey.get(id);
     if (!row) {
       row = { data: day, cliente: item.cliente };
       if (def.campaignField) row[def.campaignField] = campanha;
+      if (adAccountId) row.ad_account_id = adAccountId;
       byKey.set(id, row);
     }
     row[column] = num(row[column]) + num(item.valor);

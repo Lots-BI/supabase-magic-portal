@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { getRequestHeader } from "@tanstack/react-start/server";
 import { getSupabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PLATFORM_OWNER_EMAIL } from "@/lib/platform-owner";
@@ -13,25 +14,29 @@ import {
   type ApplicationStatus,
 } from "./brazil-document";
 import { loadCallerAccess } from "./organization.server";
+import {
+  clientIpFromHeaders,
+  isSignupRateLimited,
+  passwordStrength,
+} from "./signup-rate-limit";
 
 const registerSchema = z.object({
   email: z.string().trim().email().max(255),
-  password: z.string().min(8).max(72),
+  password: z.string().min(10).max(72),
 });
-
-function passwordStrength(password: string): string | null {
-  if (password.length < 8) return "A senha deve ter pelo menos 8 caracteres.";
-  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) {
-    return "A senha precisa de letra e número.";
-  }
-  return null;
-}
 
 export const registerAccessAccount = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => registerSchema.parse(data))
   .handler(async ({ data }) => {
     const weak = passwordStrength(data.password);
     if (weak) throw new Error(weak);
+    const ip = clientIpFromHeaders({
+      forwardedFor: getRequestHeader("x-forwarded-for"),
+      realIp: getRequestHeader("x-real-ip"),
+    });
+    if (isSignupRateLimited(data.email, ip)) {
+      throw new Error("Muitas tentativas. Aguarde e tente de novo.");
+    }
     const admin = getSupabaseAdmin();
     const email = data.email.trim().toLowerCase();
     const now = new Date().toISOString();

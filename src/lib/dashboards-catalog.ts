@@ -1,5 +1,14 @@
 import type { LucideIcon } from "lucide-react";
-import { BarChart3, Facebook, Globe, Images, Instagram, Megaphone, Music2 } from "lucide-react";
+import {
+  BarChart3,
+  Facebook,
+  Globe,
+  Images,
+  Instagram,
+  Megaphone,
+  Music2,
+  Youtube,
+} from "lucide-react";
 import type { Platform } from "@/lib/metrics";
 
 export type DashboardFamilyId = "paid" | "organic" | "analytics";
@@ -32,6 +41,7 @@ export type DashboardRouteTo =
   | "/cliente/$cliente/ga4"
   | "/cliente/$cliente/google-business"
   | "/cliente/$cliente/tiktok"
+  | "/cliente/$cliente/youtube"
   | "/cliente/$cliente/publicacoes";
 
 export type DashboardCatalogEntry = {
@@ -72,6 +82,15 @@ export const DASHBOARD_CATALOG: DashboardCatalogEntry[] = [
     description: "Métricas de campanhas e conteúdo da conta TikTok.",
     family: "paid",
     icon: Music2,
+  },
+  {
+    id: "youtube",
+    requires: "youtube",
+    to: "/cliente/$cliente/youtube",
+    label: "YouTube",
+    description: "Visualizações e impressões do canal.",
+    family: "organic",
+    icon: Youtube,
   },
   {
     id: "instagram",
@@ -125,7 +144,8 @@ export function normalizeDashboardPlatform(raw: string): Platform | null {
     key === "ga4" ||
     key === "instagram" ||
     key === "google_business" ||
-    key === "tiktok"
+    key === "tiktok" ||
+    key === "youtube"
   ) {
     return key;
   }

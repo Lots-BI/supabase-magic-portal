@@ -8,19 +8,21 @@ export async function persistCampaignStatuses(
   statuses: readonly CampaignStatusV1[] | undefined,
 ): Promise<void> {
   if (!statuses?.length || !cliente) return;
-  const seen = new Map<string, string>();
+  const seen = new Map<string, { campanha: string; status: string; adAccountId: string }>();
   for (const item of statuses) {
     const name = item.name.trim();
     const status = item.status.trim();
-    if (name && status) seen.set(name, status);
+    const adAccountId = item.adAccountId?.trim() || "";
+    if (name && status) seen.set(name, { campanha: name, status, adAccountId });
   }
   if (seen.size === 0) return;
   const updated_at = new Date().toISOString();
-  const rows = [...seen.entries()].map(([campanha, status]) => ({
+  const rows = [...seen.values()].map((item) => ({
     cliente,
     plataforma,
-    campanha,
-    status,
+    campanha: item.campanha,
+    status: item.status,
+    ad_account_id: item.adAccountId,
     updated_at,
   }));
   const { error } = await supabase

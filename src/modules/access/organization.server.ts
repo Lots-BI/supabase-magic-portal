@@ -6,7 +6,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isPlatformOwnerEmail } from "@/lib/platform-owner";
 import { resolveIsAdmin } from "@/lib/owner-admin";
 import {
-  findCrossOrgNameClash,
+  findSameOrgNameClash,
   isManagerMemberRole,
   isOperationalMemberRole,
   pickWriteOrganization,
@@ -161,8 +161,8 @@ export async function assertNomeAvailable(nome: string, organizationId: string) 
     throw new Error(error.message);
   }
   const rows = (data ?? []) as { organization_id: string | null; nome_cliente: string | null }[];
-  if (findCrossOrgNameClash(rows, nome, organizationId)) {
-    throw new Error("Já existe um cliente com esse nome em outra organização.");
+  if (findSameOrgNameClash(rows, nome, organizationId)) {
+    throw new Error("Já existe um cliente com esse nome nesta organização.");
   }
 }
 
@@ -185,9 +185,21 @@ export const checkIsOrgOperator = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const access = await loadCallerAccess(context);
+    let organizationName: string | null = null;
+    if (access.organizationIds.length > 0) {
+      const { data } = await getSupabaseAdmin()
+        .from("organizations")
+        .select("name")
+        .in("id", access.organizationIds)
+        .order("name")
+        .limit(1)
+        .maybeSingle();
+      organizationName = (data as { name?: string } | null)?.name ?? null;
+    }
     return {
       isOrgOperator: access.isOperational || access.isGlobalAdmin,
       isPlatformOwner: access.isPlatformOwner,
+      organizationName,
     };
   });
 

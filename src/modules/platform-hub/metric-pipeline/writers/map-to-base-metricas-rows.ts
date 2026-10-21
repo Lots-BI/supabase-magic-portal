@@ -8,6 +8,7 @@ export interface BaseMetricasRowV1 {
   valor: number;
   data: string;
   campanha?: string;
+  adAccountId?: string;
 }
 
 /** Payload de insert — colunas graváveis (sem id/created_at). */
@@ -18,6 +19,8 @@ export interface BaseMetricasInsertRowV1 {
   metrica: string;
   valor: number;
   campanha?: string | null;
+  cadastro_cliente_id?: number | null;
+  ad_account_id?: string | null;
 }
 
 /**
@@ -48,6 +51,7 @@ export function toBaseMetricasRows(batch: NormalizedMetricBatchV1): BaseMetricas
       valor: toBaseMetricasStorageValue(batch.platformLabel, row.metricKey, row.value),
       data: row.date,
       campanha: row.campaign,
+      adAccountId: row.adAccountId,
     });
   }
 
@@ -57,6 +61,7 @@ export function toBaseMetricasRows(batch: NormalizedMetricBatchV1): BaseMetricas
 export function toBaseMetricasInsertRows(
   batch: NormalizedMetricBatchV1,
 ): BaseMetricasInsertRowV1[] {
+  const cadastroId = batch.cadastroClienteId ?? null;
   return toBaseMetricasRows(batch).map((row) => ({
     data: row.data,
     cliente: row.cliente,
@@ -64,5 +69,7 @@ export function toBaseMetricasInsertRows(
     metrica: row.metrica,
     valor: row.valor,
     campanha: row.campanha ?? null,
+    cadastro_cliente_id: cadastroId,
+    ad_account_id: row.adAccountId?.trim() || null,
   }));
 }

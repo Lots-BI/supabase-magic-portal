@@ -3,7 +3,7 @@ title: Banco — Migrations
 description: Histórico, convenções e princípios das migrations do Lots BI.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-20
+last_review: 2026-10-21
 ---
 
 # Migrations
@@ -72,6 +72,10 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `84_client_overview_messaging.sql`        | `client_overview` passa a devolver conversas por mensagem iniciadas da Meta. |
 | `85_client_overview_ig_followers.sql`     | `client_overview` passa a devolver o estoque de seguidores do Instagram. |
 | `86_portfolio_overview_slot_metrics.sql`  | `portfolio_overview` devolve conversas Meta e seguidores IG no fim (seletor do admin). |
+| `87_org_security_hardening.sql`           | Revoga EXECUTE de `anon`/`authenticated` em `access_invalidate_auth_sessions` e `ensure_owner_admin_for_user`. Drop da policy `cliente_aliases_select_auth`. Não toca `fin_*`. |
+| `88_metric_cadastro_id.sql`               | `cadastro_cliente_id` no Hub, unique por cadastro, slug por org, RLS e RPCs isolados. Não toca `fin_*`. |
+| `89_hub_dedupe_cadastro_twins.sql`        | Apaga série Hub duplicada (com id + sem id) e o replace cobre as duas metades. |
+| `90_hub_ad_account_id.sql`                | `ad_account_id` no Hub, unique e replace por conta, seletor no dashboard Meta. |
 
 > Conteúdos (38–45) e demais arquivos em `supabase/migrations-official/` seguem a mesma
 > numeração. Lista completa no diretório. **Não existe `04`.** A tentativa

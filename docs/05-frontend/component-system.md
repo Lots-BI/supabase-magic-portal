@@ -3,7 +3,7 @@ title: Frontend — Design System & Engine de Plataformas
 description: Componentes lots/*, kit ui/* e como o engine declarativo renderiza dashboards.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-20
+last_review: 2026-10-21
 ---
 
 # Design System & Engine de Plataformas
@@ -58,7 +58,8 @@ Definido em `src/lib/platforms/types.ts`. Cada plataforma declara:
 - `kpis[]` — derivados, com `compute(totals)` usando `formulas.ts`.
 - `charts[]` — gráficos a renderizar.
 - `questions[]` — perguntas de negócio que a página responde (header narrativo).
-- `view` — view Supabase de leitura; `campaignField` habilita ranking de campanhas.
+- `view` — view SQL de referência; as telas leem `dashboard_prefer_hub_long`.
+  `campaignField` habilita ranking de campanhas.
 
 Exemplo (Google Ads, `src/lib/platforms/google-ads.ts`): métricas `spend/impressions/clicks`,
 KPIs `ctr/cpc/cpm`, gráficos de investimento e tráfego.

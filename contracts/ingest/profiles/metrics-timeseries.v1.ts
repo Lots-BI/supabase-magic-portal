@@ -19,6 +19,8 @@ export interface MetricRowV1 {
   /** Data no formato YYYY-MM-DD (timezone America/Sao_Paulo na escrita). */
   date: string;
   campaign?: string;
+  /** Conta de anúncios Meta (`act_…`). Isola duas contas do mesmo cliente. */
+  adAccountId?: string;
 }
 
 export interface MetricBatchV1 {
@@ -28,6 +30,8 @@ export interface MetricBatchV1 {
   platformLabel: string;
   /** Nome canônico do cliente (resolvido pelo ConnectionResolver). */
   canonicalClientName: string;
+  /** Cadastro do cliente. Isola métricas quando o nome se repete entre organizações. */
+  cadastroClienteId?: number | null;
   window: {
     from: string;
     to: string;

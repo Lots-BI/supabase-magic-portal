@@ -42,7 +42,10 @@ function CriarContaPage() {
   }
 
   return (
-    <AuthShell title="Pedir acesso" subtitle="O acesso é analisado pela Lots antes de abrir.">
+    <AuthShell
+      title="Pedir acesso"
+      subtitle={`Crie sua conta no ${BRAND_NAME}. Depois você informa os dados da organização e o pedido entra em análise.`}
+    >
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="block text-sm font-medium">
           E-mail
@@ -60,7 +63,7 @@ function CriarContaPage() {
           <input
             type="password"
             required
-            minLength={8}
+            minLength={10}
             autoComplete="new-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -72,7 +75,7 @@ function CriarContaPage() {
           <input
             type="password"
             required
-            minLength={8}
+            minLength={10}
             autoComplete="new-password"
             value={confirm}
             onChange={(event) => setConfirm(event.target.value)}

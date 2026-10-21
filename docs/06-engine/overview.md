@@ -3,7 +3,7 @@ title: Engine de Métricas — Visão Geral
 description: Arquitetura do motor declarativo, fluxo de dados e módulos.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-10-21
 ---
 
 # Engine de Métricas — Visão Geral
@@ -64,10 +64,11 @@ Documentação detalhada:
 
 ```typescript
 // src/lib/platforms/registry.ts
-google_ads | meta_ads | instagram | ga4;
+google_ads | meta_ads | instagram | ga4 | google_business | tiktok | youtube;
 ```
 
-GBP e TikTok: view SQL existe; **sem** `PlatformDef` — usam `PlatformPlaceholder`.
+Dashboards leem `dashboard_prefer_hub_long`. Google Business tem `vw_google_business_diario`.
+TikTok e YouTube não têm view diária própria.
 
 ---
 

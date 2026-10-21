@@ -32,7 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { PlatformDef, Row, ValueFormat } from "@/lib/platforms/types";
 import type { CommonMetric } from "@/lib/metrics";
 import { METRIC_META, resolveMetricDescription } from "@/lib/metrics";
-import { aggregatePeriod, deriveKpis, pctDelta } from "@/lib/platforms/engine";
+import { aggregatePeriod, campaignGroupKey, deriveKpis, pctDelta } from "@/lib/platforms/engine";
 import {
   OBJECTIVE_RESULT_DESCRIPTION,
   OBJECTIVE_RESULT_KEY,
@@ -62,6 +62,15 @@ import { SectionCard } from "./SectionCard";
 import { StatCard } from "./StatCard";
 import { MetricLabel } from "./MetricLabel";
 import { MetaStructureBoard } from "@/components/lots/meta-ads/MetaStructureBoard";
+import {
+  ALL_META_AD_ACCOUNTS,
+  MetaAdAccountSelector,
+  useMetaAdAccountFilter,
+} from "@/components/lots/meta-ads/MetaAdAccountSelector";
+import {
+  primaryMetaAdAccountId,
+  rowMatchesAdAccount,
+} from "@/components/lots/meta-ads/meta-ad-account";
 import { ChartFrame, ChartLegendItem } from "./charts/ChartFrame";
 import { AreaChartLotsLazy } from "./charts/AreaChartLotsLazy";
 import { getSeriesColor } from "./charts/chart-colors";
@@ -150,12 +159,37 @@ function PlatformDashboardBody({ def, cliente, period }: Props) {
   const { data: rows } = useSuspenseQuery(
     platformRowsQuery(def, cliente, period.prevFrom, period.to),
   );
+  const accountFilter = useMetaAdAccountFilter(def.key === "meta_ads" ? cliente : "");
+  const primaryAdAccountId = primaryMetaAdAccountId(accountFilter.accounts);
+  const filteredRows = useMemo(() => {
+    if (def.key !== "meta_ads") return rows;
+    return rows.filter((row) =>
+      rowMatchesAdAccount(row.ad_account_id, accountFilter.selected, primaryAdAccountId),
+    );
+  }, [def.key, rows, accountFilter.selected, primaryAdAccountId]);
 
-  const agg = useMemo(() => aggregatePeriod(def, rows, period), [def, rows, period]);
-  const hasData = rows.some((r) => r.data >= period.from && r.data <= period.to);
+  const agg = useMemo(
+    () => aggregatePeriod(def, filteredRows, period),
+    [def, filteredRows, period],
+  );
+  const hasData = filteredRows.some((r) => r.data >= period.from && r.data <= period.to);
+  const accountLabels = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const item of accountFilter.accounts) {
+      map.set(item.ad_account_id, item.label.trim() || item.ad_account_id);
+    }
+    return map;
+  }, [accountFilter.accounts]);
 
   return (
     <div className="relative isolate space-y-6 sm:space-y-7">
+      {def.key === "meta_ads" ? (
+        <MetaAdAccountSelector
+          accounts={accountFilter.accounts}
+          selected={accountFilter.selected}
+          onSelect={accountFilter.setSelected}
+        />
+      ) : null}
       {!hasData ? (
         <SectionCard eyebrow="Sem dados" title="Nada para mostrar no período selecionado">
           <EmptyState
@@ -167,21 +201,32 @@ function PlatformDashboardBody({ def, cliente, period }: Props) {
         </SectionCard>
       ) : (
         <>
-          <StatBoard def={def} agg={agg} rows={rows} period={period} />
+          <StatBoard def={def} agg={agg} rows={filteredRows} period={period} />
           {def.campaignField ? (
             <CampaignRanking
               def={def}
               agg={agg}
-              rows={rows}
+              rows={filteredRows}
               period={period}
               cliente={cliente}
+              accountLabels={accountLabels}
+              primaryAdAccountId={primaryAdAccountId}
+              showAccountLabel={
+                accountFilter.selected === ALL_META_AD_ACCOUNTS && accountFilter.accounts.length > 1
+              }
             />
           ) : null}
           <ChartsSection def={def} agg={agg} />
           {def.campaignField ? null : <DailyTable def={def} agg={agg} period={period} />}
           <ComparisonBlock def={def} agg={agg} period={period} />
           {def.key === "meta_ads" ? (
-            <MetaStructureBoard cliente={cliente} period={period} />
+            <MetaStructureBoard
+              cliente={cliente}
+              period={period}
+              adAccountId={accountFilter.selected}
+              primaryAdAccountId={primaryAdAccountId}
+              accountLabels={accountLabels}
+            />
           ) : null}
           <InsightsBlock def={def} agg={agg} period={period} />
         </>
@@ -770,12 +815,18 @@ function CampaignRanking({
   rows,
   period,
   cliente,
+  accountLabels,
+  primaryAdAccountId,
+  showAccountLabel,
 }: {
   def: PlatformDef;
   agg: ReturnType<typeof aggregatePeriod>;
   rows: Row[];
   period: Period;
   cliente: string;
+  accountLabels: ReadonlyMap<string, string>;
+  primaryAdAccountId?: string;
+  showAccountLabel: boolean;
 }) {
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const platform = campaignPlatformLabel(def.key);
@@ -785,12 +836,15 @@ function CampaignRanking({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ph_campaign_status")
-        .select("campanha, status")
+        .select("campanha, status, ad_account_id")
         .eq("cliente", cliente)
         .eq("plataforma", platform!);
       if (error) throw new Error(error.message);
       const map: Record<string, string> = {};
-      for (const row of data ?? []) map[row.campanha] = row.status;
+      for (const row of data ?? []) {
+        map[campaignGroupKey(row.campanha, row.ad_account_id)] = row.status;
+        if (!row.ad_account_id) map[row.campanha] = row.status;
+      }
       return map;
     },
     staleTime: 60_000,
@@ -846,16 +900,25 @@ function CampaignRanking({
           </thead>
           <tbody>
             {ranked.map((c, i) => {
-              const expanded = open[c.campanha] === true;
-              const activity = campaignActivity(statuses[c.campanha]);
+              const rowKey = campaignGroupKey(c.campanha, c.adAccountId);
+              const expanded = open[rowKey] === true;
+              const activity = campaignActivity(statuses[rowKey] ?? statuses[c.campanha]);
+              const accountName = c.adAccountId ? accountLabels.get(c.adAccountId) : undefined;
               const daily = rows
                 .filter((row) => {
                   const name = String(row[def.campaignField!] ?? "").trim();
-                  return name === c.campanha && row.data >= period.from && row.data <= period.to;
+                  const selectedAccount =
+                    c.adAccountId ?? primaryAdAccountId ?? ALL_META_AD_ACCOUNTS;
+                  return (
+                    name === c.campanha &&
+                    rowMatchesAdAccount(row.ad_account_id, selectedAccount, primaryAdAccountId) &&
+                    row.data >= period.from &&
+                    row.data <= period.to
+                  );
                 })
                 .sort((a, b) => (a.data < b.data ? 1 : -1));
               return (
-                <Fragment key={c.campanha}>
+                <Fragment key={rowKey}>
                   <tr className="border-t border-border hover:bg-muted/40">
                     <td className="px-4 py-2.5">
                       <span
@@ -874,14 +937,21 @@ function CampaignRanking({
                         type="button"
                         aria-expanded={expanded}
                         onClick={() =>
-                          setOpen((current) => ({ ...current, [c.campanha]: !current[c.campanha] }))
+                          setOpen((current) => ({ ...current, [rowKey]: !current[rowKey] }))
                         }
                         className="lots-focus inline-flex max-w-[280px] items-center gap-1.5 text-left"
                       >
                         <ChevronRight
                           className={cn("h-3.5 w-3.5 shrink-0 transition-transform", expanded && "rotate-90")}
                         />
-                        <span className="truncate">{c.campanha}</span>
+                        <span className="min-w-0">
+                          <span className="block truncate">{c.campanha}</span>
+                          {showAccountLabel && accountName ? (
+                            <span className="block truncate text-[11px] font-normal text-muted-foreground">
+                              {accountName}
+                            </span>
+                          ) : null}
+                        </span>
                       </button>
                     </td>
                     <td className="px-4 py-2.5">
@@ -915,7 +985,7 @@ function CampaignRanking({
                     ))}
                   </tr>
                   {expanded ? (
-                    <tr key={`${c.campanha}-daily`} className="border-t border-border bg-muted/20">
+                    <tr key={`${rowKey}-daily`} className="border-t border-border bg-muted/20">
                       <td colSpan={colSpan} className="px-4 py-3">
                         <p className="mb-2 text-[12px] text-muted-foreground">
                           Coleta diária de {c.campanha}

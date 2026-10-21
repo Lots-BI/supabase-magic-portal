@@ -3,7 +3,7 @@ title: Ambientes
 description: Desenvolvimento, staging e produção — configuração e segredos.
 status: living
 owner: Engenharia / Ops Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-21
 ---
 
 # Ambientes
@@ -26,7 +26,7 @@ last_review: 2026-09-11
 | -------- | ------------------------------------------------- |
 | Comando  | `npm run dev` · ver [SETUP.md](../../../SETUP.md) |
 | Setup    | `npm run setup` — valida Node e `.env`            |
-| URL      | `http://localhost:5173` (Vite default)            |
+| URL      | `http://127.0.0.1:8080` (`npm run dev -- --port 8080 --host 127.0.0.1 --strictPort`) |
 | Env      | `.env` (copiar de `.env.example`)                 |
 | Supabase | Projeto `ywvhoctcmibjitvwkkhb`                    |
 

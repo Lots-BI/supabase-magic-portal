@@ -15,6 +15,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { asConnectionId } from "../../../contracts/connection/connection-id.v1";
 import { isMetricsTimeseriesEnvelope } from "../../../contracts/ingest/ingest-envelope.v1";
 import { createAdminHubStack } from "@/modules/platform-hub-bridges/ph-persistence";
+import { resolveConnectionCadastroId } from "@/modules/platform-hub-bridges/ph-persistence/resolve-connection-cadastro";
 import {
   addDaysToDateStr,
   todayInSaoPaulo,
@@ -26,6 +27,7 @@ import {
 } from "@/modules/instagram-posts/instagram-profile-gap-finder";
 import { syncAllActivePluginConnections } from "@/modules/platform-hub-bridges/ph-persistence/sync-all-active-connections";
 import { persistCampaignStatuses } from "@/modules/platform-hub-bridges/base-metricas/persist-campaign-status";
+import { listAdAccountIdentities } from "@/modules/platform-hub/plugins/meta_ads/providers/official-meta.provider";
 
 /**
  * Lookback padrão para o primeiro backfill. Diferente do Instagram (limite
@@ -58,12 +60,14 @@ async function fetchExistingMetaAdsDates(
   canonicalClientName: string,
   from: string,
   to: string,
+  adAccountId: string,
+  treatNullAsThisAccount: boolean,
 ): Promise<Set<string>> {
   const dates = new Set<string>();
 
   const { data: hubRows, error: hubError } = await supabase
     .from("base_metricas_hub")
-    .select("data, metrica")
+    .select("data, metrica, ad_account_id")
     .eq("cliente", canonicalClientName)
     .ilike("plataforma", "meta ads")
     .gte("data", from)
@@ -72,6 +76,8 @@ async function fetchExistingMetaAdsDates(
 
   const byDate = new Map<string, Set<string>>();
   for (const row of hubRows ?? []) {
+    const account = String((row as { ad_account_id?: string | null }).ad_account_id ?? "").trim();
+    if (account !== adAccountId && !(treatNullAsThisAccount && !account)) continue;
     const date = String((row as { data: string }).data);
     const metric = String((row as { metrica: string }).metrica).toLowerCase();
     const set = byDate.get(date) ?? new Set<string>();
@@ -141,62 +147,95 @@ export async function syncMetaAdsCampaignsConnection(
   }
 
   const identities = await stack.identityService.list(id);
-  const existingDates = await fetchExistingMetaAdsDates(supabase, canonicalClientName, from, to);
-  const missing = listMissingDates(from, to, existingDates);
-  const refreshFrom = addDaysToDateStr(to, -(META_ADS_REFRESH_DAYS - 1));
-  const refreshDays = listMissingDates(refreshFrom, to, new Set());
-  const toFetch = [...new Set([...missing, ...refreshDays])].sort();
-
-  if (toFetch.length === 0) {
-    return { ok: true, daysFilled: 0, daysRequested: 0, from, to };
-  }
-
-  // Prioriza os dias mais recentes; o restante é preenchido em próximos cliques.
-  const capped = toFetch.slice(Math.max(0, toFetch.length - META_ADS_MAX_DAYS_PER_RUN));
-  const ranges = groupIntoContiguousRanges(capped);
-
-  const provider = stack.registry.getPlugin("meta_ads").adapter.getProvider("official_api");
-
-  let daysFilled = 0;
-  const errors: string[] = [];
-
-  for (const range of ranges) {
-    try {
-      const envelope = await provider.collect({
-        connectionId: id,
-        capability: META_ADS_METRICS_CAPABILITY,
-        identities,
-        window: range,
-      });
-
-      if (!isMetricsTimeseriesEnvelope(envelope)) continue;
-
-      if (envelope.campaignStatuses?.length) {
-        await persistCampaignStatuses(
-          supabase,
-          canonicalClientName,
-          envelope.payload.platformLabel || META_ADS_PLATFORM_LABEL,
-          envelope.campaignStatuses,
-        );
-      }
-
-      if (envelope.payload.rows.length === 0) continue;
-
-      envelope.payload.canonicalClientName = canonicalClientName;
-      envelope.payload.platformLabel = envelope.payload.platformLabel || META_ADS_PLATFORM_LABEL;
-
-      await stack.metricPipeline.accept(envelope);
-      daysFilled += new Set(envelope.payload.rows.map((row) => row.date)).size;
-    } catch (err) {
-      errors.push(err instanceof Error ? err.message : String(err));
-    }
-  }
-
-  if (daysFilled === 0 && toFetch.length > 0) {
+  const accounts = listAdAccountIdentities(identities);
+  if (accounts.length === 0) {
     return {
       ok: false,
       daysFilled: 0,
-      daysRequested: toFetch.length,
+      daysRequested: 0,
+      from,
+      to,
+      error: "Vincule ao menos uma conta de anúncios Meta em Conexões.",
+    };
+  }
+
+  const provider = stack.registry.getPlugin("meta_ads").adapter.getProvider("official_api");
+  const cadastroClienteId = await resolveConnectionCadastroId(supabase, connectionId);
+  const nonAdIdentities = identities.filter((item) => item.identityType !== "ad_account");
+
+  let daysFilled = 0;
+  let daysRequested = 0;
+  const errors: string[] = [];
+
+  for (const account of accounts) {
+    const existingDates = await fetchExistingMetaAdsDates(
+      supabase,
+      canonicalClientName,
+      from,
+      to,
+      account.externalId,
+      account.isPrimary,
+    );
+    const missing = listMissingDates(from, to, existingDates);
+    const refreshFrom = addDaysToDateStr(to, -(META_ADS_REFRESH_DAYS - 1));
+    const refreshDays = listMissingDates(refreshFrom, to, new Set());
+    const toFetch = [...new Set([...missing, ...refreshDays])].sort();
+    daysRequested += toFetch.length;
+    if (toFetch.length === 0) continue;
+
+    const capped = toFetch.slice(Math.max(0, toFetch.length - META_ADS_MAX_DAYS_PER_RUN));
+    const ranges = groupIntoContiguousRanges(capped);
+    const scopedIdentities = [{ ...account, isPrimary: true }, ...nonAdIdentities];
+
+    for (const range of ranges) {
+      try {
+        const envelope = await provider.collect({
+          connectionId: id,
+          capability: META_ADS_METRICS_CAPABILITY,
+          identities: scopedIdentities,
+          window: range,
+        });
+
+        if (!isMetricsTimeseriesEnvelope(envelope)) continue;
+
+        if (envelope.campaignStatuses?.length) {
+          try {
+            await persistCampaignStatuses(
+              supabase,
+              canonicalClientName,
+              envelope.payload.platformLabel || META_ADS_PLATFORM_LABEL,
+              envelope.campaignStatuses,
+            );
+          } catch (err) {
+            errors.push(
+              `${account.label || account.externalId}: status das campanhas: ${
+                err instanceof Error ? err.message : String(err)
+              }`,
+            );
+          }
+        }
+
+        if (envelope.payload.rows.length === 0) continue;
+
+        envelope.payload.canonicalClientName = canonicalClientName;
+        envelope.payload.cadastroClienteId = cadastroClienteId;
+        envelope.payload.platformLabel = envelope.payload.platformLabel || META_ADS_PLATFORM_LABEL;
+
+        await stack.metricPipeline.accept(envelope);
+        daysFilled += new Set(envelope.payload.rows.map((row) => row.date)).size;
+      } catch (err) {
+        errors.push(
+          `${account.label || account.externalId}: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    }
+  }
+
+  if (daysFilled === 0 && daysRequested > 0) {
+    return {
+      ok: false,
+      daysFilled: 0,
+      daysRequested,
       from,
       to,
       error:
@@ -209,7 +248,7 @@ export async function syncMetaAdsCampaignsConnection(
   return {
     ok: true,
     daysFilled,
-    daysRequested: toFetch.length,
+    daysRequested,
     from,
     to,
     error: errors.length > 0 ? errors.join("; ") : undefined,

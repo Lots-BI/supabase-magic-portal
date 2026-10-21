@@ -45,6 +45,7 @@ Crie um ADR quando a decisão:
 | [0021](./0021-platform-hub-ports-fase-0.md)               | Platform Hub ports (Fase 0)                    | Aceito              |
 | [0022](./0022-hub-registry-fase-1.md)                     | Implementação Hub Registry (Fase 1)            | Aceito              |
 | [0023](./0023-modulo-estrutura-fase-2.md)                 | Estrutura do módulo sem runtime (Fase 2)       | Aceito              |
+| [0025](./0025-multi-org-cadastro-metric-key.md)           | Métrica por cadastro_cliente_id / multi-org    | Aceito              |
 
 ## Template
 

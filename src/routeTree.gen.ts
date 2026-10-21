@@ -97,6 +97,7 @@ import { Route as AuthenticatedClienteClientePlanoEstrategicoRouteImport } from 
 import { Route as AuthenticatedClienteClientePublicacoesRouteImport } from './routes/_authenticated/cliente.$cliente.publicacoes'
 import { Route as AuthenticatedClienteClienteRelatorioRouteImport } from './routes/_authenticated/cliente.$cliente.relatorio'
 import { Route as AuthenticatedClienteClienteTiktokRouteImport } from './routes/_authenticated/cliente.$cliente.tiktok'
+import { Route as AuthenticatedClienteClienteYoutubeRouteImport } from './routes/_authenticated/cliente.$cliente.youtube'
 import { Route as ApiCrmV1InteractionsRouteImport } from './routes/api/crm/v1/interactions'
 import { Route as AuthenticatedAdminAprovacoesAgendarCardIdRouteImport } from './routes/_authenticated/admin/aprovacoes_.agendar.$cardId'
 import { Route as AuthenticatedAdminAprovacoesProducaoCardIdRouteImport } from './routes/_authenticated/admin/aprovacoes_.producao.$cardId'
@@ -608,6 +609,12 @@ const AuthenticatedClienteClienteTiktokRoute =
     path: '/tiktok',
     getParentRoute: () => AuthenticatedClienteClienteRoute,
   } as any)
+const AuthenticatedClienteClienteYoutubeRoute =
+  AuthenticatedClienteClienteYoutubeRouteImport.update({
+    id: '/youtube',
+    path: '/youtube',
+    getParentRoute: () => AuthenticatedClienteClienteRoute,
+  } as any)
 const ApiCrmV1InteractionsRoute = ApiCrmV1InteractionsRouteImport.update({
   id: '/api/crm/v1/interactions',
   path: '/api/crm/v1/interactions',
@@ -731,6 +738,7 @@ export interface FileRoutesByFullPath {
   '/cliente/$cliente/publicacoes': typeof AuthenticatedClienteClientePublicacoesRoute
   '/cliente/$cliente/relatorio': typeof AuthenticatedClienteClienteRelatorioRoute
   '/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
+  '/cliente/$cliente/youtube': typeof AuthenticatedClienteClienteYoutubeRoute
   '/api/crm/v1/interactions': typeof ApiCrmV1InteractionsRoute
   '/admin/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/admin/conexoes/': typeof AuthenticatedAdminConexoesIndexRoute
@@ -819,6 +827,7 @@ export interface FileRoutesByTo {
   '/cliente/$cliente/publicacoes': typeof AuthenticatedClienteClientePublicacoesRoute
   '/cliente/$cliente/relatorio': typeof AuthenticatedClienteClienteRelatorioRoute
   '/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
+  '/cliente/$cliente/youtube': typeof AuthenticatedClienteClienteYoutubeRoute
   '/api/crm/v1/interactions': typeof ApiCrmV1InteractionsRoute
   '/admin/clientes': typeof AuthenticatedAdminClientesIndexRoute
   '/admin/conexoes': typeof AuthenticatedAdminConexoesIndexRoute
@@ -917,6 +926,7 @@ export interface FileRoutesById {
   '/_authenticated/cliente/$cliente/publicacoes': typeof AuthenticatedClienteClientePublicacoesRoute
   '/_authenticated/cliente/$cliente/relatorio': typeof AuthenticatedClienteClienteRelatorioRoute
   '/_authenticated/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
+  '/_authenticated/cliente/$cliente/youtube': typeof AuthenticatedClienteClienteYoutubeRoute
   '/api/crm/v1/interactions': typeof ApiCrmV1InteractionsRoute
   '/_authenticated/admin/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/_authenticated/admin/conexoes/': typeof AuthenticatedAdminConexoesIndexRoute
@@ -1015,6 +1025,7 @@ export interface FileRouteTypes {
     | '/cliente/$cliente/publicacoes'
     | '/cliente/$cliente/relatorio'
     | '/cliente/$cliente/tiktok'
+    | '/cliente/$cliente/youtube'
     | '/api/crm/v1/interactions'
     | '/admin/clientes/'
     | '/admin/conexoes/'
@@ -1103,6 +1114,7 @@ export interface FileRouteTypes {
     | '/cliente/$cliente/publicacoes'
     | '/cliente/$cliente/relatorio'
     | '/cliente/$cliente/tiktok'
+    | '/cliente/$cliente/youtube'
     | '/api/crm/v1/interactions'
     | '/admin/clientes'
     | '/admin/conexoes'
@@ -1200,6 +1212,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cliente/$cliente/publicacoes'
     | '/_authenticated/cliente/$cliente/relatorio'
     | '/_authenticated/cliente/$cliente/tiktok'
+    | '/_authenticated/cliente/$cliente/youtube'
     | '/api/crm/v1/interactions'
     | '/_authenticated/admin/clientes/'
     | '/_authenticated/admin/conexoes/'
@@ -1859,6 +1872,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClienteClienteTiktokRouteImport
       parentRoute: typeof AuthenticatedClienteClienteRoute
     }
+    '/_authenticated/cliente/$cliente/youtube': {
+      id: '/_authenticated/cliente/$cliente/youtube'
+      path: '/youtube'
+      fullPath: '/cliente/$cliente/youtube'
+      preLoaderRoute: typeof AuthenticatedClienteClienteYoutubeRouteImport
+      parentRoute: typeof AuthenticatedClienteClienteRoute
+    }
     '/api/crm/v1/interactions': {
       id: '/api/crm/v1/interactions'
       path: '/api/crm/v1/interactions'
@@ -2117,6 +2137,7 @@ interface AuthenticatedClienteClienteRouteChildren {
   AuthenticatedClienteClientePublicacoesRoute: typeof AuthenticatedClienteClientePublicacoesRoute
   AuthenticatedClienteClienteRelatorioRoute: typeof AuthenticatedClienteClienteRelatorioRoute
   AuthenticatedClienteClienteTiktokRoute: typeof AuthenticatedClienteClienteTiktokRoute
+  AuthenticatedClienteClienteYoutubeRoute: typeof AuthenticatedClienteClienteYoutubeRoute
   AuthenticatedClienteClienteIndexRoute: typeof AuthenticatedClienteClienteIndexRoute
 }
 
@@ -2146,6 +2167,8 @@ const AuthenticatedClienteClienteRouteChildren: AuthenticatedClienteClienteRoute
       AuthenticatedClienteClienteRelatorioRoute,
     AuthenticatedClienteClienteTiktokRoute:
       AuthenticatedClienteClienteTiktokRoute,
+    AuthenticatedClienteClienteYoutubeRoute:
+      AuthenticatedClienteClienteYoutubeRoute,
     AuthenticatedClienteClienteIndexRoute:
       AuthenticatedClienteClienteIndexRoute,
   }
@@ -2231,13 +2254,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

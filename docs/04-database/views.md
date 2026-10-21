@@ -3,7 +3,7 @@ title: Banco — Views Analíticas
 description: Catálogo das views vw_* que alimentam os dashboards.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-20
+last_review: 2026-10-21
 ---
 
 # Views Analíticas (`vw_*`)
@@ -12,11 +12,13 @@ Views críticas `vw_*` usam **`security_invoker = true`** (migration 51): o JWT 
 vale, RLS das tabelas-base aplica. Isolação extra em `vw_metricas_normalizadas` via
 `current_user_clientes()` (plpgsql, cadastro + `client_access` — migration 55).
 
-Dashboards de plataforma leem `vw_*_diario` prefer_hub. Visão geral / Relatórios **não**
+Dashboards de plataforma, relatório operacional e plano estratégico leem a RPC
+`dashboard_prefer_hub_long` (isolamento por `cadastro_cliente_id`, migration 88).
+Views `vw_*_diario` prefer_hub continuam para SQL/Make. Visão geral / Relatórios **não**
 varrem essas views no browser: usam RPC `portfolio_overview` / `portfolio_clientes_ativos`
-(migrations 56–57, 86). O RPC `dashboard_prefer_hub_long` devolve no máximo 1000 linhas
-por chamada (teto do PostgREST). A hierarquia `nx` não entra nele (migration 82);
-o client pagina o restante.
+(migrations 56–57, 86). A RPC de dashboard devolve no máximo 1000 linhas
+por chamada (teto do PostgREST). A hierarquia `nx` não entra nela (migration 82);
+o client pagina o restante. TikTok e YouTube não têm `vw_*_diario` própria — só Hub RPC.
 
 Definições históricas: `08_aliases_e_null_guard.sql`. Prefer_hub e overview: 34, 36, 47,
 49, 50, 54–57.

@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { createUserAccount, listClientes } from "@/lib/admin.functions";
+import type { InviteMemberRole } from "@/modules/access/organization-role";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { Field, FormRow, TextInput, Select } from "@/components/lots/FormField";
 import { SectionCard } from "@/components/lots/SectionCard";
@@ -28,7 +29,7 @@ function NovoUsuarioPage() {
   const { data: clientes } = useSuspenseQuery(clientesQuery);
   const [email, setEmail] = useState("");
   const [nome, setNome] = useState("");
-  const [tipo, setTipo] = useState<"cliente" | "admin">("cliente");
+  const [tipo, setTipo] = useState<InviteMemberRole>("cliente");
   const [mode, setMode] = useState<"invite" | "password">("invite");
   const [clienteId, setClienteId] = useState<string>("");
   const [saving, setSaving] = useState(false);
@@ -51,7 +52,8 @@ function NovoUsuarioPage() {
         data: {
           email: email.trim(),
           nome: nome.trim() || null,
-          tipo,
+          tipo: tipo === "cliente" ? "cliente" : "admin",
+          member_role: tipo,
           mode,
           cadastro_cliente_id: clienteId ? Number(clienteId) : null,
           client_origin: window.location.origin,
@@ -148,7 +150,7 @@ function NovoUsuarioPage() {
       <PageHeader
         eyebrow="Usuários"
         title="Novo usuário"
-        description={`Crie acesso para administradores internos ou para clientes do ${BRAND_NAME}.`}
+        description={`Convide quem opera a organização ou quem acompanha o portal do cliente no ${BRAND_NAME}.`}
       />
       <form onSubmit={onSubmit} className="space-y-5">
         <SectionCard eyebrow="Identidade" title="Dados do usuário">
@@ -175,17 +177,21 @@ function NovoUsuarioPage() {
         <SectionCard eyebrow="Permissões" title="Tipo de acesso">
           <FormRow cols={2}>
             <Field label="Perfil" required>
-              <Select value={tipo} onChange={(e) => setTipo(e.target.value as any)}>
-                <option value="cliente">Cliente</option>
-                <option value="admin">Administrador</option>
+              <Select value={tipo} onChange={(e) => setTipo(e.target.value as InviteMemberRole)}>
+                <option value="cliente">Cliente (portal)</option>
+                <option value="owner">Dono da organização</option>
+                <option value="gestor">Gestor</option>
+                <option value="social_media">Social media</option>
+                <option value="gestor_trafego">Gestor de tráfego</option>
+                <option value="visualizador">Visualizador</option>
               </Select>
             </Field>
             <Field
               label="Cliente vinculado"
               hint={
-                tipo === "admin"
-                  ? "Opcional. Admins têm acesso a tudo."
-                  : "Vincule o cliente para liberar o acesso ao painel."
+                tipo === "cliente"
+                  ? "Obrigatório. Libera o portal daquele cliente."
+                  : "Opcional. Quem opera vê os clientes da organização."
               }
             >
               <Select value={clienteId} onChange={(e) => setClienteId(e.target.value)}>

@@ -317,6 +317,8 @@ const PLATFORM_TO = {
   instagram: "/cliente/$cliente/instagram",
   ga4: "/cliente/$cliente/ga4",
   google_business: "/cliente/$cliente/google-business",
+  tiktok: "/cliente/$cliente/tiktok",
+  youtube: "/cliente/$cliente/youtube",
 } as const;
 
 function PlatformTile({ platform, slug }: { platform: ReportPlatformSection; slug: string }) {

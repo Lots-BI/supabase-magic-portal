@@ -26,6 +26,7 @@ export interface IngestEnvelopeBaseV1 {
 export interface CampaignStatusV1 {
   name: string;
   status: string;
+  adAccountId?: string;
 }
 
 export interface MetricsTimeseriesIngestEnvelopeV1 extends IngestEnvelopeBaseV1 {

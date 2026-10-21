@@ -3,7 +3,7 @@ title: Visão Geral do Produto
 description: O que o Lots BI faz, para quem, e as principais jornadas de uso.
 status: living
 owner: Produto Lots BI
-last_review: 2026-06-26
+last_review: 2026-10-21
 ---
 
 # Visão Geral do Produto
@@ -11,8 +11,8 @@ last_review: 2026-06-26
 ## O problema
 
 Agências e empresas gerenciam contas em múltiplas plataformas de marketing (Meta Ads,
-Google Ads, GA4, Instagram, Google Business, TikTok — e futuramente LinkedIn, Pinterest,
-YouTube). Os dados ficam dispersos, em formatos diferentes, e a leitura manual é lenta e
+Google Ads, GA4, Instagram, Google Business, TikTok, YouTube — e futuramente LinkedIn,
+Pinterest). Os dados ficam dispersos, em formatos diferentes, e a leitura manual é lenta e
 propensa a erro. Gestores precisam de **informações confiáveis** para tomada de decisão —
 não apenas números em planilhas.
 
@@ -24,7 +24,8 @@ calculados de forma consistente, comparativos de período e insights automático
 
 **Estado atual (observado):** além de BI, a plataforma inclui operação de agência —
 cadastro de clientes, serviços, usuários, integrações e **calendário editorial com
-aprovação de conteúdo**.
+aprovação de conteúdo**. Uma organização aprovada opera os próprios clientes. Checkout
+e NFS-e continuam só com a Lots.
 
 **Visão futura:** plataforma proprietária end-to-end, com coletores próprios substituindo
 Make e motor de métricas unificado. Ver [Arquitetura alvo](../02-architecture/target-architecture.md).

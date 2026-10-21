@@ -12,6 +12,7 @@ import {
   listMissingDates,
 } from "@/modules/instagram-posts/instagram-profile-gap-finder";
 import { syncAllActivePluginConnections } from "@/modules/platform-hub-bridges/ph-persistence/sync-all-active-connections";
+import { resolveConnectionCadastroId } from "@/modules/platform-hub-bridges/ph-persistence/resolve-connection-cadastro";
 
 export const GA4_LOOKBACK_DAYS = 89;
 export const GA4_MAX_DAYS_PER_RUN = 89;
@@ -116,6 +117,10 @@ export async function syncGa4ProfileConnection(
       if (envelope.payload.rows.length === 0) continue;
 
       envelope.payload.canonicalClientName = canonicalClientName;
+      envelope.payload.cadastroClienteId = await resolveConnectionCadastroId(
+        supabase,
+        connectionId,
+      );
       envelope.payload.platformLabel = GA4_MAKE_PLATFORM_LABEL;
       await stack.metricPipeline.accept(envelope);
       daysFilled += new Set(envelope.payload.rows.map((row) => row.date)).size;

@@ -8,6 +8,7 @@ export const HUB_PLUGIN_DASHBOARD_PLATFORMS: Record<string, string[]> = {
   ga4: ["ga4"],
   google_business: ["google_business"],
   tiktok: ["tiktok"],
+  youtube: ["youtube"],
 };
 
 /**

@@ -4,21 +4,18 @@
 // e injeta no PlatformDashboard genérico.
 // ============================================================================
 
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useMemo, useState } from "react";
-import { RefreshCw } from "lucide-react";
-import { toast } from "sonner";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { PeriodPicker } from "@/components/lots/PeriodPicker";
 import { PlatformDashboard } from "@/components/lots/PlatformDashboard";
 import { PlatformSwitcher } from "@/components/lots/PlatformSwitcher";
 import { DashboardSkeleton } from "@/components/lots/DashboardSkeleton";
-import { Button } from "@/components/ui/button";
 import { resolvePeriod, type PeriodInput } from "@/lib/period";
 import type { PlatformDef } from "@/lib/platforms/types";
 import { clienteRefQuery } from "@/routes/_authenticated/cliente.$cliente";
-import { syncInstagramProfileFn } from "@/modules/instagram-posts/instagram-posts.server";
-import { syncMetaAdsCampaignsFn } from "@/modules/meta-ads/meta-ads.server";
+import { ClientePlatformSyncButton } from "@/components/lots/ClientePlatformSyncButton";
+import { isClienteSyncPlatform } from "@/modules/dashboards/cliente-sync-platform";
 import { useParams } from "@tanstack/react-router";
 
 interface Props {
@@ -73,78 +70,13 @@ function PlatformResolved({
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <PeriodPicker value={periodInput} onChange={setPeriodInput} />
-            {def.key === "instagram" && ref.cadastroId != null && (
-              <MetricsSyncButton
-                queryKey="instagram"
-                syncFn={() =>
-                  syncInstagramProfileFn({ data: { cadastroClienteId: ref.cadastroId! } })
-                }
-              />
-            )}
-            {def.key === "meta_ads" && ref.cadastroId != null && (
-              <MetricsSyncButton
-                queryKey="meta_ads"
-                syncFn={() =>
-                  syncMetaAdsCampaignsFn({ data: { cadastroClienteId: ref.cadastroId! } })
-                }
-              />
-            )}
+            {ref.cadastroId != null && isClienteSyncPlatform(def.key) ? (
+              <ClientePlatformSyncButton cadastroClienteId={ref.cadastroId} platform={def.key} />
+            ) : null}
           </div>
         }
       />
       <PlatformDashboard def={def} cliente={ref.queryName} period={period} />
     </div>
-  );
-}
-
-function MetricsSyncButton({
-  queryKey,
-  syncFn,
-}: {
-  queryKey: string;
-  syncFn: () => Promise<{
-    ok: boolean;
-    error?: string;
-    daysFilled?: number;
-    daysRequested?: number;
-  }>;
-}) {
-  const queryClient = useQueryClient();
-
-  const syncMutation = useMutation({
-    mutationFn: syncFn,
-    onSuccess: (result) => {
-      if (!result.ok) {
-        toast.error(result.error ?? "Não foi possível puxar métricas");
-        return;
-      }
-      if (result.error) {
-        toast.warning(result.error);
-      }
-      if (result.daysFilled === 0) {
-        toast.success("Nenhum dia novo — dados já atualizados");
-      } else {
-        toast.success(`${result.daysFilled} dia(s) atualizado(s)`);
-      }
-      queryClient.invalidateQueries({ queryKey: ["platform-rows", queryKey] });
-      queryClient.invalidateQueries({ queryKey: ["meta-structure"] });
-    },
-    onError: (error) => toast.error(error.message),
-  });
-
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      disabled={syncMutation.isPending}
-      onClick={() => syncMutation.mutate()}
-    >
-      <RefreshCw
-        className={syncMutation.isPending ? "h-4 w-4 animate-spin" : "h-4 w-4"}
-        aria-hidden
-      />
-      Puxar métricas
-    </Button>
   );
 }

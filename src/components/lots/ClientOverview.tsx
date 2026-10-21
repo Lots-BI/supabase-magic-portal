@@ -13,7 +13,9 @@ import { getSeriesColor } from "@/components/lots/charts/chart-colors";
 import { DonutChartLots } from "@/components/lots/charts/DonutChartLots";
 import { AreaChartLotsLazy } from "@/components/lots/charts/AreaChartLotsLazy";
 import { PlatformBrandMark } from "@/components/lots/PlatformBrandMark";
+import { ClientePlatformSyncButton } from "@/components/lots/ClientePlatformSyncButton";
 import { catalogForPlatforms } from "@/lib/dashboards-catalog";
+import { isClienteSyncPlatform } from "@/modules/dashboards/cliente-sync-platform";
 import {
   METRIC_META,
   dailyFromOverview,
@@ -75,11 +77,13 @@ export function ClientOverview({
   slug,
   queryName,
   platforms,
+  cadastroId,
 }: {
   nome: string;
   slug: string;
   queryName: string;
   platforms: string[];
+  cadastroId?: number | null;
 }) {
   const [days, setDays] = useState<PeriodDays>(30);
   const { data: overview } = useSuspenseQuery(clientOverviewQuery(queryName, days));
@@ -100,7 +104,7 @@ export function ClientOverview({
       <PageHeader
         eyebrow={nome}
         title="Visão geral"
-        description="Investimento, resultado e atalhos dos dashboards só desta conta."
+        description="Investimento, resultado e atalhos dos dashboards só desta conta. Puxar atualiza uma plataforma desta conta, sem varrer o portfólio."
         actions={<PeriodToggle value={days} onChange={setDays} />}
       />
 
@@ -220,21 +224,30 @@ export function ClientOverview({
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {catalog.map((entry) => (
               <li key={entry.id}>
-                <Link
-                  to={entry.to}
-                  params={{ cliente: slug }}
-                  className="lots-surface flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40"
-                >
-                  <PlatformBrandMark dashboardId={entry.id} className="h-4 w-4 shrink-0" />
-                  <span className="min-w-0">
-                    <span className="block truncate text-[13px] font-medium text-foreground">
-                      {entry.label}
+                <div className="lots-surface flex items-center gap-2 px-4 py-3">
+                  <Link
+                    to={entry.to}
+                    params={{ cliente: slug }}
+                    className="flex min-w-0 flex-1 items-center gap-3 transition-colors hover:text-foreground"
+                  >
+                    <PlatformBrandMark dashboardId={entry.id} className="h-4 w-4 shrink-0" />
+                    <span className="min-w-0">
+                      <span className="block truncate text-[13px] font-medium text-foreground">
+                        {entry.label}
+                      </span>
+                      <span className="block truncate text-[11.5px] text-muted-foreground">
+                        {entry.description}
+                      </span>
                     </span>
-                    <span className="block truncate text-[11.5px] text-muted-foreground">
-                      {entry.description}
-                    </span>
-                  </span>
-                </Link>
+                  </Link>
+                  {cadastroId != null && isClienteSyncPlatform(entry.id) ? (
+                    <ClientePlatformSyncButton
+                      cadastroClienteId={cadastroId}
+                      platform={entry.id}
+                      compact
+                    />
+                  ) : null}
+                </div>
               </li>
             ))}
           </ul>

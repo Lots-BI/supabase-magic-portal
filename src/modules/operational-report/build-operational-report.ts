@@ -20,7 +20,15 @@ import type {
   ReportPulse,
 } from "./types";
 
-const PLATFORM_ORDER = ["meta_ads", "google_ads", "instagram", "ga4", "google_business"] as const;
+const PLATFORM_ORDER = [
+  "meta_ads",
+  "google_ads",
+  "instagram",
+  "ga4",
+  "google_business",
+  "tiktok",
+  "youtube",
+] as const;
 
 const PLATFORM_HREF: Record<string, string> = {
   meta_ads: "meta-ads",
@@ -28,6 +36,8 @@ const PLATFORM_HREF: Record<string, string> = {
   instagram: "instagram",
   ga4: "ga4",
   google_business: "google-business",
+  tiktok: "tiktok",
+  youtube: "youtube",
 };
 
 const MOVE_THRESHOLD = 8;

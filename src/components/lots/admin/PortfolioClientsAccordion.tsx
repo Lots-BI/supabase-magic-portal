@@ -3,6 +3,11 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight, Search } from "lucide-react";
 import { DeltaPill } from "@/components/lots/DeltaPill";
 import { SectionCard } from "@/components/lots/SectionCard";
+import { ClientePlatformSyncButton } from "@/components/lots/ClientePlatformSyncButton";
+import {
+  lookupCadastroId,
+  type ClienteSyncPlatform,
+} from "@/modules/dashboards/cliente-sync-platform";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   formatMetric,
@@ -17,7 +22,7 @@ import { cn } from "@/lib/utils";
 type ClientRow = ClientPlatformBreakdown & { spendDelta: number | null };
 
 interface PlatformCard {
-  key: string;
+  key: ClienteSyncPlatform;
   label: string;
   primary: string;
   primaryLabel: string;
@@ -26,56 +31,50 @@ interface PlatformCard {
 }
 
 function platformCards(row: ClientPlatformBreakdown): PlatformCard[] {
-  const cards: PlatformCard[] = [];
-  if (row.meta.spend > 0 || row.meta.results > 0) {
-    cards.push({
-      key: "meta",
+  return [
+    {
+      key: "meta_ads",
       label: "Meta Ads",
       primary: formatMetric("spend", row.meta.spend),
       primaryLabel: "Investimento",
       secondary: formatMetric("conversions", row.meta.results),
       secondaryLabel: "Resultados",
-    });
-  }
-  if (row.google.spend > 0 || row.google.conversions > 0) {
-    cards.push({
-      key: "google",
+    },
+    {
+      key: "google_ads",
       label: "Google Ads",
       primary: formatMetric("spend", row.google.spend),
       primaryLabel: "Investimento",
       secondary: formatMetric("conversions", row.google.conversions),
       secondaryLabel: "Conversões",
-    });
-  }
-  if (row.ga4.sessions > 0 || row.ga4.conversions > 0) {
-    cards.push({
+    },
+    {
       key: "ga4",
       label: "Google Analytics 4",
       primary: formatMetric("sessions", row.ga4.sessions),
       primaryLabel: "Sessões",
       secondary: formatMetric("conversions", row.ga4.conversions),
       secondaryLabel: "Conversões",
-    });
-  }
-  if (row.instagram.reach > 0 || row.instagram.interactions > 0) {
-    cards.push({
+    },
+    {
       key: "instagram",
       label: "Instagram",
       primary: formatMetric("reach", row.instagram.reach),
       primaryLabel: "Alcance",
       secondary: formatMetric("engagement", row.instagram.interactions),
       secondaryLabel: "Interações",
-    });
-  }
-  return cards;
+    },
+  ];
 }
 
 export function PortfolioClientsAccordion({
   current,
   previous,
+  cadastroByName,
 }: {
   current: OverviewRow[];
   previous: OverviewRow[];
+  cadastroByName: ReadonlyMap<string, number>;
 }) {
   const [query, setQuery] = useState("");
   const [openCliente, setOpenCliente] = useState<string | null>(null);
@@ -101,7 +100,7 @@ export function PortfolioClientsAccordion({
     <SectionCard
       eyebrow="Portfólio"
       title="Por cliente"
-      description="Abra um cliente para ver Meta Ads, Google Ads, GA4 e Instagram."
+      description="Abra um cliente para ver as plataformas e puxar a coleta só daquela conta."
       bodyClassName="px-0 py-0"
     >
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
@@ -137,6 +136,7 @@ export function PortfolioClientsAccordion({
             <ClientAccordionRow
               key={row.cliente}
               row={row}
+              cadastroId={lookupCadastroId(cadastroByName, row.cliente)}
               open={openCliente === row.cliente}
               onOpenChange={(next) => setOpenCliente(next ? row.cliente : null)}
             />
@@ -149,10 +149,12 @@ export function PortfolioClientsAccordion({
 
 function ClientAccordionRow({
   row,
+  cadastroId,
   open,
   onOpenChange,
 }: {
   row: ClientRow;
+  cadastroId: number | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -201,32 +203,35 @@ function ClientAccordionRow({
           </CollapsibleTrigger>
         </div>
         <CollapsibleContent>
-          {cards.length === 0 ? (
-            <p className="border-t border-border bg-muted/30 px-5 py-4 text-[13px] text-muted-foreground">
-              Sem métricas de plataforma neste período.
-            </p>
-          ) : (
-            <div className="grid gap-3 border-t border-border bg-muted/30 px-4 py-4 sm:grid-cols-2 sm:px-5 xl:grid-cols-4">
-              {cards.map((card) => (
-                <div
-                  key={card.key}
-                  className="rounded-lg border border-border bg-background px-3 py-3"
-                >
-                  <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                    {card.label}
-                  </p>
-                  <p className="mt-1 font-display text-lg font-semibold tabular-nums text-foreground">
-                    {card.primary}
-                  </p>
-                  <p className="text-[12px] text-muted-foreground">{card.primaryLabel}</p>
-                  <p className="mt-2 text-[13px] tabular-nums text-foreground">
-                    {card.secondary}{" "}
-                    <span className="text-muted-foreground">{card.secondaryLabel}</span>
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="grid gap-3 border-t border-border bg-muted/30 px-4 py-4 sm:grid-cols-2 sm:px-5 xl:grid-cols-4">
+            {cards.map((card) => (
+              <div
+                key={card.key}
+                className="rounded-lg border border-border bg-background px-3 py-3"
+              >
+                <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                  {card.label}
+                </p>
+                <p className="mt-1 font-display text-lg font-semibold tabular-nums text-foreground">
+                  {card.primary}
+                </p>
+                <p className="text-[12px] text-muted-foreground">{card.primaryLabel}</p>
+                <p className="mt-2 text-[13px] tabular-nums text-foreground">
+                  {card.secondary}{" "}
+                  <span className="text-muted-foreground">{card.secondaryLabel}</span>
+                </p>
+                {cadastroId != null ? (
+                  <div className="mt-3">
+                    <ClientePlatformSyncButton
+                      cadastroClienteId={cadastroId}
+                      platform={card.key}
+                      compact
+                    />
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
         </CollapsibleContent>
       </Collapsible>
     </li>

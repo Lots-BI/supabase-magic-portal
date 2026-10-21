@@ -9,8 +9,19 @@ export const OPERATIONAL_MEMBER_ROLES = [
 /** Papéis que criam cliente e usuário. */
 export const MANAGER_MEMBER_ROLES = ["owner", "gestor"] as const;
 
+/** Papéis oferecidos no convite da organização. */
+export const INVITE_MEMBER_ROLES = [
+  "owner",
+  "gestor",
+  "social_media",
+  "gestor_trafego",
+  "visualizador",
+  "cliente",
+] as const;
+
 export type OperationalMemberRole = (typeof OPERATIONAL_MEMBER_ROLES)[number];
 export type ManagerMemberRole = (typeof MANAGER_MEMBER_ROLES)[number];
+export type InviteMemberRole = (typeof INVITE_MEMBER_ROLES)[number];
 
 export function isOperationalMemberRole(role: string | null | undefined): boolean {
   return (OPERATIONAL_MEMBER_ROLES as readonly string[]).includes(role ?? "");
@@ -49,7 +60,7 @@ export function pickWriteOrganization(input: {
   return null;
 }
 
-export function findCrossOrgNameClash(
+export function findSameOrgNameClash(
   rows: readonly { organization_id: string | null; nome_cliente: string | null }[],
   nome: string,
   organizationId: string,
@@ -58,6 +69,6 @@ export function findCrossOrgNameClash(
   return rows.some(
     (row) =>
       (row.nome_cliente ?? "").trim().toLowerCase() === needle &&
-      row.organization_id !== organizationId,
+      row.organization_id === organizationId,
   );
 }

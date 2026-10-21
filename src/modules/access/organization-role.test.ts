@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  findCrossOrgNameClash,
+  findSameOrgNameClash,
   memberRolesGrantOperations,
   pickWriteOrganization,
 } from "./organization-role";
@@ -40,21 +40,21 @@ describe("organization roles", () => {
     ).toBe("lots");
   });
 
-  it("recusa o mesmo nome de cliente em outra organização", () => {
+  it("só recusa o mesmo nome dentro da própria organização", () => {
     expect(
-      findCrossOrgNameClash(
+      findSameOrgNameClash(
         [{ organization_id: "lots", nome_cliente: "Padaria Sol" }],
         "padaria sol",
         "norte",
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(
-      findCrossOrgNameClash(
+      findSameOrgNameClash(
         [{ organization_id: "norte", nome_cliente: "Padaria Sol" }],
         "Padaria Sol",
         "norte",
       ),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("manda staff operacional para o admin e o cliente final para o dashboard", () => {

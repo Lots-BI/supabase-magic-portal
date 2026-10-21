@@ -48,7 +48,7 @@ function SolicitarAcessoPage() {
     <div className="mx-auto max-w-lg space-y-6 py-8">
       <PageHeader
         title="Pedido de acesso"
-        description="A Lots analisa cada pedido antes de abrir a plataforma."
+        description={`Informe os dados da sua organização. O ${BRAND_NAME} abre o acesso depois da aprovação.`}
       />
       {waiting ? (
         <SectionCard title="Em análise">

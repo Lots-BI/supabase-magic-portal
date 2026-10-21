@@ -3,7 +3,7 @@ title: Módulos Admin & Operacionais
 description: Telas administrativas, editorial, aprovações, relatórios e debug.
 status: living
 owner: Engenharia / Produto Lots BI
-last_review: 2026-10-20
+last_review: 2026-10-21
 ---
 
 # Módulos Admin & Operacionais
@@ -43,6 +43,9 @@ flowchart TB
 
 Visão de portfólio: investimento, conversões, terceiro card com **Trocar métrica**
 (Sessões GA4 no padrão) e CTR. A escolha fica neste navegador.
+
+A lista **Por cliente** abre Meta Ads, Google Ads, GA4 e Instagram. **Puxar**
+dispara `syncClientePlatformFn` só daquele cliente e daquela plataforma.
 
 ---
 

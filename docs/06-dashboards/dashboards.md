@@ -3,7 +3,7 @@ title: Dashboards — KPIs, Fórmulas e Telas
 description: Catálogo das telas analíticas, métricas exibidas e fórmulas oficiais.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-20
+last_review: 2026-10-21
 ---
 
 # Dashboards
@@ -32,6 +32,8 @@ Arquivo: `src/routes/_authenticated/admin/index.tsx`.
   `overviewConversions()` (`meta_results` + Google + GA4). O seletor do terceiro
   card é o mesmo da visão geral do cliente (`OverviewSlotCard`). A escolha fica
   neste navegador (`lots.overview.slot-metric:admin`).
+- A lista **Por cliente** abre Meta, Google Ads, GA4 e Instagram com **Puxar** só
+  daquela conta e daquela plataforma.
 
 ### 2. Visão Geral do Cliente (cliente) — `/dashboard`
 
@@ -48,7 +50,8 @@ Arquivo: `src/routes/_authenticated/cliente.$cliente.index.tsx`.
 
 - KPIs (alcance, engajamento, impressões, cliques, conversões).
 - **Comparativos 7/30/90 dias** lado a lado.
-- Mix de investimento, resumo, insights e **detalhamento por plataforma** em abas.
+- Mix de investimento e atalhos dos dashboards. Cada plataforma tem **Puxar**
+  (só aquela conexão deste cliente).
 
 ### 4. Relatório operacional — `/cliente/{slug}/relatorio`
 
@@ -59,7 +62,7 @@ Não é inventário. Ver [operational-report.md](./operational-report.md).
 
 Componente genérico `PlatformDashboard` (ver
 [Design System](../05-frontend/component-system.md)). Para cada plataforma com `PlatformDef`
-(Google Ads, Meta Ads, Instagram, GA4):
+(Google Ads, Meta Ads, Instagram, GA4, Google Business, TikTok, YouTube):
 
 - Header narrativo com as perguntas de negócio.
 - Cards do template ativo. O padrão é **Pulso** (até quatro números). Em
@@ -70,10 +73,14 @@ Componente genérico `PlatformDashboard` (ver
 - Gráficos, comparativo, tabela diária e insights listam todas as métricas.
 - **Ranking de campanhas** (quando há `campaignField`): a linha da campanha tem
   todas as métricas do período. Expandir mostra a mesma coleta, um dia por linha.
+  No Meta, se o cliente tiver mais de uma conta de anúncios, o seletor **Todas as
+  contas** | cada identidade filtra cards, ranking e estrutura. Linhas antigas
+  sem `ad_account_id` entram na conta primary.
 
-> **Cobertura atual:** Google Ads, Meta Ads, Instagram e GA4 têm `PlatformDef`. Google
-> Business tem view mas ainda não tem `PlatformDef`; TikTok não tem view nem `PlatformDef`
-> (só aparece quando houver dados). Ver [Roadmap](../11-roadmap/roadmap.md).
+> **Cobertura atual:** Google Ads, Meta Ads, Instagram, GA4, Google Business, TikTok e
+> YouTube têm `PlatformDef` e dashboard no portal. A leitura das telas de plataforma vai
+> pela RPC `dashboard_prefer_hub_long` (isolamento por `cadastro_cliente_id`). Ver
+> [Catálogo](../06-engine/platform-catalog.md).
 
 ---
 

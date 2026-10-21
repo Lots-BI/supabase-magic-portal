@@ -9,6 +9,8 @@ import { metaAdsDef } from "./meta-ads";
 import { instagramDef } from "./instagram";
 import { ga4Def } from "./ga4";
 import { googleBusinessDef } from "./google-business";
+import { tiktokDef } from "./tiktok";
+import { youtubeDef } from "./youtube";
 
 export const PLATFORM_REGISTRY: Record<string, PlatformDef> = {
   google_ads: googleAdsDef,
@@ -16,6 +18,8 @@ export const PLATFORM_REGISTRY: Record<string, PlatformDef> = {
   instagram: instagramDef,
   ga4: ga4Def,
   google_business: googleBusinessDef,
+  tiktok: tiktokDef,
+  youtube: youtubeDef,
 };
 
 export const PLATFORMS = Object.values(PLATFORM_REGISTRY);

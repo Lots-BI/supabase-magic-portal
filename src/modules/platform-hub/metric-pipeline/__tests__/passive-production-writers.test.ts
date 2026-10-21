@@ -70,6 +70,8 @@ describe("Passive Production — Writers", () => {
         metrica: "impressions",
         valor: 100,
         campanha: null,
+        cadastro_cliente_id: null,
+        ad_account_id: null,
       },
     ]);
   });
@@ -169,6 +171,8 @@ describe("Passive Production — Writers", () => {
       metrica: "spend",
       valor: 3_000_000,
       campanha: "camp-1",
+      cadastro_cliente_id: null,
+      ad_account_id: null,
     });
   });
 

@@ -3,7 +3,7 @@ title: Segurança
 description: Modelo de defesa em profundidade, segredos, RLS e políticas de acesso.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-21
 ---
 
 # Segurança
@@ -88,10 +88,11 @@ Posts editorial: `deletePost` faz DELETE físico (exceção documentada).
 
 ## Signup público
 
-**Risco atual:** qualquer pessoa pode criar conta em `/auth`.
-
-**Mitigação planejada:** desabilitar signup; fluxo invite-only via admin.
-Ver [roadmap](../11-roadmap/roadmap.md) Fase 2.
+Conta nasce em `/criar-conta` (service role). O pedido em `/solicitar-acesso`
+não cria organização até a Lots aprovar. Há limite de taxa e senha de 10
+caracteres. `access_invalidate_auth_sessions` só executa como `service_role`.
+Cofre: `HUB_CREDENTIAL_ENCRYPTION_KEY` obrigatória. Checkout e NFS-e ficam
+fora desta superfície (`fin_*`).
 
 ---
 

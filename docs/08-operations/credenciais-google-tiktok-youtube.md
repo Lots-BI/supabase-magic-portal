@@ -1,6 +1,8 @@
 # O que ainda falta para uma organização operar os próprios clientes
 
-Conferido em 05/10/2026 no site público, no código da `main` (`822c70b`) e no que o produto já faz com os clientes da Lots. Nenhum segredo entra neste arquivo. Google Cloud, TikTok, Meta, a lista de URLs do Supabase e o centro de API do Google Ads continuam fora desta verificação: os passos dessas telas seguem até você confirmar na própria tela.
+Conferido de novo em 21/10/2026 no código (dashboards TikTok/YouTube, papéis no convite,
+Google Business no assistente). Os passos de OAuth/SMTP nas telas do Google, TikTok e Meta
+continuam humanos. Nenhum segredo entra neste arquivo.
 
 Uma organização de fora deve cadastrar os clientes dela, convidar quem opera e quem acompanha, conectar as contas de mídia desses clientes e usar conteúdos, tarefas, CRM, relatórios, diretrizes e dashboards só nesse conjunto. O que a Lots faz hoje com os clientes da Lots, essa agência faz com os dela. Checkout, nota fiscal e pagamento ficam com a Lots.
 
@@ -9,7 +11,7 @@ Uma organização de fora deve cadastrar os clientes dela, convidar quem opera e
 - [lotsbi.leandromajr.com](https://lotsbi.leandromajr.com) publica a `main`. A página de entrar carrega `/assets/index-WZxEQJWk.js`. O pacote de setembro (`auth-DE33EX3e.js`) saiu do ar.
 - Quem ainda não tem organização pede acesso em `/criar-conta` e completa os dados em `/solicitar-acesso`. Aprovar o pedido cria a organização e torna essa pessoa dona dela. A fila é `/admin/solicitacoes`, só na conta da Lots.
 - O dono dessa organização entra no painel e vê só os clientes da organização dele: visão geral, tarefas, CRM, relatórios, conteúdos, diretrizes, clientes, usuários e conexões.
-- Convidar como **Cliente** abre o portal daquele cliente. Convidar como **Administrador** cria outro dono da mesma organização. Isso não cria administrador global da plataforma.
+- Convidar escolhe o papel na organização: dono, gestor, social media, gestor de tráfego, visualizador ou cliente. Cliente abre o portal daquela conta. Dono não cria administrador global da plataforma.
 - As tabelas de organizações, membros e pedidos já existem no Supabase. Há uma organização. As SQL 65, 66 e 67, e o ajuste que destrava o login, já foram aplicadas. Não rode de novo.
 - No `.env` local, Google e Meta já têm valor. `TIKTOK_APP_ID` e `TIKTOK_APP_SECRET` estão vazios. `APP_URL` local é `http://localhost:8080`. `CRON_SECRET` fica só nos secrets do GitHub.
 - Em Production, `APP_URL` precisa continuar `https://lotsbi.leandromajr.com`, sem barra no final, junto com `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` e `GOOGLE_ADS_DEVELOPER_TOKEN`.
@@ -72,7 +74,7 @@ O código pede `youtube.upload` além da leitura. Conexão antiga só lê númer
 2. Aceite a permissão no Gmail que a tela de permissão deixar passar.
 3. O upload grava o vídeo como público e recusa arquivo acima de 64 MB.
 
-Ainda não existe página de métricas do YouTube no portal do cliente. A coleta do canal e o envio de vídeo já estão no fluxo de conexão.
+A página de métricas do YouTube no portal do cliente é `/cliente/{slug}/youtube`. A coleta do canal e o envio de vídeo já estão no fluxo de conexão.
 
 ## 5. Google Ads — token em modo teste
 
@@ -89,7 +91,7 @@ Nesse modo a plataforma só lê contas de anúncio de teste do Google. A conta r
 
 A API de anúncios (`ads.read`) coleta métricas de campanha. Ela não publica vídeo no perfil. Card marcado como TikTok falha a publicação de propósito. Não crie um app de criadores para contornar isso.
 
-O painel do cliente em TikTok ainda é uma página vazia. A conexão e a coleta no hub já existem; a página de métricas do cliente ainda não.
+A página de métricas do TikTok no portal do cliente é `/cliente/{slug}/tiktok`. A conexão e a coleta no hub já existem; a API de anúncios não publica vídeo no perfil.
 
 1. Abra [TikTok Marketing API](https://business-api.tiktok.com/portal).
 2. Crie o app. Se a tela pedir SMS e o código não chegar, pare aqui.
@@ -142,11 +144,9 @@ O convite continua saindo pelo Supabase. Para o dono da organização convidar o
 
 ## O que o código ainda não iguala
 
-Isto não se resolve nas telas acima:
-
-- A tela de novo usuário só oferece Cliente e Administrador. Gestor, gestor de tráfego e social media existem no banco e operam o painel, mas a tela não deixa escolhê-los. Administrador, neste convite, é outro dono da organização.
-- TikTok no portal do cliente é página vazia. YouTube não tem página de métricas do cliente. Google Business tem dashboard, mas o assistente de conexão não oferece essa plataforma.
-- Checkout, nota fiscal e pagamento continuam só com a Lots.
+Checkout, nota fiscal e pagamento continuam só com a Lots. O restante desta lista
+(papéis no convite, dashboards TikTok/YouTube, Google Business no assistente) já
+está no código.
 
 ## O que devolver no chat
 

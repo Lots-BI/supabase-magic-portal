@@ -18,6 +18,7 @@ import {
 } from "@/modules/platform-hub/plugins/instagram_organic/api/date-utils";
 import { groupIntoContiguousRanges, listMissingDates } from "./instagram-profile-gap-finder";
 import { syncAllActivePluginConnections } from "@/modules/platform-hub-bridges/ph-persistence/sync-all-active-connections";
+import { resolveConnectionCadastroId } from "@/modules/platform-hub-bridges/ph-persistence/resolve-connection-cadastro";
 
 /** Meta expõe Insights de conta por ~90 dias (documentação oficial). */
 export const INSTAGRAM_PROFILE_LOOKBACK_DAYS = 89;
@@ -145,6 +146,10 @@ export async function syncInstagramProfileConnection(
       if (!isMetricsTimeseriesEnvelope(envelope) || envelope.payload.rows.length === 0) continue;
 
       envelope.payload.canonicalClientName = canonicalClientName;
+      envelope.payload.cadastroClienteId = await resolveConnectionCadastroId(
+        supabase,
+        connectionId,
+      );
       envelope.payload.platformLabel = envelope.payload.platformLabel || INSTAGRAM_PLATFORM_LABEL;
 
       await stack.metricPipeline.accept(envelope);

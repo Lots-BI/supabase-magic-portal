@@ -3,7 +3,7 @@ title: PlatformDef — Catálogo de Plataformas
 description: Métricas, KPIs, gráficos e views de cada plataforma registrada.
 status: living
 owner: Engenharia / Dados Lots BI
-last_review: 2026-06-26
+last_review: 2026-10-21
 ---
 
 # PlatformDef — Catálogo de Plataformas
@@ -131,20 +131,54 @@ Engagement rate (sessões), eventos/sessão, views/user, conv/sessão, conv/user
 
 ---
 
-## Plataformas sem PlatformDef
+## Google Business
 
-| Plataforma      | View                        | Rota                              | Status                |
-| --------------- | --------------------------- | --------------------------------- | --------------------- |
-| Google Business | `vw_google_business_diario` | `/cliente/{slug}/google-business` | `PlatformPlaceholder` |
-| TikTok          | —                           | `/cliente/{slug}/tiktok`          | `PlatformPlaceholder` |
+| Item    | Valor                           |
+| ------- | ------------------------------- |
+| Key     | `google_business`               |
+| View    | `vw_google_business_diario`     |
+| Arquivo | `google-business.ts`            |
+| Rota    | `/cliente/{slug}/google-business` |
 
-### Checklist para promover a cidadão de primeira classe
+### Métricas oficiais
 
-- [ ] Dados estáveis no Make/coletor
-- [ ] View SQL validada
-- [ ] `PlatformDef` + registry
-- [ ] Substituir placeholder por `PlatformDashboardPage`
-- [ ] Atualizar este catálogo
+profile_views, searches, direction_requests, website_clicks, phone_calls, messages,
+photo_views, reviews_count, reviews_rating (avg)
+
+### KPI derivado
+
+Ações totais = rotas + site + ligações + mensagens
+
+---
+
+## TikTok
+
+| Item     | Valor                    |
+| -------- | ------------------------ |
+| Key      | `tiktok`                 |
+| Leitura  | `dashboard_prefer_hub_long` (sem `vw_tiktok_diario`) |
+| Arquivo  | `tiktok.ts`              |
+| Campanha | `campanha`               |
+| Rota     | `/cliente/{slug}/tiktok` |
+
+### Métricas oficiais
+
+spend (soma), impressions (soma). KPI: CPM.
+
+---
+
+## YouTube
+
+| Item    | Valor                      |
+| ------- | -------------------------- |
+| Key     | `youtube`                  |
+| Leitura | `dashboard_prefer_hub_long` (sem `vw_youtube_diario`) |
+| Arquivo | `youtube.ts`               |
+| Rota    | `/cliente/{slug}/youtube`  |
+
+### Métricas oficiais
+
+views (soma), impressions (soma). KPI: views por impressão.
 
 ---
 

@@ -5,7 +5,8 @@ import { isPlatformOwnerEmail } from "@/lib/platform-owner";
 import { resolvePeriod } from "@/lib/period";
 import { getPlatformDef, PLATFORM_REGISTRY } from "@/lib/platforms/registry";
 import type { Row } from "@/lib/platforms/types";
-import { aggregatePeriod, platformViewSelect } from "@/lib/platforms/engine";
+import { aggregatePeriod } from "@/lib/platforms/engine";
+import { fetchDashboardRows } from "@/lib/platforms/fetch-dashboard-rows";
 import { z } from "zod";
 import {
   PLANO_STATUS,
@@ -247,14 +248,7 @@ async function fetchPlatformRows(
     platformKeys.map(async (key) => {
       const def = getPlatformDef(key);
       if (!def) return;
-      const { data, error } = await supabase
-        .from(def.view)
-        .select(platformViewSelect(def))
-        .eq("cliente", clienteNome)
-        .gte("data", prevFrom)
-        .lte("data", to);
-      if (error) throw new Error(error.message);
-      out[key] = (data ?? []) as Row[];
+      out[key] = await fetchDashboardRows(supabase, def, clienteNome, prevFrom, to);
     }),
   );
   return out;

@@ -35,6 +35,28 @@ describe("excludeExistingMetricRows", () => {
     expect(missing.map((row) => row.metrica)).toEqual(["results"]);
   });
 
+  it("distingue a mesma campanha em contas de anúncios diferentes", () => {
+    expect(
+      metricRowNaturalKey({
+        cliente: "Fernanda",
+        plataforma: "Meta Ads",
+        metrica: "spend",
+        data: "2026-10-01",
+        campanha: "A",
+        ad_account_id: "act_1",
+      }),
+    ).not.toBe(
+      metricRowNaturalKey({
+        cliente: "Fernanda",
+        plataforma: "Meta Ads",
+        metrica: "spend",
+        data: "2026-10-01",
+        campanha: "A",
+        ad_account_id: "act_2",
+      }),
+    );
+  });
+
   it("trata campanha nula como a unique COALESCE(campanha, '')", () => {
     expect(
       metricRowNaturalKey({

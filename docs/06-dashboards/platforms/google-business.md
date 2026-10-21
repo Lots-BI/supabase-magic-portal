@@ -1,34 +1,31 @@
 ---
 title: Google Business — Dashboard
-description: Status, view e limitações do dashboard Google Business Profile no Lots BI.
+description: Perfil Google Business Profile no portal do cliente.
 status: living
 owner: Engenharia / Dados Lots BI
-tags: [dashboard, google-business]
+tags: [dashboard, google-business, platformdef]
 difficulty: beginner
-last_review: 2026-06-26
+last_review: 2026-10-21
 ---
 
 # Google Business Profile
 
 ## Origem dos dados
 
-| Item         | Valor                                            |
-| ------------ | ------------------------------------------------ |
-| View SQL     | `vw_google_business_diario`                      |
-| Rota cliente | `/cliente/{slug}/google-business`                |
-| Status       | `PlatformPlaceholder` — sem PlatformDef completo |
+| Item         | Valor                                    |
+| ------------ | ---------------------------------------- |
+| Platform key | `google_business`                        |
+| View SQL     | `vw_google_business_diario`              |
+| Leitura UI   | RPC `dashboard_prefer_hub_long`          |
+| PlatformDef  | `src/lib/platforms/google-business.ts`   |
+| Rota cliente | `/cliente/{slug}/google-business`        |
 
-## Situação atual
+A tela usa `PlatformDashboardPage`. O assistente de conexão lista Google Business.
 
-Dados podem existir na view, mas a UI ainda usa placeholder genérico até promoção a cidadão de primeira classe.
+## Métricas oficiais
 
-## Checklist para dashboard completo
-
-- [ ] Dados estáveis no Make/coletor
-- [ ] View SQL validada
-- [ ] `PlatformDef` + registry
-- [ ] Substituir placeholder por `PlatformDashboardPage`
-- [ ] Atualizar catálogo de plataformas
+profile_views, searches, direction_requests, website_clicks, phone_calls, messages,
+photo_views, reviews_count (soma); reviews_rating (média). KPI: ações totais.
 
 ## Referências
 
