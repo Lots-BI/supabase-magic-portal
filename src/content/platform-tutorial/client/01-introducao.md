@@ -25,6 +25,7 @@ Se você é da **equipe interna da agência**, use o tutorial em `/admin/tutoria
 
 | Aba                   | Rota                                               | Função                                           |
 | --------------------- | -------------------------------------------------- | ------------------------------------------------ |
+| **Visão geral**       | `/cliente/{sua-marca}`                             | Números da marca no período                      |
 | **Dashboards**        | `/dashboard`                                       | Entrar no dashboard de cada plataforma           |
 | **Relatório**         | `/cliente/{sua-marca}/relatorio`                   | O que aconteceu no período — visual, sem análise |
 | **Plano Estratégico** | `/plano-estrategico`                               | Objetivos e estratégias acordados com a agência  |

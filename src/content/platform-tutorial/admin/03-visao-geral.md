@@ -23,12 +23,14 @@ O **Centro executivo** consolida a performance de **todos os clientes** em um ú
 | Clientes ativos    | Quantos clientes têm dados recentes    | RPC `portfolio_clientes_ativos` |
 | Alcance Instagram  | Alcance agregado (MAX por cliente/dia) | overview |
 | Sessões GA4        | Tráfego do site                        | overview |
-| Conversões         | Resultados Meta + Google + GA4 (CPA)   | `overviewConversions()` |
+| Resultados         | Métrica que as campanhas usam para otimizar a entrega | Meta results + Google + GA4 |
 
 Cada card mostra **delta** vs período anterior (pill verde/vermelha).
 
 > **Não** some conversões do pixel Meta (`meta_conversions`) em cima de Resultados — seria dobro.
 > GA4 Make parou em 17/08/2026; na janela de 30 dias o GA4 pode ser zero mesmo com Meta ativo.
+
+**Ver como cliente** abre a visão geral daquela marca (não o hub de dashboards). Lá o terceiro card começa em Conversas por mensagem; a escolha fica no navegador.
 
 Se a tela ficar em branco ou “timeout”, faça **Ctrl+F5**. Os números vêm do servidor, não de um SELECT pesado na view.
 

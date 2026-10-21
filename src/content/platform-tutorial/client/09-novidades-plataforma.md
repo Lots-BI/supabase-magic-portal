@@ -25,13 +25,13 @@ Cada entrada traz:
 
 A novidade mais recente aparece destacada no topo.
 
-## Exemplo recente (set/2026)
+## Exemplo recente (out/2026)
 
-- **Relatório visual:** a aba **Relatório** mostra o que aconteceu no período em números e gráficos. Canal sem coleta nem aparece. Capítulo **Relatório**.
-- **Conteúdos:** o post da sua vez aparece grande. Toque, leia os três cartões, grave na câmera, verde para sim e âmbar para mudar.
-- **Meta Ads — Resultados:** o dashboard Meta Ads mostra a coluna Resultados do Gerenciador (venda, lead, etc.). Use **Puxar métricas** se algum dia estiver vazio.
+- **Dashboards:** recorte **Pulso** nos cards; **Editar visualização** troca o modelo ou salva o seu. Ranking e tabela diária continuam com todas as métricas. Capítulo **Plataformas de mídia**.
+- **Visão geral:** o terceiro card começa em Conversas por mensagem. Resultados é a métrica que as campanhas usam para otimizar a entrega.
+- **Relatório visual:** a aba **Relatório** mostra o período em números e gráficos. Canal sem coleta nem aparece.
+- **Conteúdos:** o post da sua vez aparece grande. Toque, leia os três cartões, grave na câmera.
 - **Conexões:** conecte Instagram e Meta Ads você mesmo em **Conexões**.
-- **Publicações Instagram:** métricas por post com miniaturas (capítulo **Publicações Instagram**).
 
 Quando houver novidade nova, o sino do topo avisa. Se as notificações do navegador estiverem permitidas para o Lots BI, também aparece um aviso do sistema.
 

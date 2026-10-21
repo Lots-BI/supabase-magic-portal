@@ -156,7 +156,6 @@ export const instagramDef: PlatformDef = {
       key: "follows",
       column: "follows",
       label: "Novos seguidores",
-      short: "Novos",
       format: "int",
       aggregation: { kind: "sum" },
       icon: UserPlus,
@@ -184,7 +183,7 @@ export const instagramDef: PlatformDef = {
       icon: Users,
       positiveIsGood: true,
       description:
-        "Total de seguidores do perfil no último dia coletado. A Graph API entrega o estoque atual; a plataforma guarda o snapshot de ontem.",
+        "Total de seguidores do perfil agora. A Graph API não envia o histórico dia a dia, então este número não entra na tabela diária.",
     },
     {
       key: "following_count",
@@ -194,7 +193,7 @@ export const instagramDef: PlatformDef = {
       aggregation: { kind: "last" },
       icon: Users,
       positiveIsGood: true,
-      description: "Quantas contas este perfil segue (snapshot de ontem).",
+      description: "Quantas contas este perfil segue agora. Estoque atual, fora da tabela diária.",
     },
     {
       key: "media_count",
@@ -205,7 +204,7 @@ export const instagramDef: PlatformDef = {
       aggregation: { kind: "last" },
       icon: Eye,
       positiveIsGood: true,
-      description: "Quantidade de mídias no perfil no snapshot de ontem.",
+      description: "Quantidade de mídias no perfil agora. Estoque atual, fora da tabela diária.",
     },
   ],
   heroMetrics: ["reach", "views", "accounts_engaged", "interactions"],

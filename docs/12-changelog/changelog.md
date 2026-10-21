@@ -46,6 +46,27 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Alterado
 
+- **Novidades, tutorial e diagnóstico (2026-10-20):** as abas Novidades,
+  Tutorial, Knowledge Center, AI Workspace, Painel operacional, Auditoria de
+  views, Privacidade e Termos descrevem os recortes dos dashboards. O sino
+  avisa a novidade. O painel operacional conta o hub e lê cada view diária
+  na coluna certa.
+
+- **Dashboards: templates de análise (2026-10-20):** cada plataforma abre no
+  recorte Pulso, só nos cards. Em Editar visualização dá para escolher
+  Eficiência, Entrega, Resultado, Engajamento, Vídeo, Perfil ou Tudo, ou
+  montar e salvar o próprio recorte (admin e cliente, neste navegador). Ranking,
+  coleta diária, gráficos e comparativo continuam com todas as métricas. A
+  coleta não muda.
+
+- **Dashboards: ranking com todas as métricas (2026-10-20):** a linha da
+  campanha mostra o total de cada métrica no período. Expandir mostra a mesma
+  coleta, um dia por linha.
+
+- **Dashboards: editar visualização (2026-10-20):** cada dashboard de plataforma
+  tem o botão Editar visualização. Os cards de métrica e KPI podem ser arrastados,
+  e a ordem fica salva no navegador daquela plataforma.
+
 - **Visão geral: métrica do terceiro card (2026-10-20):** o card abre em
   Conversas por mensagem iniciadas. Quem vê a conta troca a métrica, e a escolha
   fica salva no navegador daquela conta.
@@ -54,8 +75,9 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
   Resultados. O (i) explica que é a métrica que as campanhas usam para otimizar
   a entrega de usuários.
 
-- **Visão geral: Seguidores Instagram (2026-10-20):** a troca de métrica inclui
-  o total de seguidores do perfil no último dia do período.
+- **Instagram: estoque fora da tabela diária (2026-10-20):** seguidores, seguindo
+  e publicações são o total atual do perfil. A API não manda o ganho de cada dia,
+  então esses três saem da tabela diária e ficam só nos cards, sem variação falsa.
 
 - **Menu Visão geral (2026-10-20):** o item da conta abre só a visão daquele
   cliente. Visão geral e Dashboards não ficam ativos ao mesmo tempo.
@@ -109,6 +131,10 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
   ranking, a coleta diária, o custo por seguidor e a coluna da estrutura.
 
 ### Corrigido
+
+- **Meta Ads: aba Conjuntos vazia (2026-10-20):** a chave do conjunto no hub
+  tem cinco campos (sem o nome do anúncio). A tela exigia seis e descartava
+  todas as linhas. A aba Conjuntos volta a listar os conjuntos do período.
 
 - **Coleta Meta Ads cortada em 1000 linhas (2026-10-20):** o dashboard lia só o
   primeiro milhar. Com conjunto e anúncio no mesmo recorte, gasto, resultados e

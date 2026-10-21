@@ -3,7 +3,7 @@ title: Dashboards — KPIs, Fórmulas e Telas
 description: Catálogo das telas analíticas, métricas exibidas e fórmulas oficiais.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-20
 ---
 
 # Dashboards
@@ -60,11 +60,14 @@ Componente genérico `PlatformDashboard` (ver
 (Google Ads, Meta Ads, Instagram, GA4):
 
 - Header narrativo com as perguntas de negócio.
-- Cards hero + KPIs.
-- Gráficos declarados no `PlatformDef`.
-- Comparativo período atual × anterior (tabela).
-- **Ranking de campanhas** (quando há `campaignField`).
-- Tabela diária + insights automáticos.
+- Cards do template ativo. O padrão é **Pulso** (até quatro números). Em
+  **Editar visualização** dá para escolher um recorte de mercado, montar o
+  próprio (incluir/tirar cards, nomear e salvar) e arrastar a ordem. Admin e
+  cliente gravam no navegador, por plataforma. Catálogo:
+  `src/lib/platforms/dashboard-templates.ts`. O template **só muda os cards**.
+- Gráficos, comparativo, tabela diária e insights listam todas as métricas.
+- **Ranking de campanhas** (quando há `campaignField`): a linha da campanha tem
+  todas as métricas do período. Expandir mostra a mesma coleta, um dia por linha.
 
 > **Cobertura atual:** Google Ads, Meta Ads, Instagram e GA4 têm `PlatformDef`. Google
 > Business tem view mas ainda não tem `PlatformDef`; TikTok não tem view nem `PlatformDef`

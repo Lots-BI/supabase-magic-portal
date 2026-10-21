@@ -71,8 +71,9 @@ Coleta de **publicações** (`/publicacoes`, feed/reels/stories) é independente
 | media_count        | media_count        | **last**  |
 
 `follows` e `unfollows` vêm de `follows_and_unfollows` com `breakdown=follow_type`
-(seguir versus deixar de seguir). `followers_count` é o estoque do perfil gravado
-no dia de ontem — a Graph API não envia a série histórica.
+(seguir versus deixar de seguir). `followers_count`, `following_count` e
+`media_count` são o estoque atual do perfil. A Graph API não envia a série
+histórica, então esses três ficam só nos cards e não na tabela diária.
 
 ## KPIs derivados
 

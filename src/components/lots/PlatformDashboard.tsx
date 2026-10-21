@@ -7,13 +7,32 @@
 // ============================================================================
 
 import { useSuspenseQuery, useQuery, queryOptions, keepPreviousData } from "@tanstack/react-query";
-import { Fragment, Suspense, useMemo, useState } from "react";
-import { Inbox, Sparkles, TrendingDown, TrendingUp, Trophy, ChevronRight } from "lucide-react";
+import { Fragment, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Inbox, Sparkles, TrendingDown, TrendingUp, Trophy, ChevronRight, GripVertical, Plus, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { PlatformDef, Row, ValueFormat } from "@/lib/platforms/types";
 import type { CommonMetric } from "@/lib/metrics";
 import { METRIC_META, resolveMetricDescription } from "@/lib/metrics";
-import { aggregatePeriod, pctDelta } from "@/lib/platforms/engine";
+import { aggregatePeriod, deriveKpis, pctDelta } from "@/lib/platforms/engine";
 import {
   OBJECTIVE_RESULT_DESCRIPTION,
   OBJECTIVE_RESULT_KEY,
@@ -21,6 +40,22 @@ import {
   summarizeResultSources,
 } from "@/lib/platforms/result-sources";
 import { fetchDashboardRows } from "@/lib/platforms/fetch-dashboard-rows";
+import {
+  DASHBOARD_TEMPLATES,
+  DEFAULT_DASHBOARD_TEMPLATE,
+  PERSONALIZADO_ID,
+  isCustomTemplateId,
+  newCustomTemplateId,
+  readCustomTemplates,
+  readTemplateId,
+  removeCustomTemplate,
+  resolveTemplate,
+  templateFits,
+  upsertCustomTemplate,
+  visibleCardIds,
+  writeTemplateId,
+  type SavedDashboardTemplate,
+} from "@/lib/platforms/dashboard-templates";
 import type { Period } from "@/lib/period";
 import { formatBR } from "@/lib/period";
 import { SectionCard } from "./SectionCard";
@@ -132,9 +167,7 @@ function PlatformDashboardBody({ def, cliente, period }: Props) {
         </SectionCard>
       ) : (
         <>
-          <HeroCards def={def} agg={agg} rows={rows} period={period} />
-          <ExtraMetricCards def={def} agg={agg} />
-          <KpiCards def={def} agg={agg} />
+          <StatBoard def={def} agg={agg} rows={rows} period={period} />
           {def.campaignField ? (
             <CampaignRanking
               def={def}
@@ -159,6 +192,10 @@ function PlatformDashboardBody({ def, cliente, period }: Props) {
 
 // ---------- Cards ----------------------------------------------------------
 
+function isStockMetric(metric: { aggregation: { kind: string } }): boolean {
+  return metric.aggregation.kind === "last";
+}
+
 function metricDescription(key: string, explicit?: string): string | undefined {
   if (explicit) return explicit;
   const common = key as CommonMetric;
@@ -166,7 +203,88 @@ function metricDescription(key: string, explicit?: string): string | undefined {
   return resolveMetricDescription(key);
 }
 
-function HeroCards({
+const CARD_LAYOUT_STORAGE = "lots.dashboard.cards";
+
+function defaultCardIds(def: PlatformDef): string[] {
+  const heroes = def.heroMetrics.filter((key) => def.metrics.some((metric) => metric.key === key));
+  const extras = def.metrics
+    .filter((metric) => !def.heroMetrics.includes(metric.key))
+    .map((metric) => metric.key);
+  return [
+    ...heroes.map((key) => `metric:${key}`),
+    ...extras.map((key) => `metric:${key}`),
+    ...def.kpis.map((kpi) => `kpi:${kpi.key}`),
+  ];
+}
+
+function readCardOrder(platformKey: string, defaults: string[]): string[] {
+  if (typeof window === "undefined") return defaults;
+  try {
+    const raw = window.localStorage.getItem(`${CARD_LAYOUT_STORAGE}:${platformKey}`);
+    if (!raw) return defaults;
+    const stored = JSON.parse(raw) as unknown;
+    if (!Array.isArray(stored)) return defaults;
+    const known = new Set(defaults);
+    const kept = stored.filter((id): id is string => typeof id === "string" && known.has(id));
+    const missing = defaults.filter((id) => !kept.includes(id));
+    return [...kept, ...missing];
+  } catch {
+    return defaults;
+  }
+}
+
+function SortableStat({
+  id,
+  editing,
+  onHide,
+  children,
+}: {
+  id: string;
+  editing: boolean;
+  onHide?: () => void;
+  children: ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    disabled: !editing,
+  });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn("min-w-0", isDragging && "z-20 opacity-80")}
+    >
+      <div className="relative h-full">
+        {editing ? (
+          <>
+            <button
+              type="button"
+              className="lots-focus absolute left-2 top-2 z-10 inline-flex h-7 w-7 cursor-grab items-center justify-center rounded-md border border-border bg-card text-muted-foreground active:cursor-grabbing"
+              aria-label="Arrastar card"
+              {...attributes}
+              {...listeners}
+            >
+              <GripVertical className="h-3.5 w-3.5" />
+            </button>
+            {onHide ? (
+              <button
+                type="button"
+                className="lots-focus absolute right-2 top-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-card text-muted-foreground"
+                aria-label="Tirar card deste recorte"
+                onClick={onHide}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
+          </>
+        ) : null}
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function StatBoard({
   def,
   agg,
   rows,
@@ -177,7 +295,26 @@ function HeroCards({
   rows: Row[];
   period: Period;
 }) {
+  const defaults = useMemo(() => defaultCardIds(def), [def]);
+  const [editing, setEditing] = useState(false);
+  const [draftName, setDraftName] = useState("");
+  const [customs, setCustoms] = useState<SavedDashboardTemplate[]>(() => readCustomTemplates(def.key));
+  const [templateId, setTemplateId] = useState(() => readTemplateId(def.key, readCustomTemplates(def.key)));
+  const [order, setOrder] = useState<string[]>(() => readCardOrder(def.key, defaults));
   const [resultKey, setResultKey] = useState("results");
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  useEffect(() => {
+    const saved = readCustomTemplates(def.key);
+    setCustoms(saved);
+    setTemplateId(readTemplateId(def.key, saved));
+    setOrder(readCardOrder(def.key, defaults));
+    setDraftName("");
+  }, [def.key, defaults]);
+
   const slices = useMemo(
     () =>
       summarizeResultSources(
@@ -187,7 +324,6 @@ function HeroCards({
       ),
     [rows, period],
   );
-  const heroes = def.metrics.filter((m) => def.heroMetrics.includes(m.key));
   const labelOf = (key: string) =>
     def.metrics.find((metric) => metric.key === key)?.label ??
     (key === "instagram_profile_follows" ? "Seguidores via anúncio" : key);
@@ -197,120 +333,273 @@ function HeroCards({
       slice.key === OBJECTIVE_RESULT_KEY
         ? "Resultado do objetivo"
         : `Resultado · ${labelOf(slice.key)}`,
-        description:
-          slice.key === OBJECTIVE_RESULT_KEY
-            ? OBJECTIVE_RESULT_DESCRIPTION
-            : `Vezes em que «${labelOf(slice.key)}» foi a coluna Resultados do Gerenciador. O card com esse nome soma a métrica em todas as campanhas, mesmo quando o resultado do dia foi outro número.`,
+    description:
+      slice.key === OBJECTIVE_RESULT_KEY
+        ? OBJECTIVE_RESULT_DESCRIPTION
+        : `Vezes em que «${labelOf(slice.key)}» foi a coluna Resultados do Gerenciador. O card com esse nome soma a métrica em todas as campanhas, mesmo quando o resultado do dia foi outro número.`,
     value: formatValue("int", slice.current),
     current: slice.current,
     previous: slice.previous,
   }));
   const showResultMenu = resultOptions.some((option) => option.key !== OBJECTIVE_RESULT_KEY);
 
-  return (
-    <section className="relative isolate grid grid-cols-2 gap-3 lg:grid-cols-4">
-      {heroes.map((m, i) => {
-        const isResults = m.key === "results" && showResultMenu;
-        const chosen =
-          isResults && resultKey !== "results"
-            ? resultOptions.find((option) => option.key === resultKey)
-            : undefined;
-        const cur = chosen ? chosen.current : (agg.current[m.key] ?? 0);
-        const prev = chosen ? chosen.previous : (agg.previous[m.key] ?? 0);
-        const total = agg.current.results ?? 0;
-        return (
-          <StatCard
-            key={m.key}
-            label={chosen?.label ?? m.label}
-            value={formatValue(chosen ? "int" : m.format, cur)}
-            icon={m.icon}
-            delta={pctDelta(cur, prev)}
-            positiveIsGood={m.positiveIsGood ?? true}
-            emphasis={i === 0 ? "hero" : "default"}
-            description={
-              chosen?.description ??
-              metricDescription(m.key, m.description)
-            }
-            className={cn(i === 0 ? "lg:col-span-2" : undefined, isResults && "z-10")}
-            hint={
-              chosen
-                ? `Total de resultados: ${formatValue("int", total)}`
-                : undefined
-            }
-            options={
-              isResults
-                ? [
-                    {
-                      key: "results",
-                      label: "Total",
-                      value: formatValue("int", total),
-                      description: TOTAL_RESULTS_DESCRIPTION,
-                    },
-                    ...resultOptions,
-                  ]
-                : undefined
-            }
-            selectedKey={resultKey}
-            onSelect={setResultKey}
-          />
-        );
-      })}
-    </section>
-  );
-}
+  const lensId = templateFits(defaults, templateId, customs) ? templateId : DEFAULT_DASHBOARD_TEMPLATE;
+  const lens = resolveTemplate(lensId, customs);
+  const catalog = DASHBOARD_TEMPLATES.filter((template) => templateFits(defaults, template.id));
+  const focused = isCustomTemplateId(lensId) || lensId !== "tudo";
 
-function ExtraMetricCards({
-  def,
-  agg,
-}: {
-  def: PlatformDef;
-  agg: ReturnType<typeof aggregatePeriod>;
-}) {
-  const extras = def.metrics.filter((m) => !def.heroMetrics.includes(m.key));
-  if (extras.length === 0) return null;
-  return (
-    <section className="relative isolate grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-      {extras.map((m) => {
-        const cur = agg.current[m.key] ?? 0;
-        const prev = agg.previous[m.key] ?? 0;
-        return (
-          <StatCard
-            key={m.key}
-            label={m.label}
-            value={formatValue(m.format, cur)}
-            icon={m.icon}
-            delta={pctDelta(cur, prev)}
-            positiveIsGood={m.positiveIsGood ?? true}
-            emphasis="compact"
-            description={metricDescription(m.key, m.description)}
-          />
-        );
-      })}
-    </section>
-  );
-}
+  function persistOrder(next: string[]) {
+    setOrder(next);
+    try {
+      window.localStorage.setItem(`${CARD_LAYOUT_STORAGE}:${def.key}`, JSON.stringify(next));
+    } catch {
+      /* navegador sem storage */
+    }
+  }
 
-function KpiCards({ def, agg }: { def: PlatformDef; agg: ReturnType<typeof aggregatePeriod> }) {
-  if (def.kpis.length === 0) return null;
+  function selectTemplate(id: string) {
+    setTemplateId(id);
+    writeTemplateId(def.key, id);
+    const picked = customs.find((template) => template.id === id);
+    setDraftName(picked && picked.id !== PERSONALIZADO_ID ? picked.label : "");
+  }
+
+  const focusIds = useMemo(
+    () => visibleCardIds(defaults, lensId, customs),
+    [defaults, lensId, customs],
+  );
+
+  const shown = useMemo(() => {
+    const allow = new Set(focusIds);
+    const kept = order.filter((id) => allow.has(id));
+    const missing = focusIds.filter((id) => !kept.includes(id));
+    return [...kept, ...missing];
+  }, [order, focusIds]);
+
+  const hidden = defaults.filter((id) => !shown.includes(id));
+
+  function cardTitle(id: string): string {
+    if (id.startsWith("metric:")) {
+      return def.metrics.find((metric) => metric.key === id.slice("metric:".length))?.label ?? id;
+    }
+    return def.kpis.find((kpi) => kpi.key === id.slice("kpi:".length))?.label ?? id;
+  }
+
+  function rememberVisible(nextShown: string[]) {
+    const unique = nextShown.filter((id, index) => defaults.includes(id) && nextShown.indexOf(id) === index);
+    if (unique.length === 0) return;
+    const current = customs.find((template) => template.id === lensId);
+    const draft: SavedDashboardTemplate = isCustomTemplateId(lensId)
+      ? { id: lensId, label: current?.label ?? "Personalizado", cardIds: unique }
+      : { id: PERSONALIZADO_ID, label: "Personalizado", cardIds: unique };
+    setCustoms(upsertCustomTemplate(def.key, draft, customs));
+    if (draft.id !== lensId) selectTemplate(draft.id);
+    persistOrder([...unique, ...order.filter((id) => !unique.includes(id))]);
+  }
+
+  function onDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = shown.indexOf(String(active.id));
+    const to = shown.indexOf(String(over.id));
+    if (from < 0 || to < 0) return;
+    rememberVisible(arrayMove(shown, from, to));
+  }
+
+  function hideCard(id: string) {
+    if (shown.length <= 1) return;
+    rememberVisible(shown.filter((item) => item !== id));
+  }
+
+  function showCard(id: string) {
+    rememberVisible([...shown, id]);
+  }
+
+  function saveNamed() {
+    const label = draftName.trim();
+    if (!label || shown.length === 0) return;
+    const keepId =
+      isCustomTemplateId(lensId) && lensId !== PERSONALIZADO_ID ? lensId : newCustomTemplateId();
+    const withoutDraft =
+      lensId === PERSONALIZADO_ID ? removeCustomTemplate(def.key, PERSONALIZADO_ID, customs) : [...customs];
+    const next = upsertCustomTemplate(def.key, { id: keepId, label, cardIds: shown }, withoutDraft);
+    setCustoms(next);
+    selectTemplate(keepId);
+    setDraftName(label);
+  }
+
+  function deleteCustom(id: string) {
+    const next = removeCustomTemplate(def.key, id, customs);
+    setCustoms(next);
+    if (lensId === id) selectTemplate(DEFAULT_DASHBOARD_TEMPLATE);
+  }
+
+  function renderCard(id: string) {
+    if (id.startsWith("metric:")) {
+      const key = id.slice("metric:".length);
+      const metric = def.metrics.find((item) => item.key === key);
+      if (!metric) return null;
+      const isResults = metric.key === "results" && showResultMenu;
+      const chosen =
+        isResults && resultKey !== "results"
+          ? resultOptions.find((option) => option.key === resultKey)
+          : undefined;
+      const cur = chosen ? chosen.current : (agg.current[metric.key] ?? 0);
+      const prev = chosen ? chosen.previous : (agg.previous[metric.key] ?? 0);
+      const total = agg.current.results ?? 0;
+      const hero = focused || def.heroMetrics.includes(metric.key);
+      return (
+        <StatCard
+          label={chosen?.label ?? metric.label}
+          value={formatValue(chosen ? "int" : metric.format, cur)}
+          icon={metric.icon}
+          delta={isStockMetric(metric) ? null : pctDelta(cur, prev)}
+          positiveIsGood={metric.positiveIsGood ?? true}
+          emphasis={hero ? "default" : "compact"}
+          description={chosen?.description ?? metricDescription(metric.key, metric.description)}
+          className={isResults ? "z-10" : undefined}
+          hint={chosen ? `Total de resultados: ${formatValue("int", total)}` : undefined}
+          options={
+            isResults
+              ? [
+                  {
+                    key: "results",
+                    label: "Total",
+                    value: formatValue("int", total),
+                    description: TOTAL_RESULTS_DESCRIPTION,
+                  },
+                  ...resultOptions,
+                ]
+              : undefined
+          }
+          selectedKey={resultKey}
+          onSelect={setResultKey}
+        />
+      );
+    }
+    const key = id.slice("kpi:".length);
+    const kpi = def.kpis.find((item) => item.key === key);
+    if (!kpi) return null;
+    const cur = agg.currentKpis[kpi.key] ?? 0;
+    const prev = agg.previousKpis[kpi.key] ?? 0;
+    return (
+      <StatCard
+        label={kpi.label}
+        value={formatValue(kpi.format, cur)}
+        icon={kpi.icon}
+        delta={pctDelta(cur, prev)}
+        positiveIsGood={kpi.positiveIsGood}
+        emphasis={focused ? "default" : "compact"}
+        description={metricDescription(kpi.key, kpi.description)}
+      />
+    );
+  }
+
+  if (defaults.length === 0) return null;
+
   return (
-    <section className="relative isolate grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-5">
-      {def.kpis.map((k) => {
-        const cur = agg.currentKpis[k.key] ?? 0;
-        const prev = agg.previousKpis[k.key] ?? 0;
-        return (
-          <StatCard
-            key={k.key}
-            label={k.label}
-            value={formatValue(k.format, cur)}
-            icon={k.icon}
-            delta={pctDelta(cur, prev)}
-            positiveIsGood={k.positiveIsGood}
-            emphasis="compact"
-            description={metricDescription(k.key, k.description)}
-          />
-        );
-      })}
-    </section>
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[13px] font-medium text-foreground">{lens.label}</p>
+          <p className="text-[12px] text-muted-foreground">{lens.description}</p>
+        </div>
+        <Button type="button" variant="outline" size="sm" onClick={() => setEditing((was) => !was)}>
+          {editing ? "Concluir" : "Editar visualização"}
+        </Button>
+      </div>
+      {editing ? (
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Templates de análise">
+            {catalog.map((template) => (
+              <Button
+                key={template.id}
+                type="button"
+                size="sm"
+                variant={template.id === lensId ? "default" : "outline"}
+                onClick={() => selectTemplate(template.id)}
+              >
+                {template.label}
+              </Button>
+            ))}
+            {customs.map((template) => (
+              <span key={template.id} className="inline-flex items-center">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={template.id === lensId ? "default" : "outline"}
+                  className="rounded-r-none"
+                  onClick={() => selectTemplate(template.id)}
+                >
+                  {template.label}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={template.id === lensId ? "default" : "outline"}
+                  className="rounded-l-none border-l-0 px-2"
+                  aria-label={`Excluir ${template.label}`}
+                  onClick={() => deleteCustom(template.id)}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </span>
+            ))}
+          </div>
+          <form
+            className="flex flex-wrap items-center gap-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              saveNamed();
+            }}
+          >
+            <Input
+              value={draftName}
+              onChange={(event) => setDraftName(event.target.value)}
+              placeholder="Nome do seu recorte"
+              className="h-8 w-[220px]"
+              aria-label="Nome do template"
+            />
+            <Button type="submit" size="sm" variant="outline" disabled={draftName.trim().length === 0}>
+              Salvar template
+            </Button>
+          </form>
+          <p className="text-[12px] text-muted-foreground">
+            Os templates só mudam os cards. Tire o que não entra neste recorte; as métricas
+            fora ficam abaixo para incluir de novo. Arraste pelo ícone para ordenar.
+          </p>
+        </div>
+      ) : null}
+      {shown.length > 0 ? (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+          <SortableContext items={shown} strategy={rectSortingStrategy}>
+            <section className="relative isolate grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {shown.map((id) => (
+                <SortableStat
+                  key={id}
+                  id={id}
+                  editing={editing}
+                  onHide={editing && shown.length > 1 ? () => hideCard(id) : undefined}
+                >
+                  {renderCard(id)}
+                </SortableStat>
+              ))}
+            </section>
+          </SortableContext>
+        </DndContext>
+      ) : null}
+      {editing && hidden.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-[12px] text-muted-foreground">Fora deste recorte:</p>
+          {hidden.map((id) => (
+            <Button key={id} type="button" size="sm" variant="ghost" onClick={() => showCard(id)}>
+              <Plus className="mr-1 h-3.5 w-3.5" />
+              {cardTitle(id)}
+            </Button>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -388,7 +677,7 @@ function ComparisonBlock({
   period: Period;
 }) {
   const rows = [
-    ...def.metrics.map((metric) => ({
+    ...def.metrics.filter((metric) => !isStockMetric(metric)).map((metric) => ({
       key: metric.key,
       label: metric.label,
       format: metric.format,
@@ -514,21 +803,15 @@ function CampaignRanking({
     .filter((c) => c.campanha.trim().length > 0)
     .sort((a, b) => (b.totals[sortKey] ?? 0) - (a.totals[sortKey] ?? 0));
   if (ranked.length === 0) return null;
-  const cols = (def.rankingMetrics ?? def.heroMetrics)
-    .map((key) => def.metrics.find((metric) => metric.key === key))
-    .filter((metric): metric is (typeof def.metrics)[number] => metric != null);
-  const dailyMetrics = [
-    ...cols,
-    ...def.metrics.filter((metric) => !cols.some((col) => col.key === metric.key)),
-  ];
-  const kpiCols = def.kpis.slice(0, 3);
+  const cols = def.metrics.filter((metric) => !isStockMetric(metric));
+  const kpiCols = def.kpis;
   const colSpan = 3 + cols.length + kpiCols.length;
 
   return (
     <SectionCard
       eyebrow="Campanhas"
       title="Ranking por desempenho"
-      description="Clique na campanha para ver a coleta diária dela. Ativa ou inativa é o estado atual no gerenciador — entra na próxima coleta."
+      description="Cada linha é o total da campanha no período, com todas as métricas. Abra para ver a mesma coleta, um dia por linha. Ativa ou inativa é o estado atual no gerenciador."
       bodyClassName="px-0 py-0"
     >
       <div className="lots-table-scroll">
@@ -642,11 +925,20 @@ function CampaignRanking({
                             <thead className="text-left text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
                               <tr>
                                 <th className="px-3 py-2 font-medium">Dia</th>
-                                {dailyMetrics.map((m) => (
+                                {cols.map((m) => (
                                   <th key={m.key} className="px-3 py-2 text-right font-medium">
                                     <MetricLabel
                                       label={m.short ?? m.label}
                                       description={m.description ?? m.label}
+                                      className="ml-auto normal-case tracking-normal"
+                                    />
+                                  </th>
+                                ))}
+                                {kpiCols.map((k) => (
+                                  <th key={k.key} className="px-3 py-2 text-right font-medium">
+                                    <MetricLabel
+                                      label={k.label}
+                                      description={k.description}
                                       className="ml-auto normal-case tracking-normal"
                                     />
                                   </th>
@@ -657,28 +949,49 @@ function CampaignRanking({
                               {daily.length === 0 ? (
                                 <tr>
                                   <td
-                                    colSpan={1 + dailyMetrics.length}
+                                    colSpan={1 + cols.length + kpiCols.length}
                                     className="px-3 py-3 text-muted-foreground"
                                   >
                                     Sem dias neste período.
                                   </td>
                                 </tr>
                               ) : (
-                                daily.map((day) => (
-                                  <tr key={day.data} className="border-t border-border">
-                                    <td className="whitespace-nowrap px-3 py-2 tabular-nums text-foreground">
-                                      {formatBR(day.data)}
-                                    </td>
-                                    {dailyMetrics.map((m) => (
-                                      <td
-                                        key={m.key}
-                                        className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-foreground"
-                                      >
-                                        {formatValue(m.format, (day[m.key] as number | undefined) ?? 0)}
+                                daily.map((day) => {
+                                  const totals: Record<string, number> = {};
+                                  for (const metric of cols) {
+                                    const n = Number(day[metric.column] ?? day[metric.key] ?? 0);
+                                    totals[metric.key] = Number.isFinite(n) ? n : 0;
+                                  }
+                                  const dayKpis = deriveKpis(def, totals, {
+                                    ...period,
+                                    from: day.data,
+                                    to: day.data,
+                                    days: 1,
+                                  });
+                                  return (
+                                    <tr key={day.data} className="border-t border-border">
+                                      <td className="whitespace-nowrap px-3 py-2 tabular-nums text-foreground">
+                                        {formatBR(day.data)}
                                       </td>
-                                    ))}
-                                  </tr>
-                                ))
+                                      {cols.map((m) => (
+                                        <td
+                                          key={m.key}
+                                          className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-foreground"
+                                        >
+                                          {formatValue(m.format, totals[m.key] ?? 0)}
+                                        </td>
+                                      ))}
+                                      {kpiCols.map((k) => (
+                                        <td
+                                          key={k.key}
+                                          className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-muted-foreground"
+                                        >
+                                          {formatValue(k.format, dayKpis[k.key] ?? 0)}
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  );
+                                })
                               )}
                             </tbody>
                           </table>
@@ -707,13 +1020,18 @@ function DailyTable({
   agg: ReturnType<typeof aggregatePeriod>;
   period: Period;
 }) {
-  // Ordem mais recente primeiro.
+  const series = def.metrics.filter((metric) => !isStockMetric(metric));
   const rows = [...agg.daily].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const hasStock = def.metrics.some((metric) => isStockMetric(metric));
   return (
     <SectionCard
       eyebrow="Detalhamento"
       title="Tabela diária"
-      description={`Uma linha por dia entre ${formatBR(period.from)} e ${formatBR(period.to)}.`}
+      description={`Uma linha por dia entre ${formatBR(period.from)} e ${formatBR(period.to)}.${
+        hasStock
+          ? " Seguidores, seguindo e publicações são o total atual do perfil e ficam nos cards."
+          : ""
+      }`}
       bodyClassName="px-0 py-0"
     >
       <div className="max-h-[480px] overflow-auto">
@@ -721,7 +1039,7 @@ function DailyTable({
           <thead className="sticky top-0 bg-card text-left text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground shadow-[inset_0_-1px_0_var(--border)]">
             <tr>
               <th className="px-4 py-2.5 font-medium">Dia</th>
-              {def.metrics.map((m) => (
+              {series.map((m) => (
                 <th key={m.key} className="px-4 py-2.5 text-right font-medium">
                   <MetricLabel
                     label={m.short ?? m.label}
@@ -738,7 +1056,7 @@ function DailyTable({
                 <td className="whitespace-nowrap px-4 py-2 tabular-nums text-foreground">
                   {formatBR(r.date as string)}
                 </td>
-                {def.metrics.map((m) => (
+                {series.map((m) => (
                   <td
                     key={m.key}
                     className="whitespace-nowrap px-4 py-2 text-right tabular-nums text-foreground"

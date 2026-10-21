@@ -94,6 +94,8 @@ A coleta de campanha continua sendo a fonte de gasto, alcance e resultados.
 No mesmo **Puxar métricas** o coletor também pede conjunto (`adset`) e anúncio (`ad`).
 Essas linhas usam o prefixo `nx` e aparecem na seção **Estrutura** do dashboard
 (Conjuntos, Anúncios, Turbinação), lidas por `dashboard_meta_structure_long`.
+A chave do conjunto tem cinco campos (sem anúncio); a do anúncio tem seis. A
+aba Conjuntos precisa aceitar as duas.
 O RPC do dashboard de campanha não as inclui: o PostgREST corta em 1000 linhas
 e, misturadas, elas faziam gasto e resultados do período sumirem.
 

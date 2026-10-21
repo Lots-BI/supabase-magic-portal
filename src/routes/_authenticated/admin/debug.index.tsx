@@ -92,7 +92,7 @@ function DebugPage() {
       <PageHeader
         eyebrow="Dados"
         title="Camada analítica"
-        description="Snapshot bruto de base_metricas e views."
+        description="base_metricas (Make leftover), base_metricas_hub e views. Dashboards de plataforma leem o hub via RPC paginado; conjunto e anúncio vêm de dashboard_meta_structure_long."
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -101,6 +101,11 @@ function DebugPage() {
           value={fmt(data.total_registros)}
           icon={Database}
           emphasis="hero"
+        />
+        <StatCard
+          label="Registros no hub"
+          value={fmt(data.total_hub)}
+          icon={Database}
         />
         <StatCard label="Clientes distintos" value={fmt(data.total_clientes)} icon={Users} />
         <StatCard

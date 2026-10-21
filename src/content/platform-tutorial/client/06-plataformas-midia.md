@@ -24,9 +24,9 @@ Instagram, você mesmo pode conectar sua conta em **Conexões** — veja o capí
 
 ## Anatomia de todo dashboard de plataforma
 
-### 1. Hero KPIs
+### 1. Cards do recorte
 
-2–4 números grandes — investimento, cliques, conversões, CTR (varia por plataforma).
+O padrão é **Pulso**: até quatro números para ler o período de relance. **Editar visualização** troca o recorte (Eficiência, Entrega, Resultado, Engajamento, Vídeo, Perfil ou Tudo) ou deixa você incluir, tirar e salvar os próprios cards. Isso **não** esconde métricas do ranking nem da tabela diária.
 
 ### 2. Gráficos
 
@@ -38,7 +38,7 @@ Tabela com variação % — ideal para ver se a última semana piorou um KPI esp
 
 ### 4. Ranking de campanhas
 
-Quando disponível, lista campanhas ordenadas por gasto ou conversões — identifique campeãs e freiras.
+Quando disponível (Meta Ads e Google Ads), a linha da campanha traz **todas** as métricas do período. Clique para ver a mesma coleta, um dia por linha.
 
 ### 5. Tabela diária
 
@@ -68,7 +68,7 @@ Frases sobre variações > limiar — “CTR subiu 15%”.
 | Resultados / conversões | Lead, compra, conversa — o que a campanha otimiza |
 | CPC / CPM            | Subida pode indicar leilão mais caro          |
 
-**Passo a passo:** compare donut de posicionamento (se houver) → identifique criativo vencedor no ranking.
+**Passo a passo:** ranking da campanha → abra o dia a dia → em **Estrutura**, as abas Conjuntos, Anúncios e Turbinação.
 
 Botão **Puxar métricas** (ao lado do período) busca na Meta qualquer dia sem dados de campanha
 dentro do histórico disponível — use quantas vezes precisar até completar o período.
@@ -79,6 +79,7 @@ Foco em **alcance, engajamento, interações** — não confunda com Meta Ads.
 
 - Engagement rate alto = conteúdo ressoando
 - Alcance baixo com bom engajamento = audiência fiel mas pequena
+- **Novos seguidores** é o ganho do dia. Seguidores, seguindo e publicações são o total atual do perfil — ficam nos cards, não na tabela diária.
 - Botão **Puxar métricas** (ao lado do período) busca na Meta qualquer dia sem dados dentro
   do histórico disponível (~90 dias) — use quantas vezes precisar até completar o período.
 

@@ -722,6 +722,13 @@ export const getDebugSnapshot = createServerFn({ method: "GET" })
       ),
       safe(
         context.supabase
+          .from("vw_google_ads_diario")
+          .select(DEBUG_DAILY_VIEW_SAMPLE_SELECT)
+          .order("data", { ascending: false })
+          .limit(20),
+      ),
+      safe(
+        context.supabase
           .from("vw_meta_ads_diario")
           .select(DEBUG_DAILY_VIEW_SAMPLE_SELECT)
           .order("data", { ascending: false })
@@ -749,6 +756,9 @@ export const getDebugSnapshot = createServerFn({ method: "GET" })
     const totalCount = await supabaseAdmin
       .from("base_metricas")
       .select("*", { count: "exact", head: true });
+    const hubCount = await supabaseAdmin
+      .from("base_metricas_hub")
+      .select("*", { count: "exact", head: true });
 
     const clientesSet = new Set<string>();
     (clientesRes.data as any[] | null)?.forEach((r) => r?.cliente && clientesSet.add(r.cliente));
@@ -761,6 +771,7 @@ export const getDebugSnapshot = createServerFn({ method: "GET" })
 
     return {
       total_registros: totalCount.count ?? null,
+      total_hub: hubCount.count ?? null,
       total_clientes: clientesSet.size,
       ultima_data: (ultimaDataRes.data as any[] | null)?.[0]?.data ?? null,
       auth_invite: await evaluateAuthDiagnostics(),
@@ -808,8 +819,8 @@ SELECT bm.id, bm.data, bm.cliente,
   bm.campanha, bm.created_at
 FROM public.base_metricas bm
 WHERE bm.cliente IN (SELECT cliente_nome FROM public.current_user_clientes());`,
-  vw_overview_cliente: `Filtra: plataforma IN ('meta_ads','google_ads','ga4','instagram')\nMétricas usadas: spend, impressions, clicks, sessions, conversions, reach, total_interactions`,
-  vw_meta_ads_diario: `Filtra: plataforma = 'meta_ads'\nMétricas: reach, impressions, clicks, spend, results, conversions, inline_link_clicks, unique_clicks, link_clicks, landing_page_views, video_views, post_engagements, messaging_conversations_started, messaging_first_replies, page_engagements`,
+  vw_overview_cliente: `Filtra: plataforma IN ('meta_ads','google_ads','ga4','instagram')\nA visão geral do cliente lê o RPC client_overview (migrations 84–85: conversas Meta e seguidores Instagram).`,
+  vw_meta_ads_diario: `Filtra: plataforma = 'meta_ads'\nO dashboard pagina dashboard_prefer_hub_long. Conjunto/anúncio: dashboard_meta_structure_long (prefixo nx).`,
   vw_google_ads_diario: `Filtra: plataforma = 'google_ads'\nMétricas: impressions, clicks, spend (com /1000000)`,
   vw_ga4_diario: `Filtra: plataforma = 'ga4'\nMétricas: activeusers, sessions, engagedsessions, screenpageviews, eventcount, conversions`,
   vw_instagram_diario: `Filtra: plataforma = 'instagram'\nMétricas: reach, total_interactions, accounts_engaged, likes, comments, saves, shares, profile_links_taps, views, replies, website_clicks, follows`,

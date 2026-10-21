@@ -4,7 +4,7 @@ import { LotsBIWordmark } from "@/components/lots/LotsMark";
 import { BRAND_NAME, BRAND_URL, brandTitle } from "@/lib/brand";
 import { PLATFORM_OWNER_EMAIL } from "@/lib/platform-owner";
 
-const UPDATED_ON = "29 de setembro de 2026";
+const UPDATED_ON = "20 de outubro de 2026";
 const GOOGLE_PRIVACY_POLICY_URL = "http://www.google.com/policies/privacy";
 const GOOGLE_SECURITY_SETTINGS_URL = "https://security.google.com/settings/security/permissions";
 const YOUTUBE_TERMS_URL = "https://www.youtube.com/t/terms";
@@ -118,6 +118,11 @@ function PrivacyPolicyPage() {
               dados para segurança e diagnóstico.
             </li>
             <li>Cookie de sessão para manter o login.</li>
+            <li>
+              Preferências de visualização no próprio navegador: recorte dos cards do dashboard,
+              ordem dos cards, métrica extra da visão geral e o sino de novidades. Isso não vai
+              para o servidor.
+            </li>
           </ul>
         </Section>
 

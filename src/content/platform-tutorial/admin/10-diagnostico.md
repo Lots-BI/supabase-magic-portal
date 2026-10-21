@@ -11,7 +11,7 @@ Ferramentas **técnicas e operacionais** para engenharia e admins experientes. N
 
 ### Objetivo
 
-Verificar se os **dados estão chegando** (Hub para Meta/Instagram; Make leftover para Google/GA4).
+Verificar se os **dados estão chegando** (Hub para Meta/Instagram; Make leftover para Google/GA4). O painel mostra volume de `base_metricas` e de `base_metricas_hub`. Os dashboards de plataforma leem o hub via `dashboard_prefer_hub_long` (paginado). Conjunto e anúncio: `dashboard_meta_structure_long`.
 
 ### Passo a passo
 
@@ -36,7 +36,7 @@ Verificar se os **dados estão chegando** (Hub para Meta/Instagram; Make leftove
 
 ### Objetivo
 
-Validar que as **views SQL** (`vw_overview_cliente`, `vw_clientes_ativos`, etc.) respondem e respeitam **RLS** (Row Level Security).
+Validar que as **views SQL** (`vw_overview_cliente`, `vw_meta_ads_diario`, etc.) respondem e respeitam **RLS**. A visão geral do cliente usa o RPC `client_overview`. Se a view autenticada tem dado e o dashboard não, o corte costuma ser o teto de 1000 linhas do PostgREST — a leitura agora pagina.
 
 ### Passo a passo
 

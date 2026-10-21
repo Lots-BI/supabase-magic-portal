@@ -9,7 +9,6 @@ import {
   Sparkles,
   Database,
   FileBarChart,
-  Wrench,
   Smartphone,
   Plug,
 } from "lucide-react";
@@ -18,22 +17,10 @@ import { getFavorites, getRecent } from "@/lib/knowledge-center/storage";
 
 const HIGHLIGHTS = [
   {
-    slug: "06-dashboards/operational-report",
-    title: "Relatório operacional",
-    description: "Canvas visual por cliente. Plataforma sem coleta não aparece.",
+    slug: "06-dashboards/dashboards",
+    title: "Dashboards",
+    description: "Templates de leitura, ranking completo e visão geral da marca.",
     icon: FileBarChart,
-  },
-  {
-    slug: "07-integrations/current-pipeline-hub",
-    title: "Ingestão Hub (atual)",
-    description: "Crons Meta/IG, prefer_hub, Make leftover e o que falta (OAuth Google).",
-    icon: Plug,
-  },
-  {
-    slug: "reports/overview-relatorios-timeout-audit",
-    title: "Visão geral / Relatórios",
-    description: "RPC portfolio_overview, timeout 8-union e KPI de conversões.",
-    icon: Wrench,
   },
   {
     slug: "12-changelog/changelog",
@@ -42,9 +29,21 @@ const HIGHLIGHTS = [
     icon: Sparkles,
   },
   {
+    slug: "07-integrations/current-pipeline-hub",
+    title: "Ingestão Hub (atual)",
+    description: "Crons Meta/IG, prefer_hub, Make leftover e o que falta (OAuth Google).",
+    icon: Plug,
+  },
+  {
+    slug: "06-dashboards/operational-report",
+    title: "Relatório operacional",
+    description: "Canvas visual por cliente. Plataforma sem coleta não aparece.",
+    icon: FileBarChart,
+  },
+  {
     slug: "04-database/migrations",
     title: "Migrations",
-    description: "Ordem oficial 01→57, idempotência e validação.",
+    description: "Ordem oficial até 85, idempotência e validação.",
     icon: Database,
   },
   {

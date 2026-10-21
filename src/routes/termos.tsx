@@ -4,7 +4,7 @@ import { LotsBIWordmark } from "@/components/lots/LotsMark";
 import { BRAND_NAME, BRAND_URL, brandTitle } from "@/lib/brand";
 import { PLATFORM_OWNER_EMAIL } from "@/lib/platform-owner";
 
-const UPDATED_ON = "29 de setembro de 2026";
+const UPDATED_ON = "20 de outubro de 2026";
 const YOUTUBE_TERMS_URL = "https://www.youtube.com/t/terms";
 const GOOGLE_API_TERMS_URL = "https://developers.google.com/terms";
 
@@ -47,7 +47,8 @@ function TermsOfServicePage() {
           <p>
             O {BRAND_NAME} é uma ferramenta de trabalho para equipes de marketing. Ela reúne
             métricas, o fluxo de aprovação de conteúdo e, quando a conta autoriza, a publicação nos
-            canais conectados. O acesso é por convite ou por pedido analisado pela equipe.
+            canais conectados. Recortes de visualização dos dashboards ficam só no navegador de quem
+            entrou. O acesso é por convite ou por pedido analisado pela equipe.
           </p>
         </Section>
 

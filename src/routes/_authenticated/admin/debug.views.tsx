@@ -70,7 +70,7 @@ function ViewsAuditPage() {
       <PageHeader
         eyebrow="Diagnóstico"
         title="Auditoria de views analíticas"
-        description="Por que as views retornam 0 linhas mesmo com base_metricas populada."
+        description="Views diárias vs RPC do dashboard. A visão geral usa client_overview; Meta/Google/IG/GA4 paginam dashboard_prefer_hub_long; conjunto e anúncio vêm de dashboard_meta_structure_long."
       />
 
       {/* Diagnóstico de causa raiz */}

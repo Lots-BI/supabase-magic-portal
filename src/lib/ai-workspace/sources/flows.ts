@@ -51,6 +51,18 @@ const FLOW_DEFINITIONS: Array<{
     ],
   },
   {
+    id: "dashboard-reading",
+    name: "Leitura dos dashboards",
+    sourceSlug: "06-dashboards/dashboards",
+    fallbackSteps: [
+      "Cards do template (Pulso por padrão)",
+      "Editar visualização — recortes e template próprio",
+      "Ranking de campanhas com todas as métricas",
+      "Expansão = coleta diária das mesmas colunas",
+      "Estrutura Meta: conjunto, anúncio, turbinação",
+    ],
+  },
+  {
     id: "platform-hub-metrics",
     name: "Pipeline de métricas (Platform Hub)",
     sourceSlug: "02-architecture/engineering-contracts",

@@ -5,7 +5,7 @@ description: Hub inicial para abrir o dashboard de cada plataforma conectada.
 
 # Dashboards (`/dashboard`)
 
-É a **primeira tela** após o login. Em vez de um resumo misturado, você escolhe **qual dashboard** abrir — separado por plataforma.
+Depois do login, a **visão geral** da marca é o resumo. **Dashboards** é o hub para abrir cada plataforma — Meta Ads, Instagram, Google Ads, GA4.
 
 ## O que aparece na tela
 
@@ -28,8 +28,9 @@ Se um card não aparece, a agência ainda não conectou aquela plataforma ou ain
 1. Abra **Dashboards** no menu.
 2. Escolha a família (paga, orgânico ou analytics).
 3. Toque no card da plataforma.
-4. Leia os KPIs e o gráfico daquele canal.
-5. Para trocar de plataforma, volte aos dashboards e escolha outro card.
+4. Leia os cards. O recorte padrão é **Pulso** (poucos números). Em **Editar visualização** você troca o recorte ou monta o seu — só os cards mudam.
+5. Ranking, gráficos e tabela diária continuam com todas as métricas.
+6. Para trocar de plataforma, volte aos dashboards e escolha outro card.
 
 ## O que você não faz aqui
 

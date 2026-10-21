@@ -61,6 +61,8 @@ Cole no início da sessão do seu editor de código com IA.
 
 Detalhes de arquitetura e fontes automáticas:
 
+O gerador inclui o fluxo **Leitura dos dashboards** (templates, ranking e estrutura Meta) a partir de `docs/06-dashboards/dashboards.md`.
+
 - [ai-workspace.md](../../../docs/06-dashboards/ai-workspace.md)
 - [ai-chat-context.md](../../../docs/06-dashboards/ai-chat-context.md)
 

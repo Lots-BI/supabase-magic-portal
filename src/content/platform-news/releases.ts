@@ -21,6 +21,21 @@ export type PlatformReleaseItem = {
 
 export const PLATFORM_RELEASES: PlatformReleaseItem[] = [
   {
+    id: "2026-10-20-dashboards-leitura",
+    date: "2026-10-20",
+    title: "Dashboards: recorte de leitura e ranking completo",
+    summary:
+      "Cada dashboard abre no essencial. Você monta o próprio recorte, e a tabela de campanhas mostra todas as métricas — o dia a dia fica na expansão.",
+    bullets: [
+      "**Editar visualização** escolhe Pulso, Eficiência, Entrega e outros recortes, ou salva o seu. Só os cards mudam.",
+      "No **ranking por desempenho**, a linha da campanha tem todas as métricas. Abrir mostra o mesmo conjunto, um dia por linha.",
+      "A **visão geral** da marca começa em Conversas por mensagem. Resultados é a métrica que as campanhas usam para otimizar a entrega.",
+      "No Meta Ads, a aba **Conjuntos** lista os conjuntos do período.",
+    ],
+    audience: "all",
+    tags: ["Dashboards", "Novidade"],
+  },
+  {
     id: "2026-10-09-conteudos-midia-celular",
     date: "2026-10-09",
     title: "Conteúdos: envie mídia pelo celular",

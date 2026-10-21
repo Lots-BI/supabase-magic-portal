@@ -3,7 +3,7 @@ title: Módulos Admin & Operacionais
 description: Telas administrativas, editorial, aprovações, relatórios e debug.
 status: living
 owner: Engenharia / Produto Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-20
 ---
 
 # Módulos Admin & Operacionais
@@ -186,8 +186,8 @@ Catálogo de serviços contratáveis (`servicos` + `cliente_servicos`).
 
 | Rota                 | Server function    | Propósito                       |
 | -------------------- | ------------------ | ------------------------------- |
-| `/admin/debug`       | `getDebugSnapshot` | Amostra de ingestão por cliente |
-| `/admin/debug/views` | `getViewsAudit`    | Security + amostra de cada view |
+| `/admin/debug`       | `getDebugSnapshot` | Hub + Make leftover e amostra das views diárias certas |
+| `/admin/debug/views` | `getViewsAudit`    | Security + amostra; RPCs `client_overview` e hub long |
 
 Ferramentas operacionais de primeira classe. Ver [Runbook](../08-operations/runbook.md).
 

@@ -41,7 +41,8 @@ export function structureCampaignKey(input: StructureKey): string {
 export function parseStructureCampaignKey(raw: string): StructureKey | null {
   if (!raw.startsWith("nx\t")) return null;
   const parts = raw.split("\t");
-  if (parts.length < 6) return null;
+  // Conjunto não tem nome de anúncio: o hub grava 5 campos, sem tab no fim.
+  if (parts.length < 5) return null;
   const level = parts[1];
   if (level !== "ad" && level !== "adset") return null;
   return {

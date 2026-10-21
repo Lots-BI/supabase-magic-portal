@@ -1,37 +1,42 @@
 ---
 title: Painel da sua marca
-description: Hub da conta e navegação para o dashboard de cada plataforma.
+description: Visão geral da conta e atalho para o dashboard de cada plataforma.
 ---
 
 # Painel da sua marca (`/cliente/{slug}`)
 
-Tela da sua marca com os **mesmos dashboards** do menu, já filtrados para esta conta.
+A **visão geral** é o resumo da marca no período. Os dashboards de cada plataforma ficam no menu **Dashboards**.
 
 ## Como chegar
 
-1. No menu, abra **Dashboards**.
-2. Escolha a plataforma (Instagram, Meta Ads, Google Ads, GA4…).
-3. Ou acesse `/cliente/nome-da-sua-marca` para ver os cards desta conta.
-4. `Ctrl+K` → digite o nome da marca ou da plataforma.
-5. Menu **Relatório** — resumo visual do período (só canais com dado).
+1. No menu, abra **Visão geral** (olho).
+2. Ou **Dashboards** para entrar no canal (Instagram, Meta Ads, Google Ads, GA4…).
+3. `Ctrl+K` → digite o nome da marca ou da plataforma.
+4. Menu **Relatório** — resumo visual do período (só canais com dado).
 
-## Estrutura da tela
+## Visão geral
 
-### Cards por família
+Três cards no topo:
+
+1. **Investimento** — Meta + Google no período.
+2. **Resultados** — a métrica que as campanhas usam para otimizar a entrega de usuários.
+3. O terceiro card começa em **Conversas por mensagem iniciadas**. O menu troca para sessões, alcance, seguidores Instagram e outras métricas. A escolha fica neste navegador, só nesta marca.
+
+## Dashboards da plataforma
 
 - **Mídia paga** — Meta Ads, Google Ads, TikTok
 - **Orgânico** — Instagram, Publicações, Google Business
 - **Analytics** — Google Analytics 4
 
-Toque no card para abrir o dashboard da plataforma. Para trocar de canal, volte aos **Dashboards**.
+Toque no card para abrir o canal. Em **Editar visualização** você escolhe o recorte dos cards (Pulso, Eficiência, etc.) ou salva o seu.
 
 ## Passo a passo: análise mensal
 
-1. Abra **Dashboards**.
-2. Entre no canal com mais investimento ou mais conteúdo no mês.
-3. Ajuste o período para **30 dias**.
+1. Abra **Visão geral** e ajuste o período para **30 dias**.
+2. Leia investimento, resultados e o terceiro card.
+3. Entre no canal com mais investimento ou mais conteúdo.
 4. Compare com o período anterior nos KPIs e no gráfico.
-5. Repita nas outras plataformas relevantes.
+5. No ranking, a linha da campanha tem todas as métricas; abrir mostra o dia a dia.
 6. Anote 3 perguntas para a agência com **datas** específicas de queda/pico.
 
 ## Sync / última atualização

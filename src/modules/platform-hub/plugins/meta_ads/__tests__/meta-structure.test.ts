@@ -53,4 +53,14 @@ describe("meta structure", () => {
     });
     expect(parseStructureCampaignKey(key)?.level).toBe("adset");
   });
+
+  it("lê conjunto gravado sem o campo vazio do anúncio", () => {
+    expect(parseStructureCampaignKey("nx\tadset\t0\tLanding Page\tPúblico A")).toMatchObject({
+      level: "adset",
+      boosted: false,
+      campaign: "Landing Page",
+      adset: "Público A",
+      ad: "",
+    });
+  });
 });
