@@ -82,7 +82,7 @@ Template: [`.env.example`](./.env.example) · referência: [`docs/ENVIRONMENT_VA
 | Supabase | `VITE_OFFICIAL_SUPABASE_*`, `OFFICIAL_SERVICE_ROLE_KEY` |
 | App | `APP_URL` (obrigatório em prod — OAuth e convites) |
 | Platform Hub OAuth | `META_APP_ID`, `META_APP_SECRET`, `GOOGLE_OAUTH_*`, `TIKTOK_*` |
-| Vault | `HUB_CREDENTIAL_ENCRYPTION_KEY` (obrigatória) |
+| Vault | `HUB_CREDENTIAL_ENCRYPTION_KEY` (preferencial; senão service role) |
 
 **Nunca** exponha `OFFICIAL_SERVICE_ROLE_KEY` com prefixo `VITE_`.
 

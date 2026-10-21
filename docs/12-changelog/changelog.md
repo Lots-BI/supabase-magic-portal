@@ -38,11 +38,23 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
   volta no assistente de conexão. Pedido de acesso continua com aprovação da Lots.
   Checkout e nota fiscal não mudam.
 
+### Corrigido
+
+- **Puxar métricas na Vercel (2026-10-21):** o cofre voltou a abrir tokens
+  gravados com a service role quando `HUB_CREDENTIAL_ENCRYPTION_KEY` ainda não
+  está no ambiente. Sem isso o José (e qualquer conexão antiga) falhava com
+  `Missing HUB_CREDENTIAL_ENCRYPTION_KEY`.
+
+- **Puxar na visão geral (2026-10-21):** operador da organização (gestor,
+  social, tráfego) consegue puxar a série do cliente da org. Linhas Meta sem
+  `ad_account_id` entram na conta primary no seletor. Falha ao gravar status
+  da campanha não descarta as métricas já coletadas.
+
 ### Segurança
 
 - RPC `access_invalidate_auth_sessions` só com service role. Policy aberta de
-  aliases removida. Cofre exige `HUB_CREDENTIAL_ENCRYPTION_KEY`. Cadastro com
-  limite de taxa e senha de 10 caracteres.
+  aliases removida. Cofre prefere `HUB_CREDENTIAL_ENCRYPTION_KEY` e ainda lê
+  blobs da service role. Cadastro com limite de taxa e senha de 10 caracteres.
 
 ### Dados
 
@@ -71,13 +83,6 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 - **Seguidores via anúncio no Meta Ads (2026-10-20):** o dashboard ganha um card
   com os seguidores adquiridos pelos anúncios. A coleta diária de cada campanha
   mostra essa coluna junto de gasto, resultados, conversas e cliques.
-
-### Corrigido
-
-- **Puxar na visão geral (2026-10-21):** operador da organização (gestor,
-  social, tráfego) consegue puxar a série do cliente da org. Linhas Meta sem
-  `ad_account_id` entram na conta primary no seletor. Falha ao gravar status
-  da campanha não descarta as métricas já coletadas.
 
 ### Alterado
 

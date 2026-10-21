@@ -106,8 +106,8 @@ Criptografia AES-256-GCM de tokens OAuth em `ph_credentials`.
 
 | Variável | Obrigatório | Descrição | Onde é usada | Exemplo | Ambiente | Como obter |
 | -------- | ----------- | --------- | ------------ | ------- | -------- | ---------- |
-| `HUB_CREDENTIAL_ENCRYPTION_KEY` | sim | Segredo dedicado para criptografar credenciais no vault. Sem fallback para a service role. | `platform-hub-bridges/ph-persistence/credential-crypto.ts` | `openssl rand -base64 32` (ex.: `K7x...`) | dev, staging, prod | Gerar string aleatória forte (32+ bytes); armazenar em secret manager. Se tokens já foram gravados com outro valor, use o mesmo — não rotacione. |
-| `OFFICIAL_SERVICE_ROLE_KEY` | server | API admin; **não** criptografa mais o cofre | `client.server.ts` | (service role) | todos | Nunca `VITE_` |
+| `HUB_CREDENTIAL_ENCRYPTION_KEY` | sim (preferencial) | Segredo dedicado para criptografar credenciais no vault. Se faltar, a leitura/gravação usa `OFFICIAL_SERVICE_ROLE_KEY` (tokens já gravados na Vercel antes desta chave). | `platform-hub-bridges/ph-persistence/credential-crypto.ts` | `openssl rand -base64 32` (ex.: `K7x...`) | dev, staging, prod | Gerar string aleatória forte (32+ bytes); armazenar em secret manager. Se tokens já foram gravados com outro valor, use o mesmo — não rotacione. |
+| `OFFICIAL_SERVICE_ROLE_KEY` | server | API admin; também abre o cofre se a chave dedicada faltar ou não bater com o blob. | `client.server.ts`, `credential-crypto.ts` | (service role) | todos | Nunca `VITE_` |
 
 ---
 
@@ -199,7 +199,7 @@ Runbook: `src/modules/platform-hub-bridges/gate-a-meta-staging/docs/RUNBOOK.md`
 | `APP_URL` | `http://localhost:5173` | URL preview | domínio público |
 | OAuth (`META_*`, `GOOGLE_*`, `TIKTOK_*`) | opcional até testar conexões | obrigatório para homologação live | obrigatório para official providers |
 | `GOOGLE_ADS_DEVELOPER_TOKEN` | opcional | obrigatório p/ Google Ads | obrigatório p/ Google Ads |
-| `HUB_CREDENTIAL_ENCRYPTION_KEY` | obrigatória | obrigatória | **obrigatória** |
+| `HUB_CREDENTIAL_ENCRYPTION_KEY` | preferencial | preferencial | preferencial (abre service role se faltar) |
 | `PLATFORM_HUB_WRITER_TARGET` | default `HUB` | `HUB` ou `BOTH` | `HUB` até cutover |
 | `PLATFORM_HUB_SUPABASE_WRITER` | `true` no admin stack | `true` | conforme fase de rollout |
 | Gate A (`GATE_A_*`) | CLI local apenas | CLI | CLI (não UI) |

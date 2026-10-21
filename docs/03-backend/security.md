@@ -91,7 +91,8 @@ Posts editorial: `deletePost` faz DELETE físico (exceção documentada).
 Conta nasce em `/criar-conta` (service role). O pedido em `/solicitar-acesso`
 não cria organização até a Lots aprovar. Há limite de taxa e senha de 10
 caracteres. `access_invalidate_auth_sessions` só executa como `service_role`.
-Cofre: `HUB_CREDENTIAL_ENCRYPTION_KEY` obrigatória. Checkout e NFS-e ficam
+Cofre: `HUB_CREDENTIAL_ENCRYPTION_KEY` preferencial; se faltar, abre a
+service role. Checkout e NFS-e ficam
 fora desta superfície (`fin_*`).
 
 ---
