@@ -19,17 +19,8 @@
 
 <!-- LOVABLE:BEGIN -->
 
-> [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
->
-> **Lots BI policy:** Lovable is **build/deploy only** until Cloudflare deploy is validated.
-> Do not implement features in the Lovable editor.
+> Build e deploy **não** passam mais pelo Lovable. Produção = Vercel (`push` em
+> `main`). Continua **sem force-push** no histórico publicado.
 
 <!-- LOVABLE:END -->
 

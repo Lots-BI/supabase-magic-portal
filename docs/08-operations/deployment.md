@@ -3,13 +3,13 @@ title: Operações — Deployment & Ambiente
 description: Build, runtime, variáveis de ambiente, deploy e papel transitório do Lovable.
 status: living
 owner: Engenharia / Ops Lots BI
-last_review: 2026-09-11
+last_review: 2026-10-21
 ---
 
 # Deployment & Ambiente
 
-> **Desenvolvimento oficial:** Cursor + repositório Git. Lovable **não** é ambiente de
-> implementação — apenas build/deploy transitório. Ver
+> **Desenvolvimento oficial:** Cursor + repositório Git. Build Vite + Nitro
+> (`vite.config.ts`) com preset **Vercel**. Ver
 > [Fluxo de desenvolvimento](../09-standards/development-workflow.md) · [ADR-0010](../02-architecture/adr/0010-cursor-official-development-environment.md).
 
 ## Pipeline de entrega
@@ -26,21 +26,19 @@ flowchart LR
 | --------------- | ------------------------------------------ | -------------- |
 | Desenvolvimento | **Cursor**                                 | ✅ Oficial     |
 | Versionamento   | Git / GitHub (`Lots-BI/supabase-magic-portal`) | ✅ Oficial |
-| Build           | Vite + `@lovable.dev/vite-tanstack-config` | ⚠️ Transitório |
+| Build           | Vite + Nitro (`vite.config.ts`, preset Vercel) | ✅ |
 | **Produção**    | **Vercel** — merge em `main` publica       | ✅ Confirmado  |
 | Cloudflare      | `deploy.yml` `workflow_dispatch`           | 🟡 Manual, não é o domínio real |
 | Lovable         | Sync do branch; não é o host               | ⚠️ Transitório |
 
-- **Bundler:** Vite 8, configurado via `@lovable.dev/vite-tanstack-config` (`vite.config.ts`).
-- O preset já inclui: `tanstackStart`, `viteReact`, `tailwindcss`, `tsConfigPaths`, **Nitro**
-  (build, alvo padrão **Cloudflare**), injeção de `VITE_*`, alias `@`, dedupe e plugins de
-  erro. **Não adicionar esses plugins manualmente** (quebra com plugins duplicados).
-- Entrypoint SSR redirecionado para `src/server.ts` (via `tanstackStart.server.entry`), que
-  envolve a renderização com tratamento de erro robusto.
+- **Bundler:** Vite 8 em `vite.config.ts` (`tanstackStart`, React, Tailwind, tsconfig
+  paths, Nitro **somente no build** com `preset: "vercel"`). Não reintroduzir o
+  wrapper `@lovable.dev/vite-tanstack-config`.
+- Entrypoint SSR: `src/server.ts` (`tanstackStart.server.entry`).
 
 ## Rotas HTTP `/api/*`
 
-O preset Lovable **não monta** `server/routes` (Nitro) no Vercel. Os jobs oficiais estão em
+O Nitro no Vercel **não monta** `server/routes`. Os jobs oficiais estão em
 `src/routes/api/**` (TanStack Start `server.handlers`).
 
 | Rota | Quem chama |

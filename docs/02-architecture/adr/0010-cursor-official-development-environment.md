@@ -54,7 +54,7 @@ vive e como features devem ser entregues.
 
 ### Negativas / transição
 
-- Build ainda usa `@lovable.dev/vite-tanstack-config` — dependência técnica permanece.
+- Build usa `vite.config.ts` próprio (TanStack Start + Nitro Vercel).
 - Sync Lovable ↔ Git pode continuar no branch conectado; cuidado com histórico (`AGENTS.md`).
 - Time deve resistir a implementar features no editor Lovable por conveniência.
 
@@ -73,7 +73,7 @@ vive e como features devem ser entregues.
 - [ ] Pipeline CI/CD no GitHub (lint, test, build, deploy).
 - [x] Nenhuma feature implementada via editor Lovable (política ADR-0010).
 - [x] Documentação de deploy atualizada (Lovable = build/deploy transitório).
-- [ ] Remoção de `@lovable.dev/vite-tanstack-config`.
+- [x] Remoção de `@lovable.dev/vite-tanstack-config`.
 
 ## Referências
 

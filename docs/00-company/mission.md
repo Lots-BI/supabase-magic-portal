@@ -53,7 +53,7 @@ inteligência operacional e analítica deve residir dentro do ecossistema Lots B
 | Ferramenta   | Papel hoje                               | Status no repo                                                                           |
 | ------------ | ---------------------------------------- | ---------------------------------------------------------------------------------------- |
 | **Make**     | Coleta e ingestão de métricas → Supabase | Usado operacionalmente; **não versionado** neste repositório                             |
-| **Lovable**  | Build/deploy transitório                 | Confirmado via `@lovable.dev/vite-tanstack-config`; **não** é ambiente de dev (ADR-0010) |
+| **Lovable**  | Fora do build                            | Removido `@lovable.dev/vite-tanstack-config`. Produção = Vercel. |
 | **Horizons** | Citado na visão estratégica              | **⚠️ INFORMAÇÃO NÃO ENCONTRADA** no repositório                                          |
 
 ### Arquitetura alvo (resumo)

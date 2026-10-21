@@ -696,6 +696,7 @@ export const getHubAgencyAlerts = createServerFn({ method: "GET" })
       disconnected: connectionsInScope(access, alerts.disconnected),
       lowCoverage: connectionsInScope(access, alerts.lowCoverage),
       staleSync: connectionsInScope(access, alerts.staleSync),
+      failedSync: connectionsInScope(access, alerts.failedSync),
     };
   });
 
@@ -730,6 +731,7 @@ export const getHubOperationalSnapshot = createServerFn({ method: "GET" })
         disconnected: connectionsInScope(access, alerts.disconnected),
         lowCoverage: connectionsInScope(access, alerts.lowCoverage),
         staleSync: connectionsInScope(access, alerts.staleSync),
+        failedSync: connectionsInScope(access, alerts.failedSync),
       },
     };
   });

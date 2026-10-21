@@ -1,6 +1,6 @@
 # Platform Hub — Documentação operacional (auto)
 
-> Gerado automaticamente em 2026-10-09T17:41:20.183Z · contract 1.0.0
+> Gerado automaticamente em 2026-10-21T21:19:07.833Z · contract 1.0.0
 
 ## Rotas administrativas
 

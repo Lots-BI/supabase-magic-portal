@@ -238,7 +238,7 @@ Plano: [content-workflow-implementation-plan.md](../03-backend/content-workflow-
 > Ver [ADR-0009](../02-architecture/adr/0009-platform-proprietary-infrastructure.md).
 
 - 🎯 **CI/CD completo** — lint/test/build ✅; deploy + migrations automáticas pendente.
-- 🎯 **Desacoplar Lovable** — remover `@lovable.dev/vite-tanstack-config`.
+- ✅ **Desacoplar Lovable do build** — `vite.config.ts` próprio, preset Vercel.
 - 🔧 **Materializar views pesadas** quando volume exigir.
 - ✨ **Relatórios/export agendados.**
 

@@ -16,15 +16,14 @@ type LovableEventsBridge = {
 
 declare global {
   interface Window {
-    /** Bridge transitório enquanto Lovable permanece no pipeline de deploy. */
+    /** Host opcional (ex.: preview antigo). Ausente na Vercel — no-op. */
     __lovableEvents?: LovableEventsBridge;
   }
 }
 
 /**
  * Reporta erros do client para observabilidade.
- * Hoje: console (dev) + bridge Lovable (transitório).
- * Futuro: Sentry / Datadog — plugar aqui sem alterar boundaries.
+ * Hoje: console (dev). Futuro: Sentry / Datadog — plugar aqui sem alterar boundaries.
  */
 export function reportClientError(error: unknown, context: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;

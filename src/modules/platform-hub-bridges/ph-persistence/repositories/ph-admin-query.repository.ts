@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { connectionHasFailedSync } from "../connection-alerts";
 
 export interface PhConnectionAdminRowV1 {
   id: string;
@@ -202,6 +203,7 @@ export class PhAdminQueryRepository {
     disconnected: PhConnectionAdminRowV1[];
     lowCoverage: PhConnectionAdminRowV1[];
     staleSync: PhConnectionAdminRowV1[];
+    failedSync: PhConnectionAdminRowV1[];
   }> {
     const connections = await this.listConnections();
     const now = Date.now();
@@ -216,6 +218,7 @@ export class PhAdminQueryRepository {
           c.status === "active" &&
           (!c.lastSyncAt || now - new Date(c.lastSyncAt).getTime() > staleMs),
       ),
+      failedSync: connections.filter((c) => connectionHasFailedSync(c)),
     };
   }
 

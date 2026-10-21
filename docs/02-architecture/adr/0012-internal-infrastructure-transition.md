@@ -65,11 +65,11 @@ Adotar transição **faseada e sem ruptura**:
 - [x] `SETUP.md` e `npm run setup`
 - [x] Workflow deploy Cloudflare (manual)
 - [x] `reportClientError` genérico
-- [ ] Deploy Cloudflare validado em produção
-- [ ] Secrets migrados para GitHub + Cloudflare
-- [ ] Remover `@lovable.dev/vite-tanstack-config`
-- [ ] Desconectar projeto Lovable do Git
-- [ ] Remover bloco `LOVABLE` de `AGENTS.md`
+- [x] Deploy Cloudflare validado em produção — **não**: produção real é **Vercel**
+- [ ] Secrets migrados para GitHub + Cloudflare (opcional; Vercel já opera)
+- [x] Remover `@lovable.dev/vite-tanstack-config` (Vite próprio, preset Vercel)
+- [ ] Desconectar projeto Lovable do Git (painel Lovable, fora deste repo)
+- [x] Bloco `LOVABLE` de `AGENTS.md` atualizado (sem sync de editor)
 - [ ] Renomear `OFFICIAL_*` → `SUPABASE_*` (opcional, pós-Lovable)
 
 ## Referências

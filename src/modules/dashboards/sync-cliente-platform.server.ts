@@ -107,6 +107,28 @@ async function runPlatformSync(
   };
 }
 
+async function recordPuxarOutcome(connectionId: string, result: ClientePlatformSyncResult) {
+  try {
+    const { error } = await getSupabaseAdmin()
+      .from("ph_connections")
+      .update({
+        last_sync_at: new Date().toISOString(),
+        last_sync_status: result.ok ? "success" : "failed",
+        last_error: result.ok ? null : (result.error ?? "Falha na sincronização"),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", connectionId);
+    if (error) {
+      console.warn("[sync] não gravou o resultado da coleta:", error.message);
+    }
+  } catch (err) {
+    console.warn(
+      "[sync] não gravou o resultado da coleta:",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+}
+
 /** Puxa a série de UMA plataforma de UM cliente. Não varre o portfólio. */
 export const syncClientePlatformFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -122,5 +144,7 @@ export const syncClientePlatformFn = createServerFn({ method: "POST" })
       };
     }
 
-    return runPlatformSync(connectionId, data.platform);
+    const result = await runPlatformSync(connectionId, data.platform);
+    await recordPuxarOutcome(connectionId, result);
+    return result;
   });

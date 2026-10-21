@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { byCampaign, platformViewSelect } from "../engine";
+import { byCampaign, campaignGroupKey, platformViewSelect } from "../engine";
 import { metaAdsDef } from "../meta-ads";
 import { googleAdsDef } from "../google-ads";
 import { ga4Def } from "../ga4";
@@ -64,6 +64,13 @@ describe("byCampaign", () => {
     );
     expect(campaigns).toHaveLength(2);
     expect(campaigns.map((item) => item.adAccountId).sort()).toEqual(["act_1", "act_2"]);
+  });
+});
+
+describe("campaignGroupKey", () => {
+  it("separa a mesma campanha em contas diferentes", () => {
+    expect(campaignGroupKey("A", "act_1")).not.toBe(campaignGroupKey("A", "act_2"));
+    expect(campaignGroupKey("A")).toBe(campaignGroupKey("A", ""));
   });
 });
 

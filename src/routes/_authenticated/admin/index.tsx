@@ -38,6 +38,10 @@ import { PortfolioClientsAccordion } from "@/components/lots/admin/PortfolioClie
 import { indexCadastroIdsByClienteName } from "@/modules/dashboards/cliente-sync-platform";
 import { getApprovalOpsDashboard } from "@/modules/approval/dashboard/dashboard.server";
 import { getHubAgencyAlerts } from "@/modules/platform-hub-admin/hub-admin.server";
+import {
+  clipAlertError,
+  pluginAlertLabel,
+} from "@/modules/platform-hub-bridges/ph-persistence/connection-alerts";
 import { hubAdminKeys } from "@/modules/platform-hub-admin/query-keys";
 import {
   DollarSign,
@@ -177,7 +181,7 @@ function OverviewBody({ days }: { days: PeriodDays }) {
   );
 
   const awaiting = opsQ.data?.awaitingApproval ?? 0;
-  const failedConnections = alertsQ.data?.unhealthy.length ?? 0;
+  const failedConnections = alertsQ.data?.failedSync.length ?? alertsQ.data?.unhealthy.length ?? 0;
 
   const attentionItems = useMemo(() => {
     const items: Array<{
@@ -201,6 +205,17 @@ function OverviewBody({ days }: { days: PeriodDays }) {
           to: "/cliente/$cliente",
         });
       }
+    }
+
+    for (const row of (alertsQ.data?.failedSync ?? []).slice(0, 6)) {
+      const platform = pluginAlertLabel(row.pluginKey);
+      const detail = clipAlertError(row.lastError);
+      items.push({
+        key: `fail-${row.id}`,
+        cliente: row.clienteNome ?? row.label,
+        reason: detail ? `${platform} falhou · ${detail}` : `Sync ${platform} falhou`,
+        to: "/admin/conexoes/health",
+      });
     }
 
     for (const a of staleAccounts.slice(0, 6)) {
@@ -227,7 +242,7 @@ function OverviewBody({ days }: { days: PeriodDays }) {
     }
 
     return items.slice(0, 8);
-  }, [current, previous, staleAccounts, opsQ.data?.byClient]);
+  }, [current, previous, staleAccounts, opsQ.data?.byClient, alertsQ.data?.failedSync]);
 
   return (
     <div className="space-y-7">
@@ -392,9 +407,20 @@ function OverviewBody({ days }: { days: PeriodDays }) {
               {attentionItems.map((item) => {
                 const clienteId = idByNome.get(item.cliente);
                 const isApproval = item.to === "/admin/aprovacoes";
+                const isHealth = item.to === "/admin/conexoes/health";
                 return (
                   <li key={item.key}>
-                    {isApproval && (item.search?.cliente ?? clienteId) ? (
+                    {isHealth ? (
+                      <Link
+                        to="/admin/conexoes/health"
+                        className="flex items-center justify-between gap-3 px-5 py-3 text-[13px] transition-colors hover:bg-muted/40"
+                      >
+                        <span className="truncate font-medium text-foreground">{item.cliente}</span>
+                        <span className="shrink-0 text-[12px] text-muted-foreground">
+                          {item.reason}
+                        </span>
+                      </Link>
+                    ) : isApproval && (item.search?.cliente ?? clienteId) ? (
                       <Link
                         to="/admin/aprovacoes"
                         search={{ cliente: item.search?.cliente ?? clienteId }}

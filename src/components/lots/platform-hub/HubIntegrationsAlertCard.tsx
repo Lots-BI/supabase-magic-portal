@@ -28,6 +28,7 @@ export function HubIntegrationsAlertCard() {
 
   const summary = overview?.overview;
   const hasIssues =
+    (alerts?.failedSync.length ?? 0) > 0 ||
     (alerts?.unhealthy.length ?? 0) > 0 ||
     (alerts?.degraded.length ?? 0) > 0 ||
     (alerts?.staleSync.length ?? 0) > 0 ||
@@ -74,7 +75,14 @@ export function HubIntegrationsAlertCard() {
 
       {hasIssues ? (
         <div className="mx-4 mb-4 space-y-2">
-          {(alerts?.unhealthy.length ?? 0) > 0 && (
+          {(alerts?.failedSync.length ?? 0) > 0 && (
+            <AlertRow
+              icon={AlertTriangle}
+              label={`${alerts!.failedSync.length} sync com falha`}
+              href="/admin/conexoes/health"
+            />
+          )}
+          {(alerts?.unhealthy.length ?? 0) > 0 && (alerts?.failedSync.length ?? 0) === 0 && (
             <AlertRow
               icon={AlertTriangle}
               label={`${alerts!.unhealthy.length} com erro`}
