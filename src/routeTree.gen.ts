@@ -30,6 +30,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedAccountSecurityRouteImport } from './routes/_authenticated/account/security'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAiWorkspaceRouteImport } from './routes/_authenticated/admin/ai-workspace'
+import { Route as AuthenticatedAdminAnalistaRouteImport } from './routes/_authenticated/admin/analista'
 import { Route as AuthenticatedAdminAprovacoesRouteImport } from './routes/_authenticated/admin/aprovacoes'
 import { Route as AuthenticatedAdminBrandbookRouteImport } from './routes/_authenticated/admin/brandbook'
 import { Route as AuthenticatedAdminBrandingRouteImport } from './routes/_authenticated/admin/branding'
@@ -214,6 +215,12 @@ const AuthenticatedAdminAiWorkspaceRoute =
   AuthenticatedAdminAiWorkspaceRouteImport.update({
     id: '/ai-workspace',
     path: '/ai-workspace',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminAnalistaRoute =
+  AuthenticatedAdminAnalistaRouteImport.update({
+    id: '/analista',
+    path: '/analista',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminAprovacoesRoute =
@@ -686,6 +693,7 @@ export interface FileRoutesByFullPath {
   '/admin/tutorial': typeof AuthenticatedAdminTutorialRouteRouteWithChildren
   '/account/security': typeof AuthenticatedAccountSecurityRoute
   '/admin/ai-workspace': typeof AuthenticatedAdminAiWorkspaceRoute
+  '/admin/analista': typeof AuthenticatedAdminAnalistaRoute
   '/admin/aprovacoes': typeof AuthenticatedAdminAprovacoesRoute
   '/admin/brandbook': typeof AuthenticatedAdminBrandbookRoute
   '/admin/branding': typeof AuthenticatedAdminBrandingRoute
@@ -779,6 +787,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthIndexRoute
   '/account/security': typeof AuthenticatedAccountSecurityRoute
   '/admin/ai-workspace': typeof AuthenticatedAdminAiWorkspaceRoute
+  '/admin/analista': typeof AuthenticatedAdminAnalistaRoute
   '/admin/aprovacoes': typeof AuthenticatedAdminAprovacoesRoute
   '/admin/brandbook': typeof AuthenticatedAdminBrandbookRoute
   '/admin/branding': typeof AuthenticatedAdminBrandingRoute
@@ -876,6 +885,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/tutorial': typeof AuthenticatedAdminTutorialRouteRouteWithChildren
   '/_authenticated/account/security': typeof AuthenticatedAccountSecurityRoute
   '/_authenticated/admin/ai-workspace': typeof AuthenticatedAdminAiWorkspaceRoute
+  '/_authenticated/admin/analista': typeof AuthenticatedAdminAnalistaRoute
   '/_authenticated/admin/aprovacoes': typeof AuthenticatedAdminAprovacoesRoute
   '/_authenticated/admin/brandbook': typeof AuthenticatedAdminBrandbookRoute
   '/_authenticated/admin/branding': typeof AuthenticatedAdminBrandingRoute
@@ -976,6 +986,7 @@ export interface FileRouteTypes {
     | '/admin/tutorial'
     | '/account/security'
     | '/admin/ai-workspace'
+    | '/admin/analista'
     | '/admin/aprovacoes'
     | '/admin/brandbook'
     | '/admin/branding'
@@ -1069,6 +1080,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/account/security'
     | '/admin/ai-workspace'
+    | '/admin/analista'
     | '/admin/aprovacoes'
     | '/admin/brandbook'
     | '/admin/branding'
@@ -1165,6 +1177,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/tutorial'
     | '/_authenticated/account/security'
     | '/_authenticated/admin/ai-workspace'
+    | '/_authenticated/admin/analista'
     | '/_authenticated/admin/aprovacoes'
     | '/_authenticated/admin/brandbook'
     | '/_authenticated/admin/branding'
@@ -1415,6 +1428,13 @@ declare module '@tanstack/react-router' {
       path: '/ai-workspace'
       fullPath: '/admin/ai-workspace'
       preLoaderRoute: typeof AuthenticatedAdminAiWorkspaceRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/analista': {
+      id: '/_authenticated/admin/analista'
+      path: '/analista'
+      fullPath: '/admin/analista'
+      preLoaderRoute: typeof AuthenticatedAdminAnalistaRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/aprovacoes': {
@@ -2021,6 +2041,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminKnowledgeRouteRoute: typeof AuthenticatedAdminKnowledgeRouteRouteWithChildren
   AuthenticatedAdminTutorialRouteRoute: typeof AuthenticatedAdminTutorialRouteRouteWithChildren
   AuthenticatedAdminAiWorkspaceRoute: typeof AuthenticatedAdminAiWorkspaceRoute
+  AuthenticatedAdminAnalistaRoute: typeof AuthenticatedAdminAnalistaRoute
   AuthenticatedAdminAprovacoesRoute: typeof AuthenticatedAdminAprovacoesRoute
   AuthenticatedAdminBrandbookRoute: typeof AuthenticatedAdminBrandbookRoute
   AuthenticatedAdminBrandingRoute: typeof AuthenticatedAdminBrandingRoute
@@ -2061,6 +2082,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminTutorialRouteRoute:
       AuthenticatedAdminTutorialRouteRouteWithChildren,
     AuthenticatedAdminAiWorkspaceRoute: AuthenticatedAdminAiWorkspaceRoute,
+    AuthenticatedAdminAnalistaRoute: AuthenticatedAdminAnalistaRoute,
     AuthenticatedAdminAprovacoesRoute: AuthenticatedAdminAprovacoesRoute,
     AuthenticatedAdminBrandbookRoute: AuthenticatedAdminBrandbookRoute,
     AuthenticatedAdminBrandingRoute: AuthenticatedAdminBrandingRoute,

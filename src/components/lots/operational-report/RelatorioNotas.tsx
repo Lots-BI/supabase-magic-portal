@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Wand2 } from "lucide-react";
@@ -23,6 +23,8 @@ export function RelatorioNotas({
   periodoInicio,
   periodoFim,
   periodoLabel,
+  incomingNote = null,
+  onCanEditChange,
 }: {
   cadastroClienteId: number;
   platforms: ReportPlatformSection[];
@@ -30,6 +32,8 @@ export function RelatorioNotas({
   periodoInicio: string;
   periodoFim: string;
   periodoLabel: string;
+  incomingNote?: { html: string; nonce: number } | null;
+  onCanEditChange?: (canEdit: boolean) => void;
 }) {
   const qc = useQueryClient();
   const listFn = useServerFn(listRelatorioNotas);
@@ -45,6 +49,39 @@ export function RelatorioNotas({
   const [quedaAberta, setQuedaAberta] = useState(false);
   const [quedaHtml, setQuedaHtml] = useState("");
   const [quedaHtmlTick, setQuedaHtmlTick] = useState(0);
+  const seenNote = useRef<number | null>(null);
+
+  useEffect(() => {
+    onCanEditChange?.(Boolean(notas.data?.canEdit));
+  }, [notas.data?.canEdit, onCanEditChange]);
+
+  useEffect(() => {
+    if (!incomingNote || !notas.data?.canEdit) return;
+    if (seenNote.current === incomingNote.nonce) return;
+    seenNote.current = incomingNote.nonce;
+    const next = incomingNote.html;
+    if (aberta) {
+      setHtml((current) => joinNoteHtml(current, next));
+      setHtmlTick((tick) => tick + 1);
+      return;
+    }
+    if (quedaAberta) {
+      setQuedaHtml((current) => joinNoteHtml(current, next));
+      setQuedaHtmlTick((tick) => tick + 1);
+      return;
+    }
+    const first = platforms[0];
+    if (first) {
+      const saved = notas.data.analises.find((item) => item.plataforma === first.key)?.html ?? "";
+      setAberta(first.key);
+      setHtml(joinNoteHtml(saved, next));
+      setHtmlTick((tick) => tick + 1);
+      return;
+    }
+    setQuedaAberta(true);
+    setQuedaHtml(joinNoteHtml(notas.data.queda?.html ?? "", next));
+    setQuedaHtmlTick((tick) => tick + 1);
+  }, [incomingNote, notas.data, aberta, quedaAberta, platforms]);
 
   function refresh() {
     void qc.invalidateQueries({ queryKey: ["relatorio-notas", cadastroClienteId] });
@@ -210,4 +247,9 @@ export function RelatorioNotas({
       ) : null}
     </section>
   );
+}
+
+function joinNoteHtml(current: string, next: string): string {
+  if (!current.trim()) return next;
+  return `${current}${next}`;
 }

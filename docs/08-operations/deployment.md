@@ -3,7 +3,7 @@ title: Operações — Deployment & Ambiente
 description: Build, runtime, variáveis de ambiente, deploy e papel transitório do Lovable.
 status: living
 owner: Engenharia / Ops Lots BI
-last_review: 2026-10-21
+last_review: 2026-11-03
 ---
 
 # Deployment & Ambiente
@@ -86,6 +86,7 @@ Este projeto ainda está **conectado ao Lovable** para build (ver `AGENTS.md`). 
 | `VITE_OFFICIAL_SUPABASE_ANON_KEY` / `OFFICIAL_SUPABASE_ANON_KEY` | client/server   | Chave anônima (RLS)                            |
 | `VITE_OFFICIAL_SUPABASE_PROJECT_ID`                              | client          | ID do projeto (default `ywvhoctcmibjitvwkkhb`) |
 | `OFFICIAL_SERVICE_ROLE_KEY`                                      | **só servidor** | Chave service-role (bypass RLS)                |
+| `ANTHROPIC_API_KEY`                                              | **só servidor** | Analista do relatório. Sem ela, o chat avisa e segue. Nunca `VITE_` |
 
 - O client anon falha no boot se faltarem URL/anon key (`client.ts`).
 - O client admin falha no boot se faltarem URL/service-role (`client.server.ts`).

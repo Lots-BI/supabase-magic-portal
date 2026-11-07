@@ -3,7 +3,7 @@ title: Arquitetura — Decisões (resumo)
 description: Resumo narrativo das principais escolhas arquiteturais e seus porquês.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-26
+last_review: 2026-11-03
 ---
 
 # Decisões Arquiteturais (resumo)
@@ -80,5 +80,11 @@ Engenharia tradicional versionada no Git; Lovable rebaixado a build/deploy trans
 
 CI, testes, governança e validação automatizada — docs sozinhos não enforce qualidade.
 → [ADR-0011](./adr/0011-engineering-system-foundation.md)
+
+### Por que o analista do relatório é um port próprio?
+
+A pergunta usa só o relatório já calculado e o Claude, na aba `/admin/analista`
+(só admin). Sem chave, a tela segue. O AI Workspace e o port de copy ficam de fora.
+→ [ADR-0026](./adr/0026-report-analyst-claude.md)
 
 Ver também: [Sistema de Engenharia](../00-company/engineering-system.md) · [Governança](../09-standards/governance.md)

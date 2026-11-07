@@ -3,7 +3,7 @@ title: Ambientes
 description: Desenvolvimento, staging e produção — configuração e segredos.
 status: living
 owner: Engenharia / Ops Lots BI
-last_review: 2026-10-21
+last_review: 2026-11-03
 ---
 
 # Ambientes
@@ -48,7 +48,7 @@ Em dev, **duplicar** URL e anon key com e sem prefixo `VITE_`:
 | URL    | `https://lotsbi.leandromajr.com`                                            |
 | Host   | **Vercel** (`Server: Vercel`) — merge em `main` publica                     |
 | Build  | Vite + Nitro (preset Lovable no `vite.config.ts`)                           |
-| Extra  | GitHub Actions → Cloudflare (`deploy.yml`) é **manual** e não aponta este domínio |
+| Extra  | GitHub Actions → Cloudflare (`deploy.yml`) é **manual** e não aponta este domínio. `ANTHROPIC_API_KEY` é opcional no runtime Vercel (analista do relatório). |
 
 Deploy Cloudflare preparado: [CI/CD](./cicd.md) · ADR-0012 (ainda não é produção).
 

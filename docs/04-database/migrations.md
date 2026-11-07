@@ -3,7 +3,7 @@ title: Banco — Migrations
 description: Histórico, convenções e princípios das migrations do Lots BI.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-21
+last_review: 2026-11-03
 ---
 
 # Migrations
@@ -76,6 +76,7 @@ As migrations vivem em `supabase/migrations-official/` e seguem três princípio
 | `88_metric_cadastro_id.sql`               | `cadastro_cliente_id` no Hub, unique por cadastro, slug por org, RLS e RPCs isolados. Não toca `fin_*`. |
 | `89_hub_dedupe_cadastro_twins.sql`        | Apaga série Hub duplicada (com id + sem id) e o replace cobre as duas metades. |
 | `90_hub_ad_account_id.sql`                | `ad_account_id` no Hub, unique e replace por conta, seletor no dashboard Meta. |
+| `91_report_analyst.sql`                   | Uso diário e auditoria do analista do relatório. RLS só nas linhas do próprio usuário. |
 
 > Conteúdos (38–45) e demais arquivos em `supabase/migrations-official/` seguem a mesma
 > numeração. Lista completa no diretório. **Não existe `04`.** A tentativa

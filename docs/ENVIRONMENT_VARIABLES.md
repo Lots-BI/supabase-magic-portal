@@ -3,7 +3,7 @@ title: Variáveis de ambiente — Platform Hub & Admin
 description: Inventário auditado de todas as variáveis usadas pelo Platform Hub e pelo módulo administrativo.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-21
+last_review: 2026-11-03
 ---
 
 # Variáveis de ambiente — Platform Hub & Admin
@@ -190,6 +190,17 @@ Runbook: `src/modules/platform-hub-bridges/gate-a-meta-staging/docs/RUNBOOK.md`
 
 ---
 
+## 8. Analista do relatório (Claude)
+
+Só no servidor. Sem `ANTHROPIC_API_KEY`, `askReportAnalystFn` devolve `not_configured` e a tela do relatório continua. Nunca prefixar com `VITE_`.
+
+| Variável | Obrigatório | Descrição | Onde é usada | Exemplo | Ambiente | Como obter |
+| -------- | ----------- | --------- | ------------ | ------- | -------- | ---------- |
+| `ANTHROPIC_API_KEY` | não | Chave da API Anthropic | `anthropic-report-analyst.server.ts` | `sk-ant-...` | dev, prod | [console.anthropic.com](https://console.anthropic.com) → API keys |
+| `REPORT_ANALYST_MODEL` | não | Modelo. Default `claude-sonnet-5-5` | idem | `claude-sonnet-5-5` | dev, prod | Opcional |
+
+---
+
 ## Matriz por ambiente
 
 | Grupo | dev local | staging / homolog | produção |
@@ -203,6 +214,7 @@ Runbook: `src/modules/platform-hub-bridges/gate-a-meta-staging/docs/RUNBOOK.md`
 | `PLATFORM_HUB_WRITER_TARGET` | default `HUB` | `HUB` ou `BOTH` | `HUB` até cutover |
 | `PLATFORM_HUB_SUPABASE_WRITER` | `true` no admin stack | `true` | conforme fase de rollout |
 | Gate A (`GATE_A_*`) | CLI local apenas | CLI | CLI (não UI) |
+| `ANTHROPIC_API_KEY` | opcional | opcional | opcional (chat do relatório) |
 | `CLOUDFLARE_API_TOKEN` | — | — | CI deploy |
 
 ---
@@ -253,6 +265,8 @@ Todas as variáveis abaixo foram encontradas no código e estão documentadas ne
 | `GATE_A_DISCOVER_MIN_ROWS` | `gate-a-discover.cli.test.ts` |
 | `GATE_A_DISCOVER_LIMIT` | `gate-a-discover.cli.test.ts` |
 | `CLOUDFLARE_API_TOKEN` | `.github/workflows/deploy.yml` |
+| `ANTHROPIC_API_KEY` | `src/modules/report-analyst/anthropic-report-analyst.server.ts` |
+| `REPORT_ANALYST_MODEL` | `src/modules/report-analyst/anthropic-report-analyst.server.ts` |
 
 **Resultado:** nenhuma variável `process.env.*` usada em `src/` ou `scripts/` do Platform Hub / admin ficou de fora.
 

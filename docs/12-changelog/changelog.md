@@ -3,7 +3,7 @@ title: Changelog
 description: Histórico de mudanças relevantes do Lots BI (produto, dados e infraestrutura).
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-21
+last_review: 2026-11-07
 ---
 
 # Changelog
@@ -20,6 +20,15 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 ## [Não lançado]
 
 ### Adicionado
+
+- **Analista Claude (2026-11-07):** aba admin `/admin/analista` — só admin. Escolhe
+  cliente e período, pergunta sobre o relatório e pode usar a resposta na análise
+  sem enviar. O relatório do cliente mantém a leitura automática e **não** tem o
+  chat. Sem `ANTHROPIC_API_KEY`, o chat avisa e segue. Limite: 30 perguntas /
+  admin / cliente / dia.
+
+- **Leitura automática no relatório (2026-11-03):** bloco **O que os números
+  dizem** (clima, variação e sinais de `buildInsights`) no relatório do cliente.
 
 - **Visão geral: puxar por cliente e plataforma (2026-10-21):** na visão geral
   do admin, abra o cliente e use **Puxar** em Meta, Google Ads, GA4 ou Instagram.

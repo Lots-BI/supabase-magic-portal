@@ -3,7 +3,7 @@ title: Architecture Decision Records (ADRs)
 description: Índice e processo dos registros de decisão arquitetural do Lots BI.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-06-30
+last_review: 2026-11-03
 ---
 
 # Architecture Decision Records (ADRs)
@@ -46,6 +46,7 @@ Crie um ADR quando a decisão:
 | [0022](./0022-hub-registry-fase-1.md)                     | Implementação Hub Registry (Fase 1)            | Aceito              |
 | [0023](./0023-modulo-estrutura-fase-2.md)                 | Estrutura do módulo sem runtime (Fase 2)       | Aceito              |
 | [0025](./0025-multi-org-cadastro-metric-key.md)           | Métrica por cadastro_cliente_id / multi-org    | Aceito              |
+| [0026](./0026-report-analyst-claude.md)                   | Analista do relatório com Claude               | Aceito              |
 
 ## Template
 

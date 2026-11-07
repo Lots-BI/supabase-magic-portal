@@ -3,7 +3,7 @@ title: Backend — Referência de API (Server Functions)
 description: Catálogo de todas as server functions, com auth exigida, input e retorno.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-21
+last_review: 2026-11-07
 ---
 
 # Referência de API — Server Functions
@@ -212,6 +212,18 @@ last_review: 2026-10-21
   `portfolio_clientes_ativos` (migrations 56–57, 86). **Não** faz SELECT PostgREST em
   `vw_overview_cliente` (timeout 8-union). A 86 acrescenta conversas Meta e
   seguidores Instagram para o seletor do terceiro card.
+
+## Módulo: `report-analyst.server.ts`
+
+#### `askReportAnalystFn` — `POST`
+
+- **Admin?** Sim (`resolveIsAdmin`). Cliente e operador de org são recusados.
+- **Input:** `{ cadastroClienteId, preset, customFrom?, customTo?, question, history? }`.
+  Histórico até 8 turnos. A pergunta tem no máximo 2000 caracteres.
+- **Retorno:** `{ ok: true, answer }` ou `{ ok: false, code, message }` com
+  `not_configured`, `rate_limited` ou `upstream`.
+- **Uso:** aba `/admin/analista`. O contexto é remontado no servidor a partir do
+  relatório. Sem `ANTHROPIC_API_KEY`, devolve `not_configured`.
 
 ---
 

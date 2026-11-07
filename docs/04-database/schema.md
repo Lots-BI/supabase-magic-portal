@@ -3,7 +3,7 @@ title: Banco — Schema & Modelo de Dados
 description: Tabelas, enums, relacionamentos, RLS e o modelo multi-tenant do Lots BI.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-21
+last_review: 2026-11-03
 ---
 
 # Banco de Dados — Schema & Modelo de Dados
@@ -212,6 +212,12 @@ WHERE has_role(auth.uid(), 'admin');
 
 > **Dívida:** para admin, faz `SELECT DISTINCT` em `base_metricas` em runtime — comentado no
 > SQL como ponto a substituir por catálogo dedicado quando a base crescer.
+
+### `report_analyst_usage` e `report_analyst_threads`
+
+Migration 91. Contador diário (dia BRT gravado pela aplicação) e auditoria de
+pergunta/resposta do analista do relatório. O usuário autenticado só lê e insere
+as próprias linhas (`user_id = auth.uid()`).
 
 ---
 

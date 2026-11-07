@@ -3,7 +3,7 @@ title: RLS — Catálogo de Policies
 description: Todas as Row Level Security policies do Postgres, por tabela.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-21
+last_review: 2026-11-03
 ---
 
 # RLS — Catálogo de Policies
@@ -127,6 +127,20 @@ live das views analíticas.
 
 A tabela histórica `base_metricas` (nome sem sufixo) pode ainda existir no remoto; o app
 lê Make/Hub. Schema Make versionado na **52**.
+
+---
+
+## `report_analyst_usage` e `report_analyst_threads`
+
+RLS **ON** (migration 91). `authenticated` só `SELECT` e `INSERT` quando
+`user_id` é o `auth.uid()`. Sem policy de update/delete. `anon` sem grant.
+
+| Policy | Operação | Regra | Migration |
+| --- | --- | --- | --- |
+| `report_analyst_usage_select_own` | SELECT | `(SELECT auth.uid()) = user_id` | 91 |
+| `report_analyst_usage_insert_own` | INSERT | idem | 91 |
+| `report_analyst_threads_select_own` | SELECT | idem | 91 |
+| `report_analyst_threads_insert_own` | INSERT | idem | 91 |
 
 ---
 

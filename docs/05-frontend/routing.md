@@ -3,7 +3,7 @@ title: Frontend — Roteamento & Guardas
 description: Mapa de rotas file-based, guarda de autenticação e navegação por papel.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-10-21
+last_review: 2026-11-07
 ---
 
 # Roteamento & Guardas
@@ -35,6 +35,7 @@ flowchart TD
     authed --> admin["/admin (guarda admin na UI)"]
     admin --> admIdx["/admin (centro executivo)"]
     admin --> admRel["/admin/relatorios"]
+    admin --> admAna["/admin/analista"]
     admin --> admEd["/admin/editorial"]
     admin --> admCli["/admin/clientes · /novo · /$id"]
     admin --> admUsr["/admin/usuarios · /novo"]

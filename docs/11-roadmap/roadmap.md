@@ -3,7 +3,7 @@ title: Roadmap & Dívidas Técnicas
 description: Direção de evolução do Lots BI — estado atual, arquitetura alvo e dívidas priorizadas.
 status: living
 owner: Engenharia / Produto Lots BI
-last_review: 2026-10-21
+last_review: 2026-11-07
 ---
 
 # Roadmap & Dívidas Técnicas
@@ -241,6 +241,12 @@ Plano: [content-workflow-implementation-plan.md](../03-backend/content-workflow-
 - ✅ **Desacoplar Lovable do build** — `vite.config.ts` próprio, preset Vercel.
 - 🔧 **Materializar views pesadas** quando volume exigir.
 - ✨ **Relatórios/export agendados.**
+
+## Relatório — analista (admin)
+
+Leitura automática no relatório do cliente. Chat Claude em `/admin/analista`
+(só admin). Abrir para o cliente e multi-LLM ficam fora desta entrega.
+→ [ADR-0026](../02-architecture/adr/0026-report-analyst-claude.md)
 
 ---
 

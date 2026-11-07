@@ -41,6 +41,7 @@ import {
   Info,
   ShieldCheck,
   FileText,
+  Bot,
 } from "lucide-react";
 import { lazy, Suspense } from "react";
 
@@ -181,6 +182,7 @@ function AuthenticatedLayout() {
         { to: "/admin/tarefas", label: "Tarefas", icon: ListTodo },
         { to: "/admin/crm", label: "CRM", icon: Contact2 },
         { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
+        ...(isAdmin ? [{ to: "/admin/analista", label: "Analista", icon: Bot }] : []),
         ...(FEATURE_PLANO_ESTRATEGICO_NAV
           ? [{ to: "/admin/plano-estrategico", label: "Plano Estratégico", icon: Compass }]
           : []),

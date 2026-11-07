@@ -40,6 +40,8 @@ const inputSchema = z.object({
     .optional(),
 });
 
+export type OperationalReportQuery = z.infer<typeof inputSchema>;
+
 async function assertClienteAccess(
   context: {
     supabase: SupabaseClient;
@@ -109,127 +111,127 @@ function inDateRange(iso: string, from: string, to: string): boolean {
   return day >= from && day <= to;
 }
 
+export async function loadClientOperationalReport(
+  supabase: SupabaseClient,
+  data: OperationalReportQuery,
+): Promise<OperationalReport> {
+  const periodInput: PeriodInput = {
+    preset: data.preset,
+    customFrom: data.customFrom,
+    customTo: data.customTo,
+  };
+  const period = resolvePeriod(periodInput);
+
+  const { data: cadastro, error: cadastroError } = await supabase
+    .from("cadastro_clientes")
+    .select("id, nome_cliente, slug")
+    .eq("id", data.cadastroClienteId)
+    .maybeSingle();
+  if (cadastroError) throw new Error(cadastroError.message);
+  if (!cadastro?.nome_cliente) throw new Error("Cliente não encontrado");
+
+  const clienteNome = String(cadastro.nome_cliente);
+  const clienteSlug = cadastro.slug != null ? String(cadastro.slug) : "";
+
+  const [overviewRes, mediaRes, cardsRes] = await Promise.all([
+    supabase
+      .from("vw_overview_cliente")
+      .select(OVERVIEW_CLIENTE_SELECT)
+      .eq("cliente", clienteNome)
+      .gte("data", period.prevFrom)
+      .lte("data", period.to)
+      .order("data", { ascending: true }),
+    supabase
+      .from("vw_ig_media_dashboard")
+      .select("id, published_at, media_product_type, permalink, caption, metrics, content_card_id")
+      .eq("cadastro_cliente_id", data.cadastroClienteId)
+      .gte("published_at", `${period.prevFrom}T00:00:00.000Z`)
+      .lte("published_at", `${period.to}T23:59:59.999Z`)
+      .order("published_at", { ascending: false })
+      .limit(800),
+    supabase
+      .from("content_cards")
+      .select("id, status, formato, data_publicacao, publish_status, titulo")
+      .eq("cadastro_cliente_id", data.cadastroClienteId)
+      .gte("data_publicacao", period.prevFrom)
+      .lte("data_publicacao", period.to)
+      .neq("status", "arquivado"),
+  ]);
+
+  if (overviewRes.error) {
+    console.warn("[relatorio] vw_overview_cliente:", overviewRes.error.message);
+  }
+  if (mediaRes.error) throw new Error(mediaRes.error.message);
+  if (cardsRes.error) throw new Error(cardsRes.error.message);
+
+  const overviewRows = (overviewRes.data ?? []).map((row) =>
+    mapOverviewRow(row as Record<string, unknown>),
+  );
+  const overviewCurrent = sumOverview(
+    overviewRows.filter((row) => row.data >= period.from && row.data <= period.to),
+  );
+  const overviewPrevious = sumOverview(
+    overviewRows.filter((row) => row.data >= period.prevFrom && row.data <= period.prevTo),
+  );
+
+  const platformRows = await fetchPlatformRows(supabase, clienteNome, period.prevFrom, period.to);
+
+  const cardTitles = new Map<string, string>();
+  for (const row of cardsRes.data ?? []) {
+    if (row.id && row.titulo) cardTitles.set(String(row.id), String(row.titulo));
+  }
+
+  const allMedia: ReportMediaRow[] = (mediaRes.data ?? []).map((row) => ({
+    id: String(row.id),
+    published_at: String(row.published_at),
+    media_product_type: String(row.media_product_type ?? ""),
+    permalink: row.permalink != null ? String(row.permalink) : null,
+    caption: row.caption != null ? String(row.caption) : null,
+    metrics: (row.metrics as Record<string, number | undefined>) ?? {},
+    contentTitle:
+      row.content_card_id != null ? (cardTitles.get(String(row.content_card_id)) ?? null) : null,
+  }));
+
+  const postsCurrent = allMedia.filter((row) =>
+    inDateRange(row.published_at, period.from, period.to),
+  );
+  const postsPrevious = allMedia.filter((row) =>
+    inDateRange(row.published_at, period.prevFrom, period.prevTo),
+  );
+
+  const allCards: ReportCardRow[] = (cardsRes.data ?? []).map((row) => ({
+    id: String(row.id),
+    status: String(row.status),
+    formato: row.formato != null ? String(row.formato) : null,
+    data_publicacao: String(row.data_publicacao).slice(0, 10),
+    publish_status: row.publish_status != null ? String(row.publish_status) : null,
+  }));
+  const cardsCurrent = allCards.filter((row) =>
+    inDateRange(row.data_publicacao, period.from, period.to),
+  );
+  const cardsPrevious = allCards.filter((row) =>
+    inDateRange(row.data_publicacao, period.prevFrom, period.prevTo),
+  );
+
+  return buildOperationalReport({
+    clienteNome,
+    cadastroClienteId: data.cadastroClienteId,
+    clienteSlug,
+    period,
+    platformRows,
+    postsCurrent,
+    postsPrevious,
+    cardsCurrent,
+    cardsPrevious,
+    overviewCurrent,
+    overviewPrevious,
+  });
+}
+
 export const getClientOperationalReportFn = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => inputSchema.parse(d))
   .handler(async ({ data, context }): Promise<OperationalReport> => {
     await assertClienteAccess(context, data.cadastroClienteId);
-    const periodInput: PeriodInput = {
-      preset: data.preset,
-      customFrom: data.customFrom,
-      customTo: data.customTo,
-    };
-    const period = resolvePeriod(periodInput);
-
-    const { data: cadastro, error: cadastroError } = await context.supabase
-      .from("cadastro_clientes")
-      .select("id, nome_cliente, slug")
-      .eq("id", data.cadastroClienteId)
-      .maybeSingle();
-    if (cadastroError) throw new Error(cadastroError.message);
-    if (!cadastro?.nome_cliente) throw new Error("Cliente não encontrado");
-
-    const clienteNome = String(cadastro.nome_cliente);
-    const clienteSlug = cadastro.slug != null ? String(cadastro.slug) : "";
-
-    const [overviewRes, mediaRes, cardsRes] = await Promise.all([
-      context.supabase
-        .from("vw_overview_cliente")
-        .select(OVERVIEW_CLIENTE_SELECT)
-        .eq("cliente", clienteNome)
-        .gte("data", period.prevFrom)
-        .lte("data", period.to)
-        .order("data", { ascending: true }),
-      context.supabase
-        .from("vw_ig_media_dashboard")
-        .select(
-          "id, published_at, media_product_type, permalink, caption, metrics, content_card_id",
-        )
-        .eq("cadastro_cliente_id", data.cadastroClienteId)
-        .gte("published_at", `${period.prevFrom}T00:00:00.000Z`)
-        .lte("published_at", `${period.to}T23:59:59.999Z`)
-        .order("published_at", { ascending: false })
-        .limit(800),
-      context.supabase
-        .from("content_cards")
-        .select("id, status, formato, data_publicacao, publish_status, titulo")
-        .eq("cadastro_cliente_id", data.cadastroClienteId)
-        .gte("data_publicacao", period.prevFrom)
-        .lte("data_publicacao", period.to)
-        .neq("status", "arquivado"),
-    ]);
-
-    if (overviewRes.error) {
-      console.warn("[relatorio] vw_overview_cliente:", overviewRes.error.message);
-    }
-    if (mediaRes.error) throw new Error(mediaRes.error.message);
-    if (cardsRes.error) throw new Error(cardsRes.error.message);
-
-    const overviewRows = (overviewRes.data ?? []).map((row) =>
-      mapOverviewRow(row as Record<string, unknown>),
-    );
-    const overviewCurrent = sumOverview(
-      overviewRows.filter((row) => row.data >= period.from && row.data <= period.to),
-    );
-    const overviewPrevious = sumOverview(
-      overviewRows.filter((row) => row.data >= period.prevFrom && row.data <= period.prevTo),
-    );
-
-    const platformRows = await fetchPlatformRows(
-      context.supabase,
-      clienteNome,
-      period.prevFrom,
-      period.to,
-    );
-
-    const cardTitles = new Map<string, string>();
-    for (const row of cardsRes.data ?? []) {
-      if (row.id && row.titulo) cardTitles.set(String(row.id), String(row.titulo));
-    }
-
-    const allMedia: ReportMediaRow[] = (mediaRes.data ?? []).map((row) => ({
-      id: String(row.id),
-      published_at: String(row.published_at),
-      media_product_type: String(row.media_product_type ?? ""),
-      permalink: row.permalink != null ? String(row.permalink) : null,
-      caption: row.caption != null ? String(row.caption) : null,
-      metrics: (row.metrics as Record<string, number | undefined>) ?? {},
-      contentTitle:
-        row.content_card_id != null ? (cardTitles.get(String(row.content_card_id)) ?? null) : null,
-    }));
-
-    const postsCurrent = allMedia.filter((row) =>
-      inDateRange(row.published_at, period.from, period.to),
-    );
-    const postsPrevious = allMedia.filter((row) =>
-      inDateRange(row.published_at, period.prevFrom, period.prevTo),
-    );
-
-    const allCards: ReportCardRow[] = (cardsRes.data ?? []).map((row) => ({
-      id: String(row.id),
-      status: String(row.status),
-      formato: row.formato != null ? String(row.formato) : null,
-      data_publicacao: String(row.data_publicacao).slice(0, 10),
-      publish_status: row.publish_status != null ? String(row.publish_status) : null,
-    }));
-    const cardsCurrent = allCards.filter((row) =>
-      inDateRange(row.data_publicacao, period.from, period.to),
-    );
-    const cardsPrevious = allCards.filter((row) =>
-      inDateRange(row.data_publicacao, period.prevFrom, period.prevTo),
-    );
-
-    return buildOperationalReport({
-      clienteNome,
-      cadastroClienteId: data.cadastroClienteId,
-      clienteSlug,
-      period,
-      platformRows,
-      postsCurrent,
-      postsPrevious,
-      cardsCurrent,
-      cardsPrevious,
-      overviewCurrent,
-      overviewPrevious,
-    });
+    return loadClientOperationalReport(context.supabase, data);
   });

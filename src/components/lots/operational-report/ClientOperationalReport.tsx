@@ -16,6 +16,7 @@ import type { CommonMetric } from "@/lib/metrics";
 import type { ValueFormat } from "@/lib/platforms/types";
 import { getClientOperationalReportFn } from "@/modules/operational-report/operational-report.server";
 import { RelatorioNotas } from "@/components/lots/operational-report/RelatorioNotas";
+import { ReportInsightsBlock } from "@/components/lots/operational-report/ReportInsightsBlock";
 import { formatReportValue } from "@/modules/operational-report/format";
 import type {
   OperationalReport,
@@ -94,6 +95,7 @@ function ReportCanvas({ report }: { report: OperationalReport }) {
   return (
     <div className="space-y-4 sm:space-y-5">
       <Poster report={report} />
+      <ReportInsightsBlock report={report} />
 
       {empty ? (
         <section className="lots-surface px-6 py-16 text-center">
