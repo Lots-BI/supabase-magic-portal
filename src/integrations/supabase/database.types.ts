@@ -1999,6 +1999,87 @@ export type Database = {
           },
         ];
       };
+      forms: {
+        Row: {
+          cadastro_cliente_id: number;
+          created_at: string;
+          crm_person_id: string | null;
+          email: string | null;
+          external_id: string | null;
+          form_key: string;
+          id: string;
+          instagram: string | null;
+          mensagem: string | null;
+          nome: string;
+          page_url: string | null;
+          payload: Json;
+          source: string;
+          telefone: string | null;
+          utm_campaign: string | null;
+          utm_content: string | null;
+          utm_medium: string | null;
+          utm_source: string | null;
+          utm_term: string | null;
+        };
+        Insert: {
+          cadastro_cliente_id: number;
+          created_at?: string;
+          crm_person_id?: string | null;
+          email?: string | null;
+          external_id?: string | null;
+          form_key?: string;
+          id?: string;
+          instagram?: string | null;
+          mensagem?: string | null;
+          nome: string;
+          page_url?: string | null;
+          payload?: Json;
+          source?: string;
+          telefone?: string | null;
+          utm_campaign?: string | null;
+          utm_content?: string | null;
+          utm_medium?: string | null;
+          utm_source?: string | null;
+          utm_term?: string | null;
+        };
+        Update: {
+          cadastro_cliente_id?: number;
+          created_at?: string;
+          crm_person_id?: string | null;
+          email?: string | null;
+          external_id?: string | null;
+          form_key?: string;
+          id?: string;
+          instagram?: string | null;
+          mensagem?: string | null;
+          nome?: string;
+          page_url?: string | null;
+          payload?: Json;
+          source?: string;
+          telefone?: string | null;
+          utm_campaign?: string | null;
+          utm_content?: string | null;
+          utm_medium?: string | null;
+          utm_source?: string | null;
+          utm_term?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "forms_cadastro_cliente_id_fkey";
+            columns: ["cadastro_cliente_id"];
+            isOneToOne: false;
+            referencedRelation: "cadastro_clientes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "forms_crm_person_id_fkey";
+            columns: ["crm_person_id"];
+            isOneToOne: false;
+            referencedRelation: "crm_people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       editorial_pillars: {
         Row: {
           ativo: boolean;

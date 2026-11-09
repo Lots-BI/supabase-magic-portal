@@ -21,6 +21,13 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Adicionado
 
+- **Formulários de landing → CRM (2026-11-08):** `POST /api/forms/v1/submit`
+  com token por cliente (mesmo gerador do CRM). A landing **não** usa chave
+  Supabase: browser → server da landing → Lots. Grava pessoa no CRM + linha em
+  `forms` (multi-tenant por `cadastro_cliente_id`). UI do CRM copia prompt Cursor
+  + curl. Doc: [forms-submit-api.md](../07-integrations/forms-submit-api.md).
+  Migration `92_forms_crm_submit.sql`.
+
 - **Analista Claude (2026-11-07):** aba admin `/admin/analista` — só admin. Escolhe
   cliente e período, pergunta sobre o relatório e pode usar a resposta na análise
   sem enviar. O relatório do cliente mantém a leitura automática e **não** tem o

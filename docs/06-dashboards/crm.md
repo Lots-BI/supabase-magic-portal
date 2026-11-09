@@ -5,7 +5,7 @@ status: living
 owner: Engenharia Lots BI
 tags: [crm, instagram, audiência, inbox]
 difficulty: beginner
-last_review: 2026-09-11
+last_review: 2026-11-08
 ---
 
 # CRM de audiência
@@ -30,7 +30,8 @@ Não é o pipeline comercial da agência (`agency_leads`). É a audiência da ma
 1. **Graph Instagram no Lots** — comentários (já no OAuth) e Direct (caso de uso Mensagens no App Dashboard + `META_REQUEST_IG_MESSAGES_SCOPE=1` + Relogin). Sem ManyChat e sem n8n.
 2. Cron `instagram-crm-comments-sync` (comentários + Direct) depois do sync de mídia. Botão **Puxar Instagram**.
 3. Webhook Meta: `GET|POST /api/webhooks/meta`.
-4. **Opcional** `POST /api/crm/v1/interactions` — só formulário do próprio site. Ver [crm-ingest-api.md](../07-integrations/crm-ingest-api.md).
+4. **Formulário de landing** `POST /api/forms/v1/submit` — payload simples (`nome`/`email`/`instagram`…); token por cliente; **sem** chave Supabase na landing. Ver [forms-submit-api.md](../07-integrations/forms-submit-api.md).
+5. **Opcional** `POST /api/crm/v1/interactions` — eventos genéricos (n8n, batch). Ver [crm-ingest-api.md](../07-integrations/crm-ingest-api.md).
 
 A Graph **não** entrega e-mail, telefone ou endereço de comentador, nem quem curtiu. Custom Audience só hasheia e-mail/telefone consentidos — nunca IGSID. O texto de um comentário ou DM **não** vira `field_facts`.
 

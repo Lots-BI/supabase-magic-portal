@@ -25,7 +25,10 @@ type TokenRow = {
   revoked_at: string | null;
 };
 
-async function resolveIngestToken(supabase: SupabaseClient, bearer: string): Promise<TokenRow> {
+export async function resolveCrmIngestToken(
+  supabase: SupabaseClient,
+  bearer: string,
+): Promise<TokenRow> {
   const hash = hashCrmIngestToken(bearer.trim());
   const { data, error } = await supabase
     .from("crm_ingest_tokens")
@@ -48,7 +51,7 @@ export async function ingestCrmApiPayload(
   bearerToken: string,
   body: unknown,
 ): Promise<CrmIngestApiResult> {
-  const token = await resolveIngestToken(supabase, bearerToken);
+  const token = await resolveCrmIngestToken(supabase, bearerToken);
   const parsed = parseIngestEvents(body);
   if ("error" in parsed) throw new CrmIngestPayloadError(parsed.error);
 

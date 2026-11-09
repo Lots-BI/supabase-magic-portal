@@ -101,6 +101,7 @@ import { Route as AuthenticatedClienteClienteRelatorioRouteImport } from './rout
 import { Route as AuthenticatedClienteClienteTiktokRouteImport } from './routes/_authenticated/cliente.$cliente.tiktok'
 import { Route as AuthenticatedClienteClienteYoutubeRouteImport } from './routes/_authenticated/cliente.$cliente.youtube'
 import { Route as ApiCrmV1InteractionsRouteImport } from './routes/api/crm/v1/interactions'
+import { Route as ApiFormsV1SubmitRouteImport } from './routes/api/forms/v1/submit'
 import { Route as AuthenticatedAdminAprovacoesAgendarCardIdRouteImport } from './routes/_authenticated/admin/aprovacoes_.agendar.$cardId'
 import { Route as AuthenticatedAdminAprovacoesProducaoCardIdRouteImport } from './routes/_authenticated/admin/aprovacoes_.producao.$cardId'
 import { Route as AuthenticatedAdminAprovacoesRoteiroCardIdRouteImport } from './routes/_authenticated/admin/aprovacoes_.roteiro.$cardId'
@@ -634,6 +635,11 @@ const ApiCrmV1InteractionsRoute = ApiCrmV1InteractionsRouteImport.update({
   path: '/api/crm/v1/interactions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiFormsV1SubmitRoute = ApiFormsV1SubmitRouteImport.update({
+  id: '/api/forms/v1/submit',
+  path: '/api/forms/v1/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminAprovacoesAgendarCardIdRoute =
   AuthenticatedAdminAprovacoesAgendarCardIdRouteImport.update({
     id: '/aprovacoes_/agendar/$cardId',
@@ -756,6 +762,7 @@ export interface FileRoutesByFullPath {
   '/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
   '/cliente/$cliente/youtube': typeof AuthenticatedClienteClienteYoutubeRoute
   '/api/crm/v1/interactions': typeof ApiCrmV1InteractionsRoute
+  '/api/forms/v1/submit': typeof ApiFormsV1SubmitRoute
   '/admin/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/admin/conexoes/': typeof AuthenticatedAdminConexoesIndexRoute
   '/admin/debug/': typeof AuthenticatedAdminDebugIndexRoute
@@ -847,6 +854,7 @@ export interface FileRoutesByTo {
   '/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
   '/cliente/$cliente/youtube': typeof AuthenticatedClienteClienteYoutubeRoute
   '/api/crm/v1/interactions': typeof ApiCrmV1InteractionsRoute
+  '/api/forms/v1/submit': typeof ApiFormsV1SubmitRoute
   '/admin/clientes': typeof AuthenticatedAdminClientesIndexRoute
   '/admin/conexoes': typeof AuthenticatedAdminConexoesIndexRoute
   '/admin/debug': typeof AuthenticatedAdminDebugIndexRoute
@@ -948,6 +956,7 @@ export interface FileRoutesById {
   '/_authenticated/cliente/$cliente/tiktok': typeof AuthenticatedClienteClienteTiktokRoute
   '/_authenticated/cliente/$cliente/youtube': typeof AuthenticatedClienteClienteYoutubeRoute
   '/api/crm/v1/interactions': typeof ApiCrmV1InteractionsRoute
+  '/api/forms/v1/submit': typeof ApiFormsV1SubmitRoute
   '/_authenticated/admin/clientes/': typeof AuthenticatedAdminClientesIndexRoute
   '/_authenticated/admin/conexoes/': typeof AuthenticatedAdminConexoesIndexRoute
   '/_authenticated/admin/debug/': typeof AuthenticatedAdminDebugIndexRoute
@@ -1049,6 +1058,7 @@ export interface FileRouteTypes {
     | '/cliente/$cliente/tiktok'
     | '/cliente/$cliente/youtube'
     | '/api/crm/v1/interactions'
+    | '/api/forms/v1/submit'
     | '/admin/clientes/'
     | '/admin/conexoes/'
     | '/admin/debug/'
@@ -1140,6 +1150,7 @@ export interface FileRouteTypes {
     | '/cliente/$cliente/tiktok'
     | '/cliente/$cliente/youtube'
     | '/api/crm/v1/interactions'
+    | '/api/forms/v1/submit'
     | '/admin/clientes'
     | '/admin/conexoes'
     | '/admin/debug'
@@ -1240,6 +1251,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cliente/$cliente/tiktok'
     | '/_authenticated/cliente/$cliente/youtube'
     | '/api/crm/v1/interactions'
+    | '/api/forms/v1/submit'
     | '/_authenticated/admin/clientes/'
     | '/_authenticated/admin/conexoes/'
     | '/_authenticated/admin/debug/'
@@ -1279,6 +1291,7 @@ export interface RootRouteChildren {
   OauthMetaCallbackRoute: typeof OauthMetaCallbackRoute
   OauthTiktokCallbackRoute: typeof OauthTiktokCallbackRoute
   ApiCrmV1InteractionsRoute: typeof ApiCrmV1InteractionsRoute
+  ApiFormsV1SubmitRoute: typeof ApiFormsV1SubmitRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1927,6 +1940,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCrmV1InteractionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/forms/v1/submit': {
+      id: '/api/forms/v1/submit'
+      path: '/api/forms/v1/submit'
+      fullPath: '/api/forms/v1/submit'
+      preLoaderRoute: typeof ApiFormsV1SubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/aprovacoes_/agendar/$cardId': {
       id: '/_authenticated/admin/aprovacoes_/agendar/$cardId'
       path: '/aprovacoes/agendar/$cardId'
@@ -2294,6 +2314,7 @@ const rootRouteChildren: RootRouteChildren = {
   OauthMetaCallbackRoute: OauthMetaCallbackRoute,
   OauthTiktokCallbackRoute: OauthTiktokCallbackRoute,
   ApiCrmV1InteractionsRoute: ApiCrmV1InteractionsRoute,
+  ApiFormsV1SubmitRoute: ApiFormsV1SubmitRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

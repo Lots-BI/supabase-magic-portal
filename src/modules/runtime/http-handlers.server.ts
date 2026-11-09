@@ -9,6 +9,7 @@ import {
   CrmIngestPayloadError,
   ingestCrmApiPayload,
 } from "@/modules/crm/ingest/ingest-api.server";
+import { submitFormToCrm } from "@/modules/crm/ingest/submit-form.server";
 import { jsonResponse } from "./http";
 
 export function handleMetaWebhookGet(request: Request): Response {
@@ -77,5 +78,34 @@ export async function handleCrmIngestPost(request: Request): Promise<Response> {
     }
     console.error("[crm-ingest]", error);
     return jsonResponse({ error: "Ingest failed" }, 500);
+  }
+}
+
+/**
+ * Formulário de landing → CRM + forms.
+ * Auth: Bearer lots_crm_… (mesmo token da API de ingestão, por cliente).
+ * Token fica no server da landing — nunca VITE_/NEXT_PUBLIC_ nem chave Supabase.
+ */
+export async function handleFormSubmitPost(request: Request): Promise<Response> {
+  const header = request.headers.get("authorization") ?? "";
+  const bearer = header.toLowerCase().startsWith("bearer ") ? header.slice(7).trim() : "";
+  if (!bearer) return jsonResponse({ error: "Missing bearer token" }, 401);
+  let body: unknown = {};
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400);
+  }
+  try {
+    return jsonResponse(await submitFormToCrm(getSupabaseAdmin(), bearer, body));
+  } catch (error) {
+    if (error instanceof CrmIngestAuthError) {
+      return jsonResponse({ error: error.message }, 401);
+    }
+    if (error instanceof CrmIngestPayloadError) {
+      return jsonResponse({ error: error.message }, 400);
+    }
+    console.error("[forms-submit]", error);
+    return jsonResponse({ error: "Form submit failed" }, 500);
   }
 }

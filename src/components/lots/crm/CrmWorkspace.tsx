@@ -134,11 +134,34 @@ function downloadCsv(csv: string, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-function ingestCurlExample(origin: string, token = "lots_crm_SEU_TOKEN") {
-  return `curl -X POST ${origin}/api/crm/v1/interactions \\
+function formSubmitCurlExample(origin: string, token = "lots_crm_SEU_TOKEN") {
+  return `curl -X POST ${origin}/api/forms/v1/submit \\
   -H "Authorization: Bearer ${token}" \\
   -H "Content-Type: application/json" \\
-  -d '{"channel":"whatsapp","external_id":"wamid.exemplo","body":"quero orçamento","identities":[{"kind":"whatsapp","value":"5511999999999"}]}'`;
+  -d '{"nome":"Maria Silva","email":"maria@email.com","instagram":"mariasilva","form_key":"landing","page_url":"https://site.com/?utm_source=meta"}'`;
+}
+
+function landingCursorPrompt(origin: string) {
+  return `Integre o formulário desta landing ao CRM Lots BI.
+
+NÃO use chave Supabase (anon/service). NÃO grave direto no banco.
+
+Fluxo obrigatório (server-to-server):
+1) Browser → rota server DESTA landing (ex. POST /api/lead)
+2) Essa rota → POST ${origin}/api/forms/v1/submit
+   Header: Authorization: Bearer <LOTS_FORMS_TOKEN>
+   Body JSON: { nome, email?, instagram?, telefone?, mensagem?, form_key, page_url, utm_* }
+
+Env (só server, sem VITE_/NEXT_PUBLIC_):
+- LOTS_FORMS_URL=${origin}/api/forms/v1/submit
+- LOTS_FORMS_TOKEN=lots_crm_… (gerar em Lots BI → CRM do cliente → Gerar token)
+
+Regras:
+- form_key estável por landing (ex. landing-lotsbi)
+- page_url = window.location.href (mantém UTMs)
+- Exigir nome + ao menos um de email/instagram/telefone
+- Loading / sucesso / erro no form
+- Nunca expor o token no client bundle`;
 }
 
 function IngestTokenPanel({ cadastroClienteId }: { cadastroClienteId: number }) {
@@ -178,10 +201,12 @@ function IngestTokenPanel({ cadastroClienteId }: { cadastroClienteId: number }) 
 
   const tokens = tokensQuery.data ?? [];
 
+  const promptText = landingCursorPrompt(origin || "https://lotsbi.leandromajr.com");
+
   return (
     <SectionCard
-      title="API extra (formulário do site)"
-      description="Direct e comentário Instagram já entram pela Graph no Lots. Use um token só se o site ou um formulário próprio precisar empurrar um evento."
+      title="Formulário da landing → CRM"
+      description="Gere um token por cliente. A landing chama o Lots via rota server própria — sem chave Supabase no projeto do cliente."
     >
       <div className="mb-3 flex flex-wrap items-end gap-2">
         <div className="min-w-[12rem] flex-1">
@@ -196,7 +221,8 @@ function IngestTokenPanel({ cadastroClienteId }: { cadastroClienteId: number }) 
       {plainOnce ? (
         <div className="mb-3 rounded-md border border-border bg-muted/40 p-3">
           <p className="text-xs text-muted-foreground">
-            Copie agora. Não armazenamos o valor em claro.
+            Copie agora. Não armazenamos o valor em claro. Coloque só em env server da landing
+            (`LOTS_FORMS_TOKEN`).
           </p>
           <div className="mt-2 flex items-center gap-2">
             <Input readOnly value={plainOnce} className="font-mono text-xs" />
@@ -248,8 +274,24 @@ function IngestTokenPanel({ cadastroClienteId }: { cadastroClienteId: number }) 
           ))}
         </ul>
       )}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            void navigator.clipboard.writeText(promptText);
+            toast.success("Prompt do Cursor copiado.");
+          }}
+        >
+          <Copy className="mr-1.5 h-3.5 w-3.5" />
+          Copiar prompt Cursor (landing)
+        </Button>
+      </div>
       <pre className="mt-3 overflow-x-auto rounded-md bg-muted/50 p-3 text-[11px] leading-relaxed text-muted-foreground">
-        {ingestCurlExample(origin, plainOnce ?? "lots_crm_SEU_TOKEN")}
+        {formSubmitCurlExample(
+          origin || "https://lotsbi.leandromajr.com",
+          plainOnce ?? "lots_crm_SEU_TOKEN",
+        )}
       </pre>
     </SectionCard>
   );

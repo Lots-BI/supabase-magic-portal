@@ -5,10 +5,14 @@ status: living
 owner: Engenharia Lots BI
 tags: [crm, ingest, manychat, n8n]
 difficulty: beginner
-last_review: 2026-09-11
+last_review: 2026-11-08
 ---
 
 # API de ingestão CRM
+
+> Landing de tráfego? Prefira o contrato simples
+> [forms-submit-api.md](./forms-submit-api.md) (`POST /api/forms/v1/submit`).
+> Esta API continua para eventos genéricos (WhatsApp/n8n/batch).
 
 `POST {APP_URL}/api/crm/v1/interactions`
 
