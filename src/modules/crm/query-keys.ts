@@ -10,4 +10,6 @@ export const crmKeys = {
   ranking: (cadastroClienteId: number, days: number) =>
     ["crm", "ranking", cadastroClienteId, days] as const,
   ingestTokens: (cadastroClienteId: number) => ["crm", "ingest-tokens", cadastroClienteId] as const,
+  forms: (cadastroClienteId: number, days: number) =>
+    ["crm", "forms", cadastroClienteId, days] as const,
 };

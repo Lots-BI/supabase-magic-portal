@@ -2,7 +2,16 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ChevronDown, Contact2, RefreshCw, Star, Download, KeyRound, Copy } from "lucide-react";
+import {
+  ChevronDown,
+  ClipboardList,
+  Contact2,
+  RefreshCw,
+  Star,
+  Download,
+  KeyRound,
+  Copy,
+} from "lucide-react";
 import { PageHeader } from "@/components/lots/PageHeader";
 import { StatCard } from "@/components/lots/StatCard";
 import { SectionCard } from "@/components/lots/SectionCard";
@@ -50,6 +59,7 @@ import {
 import { CrmPeopleToolbar } from "@/components/lots/crm/CrmPeopleToolbar";
 import { CrmCommentFeed } from "@/components/lots/crm/CrmCommentFeed";
 import { CommentReplyBox } from "@/components/lots/crm/CommentReplyBox";
+import { CrmFormsPanel } from "@/components/lots/crm/CrmFormsPanel";
 import {
   addCrmPersonNoteFn,
   assignCrmPersonFn,
@@ -315,7 +325,7 @@ export function CrmWorkspace({
   const [q, setQ] = useState("");
   const [filters, setFilters] = useState<CrmPeopleFilters>(DEFAULT_CRM_PEOPLE_FILTERS);
   const [view, setView] = useState<CrmPeopleView>("inbox");
-  const [section, setSection] = useState<"comments" | "people">("comments");
+  const [section, setSection] = useState<"comments" | "people" | "forms">("comments");
   const [openId, setOpenId] = useState<string | null>(null);
 
   const coverageFn = useServerFn(getCrmCoverageFn);
@@ -477,25 +487,39 @@ export function CrmWorkspace({
       </div>
 
       <SectionCard
-        title={section === "comments" ? "Comentários" : "Pessoas"}
+        title={
+          section === "comments" ? "Comentários" : section === "forms" ? "Formulários" : "Pessoas"
+        }
         description={
           section === "comments"
             ? "Cada card é um comentário. A resposta sai nele, sem abrir a ficha."
-            : "Separadas pelo canal do último contato. Caixa de entrada = ainda sem resposta da marca."
+            : section === "forms"
+              ? "Leads da landing e de outros forms. Clique para ver contato, mensagem e UTMs."
+              : "Separadas pelo canal do último contato. Caixa de entrada = ainda sem resposta da marca."
         }
       >
         <Tabs
           value={section}
-          onValueChange={(value) => setSection(value as "comments" | "people")}
+          onValueChange={(value) => setSection(value as "comments" | "people" | "forms")}
           className="mb-4"
         >
           <TabsList>
             <TabsTrigger value="comments">Comentários</TabsTrigger>
             <TabsTrigger value="people">Pessoas</TabsTrigger>
+            <TabsTrigger value="forms" className="gap-1.5">
+              <ClipboardList className="h-3.5 w-3.5" />
+              Formulários
+            </TabsTrigger>
           </TabsList>
         </Tabs>
         {section === "comments" ? (
           <CrmCommentFeed cadastroClienteId={cadastroClienteId} days={days} canWrite={canWrite} />
+        ) : section === "forms" ? (
+          <CrmFormsPanel
+            cadastroClienteId={cadastroClienteId}
+            days={days}
+            onOpenPerson={setOpenId}
+          />
         ) : (
           <>
             <Tabs value={view} onValueChange={(v) => setView(v as CrmPeopleView)} className="mb-4">

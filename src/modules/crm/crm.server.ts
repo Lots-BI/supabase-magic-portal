@@ -1201,6 +1201,94 @@ export const replyCrmDmFn = createServerFn({ method: "POST" })
     return { ok: true, id: posted.id };
   });
 
+export type CrmFormSubmissionRow = {
+  id: string;
+  cadastroClienteId: number;
+  formKey: string;
+  nome: string;
+  email: string | null;
+  instagram: string | null;
+  telefone: string | null;
+  mensagem: string | null;
+  source: string;
+  pageUrl: string | null;
+  externalId: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmContent: string | null;
+  utmTerm: string | null;
+  crmPersonId: string | null;
+  createdAt: string;
+};
+
+export const listCrmFormSubmissionsFn = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        cadastroClienteId: z.number().int().positive(),
+        days: daysSchema.optional(),
+        q: z.string().optional(),
+        formKey: z.string().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<CrmFormSubmissionRow[]> => {
+    await assertAdminOrClientScope(context, data.cadastroClienteId);
+    const days = (data.days ?? 90) as PeriodDays;
+    const period = periodRange(days);
+
+    let query = context.supabase
+      .from("forms")
+      .select(
+        "id, cadastro_cliente_id, form_key, nome, email, instagram, telefone, mensagem, source, page_url, external_id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, crm_person_id, created_at",
+      )
+      .eq("cadastro_cliente_id", data.cadastroClienteId)
+      .gte("created_at", period.from)
+      .order("created_at", { ascending: false })
+      .limit(300);
+
+    if (data.formKey?.trim()) {
+      query = query.eq("form_key", data.formKey.trim());
+    }
+    if (data.q?.trim()) {
+      const q = data.q
+        .trim()
+        .replace(/^@/, "")
+        .replace(/[%*,()]/g, "");
+      if (q) {
+        query = query.or(
+          `nome.ilike.%${q}%,email.ilike.%${q}%,instagram.ilike.%${q}%,telefone.ilike.%${q}%`,
+        );
+      }
+    }
+
+    const { data: rows, error } = await query;
+    if (error) throw new Error(error.message);
+
+    return (rows ?? []).map((row) => ({
+      id: row.id,
+      cadastroClienteId: row.cadastro_cliente_id,
+      formKey: row.form_key,
+      nome: row.nome,
+      email: row.email,
+      instagram: row.instagram,
+      telefone: row.telefone,
+      mensagem: row.mensagem,
+      source: row.source,
+      pageUrl: row.page_url,
+      externalId: row.external_id,
+      utmSource: row.utm_source,
+      utmMedium: row.utm_medium,
+      utmCampaign: row.utm_campaign,
+      utmContent: row.utm_content,
+      utmTerm: row.utm_term,
+      crmPersonId: row.crm_person_id,
+      createdAt: row.created_at,
+    }));
+  });
+
 export type CrmIngestTokenRow = {
   id: string;
   label: string;

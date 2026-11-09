@@ -21,6 +21,10 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 
 ### Adicionado
 
+- **Aba Formulários no CRM (2026-11-09):** lista dos envios da landing com
+  busca, filtro por `form_key`, detalhe (contato, mensagem, UTMs, página) e
+  atalho para a ficha da pessoa.
+
 - **Formulários de landing → CRM (2026-11-08):** `POST /api/forms/v1/submit`
   com token por cliente (mesmo gerador do CRM). A landing **não** usa chave
   Supabase: browser → server da landing → Lots. Grava pessoa no CRM + linha em

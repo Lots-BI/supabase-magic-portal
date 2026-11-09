@@ -5,7 +5,7 @@ status: living
 owner: Engenharia Lots BI
 tags: [crm, forms, landing, ingest]
 difficulty: beginner
-last_review: 2026-11-08
+last_review: 2026-11-09
 ---
 
 # API de formulários (landing → CRM)
@@ -70,6 +70,8 @@ Resposta: `{ ok, submissionId, personId, deduped }`.
 Uma tabela `forms` + coluna `cadastro_cliente_id` (não uma tabela por cliente).
 O token resolve o cliente automaticamente. RLS: admin vê tudo; usuário do cliente só
 o próprio escopo.
+
+No app: CRM → aba **Formulários** (lista + detalhe). Ver [crm.md](../06-dashboards/crm.md).
 
 ## Relação com a API genérica
 

@@ -5,7 +5,7 @@ status: living
 owner: Engenharia Lots BI
 tags: [crm, instagram, audiência, inbox]
 difficulty: beginner
-last_review: 2026-11-08
+last_review: 2026-11-09
 ---
 
 # CRM de audiência
@@ -17,12 +17,14 @@ Não é o pipeline comercial da agência (`agency_leads`). É a audiência da ma
 ## O que a tela mostra
 
 - Home = **caixa de entrada**: último sinal inbound, ainda sem `brand_reply` da marca, no recorte de 7/30/90 dias.
-- Tabs: **Caixa de entrada** / **Em risco** / **Todas**.
+- Tabs principais: **Comentários** / **Pessoas** / **Formulários**.
+- Em Pessoas: **Caixa de entrada** / **Em risco** / **Todas**.
+- **Formulários:** lista dos envios em `forms` (nome, contato, mensagem, UTMs, página). Detalhe em sheet; atalho para a ficha CRM quando houver `crm_person_id`.
 - Cobertura: coletores live / scope faltando / planejado / impossível (curtidas) + **API de ingestão**.
 - Gap: `comments` nas publicações vs sinais `comment`/`reply` no grafo (só o canal Instagram).
 - Ranking **O que traz gente de volta** (secundário): pessoas no CRM vs comentários da mídia.
 - Export CSV só com fatos reais.
-- Admin: gerar / copiar uma vez / revogar token da API de ingestão.
+- Admin: gerar / copiar uma vez / revogar token da API de ingestão / prompt Cursor da landing.
 - Ficha: identidades, fatos PII só com origem real, dono (admin), unir fichas (admin), timeline.
 
 ## Coleta
