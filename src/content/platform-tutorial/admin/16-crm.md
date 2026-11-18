@@ -17,4 +17,11 @@ A aba **CRM** (Dados, acima de Relatórios) é a caixa de entrada da audiência 
 
 E-mail **não** vem do texto. Custom Audience Meta recusa IGSID.
 
+## Central de Leads (`/admin/leads`)
+
+A aba **Formulários** do CRM mostra o lead ao lado da pessoa. Para ver todos os leads de
+um cliente — landing e formulário instantâneo de campanha da Meta — num recorte dedicado
+com KPIs e filtros, use **Central de Leads** em Dados (`/admin/leads` no hub,
+`/cliente/{slug}/leads` no detalhe). O botão **Abrir ficha no CRM** volta para a pessoa.
+
 Doc: Knowledge Center → **CRM de audiência**.

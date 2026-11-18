@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -313,12 +314,15 @@ export function CrmWorkspace({
   clienteSlug,
   canWrite,
   connectionsHref,
+  initialPersonId,
 }: {
   cadastroClienteId: number;
   clienteNome: string;
   clienteSlug?: string | null;
   canWrite: boolean;
   connectionsHref: string;
+  /** Ficha a abrir ao montar — ex.: chegada via link "Abrir ficha no CRM" da Central de Leads. */
+  initialPersonId?: string | null;
 }) {
   const qc = useQueryClient();
   const [days, setDays] = useState<PeriodDays>(30);
@@ -326,7 +330,7 @@ export function CrmWorkspace({
   const [filters, setFilters] = useState<CrmPeopleFilters>(DEFAULT_CRM_PEOPLE_FILTERS);
   const [view, setView] = useState<CrmPeopleView>("inbox");
   const [section, setSection] = useState<"comments" | "people" | "forms">("comments");
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(initialPersonId ?? null);
 
   const coverageFn = useServerFn(getCrmCoverageFn);
   const listFn = useServerFn(listCrmPeopleFn);
@@ -494,8 +498,18 @@ export function CrmWorkspace({
           section === "comments"
             ? "Cada card é um comentário. A resposta sai nele, sem abrir a ficha."
             : section === "forms"
-              ? "Leads da landing e dos formulários instantâneos de campanha. A tag mostra a origem."
+              ? "Leads da landing e dos formulários instantâneos de campanha, com a origem na tag. Veja o recorte completo na Central de Leads."
               : "Separadas pelo canal do último contato. Caixa de entrada = ainda sem resposta da marca."
+        }
+        actions={
+          section === "forms" && clienteSlug ? (
+            <Button asChild size="sm" variant="outline">
+              <Link to="/cliente/$cliente/leads" params={{ cliente: clienteSlug }}>
+                <ClipboardList className="mr-1.5 h-3.5 w-3.5" />
+                Abrir Central de Leads
+              </Link>
+            </Button>
+          ) : undefined
         }
       >
         <Tabs

@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ClipboardList, Copy, ExternalLink, Mail, Phone, AtSign } from "lucide-react";
-import { toast } from "sonner";
+import { ClipboardList, ExternalLink, Mail, Phone, AtSign } from "lucide-react";
 import { EmptyState } from "@/components/lots/EmptyState";
 import type { PeriodDays } from "@/components/lots/PeriodToggle";
 import { Badge } from "@/components/ui/badge";
@@ -26,65 +25,12 @@ import {
   metaPlatformLabel,
   type FormOrigin,
 } from "@/modules/crm/ingest/meta-instant-form";
-
-function formatWhen(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function formatAgo(iso: string) {
-  const delta = Date.now() - new Date(iso).getTime();
-  if (!Number.isFinite(delta) || delta < 0) return formatWhen(iso);
-  const minutes = Math.floor(delta / 60_000);
-  if (minutes < 1) return "agora";
-  if (minutes < 60) return `há ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `há ${hours} h`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return "há 1 dia";
-  return `há ${days} dias`;
-}
-
-function contactLine(row: CrmFormSubmissionRow) {
-  const parts: string[] = [];
-  if (row.email) parts.push(row.email);
-  if (row.instagram) parts.push(`@${row.instagram.replace(/^@/, "")}`);
-  if (row.telefone) parts.push(row.telefone);
-  return parts.join(" · ");
-}
-
-function Field({ label, value }: { label: string; value: string | null | undefined }) {
-  if (!value?.trim()) return null;
-  return (
-    <div className="space-y-1">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="break-words text-sm text-foreground">{value}</p>
-    </div>
-  );
-}
-
-function CopyButton({ value, label }: { value: string; label: string }) {
-  return (
-    <Button
-      type="button"
-      size="sm"
-      variant="ghost"
-      className="h-7 px-2"
-      onClick={() => {
-        void navigator.clipboard.writeText(value);
-        toast.success(`${label} copiado.`);
-      }}
-    >
-      <Copy className="h-3.5 w-3.5" />
-    </Button>
-  );
-}
+import {
+  formatFormAgo,
+  formatFormWhen,
+  formSubmissionContactLine,
+} from "@/modules/crm/forms-present";
+import { FormCopyButton, FormDetailField } from "@/components/lots/crm/FormSubmissionDetailField";
 
 export function CrmFormsPanel({
   cadastroClienteId,
@@ -155,12 +101,12 @@ export function CrmFormsPanel({
           >
             <option value="all">Todas</option>
             <option value="landing">Landing</option>
-            <option value="meta_instant">Formulário instantâneo</option>
+            <option value="meta_instant">Formul�rio instant�neo</option>
           </select>
         </div>
         {formKeys.length > 1 || formKey !== "all" ? (
           <div className="min-w-[10rem]">
-            <p className="mb-1 text-xs text-muted-foreground">Formulário</p>
+            <p className="mb-1 text-xs text-muted-foreground">Formul�rio</p>
             <select
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               value={formKey}
@@ -178,18 +124,18 @@ export function CrmFormsPanel({
       </div>
 
       {formsQuery.isLoading ? (
-        <p className="text-sm text-muted-foreground">Carregando envios…</p>
+        <p className="text-sm text-muted-foreground">Carregando envios?</p>
       ) : rows.length === 0 ? (
         <EmptyState
           icon={ClipboardList}
           compact
-          title="Nenhum formulário neste período"
-          description="Leads da landing e dos formulários instantâneos de campanha da Meta aparecem aqui, com a origem na tag."
+          title="Nenhum formul�rio neste per�odo"
+          description="Leads da landing e dos formul�rios instant�neos de campanha da Meta aparecem aqui, com a origem na tag."
         />
       ) : (
         <ul className="divide-y divide-border rounded-lg border border-border">
           {rows.map((row) => {
-            const contacts = contactLine(row);
+            const contacts = formSubmissionContactLine(row);
             const originKind = formOriginKind(row.source, row.formKey);
             return (
               <li key={row.id}>
@@ -230,9 +176,9 @@ export function CrmFormsPanel({
                     ) : null}
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-xs text-muted-foreground">{formatAgo(row.createdAt)}</p>
+                    <p className="text-xs text-muted-foreground">{formatFormAgo(row.createdAt)}</p>
                     <p className="mt-1 text-[10px] text-muted-foreground">
-                      {formatWhen(row.createdAt)}
+                      {formatFormWhen(row.createdAt)}
                     </p>
                   </div>
                 </button>
@@ -252,9 +198,9 @@ export function CrmFormsPanel({
                   {formOriginBadge(openRow.source, openRow.formKey)}
                   {formOriginKind(openRow.source, openRow.formKey) === "meta_instant" &&
                   openRow.utmCampaign
-                    ? ` · ${openRow.utmCampaign}`
+                    ? ` � ${openRow.utmCampaign}`
                     : ""}{" "}
-                  · {formatWhen(openRow.createdAt)}
+                  � {formatFormWhen(openRow.createdAt)}
                 </SheetDescription>
               </SheetHeader>
 
@@ -264,7 +210,7 @@ export function CrmFormsPanel({
                     <div className="flex items-center gap-2 rounded-md border border-border px-3 py-2">
                       <Mail className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                       <span className="min-w-0 flex-1 truncate text-sm">{openRow.email}</span>
-                      <CopyButton value={openRow.email} label="E-mail" />
+                      <FormCopyButton value={openRow.email} label="E-mail" />
                     </div>
                   ) : null}
                   {openRow.instagram ? (
@@ -273,31 +219,40 @@ export function CrmFormsPanel({
                       <span className="min-w-0 flex-1 truncate text-sm">
                         {openRow.instagram.replace(/^@/, "")}
                       </span>
-                      <CopyButton value={openRow.instagram.replace(/^@/, "")} label="Instagram" />
+                      <FormCopyButton
+                        value={openRow.instagram.replace(/^@/, "")}
+                        label="Instagram"
+                      />
                     </div>
                   ) : null}
                   {openRow.telefone ? (
                     <div className="flex items-center gap-2 rounded-md border border-border px-3 py-2">
                       <Phone className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                       <span className="min-w-0 flex-1 truncate text-sm">{openRow.telefone}</span>
-                      <CopyButton value={openRow.telefone} label="Telefone" />
+                      <FormCopyButton value={openRow.telefone} label="Telefone" />
                     </div>
                   ) : null}
                 </div>
 
-                <Field label="Mensagem" value={openRow.mensagem} />
-                <Field label="Origem" value={formOriginLabel(openRow.source, openRow.formKey)} />
+                <FormDetailField label="Mensagem" value={openRow.mensagem} />
+                <FormDetailField
+                  label="Origem"
+                  value={formOriginLabel(openRow.source, openRow.formKey)}
+                />
                 {formOriginKind(openRow.source, openRow.formKey) === "meta_instant" ? (
                   <>
-                    <Field label="Campanha" value={openRow.utmCampaign} />
-                    <Field label="Anúncio" value={openRow.utmContent} />
-                    <Field label="Formulário da Meta" value={openRow.utmTerm} />
-                    <Field label="Plataforma" value={metaPlatformLabel(openRow.utmMedium)} />
+                    <FormDetailField label="Campanha" value={openRow.utmCampaign} />
+                    <FormDetailField label="An�ncio" value={openRow.utmContent} />
+                    <FormDetailField label="Formul�rio da Meta" value={openRow.utmTerm} />
+                    <FormDetailField
+                      label="Plataforma"
+                      value={metaPlatformLabel(openRow.utmMedium)}
+                    />
                   </>
                 ) : (
-                  <Field label="Formulário" value={openRow.formKey} />
+                  <FormDetailField label="Formul�rio" value={openRow.formKey} />
                 )}
-                <Field label="Página" value={openRow.pageUrl} />
+                <FormDetailField label="P�gina" value={openRow.pageUrl} />
 
                 {formOriginKind(openRow.source, openRow.formKey) !== "meta_instant" &&
                   (openRow.utmSource ||
@@ -310,11 +265,11 @@ export function CrmFormsPanel({
                         Campanha / UTMs
                       </p>
                       <div className="grid gap-2 sm:grid-cols-2">
-                        <Field label="utm_source" value={openRow.utmSource} />
-                        <Field label="utm_medium" value={openRow.utmMedium} />
-                        <Field label="utm_campaign" value={openRow.utmCampaign} />
-                        <Field label="utm_content" value={openRow.utmContent} />
-                        <Field label="utm_term" value={openRow.utmTerm} />
+                        <FormDetailField label="utm_source" value={openRow.utmSource} />
+                        <FormDetailField label="utm_medium" value={openRow.utmMedium} />
+                        <FormDetailField label="utm_campaign" value={openRow.utmCampaign} />
+                        <FormDetailField label="utm_content" value={openRow.utmContent} />
+                        <FormDetailField label="utm_term" value={openRow.utmTerm} />
                       </div>
                     </div>
                   )}
@@ -337,7 +292,7 @@ export function CrmFormsPanel({
                     <Button type="button" size="sm" variant="outline" asChild>
                       <a href={openRow.pageUrl} target="_blank" rel="noreferrer">
                         <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-                        Abrir página
+                        Abrir p�gina
                       </a>
                     </Button>
                   ) : null}

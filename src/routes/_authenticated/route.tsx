@@ -29,6 +29,7 @@ import {
   FileBarChart,
   ClipboardCheck,
   ListTodo,
+  ClipboardList,
   BookOpen,
   Compass,
   Palette,
@@ -181,6 +182,7 @@ function AuthenticatedLayout() {
         clientDashboards,
         { to: "/admin/tarefas", label: "Tarefas", icon: ListTodo },
         { to: "/admin/crm", label: "CRM", icon: Contact2 },
+        { to: "/admin/leads", label: "Central de Leads", icon: ClipboardList },
         { to: "/admin/relatorios", label: "Relatórios", icon: FileBarChart },
         ...(isAdmin ? [{ to: "/admin/analista", label: "Analista", icon: Bot }] : []),
         ...(FEATURE_PLANO_ESTRATEGICO_NAV
@@ -274,6 +276,11 @@ function AuthenticatedLayout() {
                 to: `/cliente/${diretrizesSlug}/crm`,
                 label: "CRM",
                 icon: Contact2,
+              },
+              {
+                to: `/cliente/${diretrizesSlug}/leads`,
+                label: "Central de Leads",
+                icon: ClipboardList,
               },
               {
                 to: `/cliente/${diretrizesSlug}/relatorio`,

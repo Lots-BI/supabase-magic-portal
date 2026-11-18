@@ -3,7 +3,7 @@ title: Changelog
 description: Histórico de mudanças relevantes do Lots BI (produto, dados e infraestrutura).
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-11-13
+last_review: 2026-11-18
 ---
 
 # Changelog
@@ -20,6 +20,14 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 ## [Não lançado]
 
 ### Adicionado
+
+- **Central de Leads (2026-11-18):** tela dedicada em Dados — `/admin/leads` (portfólio
+  por cliente: envios, landing, instantâneo) e `/cliente/{slug}/leads` (KPIs, busca,
+  filtro de origem/formulário, lista e detalhe com contato copiável e campanha da Meta).
+  Mesma fonte de dados da aba Formulários do CRM (`forms`), sem ingestão paralela. A aba
+  Formulários continua no CRM — agora com atalho **Abrir Central de Leads** — para ver o
+  lead ao lado da trajetória de comentários/Direct da pessoa; "Abrir ficha no CRM" na
+  Central de Leads volta direto para a ficha.
 
 - **Formulários instantâneos da Meta no CRM (2026-11-13):** o webhook `leadgen` lê o lead na Graph e grava a aba Formulários com a tag **Formulário instantâneo**, ao lado da landing. Filtro por origem. O cron do CRM assina a Página e repõe leads recentes. Exige `leads_retrieval`.
 

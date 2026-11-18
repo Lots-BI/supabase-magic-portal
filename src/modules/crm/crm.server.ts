@@ -34,6 +34,7 @@ import { resolveCrmInstagramTarget } from "./ingest/resolve-crm-instagram-target
 import { personListTitle } from "./present";
 import { periodRange } from "@/lib/metrics";
 import type { PeriodDays } from "@/components/lots/PeriodToggle";
+import { META_INSTANT_FORM_SOURCE } from "./ingest/meta-instant-form";
 
 const cadastroSchema = z.object({ cadastroClienteId: z.number().int().positive() });
 const daysSchema = z.union([z.literal(7), z.literal(30), z.literal(90)]);
@@ -651,6 +652,69 @@ export const listCrmPortfolioFn = createServerFn({ method: "GET" })
         commentsStatus: collector?.status ?? (cliente.instagram_ativo ? "planned" : "planned"),
       });
     }
+    return rows;
+  });
+
+export type CrmLeadsPortfolioRow = {
+  cadastroClienteId: number;
+  clienteNome: string;
+  clienteSlug: string | null;
+  total: number;
+  landing: number;
+  instant: number;
+};
+
+/**
+ * Portfólio da Central de Leads: envios do `forms` por cliente ativo no
+ * período, separados em landing vs. formulário instantâneo da Meta.
+ */
+export const listLeadsPortfolioFn = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ days: daysSchema }).parse(d))
+  .handler(async ({ data, context }): Promise<CrmLeadsPortfolioRow[]> => {
+    const ok = await resolveIsAdmin({
+      supabase: context.supabase,
+      userId: context.userId,
+      email: context.claims?.email,
+      repair: true,
+    });
+    if (!ok) throw new Error("Forbidden: admin role required");
+
+    const { data: ativos, error } = await context.supabase
+      .from("cadastro_clientes")
+      .select("id, nome_cliente, slug")
+      .eq("ativo", true)
+      .order("nome_cliente");
+    if (error) throw new Error(error.message);
+
+    const period = periodRange(data.days as PeriodDays);
+    const rows: CrmLeadsPortfolioRow[] = [];
+    for (const cliente of ativos ?? []) {
+      const [{ count: total }, { count: instant }] = await Promise.all([
+        context.supabase
+          .from("forms")
+          .select("id", { count: "exact", head: true })
+          .eq("cadastro_cliente_id", cliente.id)
+          .gte("created_at", period.from),
+        context.supabase
+          .from("forms")
+          .select("id", { count: "exact", head: true })
+          .eq("cadastro_cliente_id", cliente.id)
+          .eq("source", META_INSTANT_FORM_SOURCE)
+          .gte("created_at", period.from),
+      ]);
+      const totalCount = total ?? 0;
+      const instantCount = instant ?? 0;
+      rows.push({
+        cadastroClienteId: cliente.id,
+        clienteNome: cliente.nome_cliente,
+        clienteSlug: cliente.slug,
+        total: totalCount,
+        instant: instantCount,
+        landing: Math.max(totalCount - instantCount, 0),
+      });
+    }
+    rows.sort((a, b) => b.total - a.total);
     return rows;
   });
 
