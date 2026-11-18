@@ -3,7 +3,7 @@ title: Variáveis de ambiente — Platform Hub & Admin
 description: Inventário auditado de todas as variáveis usadas pelo Platform Hub e pelo módulo administrativo.
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-11-03
+last_review: 2026-11-13
 ---
 
 # Variáveis de ambiente — Platform Hub & Admin
@@ -135,7 +135,7 @@ Um único par OAuth cobre os quatro plugins Google.
 | `META_APP_SECRET` | condicional | App Secret | idem + HMAC do webhook CRM | `a1b2c3d4e5f6...` | dev, staging, prod | Mesmo app → **App Secret** (Show) |
 | `META_WEBHOOK_VERIFY_TOKEN` | condicional | Token do desafio GET do webhook | `server/routes/api/webhooks/meta.get.ts` | string aleatória | staging, prod | Você escolhe; o mesmo valor no App Dashboard |
 | `META_REQUEST_IG_MESSAGES_SCOPE` | não | `1` pede Direct no OAuth Instagram | `instagram-organic-oauth.config.ts` | `1` | após caso de uso Mensagens no App Dashboard | Default omitido = não pede (Relogin quebraria sem o caso de uso). Lots puxa Direct pela Graph, sem ManyChat. |
-| `META_REQUEST_LEADS_SCOPE` | não | `1` pede `leads_retrieval` no OAuth Meta Ads | `meta-oauth.config.ts` | `1` | staging/prod após App Review | Default omitido = não pede |
+| `META_REQUEST_LEADS_SCOPE` | não | `1` pede `leads_retrieval`, `pages_manage_ads` e `pages_manage_metadata` no OAuth Meta e Instagram | `meta-oauth.config.ts`, `instagram-organic-oauth.config.ts` | `1` | staging/prod depois que o app aceitar esses escopos | Default omitido = não pede. Sem isso o formulário instantâneo não entra no CRM. Reconectar a conta depois de ligar o flag. |
 
 **Redirect URI no Meta:** `{APP_URL}/oauth/meta/callback` · Produto: Facebook Login + Marketing API
 

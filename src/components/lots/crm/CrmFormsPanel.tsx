@@ -18,6 +18,14 @@ import {
 import { cn } from "@/lib/utils";
 import { crmKeys } from "@/modules/crm/query-keys";
 import { listCrmFormSubmissionsFn, type CrmFormSubmissionRow } from "@/modules/crm/crm.server";
+import {
+  formOriginBadge,
+  formOriginKind,
+  formOriginLabel,
+  instantFormContextLine,
+  metaPlatformLabel,
+  type FormOrigin,
+} from "@/modules/crm/ingest/meta-instant-form";
 
 function formatWhen(iso: string) {
   return new Date(iso).toLocaleString("pt-BR", {
@@ -88,6 +96,7 @@ export function CrmFormsPanel({
   onOpenPerson?: (personId: string) => void;
 }) {
   const [q, setQ] = useState("");
+  const [origin, setOrigin] = useState<"all" | FormOrigin>("all");
   const [formKey, setFormKey] = useState<string>("all");
   const [openId, setOpenId] = useState<string | null>(null);
   const listFn = useServerFn(listCrmFormSubmissionsFn);
@@ -105,13 +114,24 @@ export function CrmFormsPanel({
   });
 
   const formKeys = useMemo(() => {
-    const set = new Set((formsQuery.data ?? []).map((row) => row.formKey).filter(Boolean));
+    const set = new Set(
+      (formsQuery.data ?? [])
+        .filter((row) => formOriginKind(row.source, row.formKey) !== "meta_instant")
+        .map((row) => row.formKey)
+        .filter(Boolean),
+    );
     return [...set].sort((a, b) => a.localeCompare(b, "pt-BR"));
   }, [formsQuery.data]);
   const rows = useMemo(() => {
-    const list = formsQuery.data ?? [];
-    return formKey === "all" ? list : list.filter((row) => row.formKey === formKey);
-  }, [formsQuery.data, formKey]);
+    let list = formsQuery.data ?? [];
+    if (origin !== "all") {
+      list = list.filter((row) => formOriginKind(row.source, row.formKey) === origin);
+    }
+    if (origin !== "meta_instant" && formKey !== "all") {
+      list = list.filter((row) => row.formKey === formKey);
+    }
+    return list;
+  }, [formsQuery.data, formKey, origin]);
 
   const openRow = rows.find((row) => row.id === openId) ?? null;
 
@@ -123,8 +143,20 @@ export function CrmFormsPanel({
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Nome, e-mail, Instagram ou telefone"
+            placeholder="Nome, e-mail, Instagram, telefone ou campanha"
           />
+        </div>
+        <div className="min-w-[12rem]">
+          <p className="mb-1 text-xs text-muted-foreground">Origem</p>
+          <select
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+            value={origin}
+            onChange={(e) => setOrigin(e.target.value as "all" | FormOrigin)}
+          >
+            <option value="all">Todas</option>
+            <option value="landing">Landing</option>
+            <option value="meta_instant">Formulário instantâneo</option>
+          </select>
         </div>
         {formKeys.length > 1 || formKey !== "all" ? (
           <div className="min-w-[10rem]">
@@ -152,12 +184,13 @@ export function CrmFormsPanel({
           icon={ClipboardList}
           compact
           title="Nenhum formulário neste período"
-          description="Quando a landing enviar leads pela API do Lots, eles aparecem aqui com nome, contato e UTMs."
+          description="Leads da landing e dos formulários instantâneos de campanha da Meta aparecem aqui, com a origem na tag."
         />
       ) : (
         <ul className="divide-y divide-border rounded-lg border border-border">
           {rows.map((row) => {
             const contacts = contactLine(row);
+            const originKind = formOriginKind(row.source, row.formKey);
             return (
               <li key={row.id}>
                 <button
@@ -174,13 +207,24 @@ export function CrmFormsPanel({
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="truncate font-medium text-foreground">{row.nome}</p>
-                      <Badge variant="secondary" className="font-mono text-[10px]">
-                        {row.formKey}
+                      <Badge
+                        variant={originKind === "meta_instant" ? "outline" : "secondary"}
+                        className={cn(
+                          "text-[10px]",
+                          originKind === "meta_instant" ? "font-medium" : "font-mono",
+                        )}
+                      >
+                        {formOriginBadge(row.source, row.formKey)}
                       </Badge>
                     </div>
                     <p className="mt-0.5 truncate text-sm text-muted-foreground">
                       {contacts || "Sem contato estruturado"}
                     </p>
+                    {originKind === "meta_instant" ? (
+                      <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                        {instantFormContextLine(row.utmCampaign, row.utmContent, row.utmTerm)}
+                      </p>
+                    ) : null}
                     {row.mensagem ? (
                       <p className="mt-1 line-clamp-1 text-sm text-foreground/80">{row.mensagem}</p>
                     ) : null}
@@ -205,7 +249,12 @@ export function CrmFormsPanel({
               <SheetHeader>
                 <SheetTitle>{openRow.nome}</SheetTitle>
                 <SheetDescription>
-                  Envio de {openRow.formKey} · {formatWhen(openRow.createdAt)}
+                  {formOriginBadge(openRow.source, openRow.formKey)}
+                  {formOriginKind(openRow.source, openRow.formKey) === "meta_instant" &&
+                  openRow.utmCampaign
+                    ? ` · ${openRow.utmCampaign}`
+                    : ""}{" "}
+                  · {formatWhen(openRow.createdAt)}
                 </SheetDescription>
               </SheetHeader>
 
@@ -237,28 +286,38 @@ export function CrmFormsPanel({
                 </div>
 
                 <Field label="Mensagem" value={openRow.mensagem} />
-                <Field label="Formulário" value={openRow.formKey} />
-                <Field label="Origem" value={openRow.source} />
+                <Field label="Origem" value={formOriginLabel(openRow.source, openRow.formKey)} />
+                {formOriginKind(openRow.source, openRow.formKey) === "meta_instant" ? (
+                  <>
+                    <Field label="Campanha" value={openRow.utmCampaign} />
+                    <Field label="Anúncio" value={openRow.utmContent} />
+                    <Field label="Formulário da Meta" value={openRow.utmTerm} />
+                    <Field label="Plataforma" value={metaPlatformLabel(openRow.utmMedium)} />
+                  </>
+                ) : (
+                  <Field label="Formulário" value={openRow.formKey} />
+                )}
                 <Field label="Página" value={openRow.pageUrl} />
 
-                {(openRow.utmSource ||
-                  openRow.utmMedium ||
-                  openRow.utmCampaign ||
-                  openRow.utmContent ||
-                  openRow.utmTerm) && (
-                  <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
-                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                      Campanha / UTMs
-                    </p>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <Field label="utm_source" value={openRow.utmSource} />
-                      <Field label="utm_medium" value={openRow.utmMedium} />
-                      <Field label="utm_campaign" value={openRow.utmCampaign} />
-                      <Field label="utm_content" value={openRow.utmContent} />
-                      <Field label="utm_term" value={openRow.utmTerm} />
+                {formOriginKind(openRow.source, openRow.formKey) !== "meta_instant" &&
+                  (openRow.utmSource ||
+                    openRow.utmMedium ||
+                    openRow.utmCampaign ||
+                    openRow.utmContent ||
+                    openRow.utmTerm) && (
+                    <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+                      <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                        Campanha / UTMs
+                      </p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <Field label="utm_source" value={openRow.utmSource} />
+                        <Field label="utm_medium" value={openRow.utmMedium} />
+                        <Field label="utm_campaign" value={openRow.utmCampaign} />
+                        <Field label="utm_content" value={openRow.utmContent} />
+                        <Field label="utm_term" value={openRow.utmTerm} />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 <div className="flex flex-wrap gap-2 pt-2">
                   {openRow.crmPersonId && onOpenPerson ? (

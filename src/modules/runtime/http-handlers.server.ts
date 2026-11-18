@@ -10,6 +10,7 @@ import {
   ingestCrmApiPayload,
 } from "@/modules/crm/ingest/ingest-api.server";
 import { submitFormToCrm } from "@/modules/crm/ingest/submit-form.server";
+import { MetaLeadRetryError } from "@/modules/crm/ingest/meta-instant-form";
 import { jsonResponse } from "./http";
 
 export function handleMetaWebhookGet(request: Request): Response {
@@ -52,6 +53,10 @@ export async function handleMetaWebhookPost(request: Request): Promise<Response>
     }
     return jsonResponse({ ok: true, ...(await ingestMetaWebhookPayload(supabase, json)) });
   } catch (error) {
+    if (error instanceof MetaLeadRetryError) {
+      console.error("[crm-webhook]", error.message);
+      return jsonResponse({ ok: false }, 500);
+    }
     console.error("[crm-webhook]", error);
     return jsonResponse({ ok: true, ingested: 0, error: true });
   }

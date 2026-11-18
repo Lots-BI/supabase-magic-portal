@@ -1259,7 +1259,7 @@ export const listCrmFormSubmissionsFn = createServerFn({ method: "GET" })
         .replace(/[%*,()]/g, "");
       if (q) {
         query = query.or(
-          `nome.ilike.%${q}%,email.ilike.%${q}%,instagram.ilike.%${q}%,telefone.ilike.%${q}%`,
+          `nome.ilike.%${q}%,email.ilike.%${q}%,instagram.ilike.%${q}%,telefone.ilike.%${q}%,utm_campaign.ilike.%${q}%,utm_term.ilike.%${q}%`,
         );
       }
     }

@@ -5,7 +5,7 @@ status: living
 owner: Engenharia Lots BI
 tags: [crm, instagram, audiência, inbox]
 difficulty: beginner
-last_review: 2026-11-09
+last_review: 2026-11-13
 ---
 
 # CRM de audiência
@@ -19,7 +19,7 @@ Não é o pipeline comercial da agência (`agency_leads`). É a audiência da ma
 - Home = **caixa de entrada**: último sinal inbound, ainda sem `brand_reply` da marca, no recorte de 7/30/90 dias.
 - Tabs principais: **Comentários** / **Pessoas** / **Formulários**.
 - Em Pessoas: **Caixa de entrada** / **Em risco** / **Todas**.
-- **Formulários:** lista dos envios em `forms` (nome, contato, mensagem, UTMs, página). Detalhe em sheet; atalho para a ficha CRM quando houver `crm_person_id`.
+- **Formulários:** lista dos envios em `forms`. A tag mostra a origem: a chave da landing (`landing-lotsbi`) ou **Formulário instantâneo** (campanha da Meta). Filtro **Origem**. Detalhe em sheet; atalho para a ficha CRM quando houver `crm_person_id`.
 - Cobertura: coletores live / scope faltando / planejado / impossível (curtidas) + **API de ingestão**.
 - Gap: `comments` nas publicações vs sinais `comment`/`reply` no grafo (só o canal Instagram).
 - Ranking **O que traz gente de volta** (secundário): pessoas no CRM vs comentários da mídia.
@@ -31,7 +31,7 @@ Não é o pipeline comercial da agência (`agency_leads`). É a audiência da ma
 
 1. **Graph Instagram no Lots** — comentários (já no OAuth) e Direct (caso de uso Mensagens no App Dashboard + `META_REQUEST_IG_MESSAGES_SCOPE=1` + Relogin). Sem ManyChat e sem n8n.
 2. Cron `instagram-crm-comments-sync` (comentários + Direct) depois do sync de mídia. Botão **Puxar Instagram**.
-3. Webhook Meta: `GET|POST /api/webhooks/meta`.
+3. Webhook Meta: `GET|POST /api/webhooks/meta`. O campo `leadgen` (formulário instantâneo de campanha) busca o lead na Graph e grava a aba **Formulários** com origem `meta_instant_form` / `form_key=meta-instant`. Ver [meta-crm-webhooks.md](../07-integrations/meta-crm-webhooks.md).
 4. **Formulário de landing** `POST /api/forms/v1/submit` — payload simples (`nome`/`email`/`instagram`…); token por cliente; **sem** chave Supabase na landing. Ver [forms-submit-api.md](../07-integrations/forms-submit-api.md).
 5. **Opcional** `POST /api/crm/v1/interactions` — eventos genéricos (n8n, batch). Ver [crm-ingest-api.md](../07-integrations/crm-ingest-api.md).
 

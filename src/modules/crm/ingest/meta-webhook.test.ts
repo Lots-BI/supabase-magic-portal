@@ -52,4 +52,29 @@ describe("parseMetaWebhookBody", () => {
       expect.objectContaining({ object: "instagram", field: "comments", externalId: "c1" }),
     ]);
   });
+
+  it("reads a numeric leadgen id from the page object", () => {
+    const events = parseMetaWebhookBody({
+      object: "page",
+      entry: [
+        {
+          id: 599961063195897,
+          changes: [
+            {
+              field: "leadgen",
+              value: { leadgen_id: 444, form_id: 555, page_id: 599961063195897 },
+            },
+          ],
+        },
+      ],
+    });
+    expect(events).toEqual([
+      expect.objectContaining({
+        object: "page",
+        entryId: "599961063195897",
+        field: "leadgen",
+        externalId: "444",
+      }),
+    ]);
+  });
 });

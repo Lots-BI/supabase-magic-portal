@@ -11,6 +11,8 @@ import type { CrmIdentityInput, CrmSignalInput } from "../types";
 import { resolveCrmInstagramTarget } from "./resolve-crm-instagram-target.server";
 import { persistCrmSignal, recomputeAndStoreStats } from "./persist-signal.server";
 import { ignoreBrandPeople, loadCrmBrandAuthor } from "./brand-author.server";
+import { syncMetaInstantFormsForCadastro } from "./sync-meta-instant-forms.server";
+import { redactMetaError } from "./meta-instant-form";
 
 const MEDIA_LOOKBACK_DAYS = 21;
 const MEDIA_CAP = 40;
@@ -58,7 +60,8 @@ async function upsertCollector(
 async function ensureBaselineCollectors(supabase: SupabaseClient, cadastroClienteId: number) {
   const planned: Record<string, string> = {
     dm: "Direct Instagram pela Graph no Lots — caso de uso Mensagens no App Dashboard, depois Relogin. Sem ManyChat.",
-    lead_ads: "Lead Ads — webhook leadgen (App Review leads_retrieval).",
+    lead_ads:
+      "Formulário instantâneo da Meta — webhook leadgen. Exige leads_retrieval na conexão de anúncios.",
     whatsapp: "WhatsApp Cloud — plugin Hub ainda não ligado; mapper pronto.",
     gbp_reviews: "Avaliações do Google Business — planejado.",
     ingest_api: "Opcional: formulário do site. Direct e comentário entram pela Graph no Lots.",
@@ -169,6 +172,14 @@ export async function syncCrmCommentsForCadastro(
   cadastroClienteId: number,
 ): Promise<CrmCommentsSyncResult> {
   await ensureBaselineCollectors(supabase, cadastroClienteId);
+  try {
+    await syncMetaInstantFormsForCadastro(supabase, cadastroClienteId);
+  } catch (error) {
+    console.error(
+      "[crm-leadgen]",
+      redactMetaError(error instanceof Error ? error.message : "coleta do formulário instantâneo"),
+    );
+  }
 
   const target = await resolveCrmInstagramTarget(supabase, cadastroClienteId);
   if ("error" in target) {

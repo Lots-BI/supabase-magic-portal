@@ -5,7 +5,7 @@ status: living
 owner: Engenharia Lots BI
 tags: [crm, forms, landing, ingest]
 difficulty: beginner
-last_review: 2026-11-09
+last_review: 2026-11-13
 ---
 
 # API de formulários (landing → CRM)
@@ -81,3 +81,7 @@ Para eventos ricos (WhatsApp, batch, identities custom), use
 ## Migration
 
 `92_forms_crm_submit.sql`.
+
+## Formulário instantâneo da Meta
+
+Campanha com formulário instantâneo **não** usa esta API. O webhook `leadgen` grava a mesma tabela `forms`, com tag **Formulário instantâneo**. Ver [meta-crm-webhooks.md](./meta-crm-webhooks.md).

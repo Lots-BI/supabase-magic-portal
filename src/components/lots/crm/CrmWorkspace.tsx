@@ -494,7 +494,7 @@ export function CrmWorkspace({
           section === "comments"
             ? "Cada card é um comentário. A resposta sai nele, sem abrir a ficha."
             : section === "forms"
-              ? "Leads da landing e de outros forms. Clique para ver contato, mensagem e UTMs."
+              ? "Leads da landing e dos formulários instantâneos de campanha. A tag mostra a origem."
               : "Separadas pelo canal do último contato. Caixa de entrada = ainda sem resposta da marca."
         }
       >

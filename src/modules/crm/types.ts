@@ -85,6 +85,7 @@ export type CrmSignalPayload = {
   igsid?: string | null;
   hidden?: boolean;
   parentId?: string | null;
+  leadgen?: string;
 };
 
 export type CrmSignalInput = {

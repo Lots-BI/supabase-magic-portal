@@ -3,8 +3,15 @@ import { persistCrmSignal } from "./persist-signal.server";
 import { parseMetaWebhookBody, type MetaWebhookEvent } from "./meta-webhook";
 import { mapGraphCommentToSignal } from "./map-graph-comment";
 import { mapGraphDmToSignal } from "./map-graph-dm";
-import { mapLeadForm } from "./map-lead-form";
 import { mapWhatsappInbound } from "./map-whatsapp";
+import {
+  MetaLeadRetryError,
+  MetaLeadSkipError,
+  graphId,
+  redactMetaError,
+} from "./meta-instant-form";
+import { ingestMetaLeadgenEvent } from "./sync-meta-instant-forms.server";
+import { markLeadAdsCollector } from "./persist-meta-instant-form.server";
 import { isBrandAuthor, shouldSkipComment } from "../skip-rules";
 import { loadCrmBrandAuthor } from "./brand-author.server";
 import type { CrmGraphComment } from "../types";
@@ -98,6 +105,47 @@ export async function ingestMetaWebhookPayload(
   let ingested = 0;
 
   for (const event of events) {
+    if (event.field === "leadgen") {
+      const pageId = graphId(event.payload.page_id) ?? event.entryId;
+      const cadastroClienteId =
+        (await resolveCadastroByExternalId(supabase, event.entryId)) ??
+        (await resolveCadastroByExternalId(supabase, pageId));
+      if (!cadastroClienteId) {
+        await claimReceipt(supabase, "meta", event.externalId, event.field, null);
+        accepted += 1;
+        continue;
+      }
+      try {
+        const did = await ingestMetaLeadgenEvent(supabase, cadastroClienteId, event);
+        const claimed = await claimReceipt(
+          supabase,
+          "meta",
+          event.externalId,
+          event.field,
+          cadastroClienteId,
+        );
+        if (!claimed) {
+          skipped += 1;
+          continue;
+        }
+        accepted += 1;
+        if (did) ingested += 1;
+      } catch (error) {
+        if (error instanceof MetaLeadSkipError) {
+          await markLeadAdsCollector(supabase, cadastroClienteId, "scope_missing", error.message);
+          await claimReceipt(supabase, "meta", event.externalId, event.field, cadastroClienteId);
+          accepted += 1;
+          continue;
+        }
+        throw error instanceof MetaLeadRetryError
+          ? error
+          : new MetaLeadRetryError(
+              redactMetaError(error instanceof Error ? error.message : "leadgen"),
+            );
+      }
+      continue;
+    }
+
     const cadastroClienteId = await resolveCadastroByExternalId(supabase, event.entryId);
     const claimed = await claimReceipt(
       supabase,
@@ -210,36 +258,6 @@ async function ingestOneEvent(
         collector_key: "dm",
         status: "live",
         detail: "Webhook Direct recebido.",
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "cadastro_cliente_id,collector_key" },
-    );
-    return true;
-  }
-
-  if (event.field === "leadgen") {
-    const leadId =
-      typeof event.payload.leadgen_id === "string" ? event.payload.leadgen_id : event.externalId;
-    const mapped = mapLeadForm({
-      id: leadId,
-      createdTime: new Date().toISOString(),
-      fieldData: [],
-    });
-    if (!mapped) return false;
-    await persistCrmSignal(
-      supabase,
-      cadastroClienteId,
-      mapped.signal,
-      mapped.identities,
-      mapped.displayName,
-      mapped.facts,
-    );
-    await supabase.from("crm_collector_state").upsert(
-      {
-        cadastro_cliente_id: cadastroClienteId,
-        collector_key: "lead_ads",
-        status: "live",
-        detail: "Webhook Lead Ads recebido. Campos chegam no Graph fetch do lead.",
         updated_at: new Date().toISOString(),
       },
       { onConflict: "cadastro_cliente_id,collector_key" },

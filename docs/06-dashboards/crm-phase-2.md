@@ -5,12 +5,12 @@ status: living
 owner: Engenharia Lots BI
 tags: [crm, instagram, whatsapp, lead-ads]
 difficulty: advanced
-last_review: 2026-09-11
+last_review: 2026-11-13
 ---
 
 # CRM fase 2 — plano de implementação
 
-Documento de execução. W1–W3 e mappers W4–W7 estão no código (branch da v1). Direct/Lead Ads/WhatsApp **live** continuam bloqueados por App Review / WABA.
+Documento de execução. W1–W3 e mappers W4–W7 estão no código (branch da v1). Direct e WhatsApp **live** continuam bloqueados por App Review / WABA. Formulário instantâneo entra na aba Formulários quando o token tem `leads_retrieval`.
 
 Produto: [crm.md](./crm.md). Invariantes abaixo prevalecem sobre qualquer tela.
 
@@ -267,6 +267,8 @@ Opcional: `instagram-crm-dm-sync` depois do comments, só backfill raso. Webhook
 ---
 
 ## 7. W5 — Lead Ads (único caminho estruturado a e-mail/telefone/endereço vindo do Ads)
+
+> Estado em 2026-11-13: o webhook `leadgen` busca o lead na Graph e grava a aba **Formulários** com a tag **Formulário instantâneo** (`source=meta_instant_form`, `form_key=meta-instant`). O cron do CRM assina a Página e repõe leads dos últimos 14 dias. Continua exigindo `leads_retrieval` no token.
 
 **Objetivo:** `crm_field_facts` reais. Stitch com a pessoa do Instagram **quando** o lead form trouxer IGSID / Page-scoped id / e-mail que já exista.
 

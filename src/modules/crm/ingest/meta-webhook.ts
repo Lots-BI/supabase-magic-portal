@@ -45,9 +45,20 @@ function asRecord(value: unknown): Record<string, unknown> | null {
   return value as Record<string, unknown>;
 }
 
+function asGraphId(value: unknown): string | null {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (typeof value === "number" && Number.isFinite(value)) return String(Math.trunc(value));
+  return null;
+}
+
 function eventId(field: string, value: Record<string, unknown>): string {
-  const id = value.id ?? value.mid ?? value.leadgen_id ?? value.comment_id ?? value.message_id;
-  if (typeof id === "string" && id) return id;
+  const id =
+    asGraphId(value.id) ??
+    asGraphId(value.mid) ??
+    asGraphId(value.leadgen_id) ??
+    asGraphId(value.comment_id) ??
+    asGraphId(value.message_id);
+  if (id) return id;
   return `${field}:${JSON.stringify(value).slice(0, 80)}`;
 }
 
@@ -60,7 +71,12 @@ export function parseMetaWebhookBody(json: unknown): MetaWebhookEvent[] {
   for (const entry of entries) {
     const rec = asRecord(entry);
     if (!rec) continue;
-    const entryId = typeof rec.id === "string" ? rec.id : "";
+    const entryId =
+      typeof rec.id === "string"
+        ? rec.id
+        : typeof rec.id === "number" && Number.isFinite(rec.id)
+          ? String(Math.trunc(rec.id))
+          : "";
     const changes = Array.isArray(rec.changes) ? rec.changes : [];
     for (const change of changes) {
       const ch = asRecord(change);

@@ -37,6 +37,9 @@ export function instagramOrganicOauthScopes(): readonly string[] {
   if (process.env.META_REQUEST_IG_MESSAGES_SCOPE?.trim() === "1") {
     scopes.push(INSTAGRAM_ORGANIC_MESSAGES_SCOPE, PAGES_MESSAGING_SCOPE);
   }
+  if (process.env.META_REQUEST_LEADS_SCOPE?.trim() === "1") {
+    scopes.push("leads_retrieval", "pages_manage_ads", "pages_manage_metadata");
+  }
   return scopes;
 }
 

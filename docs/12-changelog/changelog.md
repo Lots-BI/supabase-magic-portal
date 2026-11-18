@@ -3,7 +3,7 @@ title: Changelog
 description: Histórico de mudanças relevantes do Lots BI (produto, dados e infraestrutura).
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-11-07
+last_review: 2026-11-13
 ---
 
 # Changelog
@@ -20,6 +20,8 @@ Categorias: `Adicionado`, `Alterado`, `Corrigido`, `Removido`, `Segurança`, `Da
 ## [Não lançado]
 
 ### Adicionado
+
+- **Formulários instantâneos da Meta no CRM (2026-11-13):** o webhook `leadgen` lê o lead na Graph e grava a aba Formulários com a tag **Formulário instantâneo**, ao lado da landing. Filtro por origem. O cron do CRM assina a Página e repõe leads recentes. Exige `leads_retrieval`.
 
 - **Aba Formulários no CRM (2026-11-09):** lista dos envios da landing com
   busca, filtro por `form_key`, detalhe (contato, mensagem, UTMs, página) e

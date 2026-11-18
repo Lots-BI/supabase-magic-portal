@@ -3,7 +3,7 @@ title: Integrações & Pipeline de Ingestão
 description: Catálogo de plataformas, IDs técnicos e o pipeline externo (Make/workers).
 status: living
 owner: Engenharia Lots BI
-last_review: 2026-11-08
+last_review: 2026-11-13
 ---
 
 # Integrações & Pipeline de Ingestão
@@ -51,6 +51,8 @@ Adicionar plataforma ao catálogo = **uma migration aditiva (`ADD COLUMN`)** + u
 
 Landings feitas no Cursor **não** recebem chave Supabase. Usam token por cliente e
 `POST /api/forms/v1/submit`. Ver [forms-submit-api.md](./forms-submit-api.md).
+
+Formulário instantâneo de campanha na Meta entra pelo webhook `leadgen`, na mesma aba, com a tag **Formulário instantâneo**. Ver [meta-crm-webhooks.md](./meta-crm-webhooks.md).
 
 ## Pipeline de ingestão
 

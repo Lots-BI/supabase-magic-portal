@@ -1,25 +1,21 @@
-import { normalizeIdentityValue } from "../normalize-identity";
 import type { CrmFieldFactInput, CrmIdentityInput, CrmSignalInput } from "../types";
+import {
+  extractLeadFields,
+  leadAnswersText,
+  parseLeadCreatedAt,
+  type LeadFieldInput,
+} from "./meta-instant-form";
 
 export const CRM_SOURCE_LEAD_ADS = "lead_ads";
 
-const FIELD_MAP: Record<string, "email" | "phone" | "full_name" | "address"> = {
-  email: "email",
-  e_mail: "email",
-  phone_number: "phone",
-  phone: "phone",
-  full_name: "full_name",
-  first_name: "full_name",
-  street_address: "address",
-  city: "address",
-};
-
-export type LeadFormField = { name?: string | null; values?: string[] | null };
+export type LeadFormField = LeadFieldInput;
 
 export type LeadFormPayload = {
   id: string;
-  createdTime?: string | null;
-  fieldData?: LeadFormField[];
+  createdTime?: string | number | null;
+  fieldData?: LeadFormField[] | null;
+  campaignId?: string | null;
+  campaignName?: string | null;
 };
 
 export function mapLeadForm(payload: LeadFormPayload): {
@@ -29,32 +25,59 @@ export function mapLeadForm(payload: LeadFormPayload): {
   displayName: string;
 } | null {
   if (!payload.id) return null;
-  const collectedAt = payload.createdTime || new Date().toISOString();
+  const extracted = extractLeadFields(payload.fieldData);
+  const collectedAt = parseLeadCreatedAt(payload.createdTime);
   const identities: CrmIdentityInput[] = [
     { kind: "leadgen", value: payload.id, source: CRM_SOURCE_LEAD_ADS },
   ];
   const facts: CrmFieldFactInput[] = [];
-  let displayName = "Lead";
 
-  for (const field of payload.fieldData ?? []) {
-    const key = (field.name ?? "").trim().toLowerCase();
-    const mapped = FIELD_MAP[key];
-    const value = field.values?.[0]?.trim();
-    if (!mapped || !value) continue;
-    facts.push({ field: mapped, value, source: CRM_SOURCE_LEAD_ADS, collectedAt });
-    if (mapped === "email") {
-      const email = normalizeIdentityValue("email", value);
-      if (email) identities.push({ kind: "email", value: email, source: CRM_SOURCE_LEAD_ADS });
-    }
-    if (mapped === "phone") {
-      const phone = normalizeIdentityValue("phone", value);
-      if (phone) identities.push({ kind: "phone", value: phone, source: CRM_SOURCE_LEAD_ADS });
-    }
-    if (mapped === "full_name") displayName = value;
+  if (extracted.email) {
+    facts.push({
+      field: "email",
+      value: extracted.email,
+      source: CRM_SOURCE_LEAD_ADS,
+      collectedAt,
+    });
+    identities.push({ kind: "email", value: extracted.email, source: CRM_SOURCE_LEAD_ADS });
+  }
+  if (extracted.telefone) {
+    facts.push({
+      field: "phone",
+      value: extracted.telefone,
+      source: CRM_SOURCE_LEAD_ADS,
+      collectedAt,
+    });
+    identities.push({ kind: "phone", value: extracted.telefone, source: CRM_SOURCE_LEAD_ADS });
+  }
+  if (extracted.nome) {
+    facts.push({
+      field: "full_name",
+      value: extracted.nome,
+      source: CRM_SOURCE_LEAD_ADS,
+      collectedAt,
+    });
+  }
+  if (extracted.instagram) {
+    identities.push({
+      kind: "ig_username",
+      value: extracted.instagram,
+      source: CRM_SOURCE_LEAD_ADS,
+    });
+  }
+  if (extracted.address) {
+    facts.push({
+      field: "address",
+      value: extracted.address,
+      source: CRM_SOURCE_LEAD_ADS,
+      collectedAt,
+    });
   }
 
+  const campaignKey = payload.campaignId?.trim() || payload.campaignName?.trim() || null;
+
   return {
-    displayName,
+    displayName: extracted.nome ?? "Lead",
     identities,
     facts,
     signal: {
@@ -62,7 +85,9 @@ export function mapLeadForm(payload: LeadFormPayload): {
       place: "ads",
       source: CRM_SOURCE_LEAD_ADS,
       externalId: payload.id,
+      body: leadAnswersText(extracted),
       occurredAt: collectedAt,
+      campaignKey,
       payload: { leadgen: payload.id },
     },
   };
